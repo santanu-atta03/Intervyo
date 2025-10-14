@@ -153,6 +153,7 @@ export const startInterview = (interviewId, token) => {
   };
 };
 
+
 export const submitAnswer = (interviewId, answerData, token,navigate) => {
   return async (dispatch, getState) => {
     dispatch(setLoading(true));
