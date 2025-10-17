@@ -4,7 +4,8 @@ const HUGGINGFACE_API_TOKEN = process.env.HUGGINGFACE_API_KEY;
 
 // Helper to call Hugging Face inference API for text generation
 async function queryModel(prompt, maxTokens = 300, temperature = 0.7) {
-  const response = await fetch('https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct', {
+  const response = await fetch('https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3'
+, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${HUGGINGFACE_API_TOKEN}`,
@@ -25,7 +26,7 @@ async function queryModel(prompt, maxTokens = 300, temperature = 0.7) {
   }
 
   const data = await response.json();
-  return data.generated_text;
+  return data[0]?.generated_text ?? '';
 }
 
 // System prompt generator

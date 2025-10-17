@@ -3,11 +3,18 @@ import fs from 'fs';
 
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
 const VOICE_ID = process.env.ELEVENLABS_VOICE_ID || '21m00Tcm4TlvDq8ikWAM'; // Rachel
-const MODEL_ID = process.env.ELEVENLABS_MODEL_ID || 'eleven_monolingual_v1';
+const MODEL_ID = 'eleven_turbo_v2'; // Using turbo for faster response
 
 // Text to Speech using ElevenLabs
 export const textToSpeech = async (text) => {
   try {
+    console.log('Generating TTS for text length:', text.length);
+    
+    // Validate API key
+    if (!ELEVENLABS_API_KEY) {
+      throw new Error('ELEVENLABS_API_KEY not configured');
+    }
+
     const response = await axios({
       method: 'post',
       url: `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`,
@@ -20,19 +27,22 @@ export const textToSpeech = async (text) => {
         text: text,
         model_id: MODEL_ID,
         voice_settings: {
-          stability: 0.5,
-          similarity_boost: 0.75,
-          style: 0.0,
+          stability: 0.6,
+          similarity_boost: 0.8,
+          style: 0.2,
           use_speaker_boost: true
         }
       },
       responseType: 'arraybuffer',
+      timeout: 30000, // 30 second timeout
     });
 
+    console.log('TTS generated successfully, size:', response.data.byteLength);
     return Buffer.from(response.data);
   } catch (error) {
     console.error('ElevenLabs TTS Error:', error.response?.data || error.message);
-    throw error;
+    // Return null instead of throwing to allow fallback
+    return null;
   }
 };
 
@@ -51,11 +61,13 @@ export const textToSpeechStream = async (text, outputPath) => {
         text: text,
         model_id: MODEL_ID,
         voice_settings: {
-          stability: 0.5,
-          similarity_boost: 0.75,
+          stability: 0.6,
+          similarity_boost: 0.8,
+          style: 0.2,
         }
       },
       responseType: 'stream',
+      timeout: 30000,
     });
 
     const writer = fs.createWriteStream(outputPath);
@@ -81,7 +93,6 @@ export const getAvailableVoices = async () => {
         'xi-api-key': ELEVENLABS_API_KEY,
       },
     });
-
     return response.data.voices;
   } catch (error) {
     console.error('Get voices error:', error);
@@ -99,7 +110,6 @@ export const getQuota = async () => {
         'xi-api-key': ELEVENLABS_API_KEY,
       },
     });
-
     return {
       characterCount: response.data.character_count,
       characterLimit: response.data.character_limit,
