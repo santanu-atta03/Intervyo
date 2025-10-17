@@ -33,5 +33,6 @@ export const interviewEndpoints = {
   GET_RESULTS_API: `${BASE_URL}/interview/:interviewId/results`,
   // or if you have a separate detailed results endpoint:
   GET_DETAILED_RESULTS_API: `${BASE_URL}/interview/:interviewId/detailed-results`,
-  GET_HISTORY_API: BASE_URL + '/interview/history'
+  GET_HISTORY_API: BASE_URL + '/interview/history',
+  START_CONVERSATION_API : BASE_URL + '/interview/:interviewId/start-conversation'
 };

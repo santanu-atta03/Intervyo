@@ -19,6 +19,8 @@ export default function InterviewSetup() {
   const [showCustomCompany, setShowCustomCompany] = useState(false);
   const [customCompany, setCustomCompany] = useState('');
   const [config, setConfig] = useState(interviewConfig);
+  const [isPreparingInterview, setIsPreparingInterview] = useState(false);
+  const [preparationProgress, setPreparationProgress] = useState(0);  
 
   useEffect(() => {
     // Reset interview state when component mounts
@@ -221,14 +223,34 @@ export default function InterviewSetup() {
 };
 
 
-  const handleStartInterview = async () => {
+const handleStartInterview = async () => {
   if (!token) {
     toast.error('Please login to continue');
     navigate('/login');
     return;
   }
 
-  // Prepare form data if resume exists
+  // Show preparation screen
+  setIsPreparingInterview(true);
+  
+  // Simulate AI preparation with progress updates
+  const progressSteps = [
+    { progress: 20, message: 'Analyzing your resume...' },
+    { progress: 40, message: 'Generating personalized questions...' },
+    { progress: 60, message: 'Setting up interview environment...' },
+    { progress: 80, message: 'Configuring AI interviewer...' },
+    { progress: 100, message: 'Ready to start!' }
+  ];
+
+  for (const step of progressSteps) {
+    await new Promise(resolve => setTimeout(resolve, 800));
+    setPreparationProgress(step.progress);
+    toast.loading(step.message, { id: 'prep' });
+  }
+  
+  toast.dismiss('prep');
+
+  // Prepare interview data
   let interviewData = { ...config };
   
   if (config.resume) {
@@ -242,14 +264,61 @@ export default function InterviewSetup() {
     formData.append('targetCompany', config.targetCompany);
     formData.append('customQuestions', JSON.stringify(config.questions));
     
-    // You'll need to update your API call to handle FormData
-    // For now, remove resume from config
-    interviewData = { ...config, resume: null };
+    interviewData = formData;
   }
 
   dispatch(createInterview(interviewData, navigate, token));
 };
 
+  if (isPreparingInterview) {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+      <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-12 max-w-md w-full border border-white/20">
+        <div className="text-center">
+          <div className="w-24 h-24 mx-auto mb-6 relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full animate-pulse"></div>
+            <div className="absolute inset-2 bg-slate-900 rounded-full flex items-center justify-center">
+              <span className="text-4xl">🤖</span>
+            </div>
+          </div>
+          
+          <h2 className="text-3xl font-bold text-white mb-4">
+            Preparing Your Interview
+          </h2>
+          
+          <div className="mb-6">
+            <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-purple-600 to-pink-600 transition-all duration-500"
+                style={{ width: `${preparationProgress}%` }}
+              ></div>
+            </div>
+            <p className="text-white/60 mt-3 text-sm">{preparationProgress}% Complete</p>
+          </div>
+          
+          <div className="space-y-3 text-left">
+            <div className={`flex items-center gap-3 p-3 rounded-xl ${preparationProgress >= 20 ? 'bg-green-500/20' : 'bg-white/5'}`}>
+              <span className="text-xl">{preparationProgress >= 20 ? '✅' : '⏳'}</span>
+              <span className="text-white/80">Resume Analysis</span>
+            </div>
+            <div className={`flex items-center gap-3 p-3 rounded-xl ${preparationProgress >= 40 ? 'bg-green-500/20' : 'bg-white/5'}`}>
+              <span className="text-xl">{preparationProgress >= 40 ? '✅' : '⏳'}</span>
+              <span className="text-white/80">Question Generation</span>
+            </div>
+            <div className={`flex items-center gap-3 p-3 rounded-xl ${preparationProgress >= 60 ? 'bg-green-500/20' : 'bg-white/5'}`}>
+              <span className="text-xl">{preparationProgress >= 60 ? '✅' : '⏳'}</span>
+              <span className="text-white/80">Environment Setup</span>
+            </div>
+            <div className={`flex items-center gap-3 p-3 rounded-xl ${preparationProgress >= 80 ? 'bg-green-500/20' : 'bg-white/5'}`}>
+              <span className="text-xl">{preparationProgress >= 80 ? '✅' : '⏳'}</span>
+              <span className="text-white/80">AI Configuration</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
       {/* Animated Background */}

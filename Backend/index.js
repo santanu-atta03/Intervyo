@@ -6,14 +6,29 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import passport from './config/Passport.js';
 import authRoutes from './routes/User.route.js';
-import interviewRoutes from './routes/interview.route.js'
+// import interviewRoutes from './routes/interview.route.js'
+import interviewRoutes from './routes/InterviewRoutes.js';
+import aiRoutes from './routes/aiRoutes.js'
+import interviewSocket from './sockets/InterviewSocket.js';
 import profileRoutes from './routes/Profile.route.js'
 import { dbConnect } from './config/db.js';
 import { apiLimiter } from './middlewares/rateLimiter.js';
 import errorHandler from './middlewares/error.middleware.js';
+import fileUpload from 'express-fileupload'
+import http from 'http'
+import { Server } from 'socket.io';
 dotenv.config();
 
 const app = express();
+
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    methods: ['GET', 'POST'],
+    credentials: true
+  }
+});
 app.use(helmet());
 // ========================================
 // MIDDLEWARE
@@ -25,6 +40,10 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(apiLimiter);
+app.use(fileUpload({
+  useTempFiles: true,
+  tempFileDir: '/tmp/'
+}));
 
 // Initialize Passport
 app.use(passport.initialize());
@@ -32,11 +51,12 @@ app.use(passport.initialize());
 // ========================================
 // DATABASE CONNECTION
 // ========================================
-
+interviewSocket(io);
 dbConnect();
 
 app.use('/api/auth', authRoutes);
-app.use('/api/interview', interviewRoutes);
+app.use('/api/interviews', interviewRoutes);
+app.use('/api/ai',aiRoutes)
 app.use('/api/profile', profileRoutes);
 
 // Health check
@@ -60,6 +80,6 @@ app.use(errorHandler);
 // START SERVER
 // ========================================
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import {Link} from "react-router-dom"
+import {Link, useNavigate} from "react-router-dom"
 
 
 export default function LandingPage() {
@@ -11,6 +11,7 @@ export default function LandingPage() {
 
   const {token} = useSelector((state) => state.auth);
   const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const naviagte = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
@@ -250,7 +251,7 @@ export default function LandingPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-            <button className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl font-semibold text-lg hover:from-purple-700 hover:to-pink-700 transition transform hover:scale-105 shadow-2xl">
+            <button onClick={() => naviagte('/dashboard')} className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl font-semibold text-lg hover:from-purple-700 hover:to-pink-700 transition transform hover:scale-105 shadow-2xl">
               Start Free Interview →
             </button>
             <button className="px-8 py-4 bg-white/10 backdrop-blur-lg rounded-xl font-semibold text-lg hover:bg-white/20 transition border border-white/20">

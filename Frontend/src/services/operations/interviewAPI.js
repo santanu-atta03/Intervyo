@@ -24,8 +24,10 @@ const {
   SUBMIT_ANSWER_API,
   COMPLETE_INTERVIEW_API,
   GET_INTERVIEW_API,
+  START_CONVERSATION_API
 } = interviewEndpoints;
 
+const BASE_URL = 'http://localhost:5000';
 // export const createInterview = (interviewConfig, navigate,token) => {
 //   return async (dispatch) => {
 //     const toastId = toast.loading('Creating your interview...');
@@ -154,86 +156,86 @@ export const startInterview = (interviewId, token) => {
 };
 
 
-export const submitAnswer = (interviewId, answerData, token,navigate) => {
-  return async (dispatch, getState) => {
-    dispatch(setLoading(true));
-  const url = SUBMIT_ANSWER_API.replace(":interviewId", interviewId);
-    try {
-      const response = await apiConnector(
-        "POST",
-        url,
-        answerData,
-        {
-          Authorization: `Bearer ${token}`,
-        }
-      );
+// export const submitAnswer = (interviewId, answerData, token,navigate) => {
+//   return async (dispatch, getState) => {
+//     dispatch(setLoading(true));
+//   const url = SUBMIT_ANSWER_API.replace(":interviewId", interviewId);
+//     try {
+//       const response = await apiConnector(
+//         "POST",
+//         url,
+//         answerData,
+//         {
+//           Authorization: `Bearer ${token}`,
+//         }
+//       );
 
-      if (!response.data.success) {
-        throw new Error(response.data.message);
-      }
+//       if (!response.data.success) {
+//         throw new Error(response.data.message);
+//       }
 
-      const { evaluation, nextQuestion, currentScore, categoryScores } =
-        response.data.data;
+//       const { evaluation, nextQuestion, currentScore, categoryScores } =
+//         response.data.data;
 
-      // Add answer to history
-      dispatch(
-        addAnswer({
-          ...answerData,
-          evaluation,
-        })
-      );
+//       // Add answer to history
+//       dispatch(
+//         addAnswer({
+//           ...answerData,
+//           evaluation,
+//         })
+//       );
 
-      // Update progress
-      const currentProgress = getState().interview.progress;
-      dispatch(
-        updateProgress({
-          answered: currentProgress.answered + 1,
-          total: response.data.data.progress?.total || currentProgress.total,
-          percentage:
-            response.data.data.progress?.percentage ||
-            currentProgress.percentage,
-        })
-      );
+//       // Update progress
+//       const currentProgress = getState().interview.progress;
+//       dispatch(
+//         updateProgress({
+//           answered: currentProgress.answered + 1,
+//           total: response.data.data.progress?.total || currentProgress.total,
+//           percentage:
+//             response.data.data.progress?.percentage ||
+//             currentProgress.percentage,
+//         })
+//       );
 
-      // Update performance
-      if (response.data.data.currentScore !== undefined) {
-        dispatch(
-          updatePerformance({
-            questionsAnswered: currentProgress.answered + 1,
-            overallScore: response.data.data.currentScore,
-          })
-        );
-      }
+//       // Update performance
+//       if (response.data.data.currentScore !== undefined) {
+//         dispatch(
+//           updatePerformance({
+//             questionsAnswered: currentProgress.answered + 1,
+//             overallScore: response.data.data.currentScore,
+//           })
+//         );
+//       }
 
-      // Update question index
-      const newIndex = getState().interview.currentQuestionIndex + 1;
-      dispatch(setCurrentQuestionIndex(newIndex));
+//       // Update question index
+//       const newIndex = getState().interview.currentQuestionIndex + 1;
+//       dispatch(setCurrentQuestionIndex(newIndex));
 
-      // Update metrics
-      if (categoryScores) {
-        dispatch(updateMetrics(categoryScores));
-      }
+//       // Update metrics
+//       if (categoryScores) {
+//         dispatch(updateMetrics(categoryScores));
+//       }
 
-      // Set next question or complete
-      if (nextQuestion) {
-        dispatch(setCurrentQuestion(nextQuestion));
-        toast.success(`Score: ${evaluation.overallScore}/100`);
-      } else {
-        toast.success("Interview completed!");
-        dispatch(completeInterview(interviewId, navigate,token))
-      }
+//       // Set next question or complete
+//       if (nextQuestion) {
+//         dispatch(setCurrentQuestion(nextQuestion));
+//         toast.success(`Score: ${evaluation.overallScore}/100`);
+//       } else {
+//         toast.success("Interview completed!");
+//         dispatch(completeInterview(interviewId, navigate,token))
+//       }
 
-      return response.data.data;
-    } catch (error) {
-      console.error("SUBMIT_ANSWER_API ERROR:", error);
-      toast.error(error.response?.data?.message || "Failed to submit answer");
-      dispatch(setError(error.message));
-      throw error;
-    } finally {
-      dispatch(setLoading(false));
-    }
-  };
-};
+//       return response.data.data;
+//     } catch (error) {
+//       console.error("SUBMIT_ANSWER_API ERROR:", error);
+//       toast.error(error.response?.data?.message || "Failed to submit answer");
+//       dispatch(setError(error.message));
+//       throw error;
+//     } finally {
+//       dispatch(setLoading(false));
+//     }
+//   };
+// };
 
 export const completeInterview = (interviewId, navigate, token) => {
   return async (dispatch) => {
@@ -301,6 +303,97 @@ export const getInterviewData = (interviewId, token) => {
       dispatch(setLoading(false));
     }
   };
+};
+
+// services/operations/interviewAPI.js
+
+// Add this function
+export const getRealTimeAIResponse = async (interviewId, data, token) => {
+  try {
+    const response = await apiConnector(
+      'POST',
+      `${BASE_URL}/api/interview/${interviewId}/real-time-response`,
+      data,
+      {
+        Authorization: `Bearer ${token}`
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Real-time AI response error:', error);
+    throw error;
+  }
+};
+
+export const evaluateCodeSubmission = async (interviewId, data, token) => {
+  try {
+    const response = await apiConnector(
+      'POST',
+      `${BASE_URL}/api/interview/${interviewId}/evaluate-code`,
+      data,
+      {
+        Authorization: `Bearer ${token}`
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Code evaluation error:', error);
+    throw error;
+  }
+};
+// services/operations/interviewAPI.js - ADD THESE FUNCTIONS
+
+export const startConversation = async (interviewId, token) => {
+  const url = START_CONVERSATION_API.replace(":interviewId", interviewId);
+  try {
+    const response = await apiConnector(
+      'POST',
+      url,
+      {},
+      {
+        Authorization: `Bearer ${token}`
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Start conversation error:', error);
+    throw error;
+  }
+};
+
+export const askNextQuestion = async (interviewId, token) => {
+  try {
+    const response = await apiConnector(
+      'POST',
+      `${BASE_URL}/api/interview/${interviewId}/ask-next-question`,
+      {},
+      {
+        Authorization: `Bearer ${token}`
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Ask question error:', error);
+    throw error;
+  }
+};
+
+
+export const submitAnswer = async (interviewId, answerData, token) => {
+  try {
+    const response = await apiConnector(
+      'POST',
+      `${process.env.REACT_APP_BASE_URL}/api/interview/${interviewId}/submit-answer`,
+      answerData,
+      {
+        Authorization: `Bearer ${token}`
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Submit answer error:', error);
+    throw error;
+  }
 };
 
 // import toast from 'react-hot-toast';

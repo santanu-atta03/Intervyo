@@ -110,6 +110,19 @@ const InterviewSchema = new mongoose.Schema({
         },
       },
     ],
+    conversationHistory: [
+  {
+    role: { type: String, enum: ['user', 'assistant'], required: true },
+    content: { type: String, required: true },
+    timestamp: { type: Date, default: Date.now },
+    metadata: {
+      type: { type: String }, // 'text', 'code', 'code_review', 'diagram'
+      language: String,
+      code: String,
+      evaluation: mongoose.Schema.Types.Mixed
+    }
+  }
+],
     speechMetrics: {
       averagePace: Number,
       fillerWords: Number,

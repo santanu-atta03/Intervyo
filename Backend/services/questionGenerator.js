@@ -432,6 +432,22 @@ Structure:
 - Input/output examples
 - Constraints
 - Expected time/space complexity`;
+const questionsWithExamples = questions.map(q => ({
+    ...q,
+    examples: [
+      {
+        input: 'Example input based on question',
+        output: 'Expected output'
+      }
+    ],
+    constraints: [
+      'Time complexity: O(n)',
+      'Space complexity: O(1)',
+      'Input size: 1 <= n <= 1000'
+    ]
+  }));
+  
+  return questionsWithExamples;
     }
 
     if (interviewType === "system-design") {

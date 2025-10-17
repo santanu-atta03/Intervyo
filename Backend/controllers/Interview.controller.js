@@ -672,6 +672,7 @@ import answerEvaluator from "../services/answerEvaluator.js";
 import emotionAnalyzer from "../services/emotionAnalyzer.js";
 import resultsGenerator from "../services/resultsGenerator.js";
 import mongoose from "mongoose";
+import groqService from "../services/groqService.js";
 
 // Helper function to safely get number
 function safeNumber(value, defaultValue = 0) {
@@ -995,6 +996,236 @@ class InterviewController {
     }
   }
 
+
+  // Add this method to the InterviewController class
+
+async getRealTimeResponse(req, res) {
+    try {
+      const { interviewId } = req.params;
+      const { questionId, answer, conversationHistory, questionType, type } = req.body;
+      const userId = req.user.id;
+
+      const interview = await Interview.findOne({ _id: interviewId, userId });
+
+      if (!interview) {
+        return res.status(404).json({
+          success: false,
+          message: 'Interview not found'
+        });
+      }
+
+      const round = interview.rounds[interview.rounds.length - 1];
+      const question = round.questions.find(q => q.questionId === questionId);
+
+      if (!question) {
+        return res.status(404).json({
+          success: false,
+          message: 'Question not found'
+        });
+      }
+
+      // Build conversation context
+      const conversationContext = conversationHistory
+        .map(msg => `${msg.role === 'user' ? 'Candidate' : 'Interviewer'}: ${msg.content}`)
+        .join('\n');
+
+      // Prepare messages for Groq
+      const messages = [
+        {
+          role: 'system',
+          content: `You are an expert technical interviewer conducting a ${interview.config.interviewType} interview for ${interview.config.domain} - ${interview.config.subDomain}.
+Difficulty level: ${interview.config.difficulty}
+
+Your responsibilities:
+1. Listen carefully to candidate's answers
+2. Ask follow-up questions if answers are incomplete or unclear
+3. Provide constructive feedback when answers are complete
+4. Be encouraging yet professional
+5. Determine if the answer is sufficient to move forward`
+        },
+        {
+          role: 'user',
+          content: `Current Question: "${question.question}"
+
+Conversation History:
+${conversationContext}
+
+Candidate's Latest Response: "${answer}"
+
+Evaluate the response and provide your feedback in the following JSON structure:
+{
+  "response": "Your verbal response to the candidate",
+  "isComplete": boolean,
+  "needsFollowUp": boolean,
+  "followUpQuestion": "question if needed (null if not needed)",
+  "evaluation": {
+    "score": number (0-100, only if isComplete is true, otherwise null),
+    "feedback": "detailed feedback",
+    "strengths": ["point1", "point2"],
+    "improvements": ["point1", "point2"]
+  }
+}`
+        }
+      ];
+
+      // Use GroqService to get JSON response
+      const aiData = await groqService.generateJSON(messages, {
+        temperature: 0.7,
+        maxTokens: 1500
+      });
+
+      res.json({
+        success: true,
+        data: aiData
+      });
+
+    } catch (error) {
+      console.error('Real-time response error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to get real-time response',
+        error: error.message
+      });
+    }
+  }
+
+  async evaluateCode(req, res) {
+    try {
+      const { interviewId } = req.params;
+      const { questionId, code, language, speakReview } = req.body;
+      const userId = req.user.id;
+
+      if (!code || !language) {
+        return res.status(400).json({
+          success: false,
+          message: 'Code and language are required'
+        });
+      }
+
+      const interview = await Interview.findOne({ _id: interviewId, userId });
+
+      if (!interview) {
+        return res.status(404).json({
+          success: false,
+          message: 'Interview not found'
+        });
+      }
+
+      const round = interview.rounds[interview.rounds.length - 1];
+      const question = round.questions.find(q => q.questionId === questionId);
+
+      // Prepare messages for code evaluation
+      const messages = [
+        {
+          role: 'system',
+          content: `You are an expert code reviewer conducting technical interviews. Provide comprehensive, constructive feedback as you would in a real interview setting.`
+        },
+        {
+          role: 'user',
+          content: `Review this ${language} code for the following question:
+
+**Question:** "${question.question}"
+**Domain:** ${interview.config.domain}
+**Difficulty:** ${interview.config.difficulty}
+
+**Code Submission:**
+\`\`\`${language}
+${code}
+\`\`\`
+
+Provide a comprehensive code review in JSON format:
+{
+  "score": number (0-100),
+  "correctness": number (0-100),
+  "efficiency": number (0-100),
+  "readability": number (0-100),
+  "bestPractices": number (0-100),
+  "feedback": "Natural, conversational feedback as you would speak to a candidate",
+  "verbalReview": "A complete verbal review that can be spoken aloud (2-3 sentences)",
+  "strengths": ["specific strength 1", "specific strength 2", ...],
+  "improvements": ["specific improvement 1", "specific improvement 2", ...],
+  "suggestions": ["actionable suggestion 1", "actionable suggestion 2", ...],
+  "isCorrect": boolean,
+  "hasErrors": boolean,
+  "errors": ["error description if any"]
+}
+
+Be encouraging but honest. Provide specific, actionable feedback.`
+        }
+      ];
+
+      // Use GroqService to get JSON response
+      const evaluation = await groqService.generateJSON(messages, {
+        temperature: 0.6,
+        maxTokens: 2000
+      });
+
+      res.json({
+        success: true,
+        data: evaluation
+      });
+
+    } catch (error) {
+      console.error('Code evaluation error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to evaluate code',
+        error: error.message
+      });
+    }
+  }
+
+  // Optional: Streaming response for real-time feedback
+  async streamResponse(req, res) {
+    try {
+      const { interviewId } = req.params;
+      const { questionId, answer } = req.body;
+      const userId = req.user.id;
+
+      const interview = await Interview.findOne({ _id: interviewId, userId });
+      if (!interview) {
+        return res.status(404).json({
+          success: false,
+          message: 'Interview not found'
+        });
+      }
+
+      const round = interview.rounds[interview.rounds.length - 1];
+      const question = round.questions.find(q => q.questionId === questionId);
+
+      // Set headers for SSE
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+
+      const messages = [
+        {
+          role: 'system',
+          content: `You are an interviewer providing real-time feedback.`
+        },
+        {
+          role: 'user',
+          content: `Question: "${question.question}"\nAnswer: "${answer}"\n\nProvide brief feedback.`
+        }
+      ];
+
+      // Stream the response
+      for await (const chunk of groqService.streamCompletion(messages)) {
+        res.write(`data: ${JSON.stringify({ chunk })}\n\n`);
+      }
+
+      res.write('data: [DONE]\n\n');
+      res.end();
+
+    } catch (error) {
+      console.error('Stream error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Streaming failed',
+        error: error.message
+      });
+    }
+  }
   // Submit Answer - FIX: Add real-time metrics
   // Submit Answer
   async submitAnswer(req, res) {
@@ -1768,4 +1999,8 @@ class InterviewController {
   }
 }
 
+
+
 export default new InterviewController();
+
+

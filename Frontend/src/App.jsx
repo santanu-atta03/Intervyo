@@ -6,10 +6,10 @@ import AuthCallback from './pages/AuthCallback';
 import Dashboard from './pages/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import Landing from './pages/Landing';
-import InterviewSetup from './pages/InterviewSetup';
+import InterviewSetup from './components/AiInterview/InterviewSetup';
 import VerifyEmail from './pages/VerifyEmail';
 import DomainSelection from './pages/DomainSelection';
-import InterviewRoom from './pages/InterviewRoom';
+import InterviewRoom from './components/AiInterview/InterviewRoom';
 import Results from './pages/Results';
 import Settings from './components/Dashboard/Settings';
 import toast from 'react-hot-toast'
@@ -48,10 +48,11 @@ function App() {
         path="/interview/:interviewId" 
         element={
           <ProtectedRoute>
-            <InterviewWrapper />
+            <InterviewRoom  />
           </ProtectedRoute>
         } 
       />
+      <Route path="/interview-room/:interviewId" element={<InterviewRoom />} />
       
       <Route 
         path="/results/:interviewId" 

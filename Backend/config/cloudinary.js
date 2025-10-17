@@ -36,6 +36,19 @@ export const upload = multer({
   },
 });
 
+export const uploadToCloudinary = async (file, folder) => {
+  try {
+    const result = await cloudinary.uploader.upload(file.tempFilePath, {
+      folder: folder,
+      resource_type: 'auto'
+    });
+    return result;
+  } catch (error) {
+    console.error('Cloudinary upload error:', error);
+    throw new Error('File upload failed');
+  }
+};
+
 // Helper function to delete image from Cloudinary
 export const deleteFromCloudinary = async (imageUrl) => {
   try {

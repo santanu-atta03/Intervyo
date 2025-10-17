@@ -10,9 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@monaco-editor/react": "^4.7.0",
     "@reduxjs/toolkit": "^2.9.0",
     "axios": "^1.12.2",
     "copy-to-clipboard": "^3.3.3",
+    "elevenlabs-js": "^1.2.6",
     "framer-motion": "^12.23.22",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.545.0",
@@ -27,7 +29,9 @@
     "react-speech-recognition": "^4.0.1",
     "react-webcam": "^7.2.0",
     "recharts": "^3.2.1",
+    "recorder-js": "^1.0.7",
     "regenerator-runtime": "^0.14.1",
+    "socket.io-client": "^4.8.1",
     "swiper": "^12.0.2"
   },
   "devDependencies": {
