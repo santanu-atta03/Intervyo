@@ -1,7 +1,16 @@
-
 import React, { useState, useEffect, useRef } from "react";
+import { Code2, X, Play } from "lucide-react";
+import Editor from "@monaco-editor/react";
 
-const InterviewRoom = ({ interviewId, token, navigate, getInterviewById, getInterviewSession, startInterview, io }) => {
+const InterviewRoom = ({
+  interviewId,
+  token,
+  navigate,
+  getInterviewById,
+  getInterviewSession,
+  startInterview,
+  io,
+}) => {
   // States
   const [loading, setLoading] = useState(true);
   const [interview, setInterview] = useState(null);
@@ -12,8 +21,8 @@ const InterviewRoom = ({ interviewId, token, navigate, getInterviewById, getInte
   const [isVideoOn, setIsVideoOn] = useState(true);
   const [isAudioOn, setIsAudioOn] = useState(true);
   const [stream, setStream] = useState(null);
-  const [mediaReady, setMediaReady] = useState(false);
   const videoRef = useRef(null);
+  const switchCount = useRef(0);
 
   const [interviewStarted, setInterviewStarted] = useState(false);
   const [isListening, setIsListening] = useState(false);
@@ -22,12 +31,29 @@ const InterviewRoom = ({ interviewId, token, navigate, getInterviewById, getInte
   const [currentQuestion, setCurrentQuestion] = useState(null);
   const [userTranscript, setUserTranscript] = useState("");
 
+  // Code editor states
+  const [showCodeEditor, setShowCodeEditor] = useState(false);
+  const [code, setCode] = useState("");
+  const [codeLanguage, setCodeLanguage] = useState("javascript");
+  const [codeOutput, setCodeOutput] = useState("");
+
   const recognitionRef = useRef(null);
   const currentAudioRef = useRef(null);
   const transcriptAccumulatorRef = useRef("");
   const shouldRestartRecognition = useRef(false);
 
-  // Initialize interview
+  const languages = [
+    {
+      value: "javascript",
+      label: "JavaScript",
+      default: "// Write your code here\n\n",
+    },
+    { value: "python", label: "Python", default: "# Write your code here\n\n" },
+    { value: "java", label: "Java", default: "// Write your code here\n\n" },
+    { value: "cpp", label: "C++", default: "// Write your code here\n\n" },
+  ];
+
+  // Auto-start interview on component mount
   useEffect(() => {
     const init = async () => {
       try {
@@ -37,6 +63,11 @@ const InterviewRoom = ({ interviewId, token, navigate, getInterviewById, getInte
         if (interviewData.status === "in-progress") {
           const sessionData = await getInterviewSession(interviewId, token);
           setSession(sessionData);
+          setInterviewStarted(true);
+        } else {
+          // Auto-start interview
+          const result = await startInterview(interviewId, setLoading, token);
+          setSession(result.session);
           setInterviewStarted(true);
         }
         setLoading(false);
@@ -49,7 +80,53 @@ const InterviewRoom = ({ interviewId, token, navigate, getInterviewById, getInte
     init();
   }, [interviewId, token, navigate]);
 
-  // Setup media
+  useEffect(() => {
+    const enterFullscreen = () => {
+      const element = document.documentElement;
+      if (element.requestFullscreen) {
+        element.requestFullscreen();
+      } else if (element.webkitRequestFullscreen) {
+        /* Safari */
+        element.webkitRequestFullscreen();
+      } else if (element.msRequestFullscreen) {
+        /* IE11 */
+        element.msRequestFullscreen();
+      }
+    };
+
+    enterFullscreen();
+  }, []);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        switchCount.current += 1;
+        console.log("Tab switch count:", switchCount.current);
+
+        if (switchCount.current > 1) {
+          // 👇 You can call your submission API or redirect
+          alert(
+            "You switched tabs more than once. Interview will be submitted."
+          );
+
+          if (socket && session) {
+            socket.emit("end-interview", {
+              sessionId: session._id,
+              interviewId: interviewId,
+            });
+          }
+        }
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [navigate]);
+
+  // Setup media automatically
   useEffect(() => {
     let mounted = true;
     let localStream = null;
@@ -58,16 +135,15 @@ const InterviewRoom = ({ interviewId, token, navigate, getInterviewById, getInte
       try {
         localStream = await navigator.mediaDevices.getUserMedia({
           video: { width: { ideal: 1280 }, height: { ideal: 720 } },
-          audio: { echoCancellation: true, noiseSuppression: true }
+          audio: { echoCancellation: true, noiseSuppression: true },
         });
 
         if (!mounted) {
-          localStream.getTracks().forEach(t => t.stop());
+          localStream.getTracks().forEach((t) => t.stop());
           return;
         }
 
         setStream(localStream);
-        setMediaReady(true);
 
         setTimeout(() => {
           if (videoRef.current && localStream && mounted) {
@@ -77,15 +153,16 @@ const InterviewRoom = ({ interviewId, token, navigate, getInterviewById, getInte
         }, 100);
       } catch (error) {
         console.error("Media error:", error);
-        alert("Camera/microphone access required");
-        setMediaReady(false);
+        alert(
+          "Camera/microphone access required. Please allow permissions and refresh."
+        );
       }
     };
 
     setupMedia();
     return () => {
       mounted = false;
-      if (localStream) localStream.getTracks().forEach(t => t.stop());
+      if (localStream) localStream.getTracks().forEach((t) => t.stop());
     };
   }, []);
 
@@ -167,16 +244,31 @@ const InterviewRoom = ({ interviewId, token, navigate, getInterviewById, getInte
     };
   }, []);
 
-  // Setup socket
+  // Setup socket and auto-start interview
   useEffect(() => {
+    if (!session || !interviewStarted) return;
+
     const newSocket = io("http://localhost:5000", {
       transports: ["websocket", "polling"],
-      reconnection: true
+      reconnection: true,
     });
 
     newSocket.on("connect", () => {
       console.log("✅ Socket connected");
       setSocketConnected(true);
+
+      // Auto join room and start
+      newSocket.emit("join-room", {
+        roomId: interviewId,
+        userId: session.userId,
+      });
+
+      setTimeout(() => {
+        newSocket.emit("candidate-ready", {
+          sessionId: session._id,
+          interviewId,
+        });
+      }, 1000);
     });
 
     newSocket.on("disconnect", () => {
@@ -210,16 +302,15 @@ const InterviewRoom = ({ interviewId, token, navigate, getInterviewById, getInte
     return () => {
       if (newSocket) newSocket.disconnect();
     };
-  }, [interviewId, navigate]);
+  }, [session, interviewStarted, interviewId, navigate]);
 
   // Handle AI message
   const handleAIMessage = async (data) => {
     console.log("Handling:", data.type);
-    
+
     setCurrentMessage(data.message);
     setAiSpeaking(true);
 
-    // Stop current audio
     if (currentAudioRef.current) {
       currentAudioRef.current.pause();
       currentAudioRef.current = null;
@@ -228,7 +319,6 @@ const InterviewRoom = ({ interviewId, token, navigate, getInterviewById, getInte
       window.speechSynthesis.cancel();
     }
 
-    // Play audio
     if (data.hasAudio && data.audioBase64) {
       try {
         await playAudioFromBase64(data.audioBase64);
@@ -239,15 +329,24 @@ const InterviewRoom = ({ interviewId, token, navigate, getInterviewById, getInte
       speakText(data.message);
     }
 
-    // Update question state
     if (data.type === "question") {
       console.log("📝 New question received");
       setCurrentQuestion(data);
       setUserTranscript("");
       transcriptAccumulatorRef.current = "";
+
+      // Show code editor if requiresCode is true
+      if (data.requiresCode) {
+        setTimeout(() => {
+          setShowCodeEditor(true);
+          const langData = languages.find((l) => l.value === codeLanguage);
+          setCode(langData?.default || "");
+        }, 2000);
+      }
     } else if (data.type === "review" || data.type === "code-review") {
-      console.log("📊 Review received, clearing question");
+      console.log("📊 Review received");
       setCurrentQuestion(null);
+      setShowCodeEditor(false);
     }
   };
 
@@ -326,8 +425,9 @@ const InterviewRoom = ({ interviewId, token, navigate, getInterviewById, getInte
   };
 
   const handleSubmitAnswer = () => {
-    const answer = (transcriptAccumulatorRef.current.trim() || userTranscript.trim());
-    
+    const answer =
+      transcriptAccumulatorRef.current.trim() || userTranscript.trim();
+
     if (!answer || answer.length < 5) {
       alert("Please provide a longer answer (at least 5 characters)");
       return;
@@ -355,36 +455,46 @@ const InterviewRoom = ({ interviewId, token, navigate, getInterviewById, getInte
     transcriptAccumulatorRef.current = "";
   };
 
-  const handleStartInterview = async () => {
-    if (!socketConnected || !mediaReady) {
-      alert("Please wait for connection");
+  const handleCodeLanguageChange = (e) => {
+    const newLang = e.target.value;
+    setCodeLanguage(newLang);
+    const langData = languages.find((l) => l.value === newLang);
+    setCode(langData?.default || "");
+  };
+
+  const handleRunCode = () => {
+    setCodeOutput(
+      "Code execution simulated. In production, this would run on a secure backend."
+    );
+  };
+
+  const handleSubmitCode = () => {
+    if (!code.trim()) {
+      alert("Please write some code before submitting");
       return;
     }
 
-    try {
-      const result = await startInterview(interviewId, setLoading, token);
-      setSession(result.session);
-      setInterviewStarted(true);
-
-      socket.emit("join-room", {
-        roomId: interviewId,
-        userId: result.session.userId,
-      });
-
-      setTimeout(() => {
-        socket.emit("candidate-ready", {
-          sessionId: result.session._id,
-          interviewId,
-        });
-      }, 1000);
-    } catch (error) {
-      console.error("Start error:", error);
-      alert("Failed to start");
+    if (!socket || !session || !currentQuestion) {
+      console.error("Cannot submit code");
+      return;
     }
+
+    console.log("📤 Submitting code");
+
+    socket.emit("submit-code", {
+      sessionId: session._id,
+      question: currentQuestion.message,
+      code: code,
+      language: codeLanguage,
+    });
+
+    setShowCodeEditor(false);
+    setCode("");
+    setCodeOutput("");
   };
 
   const handleEndInterview = () => {
-    if (window.confirm("End interview?")) {
+    if (window.confirm("Are you sure you want to end the interview?")) {
       stopListening();
       if (socket && session) {
         socket.emit("end-interview", {
@@ -418,7 +528,10 @@ const InterviewRoom = ({ interviewId, token, navigate, getInterviewById, getInte
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
+        <div className="text-center">
+          <div className="text-white text-xl mb-4">Loading interview...</div>
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+        </div>
       </div>
     );
   }
@@ -429,7 +542,11 @@ const InterviewRoom = ({ interviewId, token, navigate, getInterviewById, getInte
       <div className="bg-gray-800/50 backdrop-blur-sm border-b border-gray-700 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <div className={`w-3 h-3 rounded-full ${socketConnected ? "bg-green-500 animate-pulse" : "bg-red-500"}`} />
+            <div
+              className={`w-3 h-3 rounded-full ${
+                socketConnected ? "bg-green-500 animate-pulse" : "bg-red-500"
+              }`}
+            />
             <span className="text-white font-semibold">{interview?.role}</span>
           </div>
           <div className="px-3 py-1 bg-orange-500/20 text-orange-400 text-sm rounded-full border border-orange-500/30">
@@ -459,7 +576,10 @@ const InterviewRoom = ({ interviewId, token, navigate, getInterviewById, getInte
             muted
             playsInline
             className="w-full h-full object-cover"
-            style={{ opacity: isVideoOn ? 1 : 0, display: stream ? 'block' : 'none' }}
+            style={{
+              opacity: isVideoOn ? 1 : 0,
+              display: stream ? "block" : "none",
+            }}
           />
 
           {(!isVideoOn || !stream) && (
@@ -488,9 +608,18 @@ const InterviewRoom = ({ interviewId, token, navigate, getInterviewById, getInte
               {aiSpeaking && (
                 <div className="flex items-center justify-center gap-1 mt-2">
                   <div className="w-1 h-3 bg-white rounded-full animate-pulse"></div>
-                  <div className="w-1 h-5 bg-white rounded-full animate-pulse" style={{ animationDelay: "0.1s" }}></div>
-                  <div className="w-1 h-4 bg-white rounded-full animate-pulse" style={{ animationDelay: "0.2s" }}></div>
-                  <div className="w-1 h-6 bg-white rounded-full animate-pulse" style={{ animationDelay: "0.3s" }}></div>
+                  <div
+                    className="w-1 h-5 bg-white rounded-full animate-pulse"
+                    style={{ animationDelay: "0.1s" }}
+                  ></div>
+                  <div
+                    className="w-1 h-4 bg-white rounded-full animate-pulse"
+                    style={{ animationDelay: "0.2s" }}
+                  ></div>
+                  <div
+                    className="w-1 h-6 bg-white rounded-full animate-pulse"
+                    style={{ animationDelay: "0.3s" }}
+                  ></div>
                 </div>
               )}
             </div>
@@ -513,7 +642,7 @@ const InterviewRoom = ({ interviewId, token, navigate, getInterviewById, getInte
         </div>
 
         {/* Message Display */}
-        {currentMessage && interviewStarted && (
+        {currentMessage && interviewStarted && !showCodeEditor && (
           <div className="absolute bottom-32 left-6 right-6 max-w-3xl mx-auto">
             <div className="bg-gray-900/90 backdrop-blur-md rounded-2xl p-6 border border-gray-700 shadow-2xl">
               <div className="flex items-start gap-4">
@@ -524,7 +653,9 @@ const InterviewRoom = ({ interviewId, token, navigate, getInterviewById, getInte
                 </div>
                 <div className="flex-1">
                   <div className="text-sm text-gray-400 mb-1">
-                    {currentMessage.startsWith("You:") ? "You" : "AI Interviewer"}
+                    {currentMessage.startsWith("You:")
+                      ? "You"
+                      : "AI Interviewer"}
                   </div>
                   <p className="text-white text-lg leading-relaxed">
                     {currentMessage}
@@ -536,11 +667,15 @@ const InterviewRoom = ({ interviewId, token, navigate, getInterviewById, getInte
         )}
 
         {/* Transcript Display */}
-        {isListening && userTranscript && (
+        {isListening && userTranscript && !showCodeEditor && (
           <div className="absolute top-24 left-6 right-6 max-w-2xl mx-auto z-50">
             <div className="bg-blue-500/20 backdrop-blur-md rounded-xl p-4 border-2 border-blue-500/50">
-              <div className="text-blue-300 text-sm font-semibold mb-2">Your Answer (Live):</div>
-              <p className="text-white text-lg leading-relaxed">{userTranscript}</p>
+              <div className="text-blue-300 text-sm font-semibold mb-2">
+                Your Answer (Live):
+              </div>
+              <p className="text-white text-lg leading-relaxed">
+                {userTranscript}
+              </p>
               <div className="mt-3 text-blue-200 text-sm">
                 💡 Click "Submit Answer" when done or keep speaking...
               </div>
@@ -549,7 +684,7 @@ const InterviewRoom = ({ interviewId, token, navigate, getInterviewById, getInte
         )}
 
         {/* Listening Indicator */}
-        {isListening && (
+        {isListening && !showCodeEditor && (
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-40 pointer-events-none">
             <div className="bg-red-500/90 backdrop-blur-sm rounded-full px-8 py-4 flex items-center gap-3 shadow-2xl">
               <div className="relative">
@@ -563,8 +698,129 @@ const InterviewRoom = ({ interviewId, token, navigate, getInterviewById, getInte
           </div>
         )}
 
+        {/* Code Editor Overlay */}
+        {showCodeEditor && currentQuestion && (
+          <div className="absolute inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-gray-900 rounded-2xl w-full max-w-6xl h-[90vh] flex flex-col border border-gray-700 shadow-2xl">
+              {/* Code Editor Header */}
+              <div className="px-6 py-4 border-b border-gray-700 flex items-center justify-between bg-gray-800/50">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                    <Code2 className="w-6 h-6 text-blue-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white">
+                      Coding Challenge
+                    </h3>
+                    <p className="text-sm text-gray-400">
+                      Write your solution below
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowCodeEditor(false)}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              {/* Code Editor Content */}
+              <div className="flex-1 flex overflow-hidden">
+                {/* Problem Statement */}
+                <div className="w-2/5 border-r border-gray-700 overflow-y-auto bg-gray-800/30 p-6">
+                  <h4 className="text-white font-semibold mb-2 flex items-center gap-2">
+                    <span className="w-2 h-2 bg-green-400 rounded-full"></span>
+                    Problem Statement
+                  </h4>
+                  <div className="bg-gray-900/50 rounded-xl p-4 border border-gray-700">
+                    <p className="text-gray-300 leading-relaxed">
+                      {currentQuestion.message}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Editor Panel */}
+                <div className="flex-1 flex flex-col">
+                  <div className="px-6 py-3 border-b border-gray-700 flex items-center justify-between bg-gray-800/30">
+                    <div className="flex items-center gap-4">
+                      <select
+                        value={codeLanguage}
+                        onChange={handleCodeLanguageChange}
+                        className="bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500"
+                      >
+                        {languages.map((lang) => (
+                          <option key={lang.value} value={lang.value}>
+                            {lang.label}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        onClick={handleRunCode}
+                        className="flex items-center gap-2 px-4 py-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors border border-green-500/30"
+                      >
+                        <Play className="w-4 h-4" />
+                        <span className="font-semibold">Run Code</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex-1 overflow-hidden">
+                    <Editor
+                      height="100%"
+                      language={codeLanguage}
+                      value={code}
+                      onChange={(value) => setCode(value || "")}
+                      theme="vs-dark"
+                      options={{
+                        minimap: { enabled: true },
+                        fontSize: 14,
+                        lineNumbers: "on",
+                        scrollBeyondLastLine: false,
+                        automaticLayout: true,
+                        tabSize: 2,
+                        wordWrap: "on",
+                      }}
+                    />
+                  </div>
+
+                  {codeOutput && (
+                    <div className="border-t border-gray-700 bg-gray-800/50 p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                        <span className="text-white font-semibold text-sm">
+                          Output
+                        </span>
+                      </div>
+                      <div className="bg-gray-900 rounded-lg p-4 font-mono text-sm text-green-400">
+                        {codeOutput}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Code Editor Footer */}
+              <div className="px-6 py-4 border-t border-gray-700 flex items-center justify-between bg-gray-800/50">
+                <button
+                  onClick={() => setShowCodeEditor(false)}
+                  className="px-6 py-2 text-gray-400 hover:text-white transition-colors font-semibold"
+                >
+                  Close Editor
+                </button>
+                <button
+                  onClick={handleSubmitCode}
+                  className="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all"
+                >
+                  Submit Solution
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Control Bar */}
-        {interviewStarted && (
+        {interviewStarted && !showCodeEditor && (
           <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-40">
             <div className="bg-gray-900/90 backdrop-blur-md rounded-2xl px-6 py-4 flex items-center gap-4 border border-gray-700 shadow-2xl">
               <button
@@ -574,10 +830,20 @@ const InterviewRoom = ({ interviewId, token, navigate, getInterviewById, getInte
                   isAudioOn
                     ? "bg-gray-700 hover:bg-gray-600 text-white"
                     : "bg-red-500 hover:bg-red-600 text-white"
-                } ${isListening ? 'opacity-50 cursor-not-allowed' : ''}`}
-                title={isListening ? "Cannot toggle while listening" : (isAudioOn ? "Mute" : "Unmute")}
+                } ${isListening ? "opacity-50 cursor-not-allowed" : ""}`}
+                title={
+                  isListening
+                    ? "Cannot toggle while listening"
+                    : isAudioOn
+                    ? "Mute"
+                    : "Unmute"
+                }
               >
-                {isAudioOn ? <span className="text-2xl">🎤</span> : <span className="text-2xl">🔇</span>}
+                {isAudioOn ? (
+                  <span className="text-2xl">🎤</span>
+                ) : (
+                  <span className="text-2xl">🔇</span>
+                )}
               </button>
 
               <button
@@ -587,9 +853,12 @@ const InterviewRoom = ({ interviewId, token, navigate, getInterviewById, getInte
                     ? "bg-gray-700 hover:bg-gray-600 text-white"
                     : "bg-red-500 hover:bg-red-600 text-white"
                 }`}
-                title={isVideoOn ? "Turn off camera" : "Turn on camera"}
               >
-                {isVideoOn ? <span className="text-2xl">📹</span> : <span className="text-2xl">📷</span>}
+                {isVideoOn ? (
+                  <span className="text-2xl">📹</span>
+                ) : (
+                  <span className="text-2xl">📷</span>
+                )}
               </button>
 
               {!aiSpeaking && currentQuestion && !isListening && (
@@ -611,10 +880,12 @@ const InterviewRoom = ({ interviewId, token, navigate, getInterviewById, getInte
                     <span className="text-xl">⏸️</span>
                     <span>Stop Speaking</span>
                   </button>
-                  
+
                   <button
                     onClick={handleSubmitAnswer}
-                    disabled={!userTranscript.trim() || userTranscript.trim().length < 3}
+                    disabled={
+                      !userTranscript.trim() || userTranscript.trim().length < 3
+                    }
                     className="px-6 py-3 bg-green-500 hover:bg-green-600 rounded-xl font-semibold text-white transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <span className="text-xl">✅</span>
@@ -641,49 +912,6 @@ const InterviewRoom = ({ interviewId, token, navigate, getInterviewById, getInte
           </div>
         )}
       </div>
-
-      {/* Start Interview Overlay */}
-      {!interviewStarted && (
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="text-center">
-            <div className="bg-gray-800 rounded-2xl p-8 border border-gray-700 max-w-md">
-              <h2 className="text-2xl font-bold text-white mb-4">Ready to Start?</h2>
-              <p className="text-gray-300 mb-6">
-                Make sure your camera and microphone are working properly before starting.
-              </p>
-              
-              <div className="space-y-3 mb-6">
-                <div className="flex items-center justify-between bg-gray-900/50 p-3 rounded-lg">
-                  <span className="text-gray-300">Connection</span>
-                  <span className={`font-semibold ${socketConnected ? 'text-green-400' : 'text-red-400'}`}>
-                    {socketConnected ? '✓ Connected' : '⏳ Connecting...'}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between bg-gray-900/50 p-3 rounded-lg">
-                  <span className="text-gray-300">Camera & Mic</span>
-                  <span className={`font-semibold ${mediaReady ? 'text-green-400' : 'text-yellow-400'}`}>
-                    {mediaReady ? '✓ Ready' : '⏳ Requesting...'}
-                  </span>
-                </div>
-              </div>
-
-              <button
-                onClick={handleStartInterview}
-                disabled={loading || !socketConnected || !mediaReady}
-                className="w-full px-12 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-lg shadow-2xl"
-              >
-                {loading
-                  ? "Starting..."
-                  : !socketConnected
-                  ? "Connecting..."
-                  : !mediaReady
-                  ? "Waiting for permissions..."
-                  : "Start Interview"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
