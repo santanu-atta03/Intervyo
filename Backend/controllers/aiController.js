@@ -5,7 +5,7 @@ import {
   evaluateAnswer,
   generateNextQuestion,
   generateOverallFeedback
-} from '../config/huggingfaceAi.js';
+} from '../config/openai.js';
 
 // @desc    Generate initial questions
 // @route   POST /api/ai/generate-questions
@@ -79,12 +79,18 @@ export const evaluateCandidateAnswer = async (req, res) => {
 
     // Add to conversation history
     session.conversation.push({
-      question,
-      answer,
-      aiReview: evaluation.review,
-      score: evaluation.score,
-      codeSubmitted: codeSubmitted || null
-    });
+  speaker: 'candidate',
+  message: answer,
+  type: 'answer',
+  timestamp: new Date()
+});
+
+session.conversation.push({
+  speaker: 'ai',
+  message: evaluation.review,
+  type: 'feedback',
+  timestamp: new Date()
+});
 
     session.currentQuestionIndex += 1;
     await session.save();

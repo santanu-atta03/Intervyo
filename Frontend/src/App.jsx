@@ -48,7 +48,7 @@ function App() {
         path="/interview/:interviewId" 
         element={
           <ProtectedRoute>
-            <InterviewRoom  />
+            <InterviewWrapper  />
           </ProtectedRoute>
         } 
       />

@@ -1,56 +1,35 @@
+
 import React, { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import {
-  Mic,
-  MicOff,
-  Video,
-  VideoOff,
-  Phone,
-  CheckCircle,
-  Loader,
-  Volume2,
-} from "lucide-react";
-import io from "socket.io-client";
-import { useSelector } from "react-redux";
-import {
-  getInterviewById,
-  getInterviewSession,
-  startInterview,
-} from "../../services/operations/aiInterviewApi";
 
-const InterviewRoom = () => {
-  const { interviewId } = useParams();
-  const navigate = useNavigate();
-  const { token } = useSelector((state) => state.auth);
-
+const InterviewRoom = ({ interviewId, token, navigate, getInterviewById, getInterviewSession, startInterview, io }) => {
+  // States
   const [loading, setLoading] = useState(true);
   const [interview, setInterview] = useState(null);
   const [session, setSession] = useState(null);
   const [socket, setSocket] = useState(null);
+  const [socketConnected, setSocketConnected] = useState(false);
 
-  // Video/Audio states
   const [isVideoOn, setIsVideoOn] = useState(true);
   const [isAudioOn, setIsAudioOn] = useState(true);
   const [stream, setStream] = useState(null);
   const [mediaReady, setMediaReady] = useState(false);
   const videoRef = useRef(null);
 
-  // Interview states
   const [interviewStarted, setInterviewStarted] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [aiSpeaking, setAiSpeaking] = useState(false);
   const [currentMessage, setCurrentMessage] = useState("");
   const [currentQuestion, setCurrentQuestion] = useState(null);
-  const [socketConnected, setSocketConnected] = useState(false);
+  const [userTranscript, setUserTranscript] = useState("");
 
-  // Speech recognition and audio
   const recognitionRef = useRef(null);
   const currentAudioRef = useRef(null);
-  const pendingAnswerRef = useRef("");
+  const transcriptAccumulatorRef = useRef("");
+  const shouldRestartRecognition = useRef(false);
 
-  // Initialize interview data
+  // Initialize interview
   useEffect(() => {
-    const initInterview = async () => {
+    const init = async () => {
       try {
         const interviewData = await getInterviewById(interviewId, token);
         setInterview(interviewData);
@@ -60,7 +39,6 @@ const InterviewRoom = () => {
           setSession(sessionData);
           setInterviewStarted(true);
         }
-
         setLoading(false);
       } catch (error) {
         console.error("Init error:", error);
@@ -68,264 +46,214 @@ const InterviewRoom = () => {
         navigate("/dashboard");
       }
     };
-
-    initInterview();
+    init();
   }, [interviewId, token, navigate]);
 
-  // Setup media stream
+  // Setup media
   useEffect(() => {
     let mounted = true;
     let localStream = null;
 
     const setupMedia = async () => {
       try {
-        console.log("Requesting media permissions...");
         localStream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-            facingMode: "user"
-          },
-          audio: {
-            echoCancellation: true,
-            noiseSuppression: true,
-            autoGainControl: true,
-          },
+          video: { width: { ideal: 1280 }, height: { ideal: 720 } },
+          audio: { echoCancellation: true, noiseSuppression: true }
         });
 
         if (!mounted) {
-          localStream.getTracks().forEach((track) => track.stop());
+          localStream.getTracks().forEach(t => t.stop());
           return;
         }
 
-        console.log("Media stream obtained");
         setStream(localStream);
         setMediaReady(true);
 
-        // Attach to video element immediately
-        if (videoRef.current && localStream) {
-          videoRef.current.srcObject = localStream;
-          videoRef.current.onloadedmetadata = () => {
-            videoRef.current.play()
-              .then(() => console.log("Video playing successfully"))
-              .catch((err) => console.error("Video play error:", err));
-          };
-        }
-
-        console.log("Media setup complete");
+        setTimeout(() => {
+          if (videoRef.current && localStream && mounted) {
+            videoRef.current.srcObject = localStream;
+            videoRef.current.play().catch(console.error);
+          }
+        }, 100);
       } catch (error) {
         console.error("Media error:", error);
-        if (mounted) {
-          const errorMsg =
-            error.name === "NotAllowedError"
-              ? "Camera/microphone access denied. Please allow access and reload."
-              : error.name === "NotFoundError"
-              ? "No camera or microphone found."
-              : "Failed to access media devices.";
-
-          alert(errorMsg);
-          setMediaReady(false);
-        }
+        alert("Camera/microphone access required");
+        setMediaReady(false);
       }
     };
 
     setupMedia();
-
     return () => {
       mounted = false;
-      if (localStream) {
-        localStream.getTracks().forEach((track) => {
-          track.stop();
-          console.log("Stopped track:", track.kind);
-        });
-      }
+      if (localStream) localStream.getTracks().forEach(t => t.stop());
     };
   }, []);
 
-  // Update video when stream changes
-  useEffect(() => {
-    if (stream && videoRef.current && mediaReady) {
-      console.log("Updating video element with stream");
-      videoRef.current.srcObject = stream;
-      videoRef.current.play()
-        .then(() => console.log("Video updated and playing"))
-        .catch((err) => console.error("Video update error:", err));
-    }
-  }, [stream, mediaReady]);
-
-  // Setup socket connection
-  useEffect(() => {
-    const SOCKET_URL = "http://localhost:5000";
-    const newSocket = io(SOCKET_URL, {
-      transports: ["websocket", "polling"],
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-    });
-
-    newSocket.on("connect", () => {
-      console.log("Socket connected:", newSocket.id);
-      setSocketConnected(true);
-    });
-
-    newSocket.on("disconnect", () => {
-      console.log("Socket disconnected");
-      setSocketConnected(false);
-    });
-
-    newSocket.on("ai-message", (data) => {
-      console.log("Received AI message:", data.type);
-      handleAIMessage(data);
-    });
-
-    newSocket.on("ai-status", (data) => {
-      console.log("AI status:", data);
-      setCurrentMessage(data.message);
-    });
-
-    newSocket.on("interview-ready", (data) => {
-      console.log("Interview ready:", data);
-    });
-
-    newSocket.on("interview-ended", () => {
-      console.log("Interview ended");
-      navigate(`/results/${interviewId}`);
-    });
-
-    newSocket.on("error", (error) => {
-      console.error("Socket error:", error);
-      if (error.message && !error.message.includes("process")) {
-        // Only show non-processing errors
-        setCurrentMessage("Error: " + error.message);
-      }
-    });
-
-    setSocket(newSocket);
-
-    return () => {
-      if (newSocket) {
-        newSocket.disconnect();
-      }
-    };
-  }, [interviewId, navigate]);
-
   // Setup speech recognition
   useEffect(() => {
-    if (!("webkitSpeechRecognition" in window)) {
-      console.error("Speech recognition not supported");
+    if (!window.webkitSpeechRecognition) {
+      alert("Speech recognition not supported. Please use Chrome.");
       return;
     }
 
     const SpeechRecognition = window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
 
-    recognition.continuous = false;
-    recognition.interimResults = false;
+    recognition.continuous = true;
+    recognition.interimResults = true;
     recognition.lang = "en-US";
-    recognition.maxAlternatives = 1;
 
     recognition.onstart = () => {
-      console.log("Speech recognition started");
+      console.log("🎤 Listening started");
       setIsListening(true);
+      transcriptAccumulatorRef.current = "";
+      setUserTranscript("");
     };
 
     recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
-      const confidence = event.results[0][0].confidence;
-      console.log("Recognized:", transcript, "Confidence:", confidence);
+      let interim = "";
+      let final = "";
 
-      if (transcript && transcript.trim().length > 0) {
-        pendingAnswerRef.current = transcript;
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          final += transcript + " ";
+        } else {
+          interim += transcript;
+        }
       }
+
+      if (final) {
+        transcriptAccumulatorRef.current += final;
+      }
+
+      setUserTranscript(transcriptAccumulatorRef.current + interim);
     };
 
     recognition.onerror = (event) => {
-      console.error("Speech recognition error:", event.error);
-      setIsListening(false);
-
-      if (event.error === "not-allowed" || event.error === "service-not-allowed") {
-        alert("Microphone access denied. Please allow microphone access.");
-      } else if (event.error === "no-speech") {
-        console.log("No speech detected");
-        setCurrentMessage("No speech detected. Please try again.");
-      } else if (event.error !== "aborted") {
-        setCurrentMessage("Speech error: " + event.error);
+      console.error("Recognition error:", event.error);
+      if (event.error === "not-allowed") {
+        alert("Microphone access denied");
+        setIsListening(false);
+        shouldRestartRecognition.current = false;
       }
     };
 
     recognition.onend = () => {
       console.log("Recognition ended");
-      setIsListening(false);
-      
-      // Submit answer if we have one
-      if (pendingAnswerRef.current && pendingAnswerRef.current.trim().length > 0) {
-        handleUserAnswer(pendingAnswerRef.current);
-        pendingAnswerRef.current = "";
+      if (shouldRestartRecognition.current) {
+        setTimeout(() => {
+          try {
+            recognition.start();
+          } catch (e) {
+            setIsListening(false);
+            shouldRestartRecognition.current = false;
+          }
+        }, 100);
+      } else {
+        setIsListening(false);
       }
     };
 
     recognitionRef.current = recognition;
 
     return () => {
+      shouldRestartRecognition.current = false;
       if (recognitionRef.current) {
         try {
           recognitionRef.current.abort();
-        } catch (e) {
-          console.log("Recognition cleanup error:", e);
-        }
+        } catch (e) {}
       }
     };
-  }, [currentQuestion, socket, session]);
+  }, []);
 
-  // Handle AI message with audio playback
+  // Setup socket
+  useEffect(() => {
+    const newSocket = io("http://localhost:5000", {
+      transports: ["websocket", "polling"],
+      reconnection: true
+    });
+
+    newSocket.on("connect", () => {
+      console.log("✅ Socket connected");
+      setSocketConnected(true);
+    });
+
+    newSocket.on("disconnect", () => {
+      console.log("❌ Socket disconnected");
+      setSocketConnected(false);
+    });
+
+    newSocket.on("ai-message", (data) => {
+      console.log("📨 AI message:", data.type);
+      handleAIMessage(data);
+    });
+
+    newSocket.on("ai-status", (data) => {
+      setCurrentMessage(data.message);
+    });
+
+    newSocket.on("interview-ready", () => {
+      console.log("✅ Interview ready");
+    });
+
+    newSocket.on("interview-ended", () => {
+      navigate(`/results/${interviewId}`);
+    });
+
+    newSocket.on("error", (error) => {
+      console.error("Socket error:", error);
+    });
+
+    setSocket(newSocket);
+
+    return () => {
+      if (newSocket) newSocket.disconnect();
+    };
+  }, [interviewId, navigate]);
+
+  // Handle AI message
   const handleAIMessage = async (data) => {
-    console.log("Handling AI message:", data.type, "Has audio:", data.hasAudio);
+    console.log("Handling:", data.type);
     
     setCurrentMessage(data.message);
     setAiSpeaking(true);
 
-    // Stop any current audio
+    // Stop current audio
     if (currentAudioRef.current) {
-      try {
-        currentAudioRef.current.pause();
-        currentAudioRef.current.currentTime = 0;
-      } catch (e) {
-        console.log("Error stopping audio:", e);
-      }
+      currentAudioRef.current.pause();
       currentAudioRef.current = null;
     }
-
-    // Stop speech synthesis
     if (window.speechSynthesis) {
       window.speechSynthesis.cancel();
     }
 
-    // Play audio if available, otherwise use fallback TTS
+    // Play audio
     if (data.hasAudio && data.audioBase64) {
       try {
         await playAudioFromBase64(data.audioBase64);
       } catch (error) {
-        console.error("Audio playback error, using fallback:", error);
         speakText(data.message);
       }
     } else {
       speakText(data.message);
     }
 
-    // Store question data
+    // Update question state
     if (data.type === "question") {
+      console.log("📝 New question received");
       setCurrentQuestion(data);
-    } else if (data.type === "review") {
+      setUserTranscript("");
+      transcriptAccumulatorRef.current = "";
+    } else if (data.type === "review" || data.type === "code-review") {
+      console.log("📊 Review received, clearing question");
       setCurrentQuestion(null);
     }
   };
 
-  // Play audio from base64
   const playAudioFromBase64 = (base64Data) => {
     return new Promise((resolve, reject) => {
       try {
-        console.log("Playing audio from base64, length:", base64Data.length);
-        
         const byteCharacters = atob(base64Data);
         const byteNumbers = new Array(byteCharacters.length);
         for (let i = 0; i < byteCharacters.length; i++) {
@@ -339,211 +267,150 @@ const InterviewRoom = () => {
         currentAudioRef.current = audio;
 
         audio.onended = () => {
-          console.log("Audio playback completed");
           setAiSpeaking(false);
           URL.revokeObjectURL(url);
           resolve();
         };
 
-        audio.onerror = (error) => {
-          console.error("Audio playback error:", error);
+        audio.onerror = () => {
           setAiSpeaking(false);
           URL.revokeObjectURL(url);
-          reject(error);
+          reject();
         };
 
-        audio.play()
-          .then(() => console.log("Audio playing"))
-          .catch((err) => {
-            console.error("Audio play failed:", err);
-            reject(err);
-          });
+        audio.play().catch(reject);
       } catch (error) {
-        console.error("Base64 decode error:", error);
         reject(error);
       }
     });
   };
 
-  // Fallback text-to-speech
   const speakText = (text) => {
-    console.log("Using fallback TTS for:", text.substring(0, 50));
-    
-    if ("speechSynthesis" in window) {
+    if (window.speechSynthesis) {
       window.speechSynthesis.cancel();
-
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.85; // Slightly slower
-      utterance.pitch = 1;
-      utterance.volume = 1;
-
-      utterance.onstart = () => {
-        console.log("TTS started");
-      };
-
-      utterance.onend = () => {
-        console.log("TTS completed");
-        setAiSpeaking(false);
-      };
-
-      utterance.onerror = (error) => {
-        console.error("TTS error:", error);
-        setAiSpeaking(false);
-      };
-
+      utterance.rate = 0.9;
+      utterance.onend = () => setAiSpeaking(false);
+      utterance.onerror = () => setAiSpeaking(false);
       window.speechSynthesis.speak(utterance);
     } else {
-      console.error("Speech synthesis not available");
       setAiSpeaking(false);
     }
   };
 
   const startListening = () => {
-    if (!session || !socket) {
-      console.warn("Cannot start listening: session or socket not ready");
-      return;
-    }
-
-    if (!currentQuestion) {
-      console.warn("Cannot start listening: no current question");
-      return;
-    }
-
-    if (!recognitionRef.current) {
-      console.error("Speech recognition not initialized");
-      return;
-    }
-
-    if (isListening) {
-      console.log("Already listening");
-      return;
-    }
-
-    if (aiSpeaking) {
-      console.log("AI is speaking, cannot start listening");
+    if (!session || !socket || !currentQuestion || isListening || aiSpeaking) {
+      console.log("Cannot start listening");
       return;
     }
 
     try {
-      pendingAnswerRef.current = ""; // Clear pending answer
+      transcriptAccumulatorRef.current = "";
+      setUserTranscript("");
+      shouldRestartRecognition.current = true;
       recognitionRef.current.start();
-      console.log("Started listening for answer");
+      console.log("🎤 Started listening");
     } catch (error) {
-      console.error("Start listening error:", error);
-      if (error.message && error.message.includes("already started")) {
-        setIsListening(true);
-      }
+      console.error("Start error:", error);
     }
   };
 
   const stopListening = () => {
-    if (recognitionRef.current && isListening) {
+    shouldRestartRecognition.current = false;
+    if (recognitionRef.current) {
       try {
         recognitionRef.current.stop();
-        console.log("Stopped listening");
-      } catch (error) {
-        console.error("Stop listening error:", error);
-      }
+      } catch (e) {}
     }
+    setIsListening(false);
   };
 
-  const handleUserAnswer = (answer) => {
-    if (!socket || !session) {
-      console.error("Socket or session not available");
+  const handleSubmitAnswer = () => {
+    const answer = (transcriptAccumulatorRef.current.trim() || userTranscript.trim());
+    
+    if (!answer || answer.length < 5) {
+      alert("Please provide a longer answer (at least 5 characters)");
       return;
     }
 
-    if (!currentQuestion) {
-      console.warn("No current question to answer");
+    if (!socket || !session || !currentQuestion) {
+      console.error("Cannot submit");
       return;
     }
 
-    console.log("Sending answer:", answer.substring(0, 50));
+    console.log("📤 Submitting answer");
+
+    stopListening();
 
     socket.emit("candidate-answer", {
       sessionId: session._id,
       question: currentQuestion.message,
-      answer: answer.trim(),
+      answer: answer,
       questionIndex: currentQuestion.questionIndex,
     });
 
-    setCurrentMessage(`You: ${answer}`);
+    setCurrentMessage(`You: ${answer.substring(0, 100)}...`);
     setCurrentQuestion(null);
+    setUserTranscript("");
+    transcriptAccumulatorRef.current = "";
   };
 
   const handleStartInterview = async () => {
-    if (!socketConnected) {
-      alert("Please wait for connection to establish");
-      return;
-    }
-
-    if (!mediaReady || !stream) {
-      alert("Please allow camera and microphone access first");
+    if (!socketConnected || !mediaReady) {
+      alert("Please wait for connection");
       return;
     }
 
     try {
-      console.log("Starting interview...");
       const result = await startInterview(interviewId, setLoading, token);
-
       setSession(result.session);
       setInterviewStarted(true);
 
-      console.log("Interview started, joining room...");
-
-      // Join socket room
       socket.emit("join-room", {
         roomId: interviewId,
         userId: result.session.userId,
       });
 
-      // Wait a bit for room join, then notify ready
       setTimeout(() => {
-        if (socket && result.session?._id) {
-          console.log("Emitting candidate-ready");
-          socket.emit("candidate-ready", {
-            sessionId: result.session._id,
-            interviewId,
-          });
-        }
-      }, 1500);
+        socket.emit("candidate-ready", {
+          sessionId: result.session._id,
+          interviewId,
+        });
+      }, 1000);
     } catch (error) {
       console.error("Start error:", error);
-      alert("Failed to start interview. Please try again.");
+      alert("Failed to start");
     }
   };
 
   const handleEndInterview = () => {
-    if (window.confirm("Are you sure you want to end the interview?")) {
+    if (window.confirm("End interview?")) {
+      stopListening();
       if (socket && session) {
         socket.emit("end-interview", {
           sessionId: session._id,
           interviewId: interviewId,
         });
-      } else {
-        navigate("/dashboard");
       }
     }
   };
 
   const toggleVideo = () => {
     if (stream) {
-      const videoTrack = stream.getVideoTracks()[0];
-      if (videoTrack) {
-        videoTrack.enabled = !videoTrack.enabled;
-        setIsVideoOn(videoTrack.enabled);
-        console.log("Video toggled:", videoTrack.enabled);
+      const track = stream.getVideoTracks()[0];
+      if (track) {
+        track.enabled = !track.enabled;
+        setIsVideoOn(track.enabled);
       }
     }
   };
 
   const toggleAudio = () => {
     if (stream) {
-      const audioTrack = stream.getAudioTracks()[0];
-      if (audioTrack) {
-        audioTrack.enabled = !audioTrack.enabled;
-        setIsAudioOn(audioTrack.enabled);
-        console.log("Audio toggled:", audioTrack.enabled);
+      const track = stream.getAudioTracks()[0];
+      if (track) {
+        track.enabled = !track.enabled;
+        setIsAudioOn(track.enabled);
       }
     }
   };
@@ -551,10 +418,7 @@ const InterviewRoom = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <Loader className="w-12 h-12 text-blue-500 animate-spin mx-auto mb-4" />
-          <div className="text-white text-xl">Loading interview room...</div>
-        </div>
+        <div className="text-white text-xl">Loading...</div>
       </div>
     );
   }
@@ -565,11 +429,7 @@ const InterviewRoom = () => {
       <div className="bg-gray-800/50 backdrop-blur-sm border-b border-gray-700 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <div
-              className={`w-3 h-3 rounded-full ${
-                socketConnected ? "bg-green-500 animate-pulse" : "bg-red-500"
-              }`}
-            ></div>
+            <div className={`w-3 h-3 rounded-full ${socketConnected ? "bg-green-500 animate-pulse" : "bg-red-500"}`} />
             <span className="text-white font-semibold">{interview?.role}</span>
           </div>
           <div className="px-3 py-1 bg-orange-500/20 text-orange-400 text-sm rounded-full border border-orange-500/30">
@@ -591,7 +451,7 @@ const InterviewRoom = () => {
 
       {/* Main Content */}
       <div className="flex-1 relative bg-black">
-        {/* Candidate Video */}
+        {/* Video */}
         <div className="absolute inset-0">
           <video
             ref={videoRef}
@@ -599,10 +459,7 @@ const InterviewRoom = () => {
             muted
             playsInline
             className="w-full h-full object-cover"
-            style={{ 
-              opacity: isVideoOn ? 1 : 0,
-              display: stream ? 'block' : 'none'
-            }}
+            style={{ opacity: isVideoOn ? 1 : 0, display: stream ? 'block' : 'none' }}
           />
 
           {(!isVideoOn || !stream) && (
@@ -631,18 +488,9 @@ const InterviewRoom = () => {
               {aiSpeaking && (
                 <div className="flex items-center justify-center gap-1 mt-2">
                   <div className="w-1 h-3 bg-white rounded-full animate-pulse"></div>
-                  <div
-                    className="w-1 h-5 bg-white rounded-full animate-pulse"
-                    style={{ animationDelay: "0.1s" }}
-                  ></div>
-                  <div
-                    className="w-1 h-4 bg-white rounded-full animate-pulse"
-                    style={{ animationDelay: "0.2s" }}
-                  ></div>
-                  <div
-                    className="w-1 h-6 bg-white rounded-full animate-pulse"
-                    style={{ animationDelay: "0.3s" }}
-                  ></div>
+                  <div className="w-1 h-5 bg-white rounded-full animate-pulse" style={{ animationDelay: "0.1s" }}></div>
+                  <div className="w-1 h-4 bg-white rounded-full animate-pulse" style={{ animationDelay: "0.2s" }}></div>
+                  <div className="w-1 h-6 bg-white rounded-full animate-pulse" style={{ animationDelay: "0.3s" }}></div>
                 </div>
               )}
             </div>
@@ -651,12 +499,12 @@ const InterviewRoom = () => {
             <div className="bg-gray-900/80 backdrop-blur-sm rounded-lg px-3 py-1 text-center">
               {aiSpeaking ? (
                 <div className="flex items-center justify-center gap-2 text-green-400 text-sm">
-                  <Volume2 className="w-4 h-4" />
+                  <span>🔊</span>
                   <span>Speaking...</span>
                 </div>
               ) : (
                 <div className="text-gray-400 text-sm flex items-center justify-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span>✓</span>
                   <span>Ready</span>
                 </div>
               )}
@@ -664,9 +512,9 @@ const InterviewRoom = () => {
           </div>
         </div>
 
-        {/* Current Message Display */}
+        {/* Message Display */}
         {currentMessage && interviewStarted && (
-          <div className="absolute bottom-24 left-6 right-6 max-w-3xl mx-auto">
+          <div className="absolute bottom-32 left-6 right-6 max-w-3xl mx-auto">
             <div className="bg-gray-900/90 backdrop-blur-md rounded-2xl p-6 border border-gray-700 shadow-2xl">
               <div className="flex items-start gap-4">
                 <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
@@ -687,16 +535,29 @@ const InterviewRoom = () => {
           </div>
         )}
 
+        {/* Transcript Display */}
+        {isListening && userTranscript && (
+          <div className="absolute top-24 left-6 right-6 max-w-2xl mx-auto z-50">
+            <div className="bg-blue-500/20 backdrop-blur-md rounded-xl p-4 border-2 border-blue-500/50">
+              <div className="text-blue-300 text-sm font-semibold mb-2">Your Answer (Live):</div>
+              <p className="text-white text-lg leading-relaxed">{userTranscript}</p>
+              <div className="mt-3 text-blue-200 text-sm">
+                💡 Click "Submit Answer" when done or keep speaking...
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Listening Indicator */}
         {isListening && (
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-40 pointer-events-none">
             <div className="bg-red-500/90 backdrop-blur-sm rounded-full px-8 py-4 flex items-center gap-3 shadow-2xl">
               <div className="relative">
                 <div className="w-4 h-4 bg-white rounded-full"></div>
                 <div className="w-4 h-4 bg-white rounded-full absolute inset-0 animate-ping"></div>
               </div>
               <span className="text-white font-semibold text-lg">
-                Listening... Speak now!
+                🎤 Listening... Speak now!
               </span>
             </div>
           </div>
@@ -708,18 +569,15 @@ const InterviewRoom = () => {
             <div className="bg-gray-900/90 backdrop-blur-md rounded-2xl px-6 py-4 flex items-center gap-4 border border-gray-700 shadow-2xl">
               <button
                 onClick={toggleAudio}
+                disabled={isListening}
                 className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${
                   isAudioOn
                     ? "bg-gray-700 hover:bg-gray-600 text-white"
                     : "bg-red-500 hover:bg-red-600 text-white"
-                }`}
-                title={isAudioOn ? "Mute" : "Unmute"}
+                } ${isListening ? 'opacity-50 cursor-not-allowed' : ''}`}
+                title={isListening ? "Cannot toggle while listening" : (isAudioOn ? "Mute" : "Unmute")}
               >
-                {isAudioOn ? (
-                  <Mic className="w-6 h-6" />
-                ) : (
-                  <MicOff className="w-6 h-6" />
-                )}
+                {isAudioOn ? <span className="text-2xl">🎤</span> : <span className="text-2xl">🔇</span>}
               </button>
 
               <button
@@ -731,47 +589,60 @@ const InterviewRoom = () => {
                 }`}
                 title={isVideoOn ? "Turn off camera" : "Turn on camera"}
               >
-                {isVideoOn ? (
-                  <Video className="w-6 h-6" />
-                ) : (
-                  <VideoOff className="w-6 h-6" />
-                )}
+                {isVideoOn ? <span className="text-2xl">📹</span> : <span className="text-2xl">📷</span>}
               </button>
 
-              {!aiSpeaking && currentQuestion && (
+              {!aiSpeaking && currentQuestion && !isListening && (
                 <button
-                  onClick={isListening ? stopListening : startListening}
-                  className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 ${
-                    isListening
-                      ? "bg-red-500 hover:bg-red-600 text-white"
-                      : "bg-blue-500 hover:bg-blue-600 text-white"
-                  }`}
+                  onClick={startListening}
+                  className="px-6 py-3 bg-blue-500 hover:bg-blue-600 rounded-xl font-semibold text-white transition-all flex items-center gap-2"
                 >
-                  <Mic className="w-5 h-5" />
-                  {isListening ? "Stop Speaking" : "Answer Question"}
+                  <span className="text-xl">🎤</span>
+                  <span>Start Answering</span>
                 </button>
+              )}
+
+              {isListening && (
+                <>
+                  <button
+                    onClick={stopListening}
+                    className="px-6 py-3 bg-yellow-500 hover:bg-yellow-600 rounded-xl font-semibold text-white transition-all flex items-center gap-2"
+                  >
+                    <span className="text-xl">⏸️</span>
+                    <span>Stop Speaking</span>
+                  </button>
+                  
+                  <button
+                    onClick={handleSubmitAnswer}
+                    disabled={!userTranscript.trim() || userTranscript.trim().length < 3}
+                    className="px-6 py-3 bg-green-500 hover:bg-green-600 rounded-xl font-semibold text-white transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <span className="text-xl">✅</span>
+                    <span>Submit Answer</span>
+                  </button>
+                </>
               )}
 
               {aiSpeaking && (
                 <div className="px-6 py-3 bg-gray-700 rounded-xl text-gray-300 flex items-center gap-2">
-                  <Volume2 className="w-5 h-5 animate-pulse" />
-                  AI is speaking...
+                  <span className="text-xl animate-pulse">🔊</span>
+                  <span>AI is speaking...</span>
                 </div>
               )}
 
               <button
                 onClick={handleEndInterview}
-                className="w-14 h-14 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all"
+                className="w-14 h-14 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-all ml-2"
                 title="End interview"
               >
-                <Phone className="w-6 h-6 text-white transform rotate-[135deg]" />
+                <span className="text-2xl">📞</span>
               </button>
             </div>
           </div>
         )}
       </div>
 
-      {/* Start Interview Button */}
+      {/* Start Interview Overlay */}
       {!interviewStarted && (
         <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="text-center">
@@ -781,7 +652,6 @@ const InterviewRoom = () => {
                 Make sure your camera and microphone are working properly before starting.
               </p>
               
-              {/* Status indicators */}
               <div className="space-y-3 mb-6">
                 <div className="flex items-center justify-between bg-gray-900/50 p-3 rounded-lg">
                   <span className="text-gray-300">Connection</span>

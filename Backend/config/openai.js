@@ -1,11 +1,12 @@
 import OpenAI from 'openai';
 
+// ✅ Use GROQ API key and endpoint
 export const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  baseURL: 'https://openrouter.ai/api/v1',
+  apiKey: process.env.GROQ_API_KEY, // Set this in your .env or environment
+  baseURL: 'https://api.groq.com/openai/v1',
 });
 
-// System prompt for interview AI
+// System prompt
 export const getInterviewSystemPrompt = (role, difficulty, resumeText) => {
   return `You are a professional technical interviewer conducting a ${difficulty} level interview for a ${role} position.
 
@@ -43,7 +44,7 @@ Keep your responses concise and natural, as if speaking in a real interview.`;
 export const generateInterviewQuestions = async (role, difficulty, resumeText) => {
   try {
     const response = await openai.chat.completions.create({
-      model: "mistralai/mixtral-8x7b",
+      model: "llama-3.3-70b-versatile", // ✅ Groq-supported model
       messages: [
         {
           role: "system",
@@ -55,7 +56,7 @@ export const generateInterviewQuestions = async (role, difficulty, resumeText) =
         }
       ],
       temperature: 0.7,
-       max_tokens: 300,
+      max_tokens: 1000,
     });
 
     const content = response.choices[0].message.content;
@@ -66,11 +67,11 @@ export const generateInterviewQuestions = async (role, difficulty, resumeText) =
   }
 };
 
-// Evaluate answer
+// Evaluate candidate answer
 export const evaluateAnswer = async (question, answer, context, codeSubmitted = null) => {
   try {
     const response = await openai.chat.completions.create({
-      model: "mistralai/mixtral-8x7b",
+      model: "llama-3.3-70b-versatile",
       messages: [
         {
           role: "system",
@@ -95,7 +96,7 @@ Provide:
 Format as JSON: {"review": "...", "score": 0-10, "strength": "...", "improvement": "..."}` }
       ],
       temperature: 0.7,
-       max_tokens: 300,
+      max_tokens: 1000,
     });
 
     const content = response.choices[0].message.content;
@@ -106,11 +107,11 @@ Format as JSON: {"review": "...", "score": 0-10, "strength": "...", "improvement
   }
 };
 
-// Generate next question based on context
+// Generate next question
 export const generateNextQuestion = async (conversationHistory, role, difficulty) => {
   try {
     const response = await openai.chat.completions.create({
-      model: "mistralai/mixtral-8x7b",
+      model: "llama-3.3-70b-versatile",
       messages: [
         {
           role: "system",
@@ -118,26 +119,47 @@ export const generateNextQuestion = async (conversationHistory, role, difficulty
         },
         {
           role: "user",
-          content: `Conversation so far:\n${JSON.stringify(conversationHistory, null, 2)}\n\nGenerate the next interview question. If appropriate, this could be a coding question. Respond naturally as an interviewer would. Format as JSON: {"question": "...", "type": "technical|coding|behavioral", "requiresCode": true|false}`
+          content: `Conversation so far:\n${JSON.stringify(conversationHistory, null, 2)}\n\nGenerate the next interview question as a JSON object ONLY with the keys: "question" (string), "type" ("technical", "coding", or "behavioral"), and "requiresCode" (true or false). No extra text, no explanation.`
         }
       ],
       temperature: 0.8,
-       max_tokens: 300,
+      max_tokens: 1000,
     });
 
     const content = response.choices[0].message.content;
-    return JSON.parse(content);
+
+    // Safe parse function
+    const safeParseJSON = (text) => {
+      try {
+        return JSON.parse(text);
+      } catch {
+        const match = text.match(/\{[\s\S]*\}/);
+        if (match) {
+          try {
+            return JSON.parse(match[0]);
+          } catch (err) {
+            console.error('Failed to parse extracted JSON:', err);
+            throw err;
+          }
+        }
+        throw new Error('No valid JSON found');
+      }
+    };
+
+    return safeParseJSON(content);
+
   } catch (error) {
     console.error('Error generating next question:', error);
     throw error;
   }
 };
 
+
 // Generate overall feedback
 export const generateOverallFeedback = async (session) => {
   try {
     const response = await openai.chat.completions.create({
-      model: "mistralai/mixtral-8x7b",
+      model: "llama-3.3-70b-versatile",
       messages: [
         {
           role: "system",
@@ -149,7 +171,7 @@ export const generateOverallFeedback = async (session) => {
         }
       ],
       temperature: 0.7,
-       max_tokens: 300,
+      max_tokens: 1000,
     });
 
     const content = response.choices[0].message.content;

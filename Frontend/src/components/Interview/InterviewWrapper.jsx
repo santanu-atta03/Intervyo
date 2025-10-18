@@ -1,18 +1,25 @@
-// frontend/src/components/InterviewWrapper.jsx
-import { useState } from 'react';
-import InterviewPermissionCheck from './InterviewPermissionCheck';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import io from 'socket.io-client';
 import InterviewRoom from '../AiInterview/InterviewRoom';
+import { getInterviewById, getInterviewSession, startInterview } from '../../services/operations/aiInterviewApi';
 
-export default function InterviewWrapper() {
-  const [permissionsGranted, setPermissionsGranted] = useState(false);
+const InterviewWrapper = () => {
+  const { interviewId } = useParams();
+  const navigate = useNavigate();
+  const { token } = useSelector((state) => state.auth);
 
-  if (!permissionsGranted) {
-    return (
-      <InterviewPermissionCheck 
-        onPermissionsGranted={() => setPermissionsGranted(true)} 
-      />
-    );
-  }
+  return (
+    <InterviewRoom
+      interviewId={interviewId}
+      token={token}
+      navigate={navigate}
+      getInterviewById={getInterviewById}
+      getInterviewSession={getInterviewSession}
+      startInterview={startInterview}
+      io={io}
+    />
+  );
+};
 
-  return <InterviewRoom />;
-}
+export default InterviewWrapper;

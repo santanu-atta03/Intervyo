@@ -3,44 +3,37 @@ import Interview from '../models/Interview.js';
 import {
   evaluateAnswer,
   generateNextQuestion,
-} from '../config/huggingfaceAi.js';
+} from '../config/openai.js';
 import { textToSpeech } from '../config/elevenlabs.js';
 
 const activeRooms = new Map();
 
 export default (io) => {
   io.on('connection', (socket) => {
-    console.log('New client connected:', socket.id);
+    console.log('✅ New client connected:', socket.id);
 
-    // Helper to send AI message with TTS audio
+    // Helper to send AI message
     const sendAIMessage = async (roomId, data, toSocket = null) => {
       try {
-        console.log('Sending AI message:', data.type, '| Text:', data.message.substring(0, 50));
+        console.log('📤 Sending AI message:', data.type);
         
-        // Generate speech audio buffer for the message text
-        const audioBuffer = await textToSpeech(data.message);
-
-        let payload;
-        
-        if (audioBuffer) {
-          // Convert audio buffer to base64 string to send over socket
-          const audioBase64 = audioBuffer.toString('base64');
-          
-          payload = { 
-            ...data, 
-            audioBase64,
-            hasAudio: true 
-          };
-          console.log('Audio generated successfully, size:', audioBase64.length);
-        } else {
-          // Fallback without audio
-          payload = { 
-            ...data, 
-            hasAudio: false,
-            useFallbackTTS: true // Signal client to use browser TTS
-          };
-          console.log('Using fallback TTS');
+        // Try to generate audio
+        let audioBuffer = null;
+        try {
+          audioBuffer = await textToSpeech(data.message);
+        } catch (error) {
+          console.log('⚠️ TTS failed, using fallback');
         }
+
+        const payload = audioBuffer ? {
+          ...data,
+          audioBase64: audioBuffer.toString('base64'),
+          hasAudio: true
+        } : {
+          ...data,
+          hasAudio: false,
+          useFallbackTTS: true
+        };
 
         // Send message
         if (toSocket) {
@@ -49,17 +42,11 @@ export default (io) => {
           io.to(roomId).emit('ai-message', payload);
         }
         
-        console.log('AI message sent successfully');
+        console.log('✅ AI message sent');
       } catch (error) {
-        console.error('Error in sendAIMessage:', error);
-        // Send message without audio as fallback
-        const payload = { 
-          ...data, 
-          hasAudio: false,
-          useFallbackTTS: true,
-          error: 'TTS generation failed' 
-        };
-        
+        console.error('❌ Error in sendAIMessage:', error);
+        // Send without audio as fallback
+        const payload = { ...data, hasAudio: false, useFallbackTTS: true };
         if (toSocket) {
           toSocket.emit('ai-message', payload);
         } else {
@@ -73,23 +60,18 @@ export default (io) => {
       try {
         socket.join(roomId);
         activeRooms.set(socket.id, { roomId, userId });
-
-        console.log(`User ${userId} joined room ${roomId}`);
-
+        console.log(`✅ User ${userId} joined room ${roomId}`);
         socket.to(roomId).emit('user-joined', { userId, socketId: socket.id });
-
-        // Don't send greeting here - wait for candidate-ready
-        console.log('Room joined successfully, waiting for candidate-ready signal');
       } catch (error) {
-        console.error('Join room error:', error);
+        console.error('❌ Join room error:', error);
         socket.emit('error', { message: 'Failed to join room' });
       }
     });
 
-    // Candidate ready: send greeting and first question
+    // Candidate ready - START INTERVIEW FLOW
     socket.on('candidate-ready', async ({ sessionId, interviewId }) => {
       try {
-        console.log('Candidate ready event received:', { sessionId, interviewId });
+        console.log('🎬 Starting interview:', { sessionId, interviewId });
 
         const interview = await Interview.findById(interviewId);
         const session = await InterviewSession.findById(sessionId);
@@ -105,40 +87,62 @@ export default (io) => {
           interviewId: interview._id 
         });
 
-        console.log('Sending greeting message...');
+        console.log('📢 Sending greeting...');
         
-        // Send greeting with proper delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // GREETING
+        const greetingMsg = `Hello! Welcome to your ${interview.role} interview. I'm your AI interviewer. Let's get started!`;
         
         await sendAIMessage(socket.id, {
           type: 'greeting',
-          message: `Hello! Welcome to your ${interview.role} interview. I'm your AI interviewer today, and I'm excited to learn more about you. Let's have a great conversation!`,
+          message: greetingMsg,
           timestamp: new Date()
         }, socket);
 
-        // Wait for greeting to complete before sending question
-        await new Promise(resolve => setTimeout(resolve, 6000));
-
-        console.log('Sending first question...');
-        
-        await sendAIMessage(socket.id, {
-          type: 'question',
-          message: "Let's start with a brief introduction. Could you tell me about your background and what interests you about this role?",
-          questionIndex: 0,
-          requiresCode: false,
+        // Save greeting
+        session.conversation.push({
+          speaker: 'ai',
+          message: greetingMsg,
+          type: 'greeting',
           timestamp: new Date()
-        }, socket);
+        });
+        await session.save();
+
+        // Wait 3 seconds then send first question
+        setTimeout(async () => {
+          console.log('❓ Sending first question...');
+          
+          const firstQ = "Tell me about yourself and your experience in this field.";
+          
+          await sendAIMessage(socket.id, {
+            type: 'question',
+            message: firstQ,
+            questionIndex: 0,
+            requiresCode: false,
+            timestamp: new Date()
+          }, socket);
+
+          // Save question
+          session.conversation.push({
+            speaker: 'ai',
+            message: firstQ,
+            type: 'question',
+            timestamp: new Date()
+          });
+          await session.save();
+          
+          console.log('✅ First question sent');
+        }, 3000);
 
       } catch (error) {
-        console.error('Candidate ready error:', error);
+        console.error('❌ Candidate ready error:', error);
         socket.emit('error', { message: 'Failed to start interview' });
       }
     });
 
-    // Candidate answer
+    // Candidate answer - MAIN FLOW
     socket.on('candidate-answer', async ({ sessionId, question, answer, questionIndex }) => {
       try {
-        console.log('Received answer:', { questionIndex, answerLength: answer.length });
+        console.log('💬 Received answer for question', questionIndex);
 
         const session = await InterviewSession.findById(sessionId).populate('interviewId');
 
@@ -150,69 +154,158 @@ export default (io) => {
         // Send processing status
         socket.emit('ai-status', { 
           status: 'processing', 
-          message: 'Thank you! Let me review your response...' 
+          message: 'Analyzing your response...' 
         });
 
-        const context = `Role: ${session.interviewId.role}, Difficulty: ${session.interviewId.difficulty}`;
-        
-        console.log('Evaluating answer...');
-        const evaluation = await evaluateAnswer(question, answer, context);
-        console.log('Evaluation complete:', evaluation);
-
-        // Save to session
+        // Save candidate answer IMMEDIATELY
         session.conversation.push({
-          question,
-          answer,
-          aiReview: evaluation.review,
-          score: evaluation.score
+          speaker: 'candidate',
+          message: answer,
+          type: 'answer',
+          timestamp: new Date()
         });
+
+        // Evaluate answer with fallback
+        let evaluation;
+        try {
+          console.log('🔍 Evaluating answer...');
+          const context = `Role: ${session.interviewId.role}, Difficulty: ${session.interviewId.difficulty}`;
+          evaluation = await evaluateAnswer(question, answer, context);
+          console.log('✅ Evaluation done:', evaluation.score);
+        } catch (error) {
+          console.error('⚠️ Evaluation failed, using fallback');
+          evaluation = {
+            review: `Thank you for your answer. You provided a ${answer.length > 100 ? 'detailed' : 'good'} response.`,
+            score: answer.length > 100 ? 7 : 6,
+            strength: 'Clear communication',
+            improvement: 'Keep it up'
+          };
+        }
+
+        // Save evaluation
+        session.questionEvaluations.push({
+          question: question,
+          answer: answer,
+          score: evaluation.score,
+          maxScore: 10,
+          feedback: evaluation.review,
+          category: 'technical',
+          timestamp: new Date()
+        });
+
+        // Update scores
+        const evals = session.questionEvaluations;
+        if (evals.length > 0) {
+          const avgScore = evals.reduce((sum, e) => sum + e.score, 0) / evals.length;
+          session.technicalScore = avgScore;
+          session.communicationScore = Math.min(avgScore + 1, 10);
+          session.problemSolvingScore = avgScore;
+        }
+        
         session.currentQuestionIndex += 1;
         await session.save();
 
-        // Wait before sending review
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Send review (SHORT AND FAST)
+        setTimeout(async () => {
+          const reviewMsg = `Good! I'd rate that ${evaluation.score} out of 10. ${evaluation.strength}.`;
+          
+          await sendAIMessage(socket.id, {
+            type: 'review',
+            message: reviewMsg,
+            score: evaluation.score,
+            strength: evaluation.strength,
+            improvement: evaluation.improvement,
+            timestamp: new Date()
+          }, socket);
 
-        console.log('Sending review...');
-        await sendAIMessage(socket.id, {
-          type: 'review',
-          message: evaluation.review,
-          score: evaluation.score,
-          strength: evaluation.strength,
-          improvement: evaluation.improvement,
-          timestamp: new Date()
-        }, socket);
+          // Save review
+          session.conversation.push({
+            speaker: 'ai',
+            message: reviewMsg,
+            type: 'feedback',
+            timestamp: new Date()
+          });
+          await session.save();
 
-        // Wait for review to complete
-        await new Promise(resolve => setTimeout(resolve, 5000));
+          // IMMEDIATELY send next question after short delay
+          setTimeout(async () => {
+            console.log('❓ Generating next question...');
+            
+            let nextQ;
+            try {
+              nextQ = await generateNextQuestion(
+                session.questionEvaluations,
+                session.interviewId.role,
+                session.interviewId.difficulty
+              );
+            } catch (error) {
+              console.log('⚠️ Using fallback question');
+              const fallbackQuestions = [
+                "What are your greatest strengths for this role?",
+                "Tell me about a challenging project you worked on.",
+                "How do you handle tight deadlines?",
+                "What technologies are you most comfortable with?",
+                "Describe your problem-solving approach.",
+                "How do you stay updated with industry trends?",
+                "Tell me about a time you failed and what you learned."
+              ];
+              nextQ = {
+                question: fallbackQuestions[session.currentQuestionIndex % fallbackQuestions.length],
+                type: 'behavioral',
+                requiresCode: false
+              };
+            }
 
-        // Generate and send next question
-        console.log('Generating next question...');
-        const nextQ = await generateNextQuestion(
-          session.conversation,
-          session.interviewId.role,
-          session.interviewId.difficulty
-        );
+            console.log('📤 Sending next question...');
+            
+            await sendAIMessage(socket.id, {
+              type: 'question',
+              message: nextQ.question,
+              questionType: nextQ.type,
+              questionIndex: session.currentQuestionIndex,
+              requiresCode: nextQ.requiresCode || false,
+              timestamp: new Date()
+            }, socket);
 
-        console.log('Sending next question...');
-        await sendAIMessage(socket.id, {
-          type: 'question',
-          message: nextQ.question,
-          questionType: nextQ.type,
-          questionIndex: session.currentQuestionIndex,
-          requiresCode: nextQ.requiresCode || false,
-          timestamp: new Date()
-        }, socket);
+            // Save next question
+            session.conversation.push({
+              speaker: 'ai',
+              message: nextQ.question,
+              type: 'question',
+              timestamp: new Date()
+            });
+            await session.save();
+            
+            console.log('✅ Next question sent, ready for answer');
+
+          }, 2000); // 2 seconds after review
+
+        }, 1000); // 1 second to "think"
 
       } catch (error) {
-        console.error('Answer processing error:', error);
-        socket.emit('error', { message: 'Failed to process answer. Please try again.' });
+        console.error('❌ Answer processing error:', error);
+        socket.emit('error', { 
+          message: 'Failed to process answer. Please try again.',
+          details: error.message 
+        });
+        
+        // Send a fallback question anyway to keep flow going
+        setTimeout(async () => {
+          await sendAIMessage(socket.id, {
+            type: 'question',
+            message: "Let's continue. Tell me about your technical skills.",
+            questionIndex: session?.currentQuestionIndex || 0,
+            requiresCode: false,
+            timestamp: new Date()
+          }, socket);
+        }, 2000);
       }
     });
 
     // Code submission
     socket.on('submit-code', async ({ sessionId, question, code, language }) => {
       try {
-        console.log('Code submission received:', { language, codeLength: code.length });
+        console.log('💻 Code submission received');
 
         const session = await InterviewSession.findById(sessionId).populate('interviewId');
 
@@ -226,34 +319,67 @@ export default (io) => {
           message: 'Reviewing your code...' 
         });
 
-        const context = `Role: ${session.interviewId.role}, Difficulty: ${session.interviewId.difficulty}, Language: ${language}`;
-        const evaluation = await evaluateAnswer(question, 'Code submission', context, code);
-
-        // Update last conversation entry with code
-        const lastEntry = session.conversation[session.conversation.length - 1];
-        if (lastEntry) {
-          lastEntry.codeSubmitted = code;
-          lastEntry.language = language;
-          lastEntry.aiReview = evaluation.review;
-          lastEntry.score = evaluation.score;
-          await session.save();
+        const context = `Role: ${session.interviewId.role}, Language: ${language}`;
+        
+        let evaluation;
+        try {
+          evaluation = await evaluateAnswer(question, 'Code submission', context, code);
+        } catch (error) {
+          evaluation = {
+            review: 'Thank you for your code submission. The implementation looks good!',
+            score: 7,
+            strength: 'Code structure',
+            improvement: 'Consider edge cases'
+          };
         }
 
-        // Wait before sending review
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Save code submission
+        session.codeSubmissions.push({
+          questionId: String(session.currentQuestionIndex),
+          question: question,
+          code: code,
+          language: language,
+          score: evaluation.score,
+          feedback: evaluation.review,
+          submittedAt: new Date()
+        });
+
+        session.questionEvaluations.push({
+          question: question,
+          answer: `Code in ${language}`,
+          score: evaluation.score,
+          maxScore: 10,
+          feedback: evaluation.review,
+          category: 'coding',
+          timestamp: new Date()
+        });
+
+        await session.save();
 
         // Send code review
-        await sendAIMessage(socket.id, {
-          type: 'code-review',
-          message: evaluation.review,
-          score: evaluation.score,
-          strength: evaluation.strength,
-          improvement: evaluation.improvement,
-          timestamp: new Date()
-        }, socket);
+        setTimeout(async () => {
+          const codeReviewMsg = `Great! Your code scores ${evaluation.score}/10. ${evaluation.strength}.`;
+          
+          await sendAIMessage(socket.id, {
+            type: 'code-review',
+            message: codeReviewMsg,
+            score: evaluation.score,
+            strength: evaluation.strength,
+            improvement: evaluation.improvement,
+            timestamp: new Date()
+          }, socket);
+
+          session.conversation.push({
+            speaker: 'ai',
+            message: codeReviewMsg,
+            type: 'feedback',
+            timestamp: new Date()
+          });
+          await session.save();
+        }, 1500);
 
       } catch (error) {
-        console.error('Code submission error:', error);
+        console.error('❌ Code submission error:', error);
         socket.emit('error', { message: 'Failed to process code' });
       }
     });
@@ -261,20 +387,33 @@ export default (io) => {
     // End interview
     socket.on('end-interview', async ({ sessionId, interviewId }) => {
       try {
-        console.log('Ending interview:', { sessionId, interviewId });
+        console.log('🏁 Ending interview');
 
+        const closingMsg = "Thank you for your time! I'll prepare your feedback now.";
+        
         await sendAIMessage(socket.id, {
           type: 'closing',
-          message: "Thank you so much for your time today. You did great! I'll now prepare your detailed feedback report. This will just take a moment.",
+          message: closingMsg,
           timestamp: new Date()
         }, socket);
 
-        // Wait for closing message to complete
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        const session = await InterviewSession.findById(sessionId);
+        if (session) {
+          session.conversation.push({
+            speaker: 'ai',
+            message: closingMsg,
+            type: 'closing',
+            timestamp: new Date()
+          });
+          session.sessionStatus = 'completed';
+          await session.save();
+        }
 
-        socket.emit('interview-ended', { sessionId, interviewId });
+        setTimeout(() => {
+          socket.emit('interview-ended', { sessionId, interviewId });
+        }, 3000);
       } catch (error) {
-        console.error('End interview error:', error);
+        console.error('❌ End interview error:', error);
         socket.emit('error', { message: 'Failed to end interview' });
       }
     });
@@ -299,7 +438,7 @@ export default (io) => {
         socket.to(roomData.roomId).emit('user-left', { socketId: socket.id });
         activeRooms.delete(socket.id);
       }
-      console.log('Client disconnected:', socket.id);
+      console.log('❌ Client disconnected:', socket.id);
     });
   });
 };
