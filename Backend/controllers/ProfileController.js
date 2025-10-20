@@ -2,9 +2,7 @@ import User from '../models/User.model.js';
 import Profile from '../models/Profile.model.js';
 import { deleteFromCloudinary } from '../config/cloudinary.js';
 
-// @desc    Get user profile
-// @route   GET /api/v1/profile
-// @access  Private
+
 export const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).populate('profile').exec();
@@ -31,10 +29,7 @@ export const getProfile = async (req, res) => {
   }
 };
 
-// @desc    Update ONLY Personal Information (Profile Tab)
-// @route   PUT /api/v1/profile/personal
-// @access  Private
-// controllers/ProfileController.js - Add to updatePersonalInfo
+
 export const updatePersonalInfo = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -120,9 +115,7 @@ export const updatePersonalInfo = async (req, res) => {
   }
 };
 
-// @desc    Update ONLY Professional Information (Professional Tab)
-// @route   PUT /api/v1/profile/professional
-// @access  Private
+
 export const updateProfessionalInfo = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -169,9 +162,7 @@ export const updateProfessionalInfo = async (req, res) => {
   }
 };
 
-// @desc    Update ONLY Education (Education Tab)
-// @route   PUT /api/v1/profile/education
-// @access  Private
+
 export const updateEducation = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -216,9 +207,7 @@ export const updateEducation = async (req, res) => {
   }
 };
 
-// @desc    Update ONLY Certificates (Certificates Tab)
-// @route   PUT /api/v1/profile/certificates
-// @access  Private
+
 export const updateCertificates = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -263,9 +252,7 @@ export const updateCertificates = async (req, res) => {
   }
 };
 
-// @desc    Update ONLY Achievements (Achievements Tab)
-// @route   PUT /api/v1/profile/achievements
-// @access  Private
+
 export const updateAchievements = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -310,9 +297,7 @@ export const updateAchievements = async (req, res) => {
   }
 };
 
-// @desc    Upload profile picture
-// @route   POST /api/v1/profile/upload-picture
-// @access  Private
+
 export const uploadProfilePicture = async (req, res) => {
   try {
     if (!req.file) {
@@ -359,9 +344,7 @@ export const uploadProfilePicture = async (req, res) => {
   }
 };
 
-// @desc    Delete profile picture
-// @route   DELETE /api/v1/profile/picture
-// @access  Private
+
 export const deleteProfilePicture = async (req, res) => {
   try {
     const userId = req.user.id;

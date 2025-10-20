@@ -1,30 +1,34 @@
 import React, { useState, useEffect } from 'react';
 
 // Mock data structure - replace with your actual API calls
-const ResultsPage = ({ interviewId, sessionId, getInterviewSession, completeInterview, navigate }) => {
+const ResultsPage = ({ interviewId,result, navigate }) => {
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState(null);
   const [feedback, setFeedback] = useState(null);
   const [showConfetti, setShowConfetti] = useState(false);
 
   useEffect(() => {
-    const fetchResults = async () => {
-      try {
-        // Complete interview and get feedback
-        const result = await completeInterview(sessionId, interviewId);
-        setSession(result.session);
-        setFeedback(result.feedback);
+  const fetchResults = async () => {
+    try {
+      if (!result) {
         setLoading(false);
-        setShowConfetti(true);
-        setTimeout(() => setShowConfetti(false), 5000);
-      } catch (error) {
-        console.error('Error fetching results:', error);
-        setLoading(false);
+        return;
       }
-    };
 
-    fetchResults();
-  }, [sessionId, interviewId]);
+      // Set data from props
+      setSession(result.session);
+      setFeedback(result.feedback);
+      setLoading(false);
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 5000);
+    } catch (error) {
+      console.error('Error fetching results:', error);
+      setLoading(false);
+    }
+  };
+
+  fetchResults();
+}, [result]);
 
   const generatePDF = () => {
     const printContent = document.getElementById('pdf-content');
@@ -401,7 +405,7 @@ const ResultsPage = ({ interviewId, sessionId, getInterviewSession, completeInte
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes drawCircle {
           from {
             stroke-dashoffset: ${circumference};

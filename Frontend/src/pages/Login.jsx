@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../services/operations/authAPI';
@@ -8,6 +8,18 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const passwordInputRef = useRef(null);
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const passwordInput = document.getElementById('password-input');
+      if (passwordInput) {
+        passwordInput.focus();
+      }
+    }
+  };
+
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -57,6 +69,7 @@ export default function Login() {
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               placeholder="you@example.com"
+              onKeyDownCapture={handleKeyDown}
             />
           </div>
 
@@ -65,6 +78,7 @@ export default function Login() {
               Password
             </label>
             <input
+              id="password-input"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}

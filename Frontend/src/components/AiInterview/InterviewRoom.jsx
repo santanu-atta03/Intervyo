@@ -37,6 +37,13 @@ const InterviewRoom = ({
   const [codeLanguage, setCodeLanguage] = useState("javascript");
   const [codeOutput, setCodeOutput] = useState("");
 
+  const [showXPAnimation, setShowXPAnimation] = useState(false);
+const [xpData, setXPData] = useState(null);
+const [showLevelUp, setShowLevelUp] = useState(false);
+const [levelUpData, setLevelUpData] = useState(null);
+const [showBadgeAnimation, setShowBadgeAnimation] = useState(false);
+const [badgeQueue, setBadgeQueue] = useState([]);
+
   const recognitionRef = useRef(null);
   const currentAudioRef = useRef(null);
   const transcriptAccumulatorRef = useRef("");
@@ -290,7 +297,16 @@ const InterviewRoom = ({
     });
 
     newSocket.on("interview-ended", () => {
-      navigate(`/results/${interviewId}`);
+      console.log("Interview ended, navigating to results...");
+  
+  // Stop all media
+  stopListening();
+  if (stream) {
+    stream.getTracks().forEach(t => t.stop());
+  }
+  
+  // Navigate to results
+  navigate(`/results/${interviewId}`);
     });
 
     newSocket.on("error", (error) => {
@@ -303,6 +319,97 @@ const InterviewRoom = ({
       if (newSocket) newSocket.disconnect();
     };
   }, [session, interviewStarted, interviewId, navigate]);
+
+  useEffect(() => {
+  if (!socket) return;
+
+  // Listen for gamification updates
+  socket.on('gamification-update', (data) => {
+    console.log('🎮 Gamification Update:', data);
+    
+    // Show XP notification
+    if (data.xpEarned > 0) {
+      showNotification(`+${data.xpEarned} XP Earned!`, 'success');
+    }
+    
+    // Show level up notification
+    if (data.leveledUp) {
+      showLevelUpNotification(data.newLevel);
+    }
+    
+    // Show badge notifications
+    if (data.newBadges && data.newBadges.length > 0) {
+      data.newBadges.forEach(badge => {
+        showAchievementNotification(badge, badge.xp);
+      });
+    }
+    
+    // Show streak notification
+    if (data.streakIncreased) {
+      showNotification(`🔥 ${data.streak} Day Streak!`, 'success');
+    }
+  });
+
+  return () => {
+    socket.off('gamification-update');
+  };
+}, [socket]);
+
+
+useEffect(() => {
+  if (!socket) return;
+
+  socket.on('gamification-update', (data) => {
+    console.log('🎮 Gamification Update Received:', data);
+    
+    // Show XP animation
+    if (data.xpEarned > 0) {
+      setXPData(data);
+      setShowXPAnimation(true);
+      
+      setTimeout(() => {
+        setShowXPAnimation(false);
+      }, 3000);
+    }
+    
+    // Show level up animation
+    if (data.leveledUp) {
+      setTimeout(() => {
+        setLevelUpData({
+          oldLevel: data.oldLevel,
+          newLevel: data.newLevel
+        });
+        setShowLevelUp(true);
+        
+        setTimeout(() => {
+          setShowLevelUp(false);
+        }, 4000);
+      }, 3500); // Show after XP animation
+    }
+    
+    // Queue badge animations
+    if (data.newBadges && data.newBadges.length > 0) {
+      setBadgeQueue(data.newBadges);
+    }
+  });
+
+  return () => {
+    socket.off('gamification-update');
+  };
+}, [socket]);
+
+// Badge animation effect
+useEffect(() => {
+  if (badgeQueue.length === 0) return;
+
+  setShowBadgeAnimation(true);
+  const currentBadge = badgeQueue[0];
+
+  setTimeout(() => {
+    setShowBadgeAnimation(false);
+    setBadgeQueue(prev => prev.slice(1));
+  }, 4000);
+}, [badgeQueue]);
 
   // Handle AI message
   const handleAIMessage = async (data) => {
@@ -912,6 +1019,138 @@ const InterviewRoom = ({
           </div>
         )}
       </div>
+      {showXPAnimation && xpData && (
+  <div className="fixed inset-0 z-[100] pointer-events-none flex items-center justify-center">
+    <div className="animate-bounce-in">
+      <div className="relative">
+        {/* Glow effect */}
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur-2xl opacity-60 animate-pulse"></div>
+        
+        {/* Card */}
+        <div className="relative bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-8 border-2 border-purple-500/50 shadow-2xl min-w-[400px]">
+          <div className="text-center">
+            <div className="text-6xl mb-4 animate-bounce">✨</div>
+            <div className="text-purple-400 text-sm font-semibold mb-2">XP EARNED!</div>
+            <div className="text-6xl font-bold text-white mb-4">
+              +{xpData.xpEarned}
+            </div>
+            
+            {/* XP Breakdown */}
+            {xpData.xpBreakdown && (
+              <div className="space-y-2 text-sm">
+                {xpData.xpBreakdown.baseXP > 0 && (
+                  <div className="flex justify-between text-gray-300">
+                    <span>Base XP:</span>
+                    <span className="text-purple-400">+{xpData.xpBreakdown.baseXP}</span>
+                  </div>
+                )}
+                {xpData.xpBreakdown.scoreBonus > 0 && (
+                  <div className="flex justify-between text-gray-300">
+                    <span>Score Bonus:</span>
+                    <span className="text-blue-400">+{xpData.xpBreakdown.scoreBonus}</span>
+                  </div>
+                )}
+                {xpData.xpBreakdown.perfectBonus > 0 && (
+                  <div className="flex justify-between text-gray-300">
+                    <span>Perfect Score:</span>
+                    <span className="text-yellow-400">+{xpData.xpBreakdown.perfectBonus}</span>
+                  </div>
+                )}
+                {xpData.xpBreakdown.codeBonus > 0 && (
+                  <div className="flex justify-between text-gray-300">
+                    <span>Code Submission:</span>
+                    <span className="text-green-400">+{xpData.xpBreakdown.codeBonus}</span>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            <div className="mt-4 text-gray-400 text-sm">
+              Total XP: {xpData.totalXP?.toLocaleString()}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+{/* Level Up Animation */}
+{showLevelUp && levelUpData && (
+  <div className="fixed inset-0 z-[100] pointer-events-none flex items-center justify-center bg-black/70 backdrop-blur-sm">
+    <div className="animate-scale-in">
+      <div className="relative">
+        {/* Rays */}
+        <div className="absolute inset-0 animate-spin-slow">
+          <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-full blur-3xl"></div>
+        </div>
+        
+        {/* Card */}
+        <div className="relative bg-gradient-to-br from-purple-900 to-pink-900 rounded-3xl p-12 border-4 border-yellow-500/50 shadow-2xl">
+          <div className="text-center">
+            <div className="text-8xl mb-6 animate-bounce">👑</div>
+            <div className="text-yellow-400 text-2xl font-bold mb-4 animate-pulse">
+              LEVEL UP!
+            </div>
+            <div className="flex items-center justify-center gap-4 mb-6">
+              <div className="text-4xl font-bold text-white">{levelUpData.oldLevel}</div>
+              <div className="text-4xl text-yellow-400">→</div>
+              <div className="text-6xl font-bold text-yellow-400">{levelUpData.newLevel}</div>
+            </div>
+            <div className="text-purple-200 text-lg">
+              🎉 Congratulations! Keep up the great work! 🎉
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+{/* Badge Unlocked Animation */}
+{showBadgeAnimation && badgeQueue.length > 0 && (
+  <div className="fixed top-6 right-6 z-[100] animate-slide-in-right">
+    <div className="relative">
+      <div className="absolute inset-0 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-2xl blur-xl opacity-50 animate-pulse"></div>
+      
+      <div className="relative bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 border-2 border-yellow-500/50 shadow-2xl min-w-[350px]">
+        <div className="flex items-start gap-4">
+          <div className="text-5xl">{badgeQueue[0].icon}</div>
+          <div className="flex-1">
+            <div className="text-yellow-400 text-sm font-semibold flex items-center gap-2 mb-1">
+              <span>🏆</span>
+              BADGE UNLOCKED!
+            </div>
+            <div className="text-white font-bold text-lg mb-2">
+              {badgeQueue[0].name}
+            </div>
+            {badgeQueue[0].xp > 0 && (
+              <div className="text-purple-400 font-semibold text-sm">
+                +{badgeQueue[0].xp} XP Bonus!
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+  <style>{`
+    @keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out;
+ } `}
+  </style>
     </div>
   );
 };

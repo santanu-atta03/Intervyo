@@ -1,8 +1,8 @@
-import OpenAI from 'openai';
+import OpenAI from "openai";
 
 export const openai = new OpenAI({
   apiKey: process.env.GROQ_API_KEY,
-  baseURL: 'https://api.groq.com/openai/v1',
+  baseURL: "https://api.groq.com/openai/v1",
 });
 
 // System prompt
@@ -10,7 +10,7 @@ export const getInterviewSystemPrompt = (role, difficulty, resumeText) => {
   return `You are a professional technical interviewer conducting a ${difficulty} level interview for a ${role} position.
 
 RESUME CONTEXT:
-${resumeText || 'No resume provided'}
+${resumeText || "No resume provided"}
 
 YOUR ROLE:
 - Conduct a natural, conversational interview like a real human interviewer
@@ -32,10 +32,12 @@ Say: "Good start! Let me hear more about..."
 INTERVIEW FLOW:
 1. Start with a warm greeting and brief introduction
 2. Ask about the candidate's background (if not covered in resume)
-3. Ask ${difficulty === 'easy' ? '5-7' : difficulty === 'medium' ? '7-10' : '10-12'} technical questions
+3. Ask ${
+    difficulty === "easy" ? "5-7" : difficulty === "medium" ? "7-10" : "10-12"
+  } technical questions
 4. Include 2-3 behavioral questions
 5. For at least 2 questions, ask the candidate to write code
-6. Provide brief, natural feedback after each answer (2-3 sentences max)
+6. Provide brief, natural feedback after each answer (1-2 sentences max)
 7. End with closing remarks
 
 EVALUATION CRITERIA:
@@ -49,7 +51,12 @@ Keep your responses concise, natural, and conversational. Talk like a friendly p
 };
 
 // Evaluate candidate answer
-export const evaluateAnswer = async (question, answer, context, codeSubmitted = null) => {
+export const evaluateAnswer = async (
+  question,
+  answer,
+  context,
+  codeSubmitted = null
+) => {
   try {
     const response = await openai.chat.completions.create({
       model: "llama-3.3-70b-versatile",
@@ -73,7 +80,7 @@ GOOD EXAMPLES:
 BAD EXAMPLES (NEVER DO THIS):
 "I'd rate that 7 out of 10"
 "That's a 5/10 answer"
-"Score: 8/10"`
+"Score: 8/10"`,
         },
         {
           role: "user",
@@ -81,20 +88,20 @@ BAD EXAMPLES (NEVER DO THIS):
           
 Candidate's Answer: ${answer}
 
-${codeSubmitted ? `Code Submitted:\n${codeSubmitted}` : ''}
+${codeSubmitted ? `Code Submitted:\n${codeSubmitted}` : ""}
 
 Context: ${context}
 
 Provide conversational feedback as JSON with these fields:
 {
-  "review": "Natural conversational feedback (2-3 sentences, NO NUMBERS, NO RATINGS)",
+  "review": "Natural conversational feedback (1-2 sentences, NO NUMBERS, NO RATINGS)",
   "score": <internal score 0-10 for system use only, NOT shown to user>,
   "strength": "One specific thing they did well",
   "improvement": "One constructive suggestion (optional)"
 }
 
-Remember: The "review" field should sound like natural human speech with NO numerical ratings!`
-        }
+Remember: The "review" field should sound like natural human speech with NO numerical ratings!`,
+        },
       ],
       temperature: 0.8,
       max_tokens: 1000,
@@ -102,22 +109,27 @@ Remember: The "review" field should sound like natural human speech with NO nume
 
     const content = response.choices[0].message.content;
     const parsed = JSON.parse(content);
-    
+
     // Double-check: remove any numerical ratings that might have slipped through
-    parsed.review = parsed.review.replace(/\d+(\.\d+)?\/10/g, '')
-                                 .replace(/\d+(\.\d+)?\s*out\s*of\s*10/gi, '')
-                                 .replace(/score:?\s*\d+/gi, '')
-                                 .replace(/rating:?\s*\d+/gi, '');
-    
+    parsed.review = parsed.review
+      .replace(/\d+(\.\d+)?\/10/g, "")
+      .replace(/\d+(\.\d+)?\s*out\s*of\s*10/gi, "")
+      .replace(/score:?\s*\d+/gi, "")
+      .replace(/rating:?\s*\d+/gi, "");
+
     return parsed;
   } catch (error) {
-    console.error('Error evaluating answer:', error);
+    console.error("Error evaluating answer:", error);
     throw error;
   }
 };
 
 // Generate next question
-export const generateNextQuestion = async (conversationHistory, role, difficulty) => {
+export const generateNextQuestion = async (
+  conversationHistory,
+  role,
+  difficulty
+) => {
   try {
     const response = await openai.chat.completions.create({
       model: "llama-3.3-70b-versatile",
@@ -132,19 +144,23 @@ Mix different types of questions:
 - Problem-solving scenarios
 - Coding challenges (requiresCode: true) every 3-4 questions
 
-Make questions natural and conversational.`
+Make questions natural and conversational.`,
         },
         {
           role: "user",
-          content: `Previous questions and evaluations:\n${JSON.stringify(conversationHistory, null, 2)}\n\nGenerate the next interview question as a JSON object with these keys:
+          content: `Previous questions and evaluations:\n${JSON.stringify(
+            conversationHistory,
+            null,
+            2
+          )}\n\nGenerate the next interview question as a JSON object with these keys:
 {
   "question": "Your conversational question here",
   "type": "technical" or "coding" or "behavioral",
   "requiresCode": true or false
 }
 
-Return ONLY the JSON object, no extra text.`
-        }
+Return ONLY the JSON object, no extra text.`,
+        },
       ],
       temperature: 0.8,
       max_tokens: 1000,
@@ -161,35 +177,40 @@ Return ONLY the JSON object, no extra text.`
           try {
             return JSON.parse(match[0]);
           } catch (err) {
-            console.error('Failed to parse extracted JSON:', err);
+            console.error("Failed to parse extracted JSON:", err);
             throw err;
           }
         }
-        throw new Error('No valid JSON found');
+        throw new Error("No valid JSON found");
       }
     };
 
     return safeParseJSON(content);
-
   } catch (error) {
-    console.error('Error generating next question:', error);
+    console.error("Error generating next question:", error);
     throw error;
   }
 };
 
 // Generate interview questions
-export const generateInterviewQuestions = async (role, difficulty, resumeText) => {
+export const generateInterviewQuestions = async (
+  role,
+  difficulty,
+  resumeText
+) => {
   try {
     const response = await openai.chat.completions.create({
       model: "llama-3.3-70b-versatile",
       messages: [
         {
           role: "system",
-          content: getInterviewSystemPrompt(role, difficulty, resumeText)
+          content: getInterviewSystemPrompt(role, difficulty, resumeText),
         },
         {
           role: "user",
-          content: `Generate a list of ${difficulty === 'easy' ? 7 : difficulty === 'medium' ? 10 : 12} interview questions for a ${role} position. Include a mix of technical, coding, and behavioral questions. 
+          content: `Generate a list of ${
+            difficulty === "easy" ? 7 : difficulty === "medium" ? 10 : 12
+          } interview questions for a ${role} position. Include a mix of technical, coding, and behavioral questions. 
 
 Format as JSON array with structure: 
 [
@@ -200,15 +221,15 @@ Format as JSON array with structure:
   }
 ]
 
-Return ONLY the JSON array, no extra text.`
-        }
+Return ONLY the JSON array, no extra text.`,
+        },
       ],
       temperature: 0.7,
       max_tokens: 2000,
     });
 
     const content = response.choices[0].message.content;
-    
+
     // Safe parse
     try {
       return JSON.parse(content);
@@ -217,10 +238,10 @@ Return ONLY the JSON array, no extra text.`
       if (match) {
         return JSON.parse(match[0]);
       }
-      throw new Error('No valid JSON array found');
+      throw new Error("No valid JSON array found");
     }
   } catch (error) {
-    console.error('Error generating questions:', error);
+    console.error("Error generating questions:", error);
     throw error;
   }
 };
@@ -233,22 +254,28 @@ export const generateOverallFeedback = async (session) => {
       messages: [
         {
           role: "system",
-          content: "You are an expert interviewer providing final feedback. Be constructive, specific, encouraging, and conversational. NO numerical ratings in the summary text."
+          content:
+            "You are an expert interviewer providing final feedback. Be constructive, specific, encouraging, and conversational. NO numerical ratings in the summary text.",
         },
         {
           role: "user",
-          content: `Interview session data:\n${JSON.stringify(session, null, 2)}\n\nProvide comprehensive feedback as JSON:
+          content: `
+Interview session data:
+${JSON.stringify(session, null, 2)}
+
+Provide comprehensive feedback in this exact JSON format:
+
 {
-  "summary": "Overall conversational summary (NO numbers or ratings, just natural language)",
+  "summary": "Conversational summary with no numbers or ratings.",
   "strengths": ["strength 1", "strength 2", "strength 3"],
   "improvements": ["improvement 1", "improvement 2", "improvement 3"],
-  "overallScore": <0-100 for system>,
-  "communicationScore": <0-10 for system>,
-  "problemSolvingScore": <0-10 for system>
+  "overallScore": ,  // 0-10
+  "communicationScore": ,  // 0-10
+  "problemSolvingScore": ,  // 0-10
 }
 
-The scores are for internal system use only. The summary should be purely conversational.`
-        }
+Only return valid JSON. No extra commentary.`,
+        },
       ],
       temperature: 0.7,
       max_tokens: 1000,
@@ -257,7 +284,7 @@ The scores are for internal system use only. The summary should be purely conver
     const content = response.choices[0].message.content;
     return JSON.parse(content);
   } catch (error) {
-    console.error('Error generating feedback:', error);
+    console.error("Error generating feedback:", error);
     throw error;
   }
 };

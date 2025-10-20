@@ -144,7 +144,7 @@ userSchema.methods.generateAuthToken = function() {
   return jwt.sign(
     { id: this._id, email: this.email },
     process.env.JWT_SECRET,
-    { expiresIn: '30d' }
+    { expiresIn: '1d' }
   );
 };
 

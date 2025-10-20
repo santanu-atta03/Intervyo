@@ -14,6 +14,8 @@ import Results from './pages/Results';
 import Settings from './components/Dashboard/Settings';
 import toast from 'react-hot-toast'
 import InterviewWrapper from './components/Interview/InterviewWrapper';
+import Leaderboard from './pages/Leaderboard';
+import ReviewHistory from './components/Dashboard/ReviewHistory';
 
 function App() {
   return (
@@ -33,6 +35,8 @@ function App() {
             </ProtectedRoute>
           } 
         />
+        <Route path="/leaderboard" element={<Leaderboard />} />
+        <Route path="/history" element={<ReviewHistory />} />
         <Route path='settings' element={<Settings />} />
         <Route 
         path="/interview-setup" 

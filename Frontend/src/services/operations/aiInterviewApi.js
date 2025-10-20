@@ -237,17 +237,17 @@ export const getNextQuestion = async (sessionId) => {
 };
 
 // Complete interview
-export const completeInterview = async (sessionId, interviewId) => {
+export const completeInterview = async ( interviewId,token) => {
   const toastId = toast.loading('Generating feedback...');
 
   try {
     const response = await apiConnector('POST', AI_ENDPOINTS.COMPLETE_INTERVIEW, {
-      sessionId,
       interviewId,
-    });
+    } ,{Authorization: `Bearer ${token}`} );
 
     if (response.data.success) {
       toast.success('Feedback generated!', { id: toastId });
+      console.log("response  : ",response)
       return response.data.data;
     }
   } catch (error) {

@@ -16,6 +16,7 @@
     "copy-to-clipboard": "^3.3.3",
     "elevenlabs-js": "^1.2.6",
     "framer-motion": "^12.23.22",
+    "gsap": "^3.13.0",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.545.0",
     "react": "^19.1.1",

@@ -449,12 +449,18 @@
 
 import InterviewSession from '../models/InterviewSession.js';
 import Interview from '../models/Interview.js';
+import User from '../models/User.model.js'
 import {
   evaluateAnswer,
   generateNextQuestion,
 } from '../config/openai.js';
 import { textToSpeech } from '../config/elevenlabs.js';
-
+import { 
+  calculateXP, 
+  checkAndAwardBadges, 
+  updateUserStreak 
+} from '../services/gamification.service.js';
+import { updateUserStreakAndStats } from '../controllers/aiController.js';
 const activeRooms = new Map();
 
 export default (io) => {
@@ -807,11 +813,136 @@ export default (io) => {
     });
 
     // End interview
+    // socket.on('end-interview', async ({ sessionId, interviewId }) => {
+    //   try {
+    //     console.log('🏁 Ending interview');
+
+    //     const closingMsg = "Thank you so much for your time today! You've shared some great insights. I'll now compile your feedback report.";
+        
+    //     await sendAIMessage(socket.id, {
+    //       type: 'closing',
+    //       message: closingMsg,
+    //       timestamp: new Date()
+    //     }, socket);
+
+    //     const session = await InterviewSession.findById(sessionId);
+    //     if (session) {
+    //       session.conversation.push({
+    //         speaker: 'ai',
+    //         message: closingMsg,
+    //         type: 'closing',
+    //         timestamp: new Date()
+    //       });
+    //       session.sessionStatus = 'completed';
+    //       await session.save();
+    //     }
+
+    //     setTimeout(() => {
+    //       socket.emit('interview-ended', { sessionId, interviewId });
+    //     }, 3000);
+    //   } catch (error) {
+    //     console.error('❌ End interview error:', error);
+    //     socket.emit('error', { message: 'Failed to end interview' });
+    //   }
+    // });
+
     socket.on('end-interview', async ({ sessionId, interviewId }) => {
       try {
-        console.log('🏁 Ending interview');
+        console.log('🏁 Ending interview with gamification');
 
-        const closingMsg = "Thank you so much for your time today! You've shared some great insights. I'll now compile your feedback report.";
+        const session = await InterviewSession.findById(sessionId);
+        const interview = await Interview.findById(interviewId);
+
+        if (!session || !interview) {
+          socket.emit('error', { message: 'Session or interview not found' });
+          return;
+        }
+
+        // 1. Update interview status
+        interview.status = 'completed';
+        interview.completedAt = new Date();
+        
+        // Calculate overall score from evaluations
+        const evaluations = session.questionEvaluations;
+        if (evaluations.length > 0) {
+          const totalScore = evaluations.reduce((sum, e) => sum + e.score, 0);
+          const avgScore = (totalScore / evaluations.length) * 10; // Convert to 0-100
+          interview.overallScore = Math.round(avgScore);
+        } else {
+          interview.overallScore = 0;
+        }
+
+        await interview.save();
+
+        // 2. Update session status
+        session.sessionStatus = 'completed';
+        await session.save();
+
+        // 3. CALCULATE AND AWARD XP
+        const xpBreakdown = calculateXP(interview, session);
+        console.log('💎 XP Breakdown:', xpBreakdown);
+
+        // 4. UPDATE USER WITH XP
+        const user = await User.findById(interview.userId);
+        if (!user) {
+          console.error('User not found');
+          socket.emit('interview-ended', { sessionId, interviewId });
+          return;
+        }
+
+        const oldLevel = user.stats.level;
+        const oldXP = user.stats.xpPoints;
+
+        // Add XP
+        user.stats.xpPoints += xpBreakdown.totalXP;
+        user.stats.totalInterviews = (user.stats.totalInterviews || 0) + 1;
+
+        // Calculate new level (500 XP per level)
+        const newLevel = Math.floor(user.stats.xpPoints / 500) + 1;
+        const leveledUp = newLevel > oldLevel;
+        
+        if (leveledUp) {
+          user.stats.level = newLevel;
+          console.log(`🎉 LEVEL UP! ${oldLevel} → ${newLevel}`);
+        }
+
+        // 5. UPDATE STREAK
+        const streakData = await updateUserStreakAndStats(user);
+        console.log('🔥 Streak updated:', streakData);
+
+        await user.save();
+
+        // 6. CHECK AND AWARD BADGES
+        const { newBadges, totalXPAwarded } = await checkAndAwardBadges(interview.userId);
+        console.log('🏆 New badges awarded:', newBadges.length);
+
+        if (totalXPAwarded > 0) {
+          // Refresh user to get updated stats after badge XP
+          const updatedUser = await User.findById(interview.userId);
+          const finalLevel = Math.floor(updatedUser.stats.xpPoints / 500) + 1;
+          
+          if (finalLevel > newLevel) {
+            console.log(`🎉 BONUS LEVEL UP from badges! ${newLevel} → ${finalLevel}`);
+          }
+        }
+
+        // 7. EMIT GAMIFICATION UPDATES TO CLIENT
+        socket.emit('gamification-update', {
+          xpEarned: xpBreakdown.totalXP,
+          xpBreakdown: xpBreakdown,
+          totalXP: user.stats.xpPoints,
+          level: user.stats.level,
+          leveledUp: leveledUp,
+          oldLevel: oldLevel,
+          newLevel: user.stats.level,
+          streak: user.stats.streak,
+          streakIncreased: streakData.streakIncreased,
+          newBadges: newBadges,
+          badgeXP: totalXPAwarded
+        });
+
+        // 8. Send closing message
+        const closingMsg = `Amazing work! Let me prepare your detailed feedback.`;
         
         await sendAIMessage(socket.id, {
           type: 'closing',
@@ -819,21 +950,28 @@ export default (io) => {
           timestamp: new Date()
         }, socket);
 
-        const session = await InterviewSession.findById(sessionId);
-        if (session) {
-          session.conversation.push({
-            speaker: 'ai',
-            message: closingMsg,
-            type: 'closing',
-            timestamp: new Date()
-          });
-          session.sessionStatus = 'completed';
-          await session.save();
-        }
+        session.conversation.push({
+          speaker: 'ai',
+          message: closingMsg,
+          type: 'closing',
+          timestamp: new Date()
+        });
+        await session.save();
 
+        // 9. Redirect to results after delay
         setTimeout(() => {
-          socket.emit('interview-ended', { sessionId, interviewId });
-        }, 3000);
+          socket.emit('interview-ended', { 
+            sessionId, 
+            interviewId,
+            gamification: {
+              xpEarned: xpBreakdown.totalXP,
+              leveledUp,
+              newLevel: user.stats.level,
+              badges: newBadges
+            }
+          });
+        }, 4000);
+
       } catch (error) {
         console.error('❌ End interview error:', error);
         socket.emit('error', { message: 'Failed to end interview' });

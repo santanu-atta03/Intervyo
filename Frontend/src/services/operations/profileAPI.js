@@ -1,8 +1,9 @@
 // services/operations/profileAPI.js
 import toast from "react-hot-toast";
-import { apiConnector } from "../apiConnector";
+
 import { profileEndpoints } from "../apis";
 import { setUser, setLoading } from "../../slices/profileSlice";
+import { apiConnector } from "../apiconnector";
 
 const {
   GET_PROFILE_API,

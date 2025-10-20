@@ -340,7 +340,7 @@
 // export default Results;
 
 // File: src/pages/Results.jsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { completeInterview } from '../services/operations/aiInterviewApi';
@@ -350,22 +350,64 @@ const Results = () => {
   const { interviewId } = useParams();
   const navigate = useNavigate();
   const { token } = useSelector((state) => state.auth);
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const handleCompleteInterview = async (sessionId, interviewId) => {
-    try {
-      const response = await completeInterview(sessionId, interviewId, token);
-      return response;
-    } catch (error) {
-      console.error('Error completing interview:', error);
-      throw error;
+  useEffect(() => {
+    const handleCompleteInterview = async () => {
+      try {
+        setLoading(true);
+        const response = await completeInterview(interviewId, token);
+        console.log('Complete interview response:', response);
+        setResult(response);
+      } catch (error) {
+        console.error('Error completing interview:', error);
+        setError(error.message || 'Failed to load results');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (interviewId && token) {
+      handleCompleteInterview();
     }
-  };
+  }, [interviewId, token]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-20 h-20 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+          <h2 className="text-2xl text-white font-bold mb-2">Loading Results...</h2>
+          <p className="text-gray-400">Please wait while we fetch your interview results</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4">❌</div>
+          <h2 className="text-2xl text-white font-bold mb-2">Error Loading Results</h2>
+          <p className="text-gray-400 mb-6">{error}</p>
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold"
+          >
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <ResultsPage
       interviewId={interviewId}
-      sessionId={interviewId} // Or get from route if different
-      completeInterview={handleCompleteInterview}
+      result={result}
       navigate={navigate}
     />
   );

@@ -53,6 +53,57 @@ const questionEvaluationSchema = new mongoose.Schema({
   }
 });
 
+// const interviewSessionSchema = new mongoose.Schema({
+//   interviewId: {
+//     type: mongoose.Schema.Types.ObjectId,
+//     ref: 'Interview',
+//     required: true
+//   },
+//   userId: {
+//     type: mongoose.Schema.Types.ObjectId,
+//     ref: 'User',
+//     required: true
+//   },
+//   conversation: [conversationSchema],
+//   codeSubmissions: [codeSubmissionSchema],
+//   questionEvaluations: [questionEvaluationSchema],
+//   currentQuestionIndex: {
+//     type: Number,
+//     default: 0
+//   },
+//   sessionStatus: {
+//     type: String,
+//     enum: ['active', 'paused', 'completed'],
+//     default: 'active'
+//   },
+//   technicalScore: {
+//     type: Number,
+//     default: 0
+//   },
+//   communicationScore: {
+//     type: Number,
+//     default: 0
+//   },
+//   problemSolvingScore: {
+//     type: Number,
+//     default: 0
+//   },
+//   overallPerformance: {
+//     type: String,
+//     enum: ['excellent', 'good', 'average', 'needs-improvement'],
+//   },
+//   aiAnalysis: {
+//     keyStrengths: [String],
+//     areasForImprovement: [String],
+//     detailedFeedback: String,
+//     recommendedNextSteps: [String]
+//   }
+// }, {
+//   timestamps: true
+// });
+
+
+
 const interviewSessionSchema = new mongoose.Schema({
   interviewId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -88,9 +139,27 @@ const interviewSessionSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  overallScore: {
+    type: Number,
+    default: 0
+  },
   overallPerformance: {
     type: String,
     enum: ['excellent', 'good', 'average', 'needs-improvement'],
+  },
+  feedback: {
+    summary: {
+      type: String,
+      default: ''
+    },
+    strengths: {
+      type: [String],
+      default: []
+    },
+    improvements: {
+      type: [String],
+      default: []
+    }
   },
   aiAnalysis: {
     keyStrengths: [String],
@@ -99,7 +168,8 @@ const interviewSessionSchema = new mongoose.Schema({
     recommendedNextSteps: [String]
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  versionKey: false  // Disable versioning to avoid conflicts
 });
 
 export default mongoose.model('InterviewSession', interviewSessionSchema);

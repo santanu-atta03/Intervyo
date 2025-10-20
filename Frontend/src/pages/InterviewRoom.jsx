@@ -79,6 +79,22 @@ export default function InterviewRoom() {
     { value: 'cpp', label: 'C++', icon: '⚡' },
   ];
 
+  // Add notification function
+const showNotification = (message, type = 'info') => {
+  // Create a simple toast notification
+  const notification = document.createElement('div');
+  notification.className = `fixed top-6 right-6 z-[100] px-6 py-4 rounded-lg shadow-2xl animate-slide-in-right ${
+    type === 'success' ? 'bg-green-500' : 
+    type === 'error' ? 'bg-red-500' : 
+    'bg-blue-500'
+  } text-white font-semibold`;
+  notification.textContent = message;
+  document.body.appendChild(notification);
+  
+  setTimeout(() => {
+    notification.remove();
+  }, 3000);
+};
   // Initialize interview on mount
   useEffect(() => {
     if (!token) {

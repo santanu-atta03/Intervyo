@@ -8,7 +8,9 @@ import passport from './config/Passport.js';
 import authRoutes from './routes/User.route.js';
 // import interviewRoutes from './routes/interview.route.js'
 import interviewRoutes from './routes/InterviewRoutes.js';
-import aiRoutes from './routes/aiRoutes.js'
+import aiRoutes from './routes/aiRoutes.js';
+import dashboardRoutes from './routes/Dashboard.route.js';
+import leaderboardRoutes from './routes/Leaderboard.routes.js';
 import interviewSocket from './sockets/InterviewSocket.js';
 import profileRoutes from './routes/Profile.route.js'
 import { dbConnect } from './config/db.js';
@@ -58,6 +60,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/interviews', interviewRoutes);
 app.use('/api/ai',aiRoutes)
 app.use('/api/profile', profileRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/leaderboard', leaderboardRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
