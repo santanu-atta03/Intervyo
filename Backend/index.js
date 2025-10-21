@@ -8,6 +8,7 @@ import passport from './config/Passport.js';
 import authRoutes from './routes/User.route.js';
 // import interviewRoutes from './routes/interview.route.js'
 import interviewRoutes from './routes/InterviewRoutes.js';
+import learningHubRoutes from './routes/learningHub.routes.js';
 import aiRoutes from './routes/aiRoutes.js';
 import dashboardRoutes from './routes/Dashboard.route.js';
 import leaderboardRoutes from './routes/Leaderboard.routes.js';
@@ -62,6 +63,7 @@ app.use('/api/ai',aiRoutes)
 app.use('/api/profile', profileRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
+app.use('/api/learning-hub', learningHubRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

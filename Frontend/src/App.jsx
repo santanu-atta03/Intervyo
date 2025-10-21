@@ -16,6 +16,7 @@ import toast from 'react-hot-toast'
 import InterviewWrapper from './components/Interview/InterviewWrapper';
 import Leaderboard from './pages/Leaderboard';
 import ReviewHistory from './components/Dashboard/ReviewHistory';
+import LearningHub from './components/Dashboard/LearningHub';
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
         />
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/history" element={<ReviewHistory />} />
+        <Route path="/resources" element={<LearningHub />} />
         <Route path='settings' element={<Settings />} />
         <Route 
         path="/interview-setup" 

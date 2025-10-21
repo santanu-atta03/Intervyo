@@ -4,18 +4,16 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronRight, Trophy, Target, Zap, TrendingUp, Award, Star, Calendar, Clock, BarChart3, BookOpen, Code, MessageSquare, Brain, Menu, X, Bell, Settings, LogOut, Sparkles, Flame, Crown } from 'lucide-react';
 import { logout } from '../services/operations/authAPI';
 import { getAllInterviews } from '../services/operations/aiInterviewApi';
-import { getUserProfile } from '../services/operations/profileAPI'; // IMPORTANT: Add this import
-import { AIBrainLoader, LightningLoader, TargetFocusLoader, XPCrystalLoader } from '../components/Loader/Loader';
-import ContributionGraph from '../components/Dashboard/ContributionGraph'; // Add this import
+import { getUserProfile } from '../services/operations/profileAPI';
+import { LightningLoader } from '../components/Loader/Loader';
+import ContributionGraph from '../components/Dashboard/ContributionGraph';
 import TextType from '../components/shared/TextType';
-
 
 export default function Dashboard() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.profile);
-  const {token} = useSelector((state) => state.auth)
-  // console.log("user : ",user);
+  const { token } = useSelector((state) => state.auth);
   
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -29,83 +27,89 @@ export default function Dashboard() {
     learningProgress: []
   });
 
-  // FIX: Refetch user profile on mount to get latest stats
+  // FIXED: Single useEffect to fetch all data at once
   useEffect(() => {
-    const refreshUserProfile = async () => {
-      if (token) {
-        await dispatch(getUserProfile(token));
+    const fetchAllDashboardData = async () => {
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        
+        // Fetch both profile and interviews in parallel
+        const [profileResult, interviewsResult] = await Promise.all([
+          dispatch(getUserProfile(token)),
+          getAllInterviews(setLoading, token)
+        ]);
+
+        const interviewsArray = Array.isArray(interviewsResult) ? interviewsResult : [];
+
+        setDashboardData({
+          recentInterviews: interviewsArray,
+          stats: user?.stats || null,
+          learningProgress: calculateLearningProgress(interviewsArray)
+        });
+        
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+        setDashboardData({
+          recentInterviews: [],
+          stats: user?.stats || null,
+          learningProgress: []
+        });
+      } finally {
+        setLoading(false);
       }
     };
-    refreshUserProfile();
-  }, [token, dispatch]); // This will refresh user data when component mounts
 
-  // Fetch dashboard data on mount
+    fetchAllDashboardData();
+  }, [token]); // Only depend on token, not user
+
+  // Update dashboard data when user stats change
   useEffect(() => {
-    const fetchDashboardData = async () => {
-    try {
-      setLoading(true);
-      
-      const interviews = await getAllInterviews(setLoading, token);
-      console.log("Interviews fetched:", interviews);
-
-      const interviewsArray = Array.isArray(interviews) ? interviews : [];
-
-      setDashboardData({
-        recentInterviews: interviewsArray,
-        stats: user?.stats || null,
-        learningProgress: calculateLearningProgress(interviewsArray)
-      });
-      
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-      setDashboardData({
-        recentInterviews: [],
-        stats: user?.stats || null,
-        learningProgress: []
-      });
-      setLoading(false);
+    if (user?.stats && dashboardData.recentInterviews.length > 0) {
+      setDashboardData(prev => ({
+        ...prev,
+        stats: user.stats
+      }));
     }
-  };
-
-  if (user) {
-    fetchDashboardData();
-  }
-}, [user, token]);
+  }, [user?.stats]);
 
   // Calculate learning progress based on recent interviews
   const calculateLearningProgress = (interviews) => {
-  if (!interviews || interviews.length === 0) {
-    return [];
-  }
-
-  const skillMap = {};
-  
-  interviews.forEach(interview => {
-    const domain = interview.role || 'General';
-    if (!skillMap[domain]) {
-      skillMap[domain] = {
-        total: 0,
-        count: 0,
-        scores: []
-      };
+    if (!interviews || interviews.length === 0) {
+      return [];
     }
-    skillMap[domain].total += interview.overallScore || 0;
-    skillMap[domain].count += 1;
-    skillMap[domain].scores.push(interview.overallScore || 0);
-  });
 
-  return Object.entries(skillMap).map(([domain, data]) => {
-    const avgScore = data.count > 0 ? Math.round(data.total / data.count) : 0;
-    return {
-      topic: domain,
-      progress: avgScore,
-      icon: getIconForDomain(domain),
-      timeSpent: `${data.count * 30}min`,
-      nextMilestone: `${(data.count + 1) * 30}min`
-    };
-  }).slice(0, 4);
-};
+    const skillMap = {};
+    
+    interviews.forEach(interview => {
+      const domain = interview.role || 'General';
+      if (!skillMap[domain]) {
+        skillMap[domain] = {
+          total: 0,
+          count: 0,
+          scores: []
+        };
+      }
+      skillMap[domain].total += interview.overallScore || 0;
+      skillMap[domain].count += 1;
+      skillMap[domain].scores.push(interview.overallScore || 0);
+    });
+
+    return Object.entries(skillMap).map(([domain, data]) => {
+      const avgScore = data.count > 0 ? Math.round(data.total / data.count) : 0;
+      return {
+        topic: domain,
+        progress: avgScore,
+        icon: getIconForDomain(domain),
+        timeSpent: `${data.count * 30}min`,
+        nextMilestone: `${(data.count + 1) * 30}min`
+      };
+    }).slice(0, 4);
+  };
 
   const getIconForDomain = (domain) => {
     const icons = {
@@ -134,76 +138,76 @@ export default function Dashboard() {
 
   // Calculate average score from recent interviews
   const calculateAverageScore = () => {
-  if (!dashboardData.recentInterviews || dashboardData.recentInterviews.length === 0) {
-    return 0;
-  }
-  
-  const validScores = dashboardData.recentInterviews.filter(i => 
-    i.overallScore !== undefined && i.overallScore !== null
-  );
-  
-  if (validScores.length === 0) return 0;
-  
-  const sum = validScores.reduce((acc, interview) => acc + interview.overallScore, 0);
-  return Math.round((sum / validScores.length) * 10) / 10;
-};
+    if (!dashboardData.recentInterviews || dashboardData.recentInterviews.length === 0) {
+      return 0;
+    }
+    
+    const validScores = dashboardData.recentInterviews.filter(i => 
+      i.overallScore !== undefined && i.overallScore !== null
+    );
+    
+    if (validScores.length === 0) return 0;
+    
+    const sum = validScores.reduce((acc, interview) => acc + interview.overallScore, 0);
+    return Math.round((sum / validScores.length) * 10) / 10;
+  };
 
   // Calculate trend
   const calculateTrend = () => {
-  if (!dashboardData.recentInterviews || dashboardData.recentInterviews.length < 2) {
-    return '+0%';
-  }
-  
-  const validInterviews = dashboardData.recentInterviews.filter(i => 
-    i.overallScore !== undefined && i.overallScore !== null
-  );
-  
-  if (validInterviews.length < 2) return '+0%';
-  
-  const recent = validInterviews.slice(0, Math.min(3, validInterviews.length));
-  const older = validInterviews.slice(3, Math.min(6, validInterviews.length));
-  
-  if (older.length === 0) return '+0%';
-  
-  const recentAvg = recent.reduce((acc, i) => acc + i.overallScore, 0) / recent.length;
-  const olderAvg = older.reduce((acc, i) => acc + i.overallScore, 0) / older.length;
-  
-  if (olderAvg === 0) return '+0%';
-  
-  const trend = ((recentAvg - olderAvg) / olderAvg) * 100;
-  return trend > 0 ? `+${trend.toFixed(1)}%` : `${trend.toFixed(1)}%`;
-};
+    if (!dashboardData.recentInterviews || dashboardData.recentInterviews.length < 2) {
+      return '+0%';
+    }
+    
+    const validInterviews = dashboardData.recentInterviews.filter(i => 
+      i.overallScore !== undefined && i.overallScore !== null
+    );
+    
+    if (validInterviews.length < 2) return '+0%';
+    
+    const recent = validInterviews.slice(0, Math.min(3, validInterviews.length));
+    const older = validInterviews.slice(3, Math.min(6, validInterviews.length));
+    
+    if (older.length === 0) return '+0%';
+    
+    const recentAvg = recent.reduce((acc, i) => acc + i.overallScore, 0) / recent.length;
+    const olderAvg = older.reduce((acc, i) => acc + i.overallScore, 0) / older.length;
+    
+    if (olderAvg === 0) return '+0%';
+    
+    const trend = ((recentAvg - olderAvg) / olderAvg) * 100;
+    return trend > 0 ? `+${trend.toFixed(1)}%` : `${trend.toFixed(1)}%`;
+  };
 
   const stats = [
-  { 
-    label: 'Total Interviews', 
-    value: user?.stats?.totalInterviews || dashboardData.recentInterviews.length || 0, 
-    icon: BarChart3, 
-    color: 'from-blue-500 to-cyan-500', 
-    trend: dashboardData.recentInterviews.length > 0 ? `+${dashboardData.recentInterviews.length}` : '0'
-  },
-  { 
-    label: 'Average Score', 
-    value: calculateAverageScore() > 0 ? `${calculateAverageScore()}%` : '0%', 
-    icon: TrendingUp, 
-    color: 'from-emerald-500 to-green-500', 
-    trend: calculateTrend() 
-  },
-  { 
-    label: 'Current Streak', 
-    value: `${user?.stats?.streak || 0} days`, 
-    icon: Flame, 
-    color: 'from-orange-500 to-red-500', 
-    trend: user?.stats?.streak > 0 ? 'Active' : 'Start now' 
-  },
-  { 
-    label: 'XP Points', 
-    value: (user?.stats?.xpPoints || 0).toLocaleString(), 
-    icon: Sparkles, 
-    color: 'from-purple-500 to-pink-500', 
-    trend: '+340' 
-  }
-];
+    { 
+      label: 'Total Interviews', 
+      value: user?.stats?.totalInterviews || dashboardData.recentInterviews.length || 0, 
+      icon: BarChart3, 
+      color: 'from-blue-500 to-cyan-500', 
+      trend: dashboardData.recentInterviews.length > 0 ? `+${dashboardData.recentInterviews.length}` : '0'
+    },
+    { 
+      label: 'Average Score', 
+      value: calculateAverageScore() > 0 ? `${calculateAverageScore()}%` : '0%', 
+      icon: TrendingUp, 
+      color: 'from-emerald-500 to-green-500', 
+      trend: calculateTrend() 
+    },
+    { 
+      label: 'Current Streak', 
+      value: `${user?.stats?.streak || 0} days`, 
+      icon: Flame, 
+      color: 'from-orange-500 to-red-500', 
+      trend: user?.stats?.streak > 0 ? 'Active' : 'Start now' 
+    },
+    { 
+      label: 'XP Points', 
+      value: (user?.stats?.xpPoints || 0).toLocaleString(), 
+      icon: Sparkles, 
+      color: 'from-purple-500 to-pink-500', 
+      trend: '+340' 
+    }
+  ];
 
   const quickActions = [
     { title: 'Start Interview', icon: Target, color: 'from-blue-500 to-cyan-500', description: 'Begin practice session', action: () => navigate('/interview-setup') },
@@ -241,33 +245,12 @@ export default function Dashboard() {
   };
 
   if (loading) {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
-      <LightningLoader />
-      
-      <style>{`
-        @keyframes spin-reverse {
-          from { transform: rotate(360deg); }
-          to { transform: rotate(0deg); }
-        }
-        @keyframes orbit {
-          0% { transform: translate(-50%, -50%) rotate(0deg) translateX(45px) rotate(0deg); }
-          100% { transform: translate(-50%, -50%) rotate(360deg) translateX(45px) rotate(-360deg); }
-        }
-        @keyframes pulse-scale {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.1); }
-        }
-        .animate-spin-reverse {
-          animation: spin-reverse 1.5s linear infinite;
-        }
-        .animate-pulse-scale {
-          animation: pulse-scale 2s ease-in-out infinite;
-        }
-      `}</style>
-    </div>
-  );
-}
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
+        <LightningLoader />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
@@ -318,13 +301,6 @@ export default function Dashboard() {
                   </div>
                 )}
               </div>
-
-              {/* <button 
-                onClick={() => navigate('/settings')}
-                className="p-3 hover:bg-gray-800/50 rounded-xl transition group"
-              >
-                <Settings className="w-5 h-5 text-gray-400 group-hover:text-white transition" />
-              </button> */}
               
               <div className="relative">
                 <button 
@@ -393,18 +369,14 @@ export default function Dashboard() {
         {/* Welcome Header */}
         <div className="mb-8 animate-fadeIn">
           <h1 className="text-4xl lg:text-5xl font-bold text-white mb-3 flex items-center gap-3">
-            {/* Welcome back, {user?.name?.split(' ')[0] || 'User'} */}
-            
-
-<TextType
-  text={[`Welcome back, ${user?.name?.split(' ')[0] || 'User'}`, "Let's Start interview", "Good Luck!"]}
-  typingSpeed={175}
-  pauseDuration={3500}
-  showCursor={true}
-  cursorCharacter="|"
-/>
-            <span className={`inline-block ${isHovering ? 'animate-wave' : ''}`} onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}>👋</span>
+            <TextType
+              text={[`Welcome back, ${user?.name?.split(' ')[0] || 'User'}`, "Let's Start interview", "Good Luck!"]}
+              typingSpeed={175}
+              pauseDuration={3500}
+              showCursor={true}
+              cursorCharacter="|"
+            />
+            <span className={`inline-block ${isHovering ? 'animate-wave' : ''}`} onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)}>👋</span>
           </h1>
           <p className="text-gray-400 text-lg">Ready to level up your interview skills?</p>
         </div>
@@ -439,9 +411,7 @@ export default function Dashboard() {
                   <div 
                     className="absolute inset-y-0 left-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-500 shadow-lg shadow-purple-500/50"
                     style={{ width: `${levelProgress}%` }}
-                  >
-                    {/* <div className="absolute inset-0 bg-white/20 animate-shimmer"></div> */}
-                  </div>
+                  ></div>
                 </div>
                 <div className="text-xs text-gray-500 mt-2">
                   {xpToNextLevel} XP needed
@@ -610,7 +580,7 @@ export default function Dashboard() {
                 )}
               </div>
             </div>
-          {/* <ContributionGraph interviews={dashboardData.recentInterviews}/> */}
+            <ContributionGraph interviews={dashboardData.recentInterviews}/>
           </div>
 
           {/* Sidebar */}
@@ -697,6 +667,7 @@ export default function Dashboard() {
                 )}
               </div>
             </div>
+            
             {/* Subscription Status */}
             <div className="relative group overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl blur-xl opacity-50 group-hover:opacity-75 transition"></div>
