@@ -7,13 +7,17 @@ export default function AuthCallback() {
   const location = useLocation();
 
   useEffect(() => {
-    // Extract token from URL
-    const params = new URLSearchParams(location.search);
-    const token = params.get('token');
-    console.log("token : ",token)
+    // Extract token from cookie
+    const cookies = document.cookie.split(';');
+    const tokenCookie = cookies.find(cookie => cookie.trim().startsWith('auth_token='));
+    const token = tokenCookie ? tokenCookie.split('=')[1] : null;
+    
     if (token) {
       // Save token
       localStorage.setItem('token', token);
+      
+      // Clear the cookie
+      document.cookie = 'auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
       
       // Fetch user data
       fetch('https://intervyo.onrender.com/api/auth/me', {
@@ -36,7 +40,7 @@ export default function AuthCallback() {
     } else {
       navigate('/login?error=no_token');
     }
-  }, [location, navigate]);
+  }, [navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center">

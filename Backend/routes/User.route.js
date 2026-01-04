@@ -28,8 +28,16 @@ router.get('/google/callback',
     // Generate JWT token
     const token = req.user.generateAuthToken();
     
-    // Redirect to frontend with token
-    res.redirect(`${process.env.CLIENT_URL}/auth/callback?token=${token}`);
+    // Set HttpOnly cookie with token
+    res.cookie('auth_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // Secure in production
+      sameSite: 'strict',
+      maxAge: 5 * 60 * 1000 // 5 minutes
+    });
+    
+    // Redirect to frontend without token in URL
+    res.redirect(`${process.env.CLIENT_URL}/auth/callback`);
   }
 );
 
@@ -48,7 +56,13 @@ router.get('/github/callback',
   }),
   (req, res) => {
     const token = req.user.generateAuthToken();
-    res.redirect(`${process.env.CLIENT_URL}/auth/callback?token=${token}`);
+    res.cookie('auth_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // Secure in production
+      sameSite: 'strict',
+      maxAge: 5 * 60 * 1000 // 5 minutes
+    });
+    res.redirect(`${process.env.CLIENT_URL}/auth/callback`);
   }
 );
 
