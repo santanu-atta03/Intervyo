@@ -28,11 +28,11 @@ router.get('/google/callback',
     // Generate JWT token
     const token = req.user.generateAuthToken();
     
-    // Set HttpOnly cookie with token
+    // Set cookie with token (not HttpOnly for JS access, but secure attributes)
     res.cookie('auth_token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // Secure in production
-      sameSite: 'strict',
+      httpOnly: false, // Allow JS access for reading
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax', // Allow OAuth redirects
       maxAge: 5 * 60 * 1000 // 5 minutes
     });
     
@@ -57,9 +57,9 @@ router.get('/github/callback',
   (req, res) => {
     const token = req.user.generateAuthToken();
     res.cookie('auth_token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // Secure in production
-      sameSite: 'strict',
+      httpOnly: false, // Allow JS access for reading
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax', // Allow OAuth redirects
       maxAge: 5 * 60 * 1000 // 5 minutes
     });
     res.redirect(`${process.env.CLIENT_URL}/auth/callback`);

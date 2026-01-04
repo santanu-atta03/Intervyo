@@ -16,8 +16,8 @@ export default function AuthCallback() {
       // Save token
       localStorage.setItem('token', token);
       
-      // Clear the cookie
-      document.cookie = 'auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      // Clear the cookie (match the attributes used when setting)
+      document.cookie = 'auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; sameSite=lax' + (window.location.protocol === 'https:' ? '; secure' : '');
       
       // Fetch user data
       fetch('https://intervyo.onrender.com/api/auth/me', {
