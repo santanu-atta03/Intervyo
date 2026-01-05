@@ -22,8 +22,8 @@ passport.use(
 
         // Check if user signed up with social auth
         if (user.authProvider !== 'local') {
-          return done(null, false, { 
-            message: `Please login with ${user.authProvider}` 
+          return done(null, false, {
+            message: `Please login with ${user.authProvider}`
           });
         }
 
@@ -54,7 +54,7 @@ passport.use(
     async (accessToken, refreshToken, profile, done) => {
       try {
         // Check if user already exists
-        let user = await User.findOne({ 
+        let user = await User.findOne({
           $or: [
             { googleId: profile.id },
             { email: profile.emails[0].value }
@@ -102,7 +102,7 @@ passport.use(
     async (accessToken, refreshToken, profile, done) => {
       try {
         const email = profile.emails?.[0]?.value;
-        
+
         if (!email) {
           return done(new Error('No email associated with GitHub account'), null);
         }

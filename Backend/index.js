@@ -63,7 +63,7 @@ dbConnect();
 
 app.use('/api/auth', authRoutes);
 app.use('/api/interviews', interviewRoutes);
-app.use('/api/ai',aiRoutes)
+app.use('/api/ai', aiRoutes)
 app.use('/api/profile', profileRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
@@ -94,6 +94,10 @@ app.use(errorHandler);
 // START SERVER
 // ========================================
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  server.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+  });
+}
+
+export { app, server };
