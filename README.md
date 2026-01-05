@@ -89,7 +89,7 @@ npm run dev
 Frontend Setup
 cd frontend
 npm install
-npm start
+npm run dev
 
 
 Create a .env file in the backend directory:
