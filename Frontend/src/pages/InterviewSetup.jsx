@@ -987,7 +987,7 @@ export default function InterviewSetup() {
                 <div className="absolute inset-0 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
                 <div className="relative flex items-center gap-3">
                   <span className="text-3xl">🚀</span>
-                  Launch Interview
+                  Launch Interview Now
                   <span className="text-2xl group-hover:translate-x-2 transition-transform">→</span>
                 </div>
               </button>

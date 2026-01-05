@@ -996,7 +996,7 @@ export default function InterviewRoom() {
               </div>
               <div className="flex items-center gap-3 text-left bg-purple-500/10 border border-purple-500/30 rounded-lg p-4">
                 <CheckCircle className="w-5 h-5 text-purple-400 flex-shrink-0" />
-                <span className="text-purple-200 text-sm">Code editor available for technical questions</span>
+                <span className="text-purple-200 text-sm">Code editor available for the technical questions</span>
               </div>
             </div>
 
