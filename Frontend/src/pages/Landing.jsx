@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import {Link, useNavigate} from "react-router-dom"
-import {logo} from "../assets/intervyologo.png"
+// Logo asset (imported as default if needed in future UI tweaks)
+// import logo from "../assets/intervyologo.png";
 
 
 export default function LandingPage() {
