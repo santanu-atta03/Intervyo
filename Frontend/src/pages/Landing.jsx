@@ -2,6 +2,51 @@ import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import {Link, useNavigate} from "react-router-dom"
 import {logo} from "../assets/intervyologo.png"
+import {
+  Bot,
+  BarChart3,
+  Code,
+  Database,
+  Cpu,
+  Smartphone,
+  Wrench,
+  Target,
+  TrendingUp,
+  Trophy,
+  Users,
+  Star,
+  Play,
+  User,
+  UserRound,
+  Briefcase,
+  GraduationCap,
+  Globe,
+  ArrowRight,
+  Check,
+  Award,
+  Zap,
+  Lightbulb,
+  Rocket,
+  Settings,
+  Monitor,
+  Server,
+  SmartphoneIcon,
+  Cloud,
+  Shield,
+  Lock,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  Clock,
+  FileText,
+  PieChart,
+  BarChart,
+  TrendingUpIcon,
+  Users2,
+  FileBarChart,
+  StarIcon
+} from 'lucide-react';
 
 
 export default function LandingPage() {
@@ -47,25 +92,25 @@ export default function LandingPage() {
 
   const features = [
     {
-      icon: '🤖',
+      icon: <Bot className="w-10 h-10" />, // AI-Powered Interviews
       title: 'AI-Powered Interviews',
       description: 'Experience realistic interviews with our advanced AI interviewer',
       gradient: 'from-purple-500 to-pink-500'
     },
     {
-      icon: '📊',
+      icon: <BarChart3 className="w-10 h-10" />, // Real-Time Analytics
       title: 'Real-Time Analytics',
       description: 'Get instant feedback on your performance with detailed metrics',
       gradient: 'from-blue-500 to-cyan-500'
     },
     {
-      icon: '🎯',
+      icon: <Target className="w-10 h-10" />, // Domain-Specific Prep
       title: 'Domain-Specific Prep',
       description: 'Practice for Frontend, Backend, Data Science & more',
       gradient: 'from-green-500 to-emerald-500'
     },
     {
-      icon: '🏆',
+      icon: <Trophy className="w-10 h-10" />, // Gamified Learning
       title: 'Gamified Learning',
       description: 'Earn XP, unlock badges, and compete on leaderboards',
       gradient: 'from-yellow-500 to-orange-500'
@@ -76,21 +121,21 @@ export default function LandingPage() {
     {
       name: 'Sarah Chen',
       role: 'Software Engineer at Google',
-      image: '👩‍💻',
+      image: <UserRound className="w-10 h-10" />,
       text: 'This platform helped me land my dream job! The AI interviewer felt incredibly real.',
       rating: 5
     },
     {
       name: 'Mike Johnson',
       role: 'Data Scientist at Amazon',
-      image: '👨‍💼',
+      image: <UserRound className="w-10 h-10" />,
       text: 'The instant feedback and analytics were game-changers for my interview prep.',
       rating: 5
     },
     {
       name: 'Priya Sharma',
       role: 'Full Stack Developer at Microsoft',
-      image: '👩‍🔬',
+      image: <UserRound className="w-10 h-10" />,
       text: 'I improved my confidence by 10x. The practice sessions were incredibly valuable.',
       rating: 5
     }
@@ -104,12 +149,12 @@ export default function LandingPage() {
   ];
 
   const domains = [
-    { name: 'Frontend', icon: '🎨', color: 'bg-pink-500' },
-    { name: 'Backend', icon: '⚙️', color: 'bg-blue-500' },
-    { name: 'Full Stack', icon: '🚀', color: 'bg-purple-500' },
-    { name: 'Data Science', icon: '📊', color: 'bg-green-500' },
-    { name: 'DevOps', icon: '🔧', color: 'bg-orange-500' },
-    { name: 'Mobile', icon: '📱', color: 'bg-indigo-500' }
+    { name: 'Frontend', icon: <Code className="w-8 h-8" />, color: 'bg-pink-500' },
+    { name: 'Backend', icon: <Server className="w-8 h-8" />, color: 'bg-blue-500' },
+    { name: 'Full Stack', icon: <Globe className="w-8 h-8" />, color: 'bg-purple-500' },
+    { name: 'Data Science', icon: <Database className="w-8 h-8" />, color: 'bg-green-500' },
+    { name: 'DevOps', icon: <Wrench className="w-8 h-8" />, color: 'bg-orange-500' },
+    { name: 'Mobile', icon: <Smartphone className="w-8 h-8" />, color: 'bg-indigo-500' }
   ];
 
   const pricingPlans = [
@@ -255,8 +300,8 @@ export default function LandingPage() {
             <button onClick={() => naviagte('/dashboard')} className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl font-semibold text-lg hover:from-purple-700 hover:to-pink-700 transition transform hover:scale-105 shadow-2xl">
               Start Free Interview →
             </button>
-            <button className="px-8 py-4 bg-white/10 backdrop-blur-lg rounded-xl font-semibold text-lg hover:bg-white/20 transition border border-white/20">
-              Watch Demo 🎥
+            <button className="px-8 py-4 bg-white/10 backdrop-blur-lg rounded-xl font-semibold text-lg hover:bg-white/20 transition border border-white/20 flex items-center gap-2">
+              Watch Demo <Play className="w-5 h-5" />
             </button>
           </div>
 
@@ -296,7 +341,7 @@ export default function LandingPage() {
                 className={`scale-in ${isVisible[`domain-${index}`] ? 'visible' : ''} bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10 hover:border-purple-500/50 transition cursor-pointer group`}
                 style={{ transitionDelay: `${index * 0.1}s` }}
               >
-                <div className={`w-16 h-16 ${domain.color} rounded-xl flex items-center justify-center text-3xl mb-4 mx-auto group-hover:scale-110 transition`}>
+                <div className={`w-16 h-16 ${domain.color} rounded-xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition`}>
                   {domain.icon}
                 </div>
                 <div className="text-center font-semibold">{domain.name}</div>
@@ -323,7 +368,7 @@ export default function LandingPage() {
                 className={`fade-in-up ${isVisible[`feature-${index}`] ? 'visible' : ''} bg-white/5 backdrop-blur-lg rounded-2xl p-8 border border-white/10 hover:border-purple-500/50 transition group`}
                 style={{ transitionDelay: `${index * 0.15}s` }}
               >
-                <div className={`w-16 h-16 bg-gradient-to-r ${feature.gradient} rounded-xl flex items-center justify-center text-4xl mb-4 group-hover:scale-110 transition`}>
+                <div className={`w-16 h-16 bg-gradient-to-r ${feature.gradient} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition`}>
                   {feature.icon}
                 </div>
                 <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
@@ -344,9 +389,9 @@ export default function LandingPage() {
 
           <div className="space-y-12">
             {[
-              { step: '01', title: 'Choose Your Domain', desc: 'Select from Frontend, Backend, Data Science, and more', icon: '🎯' },
-              { step: '02', title: 'Start AI Interview', desc: 'Experience realistic interviews with our advanced AI', icon: '🤖' },
-              { step: '03', title: 'Get Instant Feedback', desc: 'Receive detailed analytics and improvement suggestions', icon: '📊' }
+              { step: '01', title: 'Choose Your Domain', desc: 'Select from Frontend, Backend, Data Science, and more', icon: <Target className="w-10 h-10" /> },
+              { step: '02', title: 'Start AI Interview', desc: 'Experience realistic interviews with our advanced AI', icon: <Bot className="w-10 h-10" /> },
+              { step: '03', title: 'Get Instant Feedback', desc: 'Receive detailed analytics and improvement suggestions', icon: <BarChart3 className="w-10 h-10" /> }
             ].map((item, index) => (
               <div
                 key={index}
@@ -356,7 +401,7 @@ export default function LandingPage() {
                 style={{ transitionDelay: `${index * 0.2}s` }}
               >
                 <div className="flex-shrink-0">
-                  <div className="w-24 h-24 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-5xl">
+                  <div className="w-24 h-24 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
                     {item.icon}
                   </div>
                 </div>
@@ -382,12 +427,12 @@ export default function LandingPage() {
           <div className="relative">
             <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-8 md:p-12 border border-white/10">
               <div className="text-center mb-6">
-                <div className="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-5xl mx-auto mb-4">
+                <div className="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   {testimonials[activeTestimonial].image}
                 </div>
                 <div className="flex justify-center gap-1 mb-4">
                   {[...Array(testimonials[activeTestimonial].rating)].map((_, i) => (
-                    <span key={i} className="text-yellow-400 text-2xl">⭐</span>
+                    <Star key={i} className="w-6 h-6 text-yellow-400" />
                   ))}
                 </div>
                 <p className="text-xl md:text-2xl text-gray-300 mb-6 italic">
@@ -472,8 +517,8 @@ export default function LandingPage() {
           <div id="cta" data-animate className={`fade-in-up ${isVisible.cta ? 'visible' : ''} bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl p-12 md:p-16`}>
             <h2 className="text-4xl md:text-5xl font-bold mb-4">Ready to Ace Your Interview?</h2>
             <p className="text-xl mb-8 text-purple-100">Join 50,000+ users who landed their dream jobs</p>
-            <button className="px-8 py-4 bg-white text-purple-600 rounded-xl font-semibold text-lg hover:bg-gray-100 transition transform hover:scale-105 shadow-2xl">
-              Start Your Free Trial Today →
+            <button className="px-8 py-4 bg-white text-purple-600 rounded-xl font-semibold text-lg hover:bg-gray-100 transition transform hover:scale-105 shadow-2xl flex items-center gap-2">
+              Start Your Free Trial Today <ArrowRight className="w-5 h-5" />
             </button>
           </div>
         </div>
