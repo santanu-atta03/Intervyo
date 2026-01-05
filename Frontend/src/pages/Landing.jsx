@@ -536,7 +536,7 @@ export default function LandingPage() {
                 </div>
                 <span className="text-lg md:text-xl font-bold">Intervyo</span>
               </div>
-              <p className="text-gray-400 text-sm md:text-base">Master your tech interviews with AI</p>
+              <p className="text-gray-400 text-sm md:text-base">Master your tech interviews with AI </p>
             </div>
             
             <div>
