@@ -1,30 +1,37 @@
-// // pages/InterviewRoom.jsx - COMPLETE REWRITE
+import React, { useState, useEffect, useRef } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import Editor from '@monaco-editor/react';
+import { apiConnector } from "../services/apiConnector";
+import toast from "react-hot-toast";
+import Webcam from "react-webcam";
+import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
+import io from 'socket.io-client';
+import {
+  Mic,
+  MicOff,
+  Video,
+  VideoOff,
+  Code,
+  Volume2,
+  VolumeX,
+  Play,
+  Check,
+  X,
+  Loader,
+  Loader2,
+  MessageSquare,
+  Brain,
+  CheckCircle,
+  AlertCircle,
+  Send,
+} from "lucide-react";
 
-// import { useState, useEffect, useRef } from "react";
-// import { useParams, useNavigate } from "react-router-dom";
-// import { useSelector } from "react-redux";
-// import Editor from '@monaco-editor/react'; 
-// import { apiConnector } from "../services/apiconnector";
-// import toast from "react-hot-toast";
-// import Webcam from "react-webcam";
-// import SpeechRecognition, {
-//   useSpeechRecognition,
-// } from "react-speech-recognition";
-// import {
-//   Mic,
-//   MicOff,
-//   Video,
-//   VideoOff,
-//   Code,
-//   Volume2,
-//   VolumeX,
-//   Play,
-//   Check,
-//   X,
-//   Loader,
-// } from "lucide-react";
+import emotionDetector from '../services/emotionDetector';
+import speechAnalyzer from '../services/speechAnalyzer';
+import EmotionDisplay from '../components/EmotionDisplay';
 
-// const REACT_APP_BASE_URL = 'http://localhost:5000';
+const REACT_APP_BASE_URL = import.meta.env.REACT_APP_BASE_URL || 'http://localhost:5000';
 // export default function InterviewRoom() {
 //   const navigate = useNavigate();
 //   const { interviewId } = useParams();
@@ -843,7 +850,14 @@ export default function EnhancedInterviewRoom() {
   const socketRef = useRef(null);
   const webcamRef = useRef(null);
   const audioRef = useRef(null);
-  
+  const { token } = useSelector((state) => state.auth);
+
+  // Emotion & Confidence
+  const [emotionData, setEmotionData] = useState(null);
+  const [confidenceData, setConfidenceData] = useState(null);
+  const [emotionMetrics, setEmotionMetrics] = useState(null);
+  const [showEmotionPanel, setShowEmotionPanel] = useState(true);
+
   // Core States
   const [isConnected, setIsConnected] = useState(false);
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
@@ -956,6 +970,50 @@ export default function EnhancedInterviewRoom() {
       return () => clearInterval(timer);
     }
   }, [interviewStatus, isPaused, timeRemaining]);
+
+  // Emotion detection when interview is active
+  useEffect(() => {
+    if (interviewStatus === 'active' && webcamRef.current && isVideoEnabled) {
+      emotionDetector.loadModels().catch(err => console.error('Emotion model error:', err));
+      emotionDetector.startDetection(webcamRef.current?.video || webcamRef.current, async (emotion) => {
+        if (!emotion) return;
+        setEmotionData(emotion);
+
+        // Periodically send a subset to backend to reduce load
+        if (Math.random() < 0.1 && token) {
+          try {
+            await apiConnector(
+              'POST',
+              `${REACT_APP_BASE_URL}/api/interviews/${interviewId}/emotion-metrics`,
+              {
+                emotions: emotion.emotions,
+                confidenceScore: emotion.confidence,
+                timestamp: emotion.timestamp,
+              },
+              { Authorization: `Bearer ${token}` }
+            );
+          } catch (error) {
+            console.error('Failed to store emotion:', error);
+          }
+        }
+      }, 1000);
+    }
+
+    return () => {
+      emotionDetector.stopDetection();
+    };
+  }, [interviewStatus, isVideoEnabled, interviewId, token]);
+
+  // Analyze user transcript for confidence
+  useEffect(() => {
+    if (userTranscript && userTranscript.length > 5) {
+      const analysis = speechAnalyzer.analyzeTranscript(userTranscript);
+      if (analysis) {
+        setConfidenceData(analysis);
+        speechAnalyzer.addSegment(analysis);
+      }
+    }
+  }, [userTranscript]);
 
   // Handle AI Message
   const handleAIMessage = (data) => {
@@ -1078,13 +1136,31 @@ export default function EnhancedInterviewRoom() {
   };
 
   // End Interview
-  const handleEndInterview = () => {
-    if (confirm('Are you sure you want to end the interview?')) {
-      socketRef.current?.emit('end-interview', {
-        sessionId: 'session-123',
-        interviewId
-      });
+  const handleEndInterview = async () => {
+    if (!confirm('Are you sure you want to end the interview?')) return;
+
+    // Stop analysis
+    try {
+      emotionDetector.stopDetection();
+      speechAnalyzer.reset();
+
+      // Request server to generate feedback and store results
+      if (token) {
+        await apiConnector(
+          'POST',
+          `${REACT_APP_BASE_URL}/api/interviews/${interviewId}/emotion-feedback`,
+          {},
+          { Authorization: `Bearer ${token}` }
+        );
+      }
+    } catch (err) {
+      console.error('Error finishing analytics:', err);
     }
+
+    socketRef.current?.emit('end-interview', {
+      sessionId: 'session-123',
+      interviewId
+    });
   };
 
   // Notifications
@@ -1489,6 +1565,31 @@ export default function EnhancedInterviewRoom() {
               >
                 {showTranscript ? 'Hide' : 'Show'} Details
               </button>
+            </div>
+          </div>
+
+          {/* Emotion & Confidence Analysis Panel */}
+          <div className="p-4">
+            <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold flex items-center gap-2">
+                  <Brain className="w-4 h-4 text-purple-400" />
+                  Live Analysis
+                </h3>
+                <button
+                  onClick={() => setShowEmotionPanel(prev => !prev)}
+                  className="text-xs text-gray-400 hover:text-white"
+                >
+                  {showEmotionPanel ? 'Hide' : 'Show'}
+                </button>
+              </div>
+
+              {showEmotionPanel && (
+                <EmotionDisplay 
+                  emotionData={emotionData}
+                  confidenceData={confidenceData}
+                />
+              )}
             </div>
           </div>
 
