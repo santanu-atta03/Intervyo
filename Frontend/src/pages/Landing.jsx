@@ -522,7 +522,7 @@ export default function LandingPage() {
           </div>
           
           <div className="border-t border-white/10 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 InterviewPro. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} InterviewPro. All rights reserved.</p>
           </div>
         </div>
       </footer>
