@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import {Link, useNavigate} from "react-router-dom"
-import {logo} from "../assets/intervyologo.png"
+import { Link, useNavigate } from "react-router-dom"
+import { logo } from "../assets/intervyologo.png"
 
 
 export default function LandingPage() {
@@ -10,7 +10,7 @@ export default function LandingPage() {
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
-  const {token} = useSelector((state) => state.auth);
+  const { token } = useSelector((state) => state.auth);
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   const naviagte = useNavigate();
 
@@ -19,10 +19,10 @@ export default function LandingPage() {
     const handleMouseMove = (e) => {
       setMousePosition({ x: e.clientX, y: e.clientY });
     };
-    
+
     window.addEventListener('scroll', handleScroll);
     window.addEventListener('mousemove', handleMouseMove);
-    
+
     // Intersection Observer for scroll animations
     const observer = new IntersectionObserver(
       (entries) => {
@@ -143,7 +143,7 @@ export default function LandingPage() {
   const heroOpacity = Math.max(1 - scrollY / 500, 0);
 
   return (
-    <div className="bg-gradient-to-b from-slate-900 via-purple-900 to-slate-900 text-white overflow-hidden">
+    <div className="overflow-hidden text-white bg-gradient-to-b from-slate-900 via-purple-900 to-slate-900">
       <style>{`
         @keyframes float {
           0%, 100% { transform: translateY(0px); }
@@ -185,8 +185,8 @@ export default function LandingPage() {
       `}</style>
 
       {/* Animated Cursor Effect */}
-      <div 
-        className="fixed w-96 h-96 rounded-full pointer-events-none z-0 mix-blend-screen"
+      <div
+        className="fixed z-0 rounded-full pointer-events-none w-96 h-96 mix-blend-screen"
         style={{
           background: 'radial-gradient(circle, rgba(168,85,247,0.15) 0%, transparent 70%)',
           left: mousePosition.x - 192,
@@ -197,26 +197,26 @@ export default function LandingPage() {
 
       {/* Navbar */}
       <nav className={`fixed w-full z-50 transition-all duration-300 ${scrollY > 50 ? 'bg-slate-900/95 backdrop-blur-lg shadow-lg' : 'bg-transparent'}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center animate-pulse-glow">
-                <span className="text-white font-bold text-xl">AI</span>
+              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 animate-pulse-glow">
+                <span className="text-xl font-bold text-white">AI</span>
               </div>
               <span className="text-xl font-bold">Intervyo</span>
             </div>
-            
-            <div className="hidden md:flex items-center gap-8">
-              <a href="#features" className="hover:text-purple-400 transition">Features</a>
-              <a href="#how-it-works" className="hover:text-purple-400 transition">How It Works</a>
-              <a href="#pricing" className="hover:text-purple-400 transition">Pricing</a>
-              <a href="#testimonials" className="hover:text-purple-400 transition">Testimonials</a>
+
+            <div className="items-center hidden gap-8 md:flex">
+              <a href="#features" className="transition hover:text-purple-400">Features</a>
+              <a href="#how-it-works" className="transition hover:text-purple-400">How It Works</a>
+              <a href="#pricing" className="transition hover:text-purple-400">Pricing</a>
+              <a href="#testimonials" className="transition hover:text-purple-400">Testimonials</a>
             </div>
 
-            { token === null && 
+            {token === null &&
               <div className="flex items-center gap-4">
-                <Link to={"/login"} className="px-4 py-2 text-sm hover:text-purple-400 transition">Sign In</Link>
-                <Link to={"/register"} className="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition transform hover:scale-105">
+                <Link to={"/login"} className="px-4 py-2 text-sm transition hover:text-purple-400">Sign In</Link>
+                <Link to={"/register"} className="px-6 py-2 font-semibold transition transform rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 hover:scale-105">
                   Get Started
                 </Link>
               </div>
@@ -226,45 +226,45 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center px-4 overflow-hidden">
+      <section className="relative flex items-center justify-center min-h-screen px-4 overflow-hidden">
         {/* Floating Shapes */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/20 rounded-full blur-3xl animate-float"></div>
-          <div className="absolute top-40 right-20 w-96 h-96 bg-pink-500/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
-          <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '4s' }}></div>
+          <div className="absolute rounded-full top-20 left-10 w-72 h-72 bg-purple-500/20 blur-3xl animate-float"></div>
+          <div className="absolute rounded-full top-40 right-20 w-96 h-96 bg-pink-500/20 blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
+          <div className="absolute rounded-full bottom-20 left-1/3 w-80 h-80 bg-blue-500/20 blur-3xl animate-float" style={{ animationDelay: '4s' }}></div>
         </div>
 
-        <div className="relative z-10 text-center max-w-5xl mx-auto" style={{ opacity: heroOpacity }}>
-          <div className="mb-6 inline-block px-6 py-2 bg-purple-500/20 backdrop-blur-lg rounded-full border border-purple-500/30">
-            <span className="text-purple-300 text-sm font-semibold">🚀 AI-Powered Interview Preparation</span>
+        <div className="relative z-10 max-w-5xl mx-auto text-center" style={{ opacity: heroOpacity }}>
+          <div className="inline-block px-6 py-2 mb-6 border rounded-full bg-purple-500/20 backdrop-blur-lg border-purple-500/30">
+            <span className="text-sm font-semibold text-purple-300">🚀 AI-Powered Interview Preparation</span>
           </div>
-          
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+
+          <h1 className="mb-6 text-5xl font-bold leading-tight md:text-7xl">
             Master Your Next
             <br />
-            <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent gradient-animate">
+            <span className="text-transparent bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text gradient-animate">
               Tech Interview
             </span>
           </h1>
-          
-          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+
+          <p className="max-w-2xl mx-auto mb-8 text-xl text-gray-300">
             Practice with our AI interviewer, get instant feedback, and land your dream job at top tech companies
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-            <button onClick={() => naviagte('/dashboard')} className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl font-semibold text-lg hover:from-purple-700 hover:to-pink-700 transition transform hover:scale-105 shadow-2xl">
+          <div className="flex flex-col items-center justify-center gap-4 mb-12 sm:flex-row">
+            <button onClick={() => naviagte('/dashboard')} className="px-8 py-4 text-lg font-semibold transition transform shadow-2xl bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl hover:from-purple-700 hover:to-pink-700 hover:scale-105">
               Start Free Interview →
             </button>
-            <button className="px-8 py-4 bg-white/10 backdrop-blur-lg rounded-xl font-semibold text-lg hover:bg-white/20 transition border border-white/20">
+            <button className="px-8 py-4 text-lg font-semibold transition border bg-white/10 backdrop-blur-lg rounded-xl hover:bg-white/20 border-white/20">
               Watch Demo 🎥
             </button>
           </div>
 
           {/* Animated Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto">
+          <div className="grid max-w-3xl grid-cols-2 gap-6 mx-auto md:grid-cols-4">
             {stats.map((stat, index) => (
-              <div key={index} className="bg-white/5 backdrop-blur-lg rounded-xl p-4 border border-white/10 hover:bg-white/10 transition">
-                <div className="text-3xl font-bold text-purple-400 mb-1">{stat.value}</div>
+              <div key={index} className="p-4 transition border bg-white/5 backdrop-blur-lg rounded-xl border-white/10 hover:bg-white/10">
+                <div className="mb-1 text-3xl font-bold text-purple-400">{stat.value}</div>
                 <div className="text-sm text-gray-400">{stat.label}</div>
               </div>
             ))}
@@ -272,22 +272,22 @@ export default function LandingPage() {
         </div>
 
         {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <div className="w-6 h-10 border-2 border-white/30 rounded-full flex items-start justify-center p-2">
-            <div className="w-1 h-3 bg-white/50 rounded-full"></div>
+        <div className="absolute transform -translate-x-1/2 bottom-8 left-1/2 animate-bounce">
+          <div className="flex items-start justify-center w-6 h-10 p-2 border-2 rounded-full border-white/30">
+            <div className="w-1 h-3 rounded-full bg-white/50"></div>
           </div>
         </div>
       </section>
 
       {/* Domains Section */}
-      <section className="py-20 px-4 relative">
-        <div className="max-w-7xl mx-auto">
+      <section className="relative px-4 py-20">
+        <div className="mx-auto max-w-7xl">
           <div id="domains" data-animate className={`text-center mb-16 fade-in-up ${isVisible.domains ? 'visible' : ''}`}>
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">Choose Your Domain</h2>
-            <p className="text-gray-400 text-lg">Specialized interview prep for every tech role</p>
+            <h2 className="mb-4 text-4xl font-bold md:text-5xl">Choose Your Domain</h2>
+            <p className="text-lg text-gray-400">Specialized interview prep for every tech role</p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
             {domains.map((domain, index) => (
               <div
                 key={index}
@@ -299,7 +299,7 @@ export default function LandingPage() {
                 <div className={`w-16 h-16 ${domain.color} rounded-xl flex items-center justify-center text-3xl mb-4 mx-auto group-hover:scale-110 transition`}>
                   {domain.icon}
                 </div>
-                <div className="text-center font-semibold">{domain.name}</div>
+                <div className="font-semibold text-center">{domain.name}</div>
               </div>
             ))}
           </div>
@@ -307,14 +307,14 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 px-4 relative">
-        <div className="max-w-7xl mx-auto">
+      <section id="features" className="relative px-4 py-20">
+        <div className="mx-auto max-w-7xl">
           <div id="features-header" data-animate className={`text-center mb-16 fade-in-up ${isVisible['features-header'] ? 'visible' : ''}`}>
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">Why Choose InterviewPro?</h2>
-            <p className="text-gray-400 text-lg">Everything you need to ace your interview</p>
+            <h2 className="mb-4 text-4xl font-bold md:text-5xl">Why Choose Intervyo?</h2>
+            <p className="text-lg text-gray-400">Everything you need to ace your interview</p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {features.map((feature, index) => (
               <div
                 key={index}
@@ -326,7 +326,7 @@ export default function LandingPage() {
                 <div className={`w-16 h-16 bg-gradient-to-r ${feature.gradient} rounded-xl flex items-center justify-center text-4xl mb-4 group-hover:scale-110 transition`}>
                   {feature.icon}
                 </div>
-                <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
+                <h3 className="mb-2 text-xl font-bold">{feature.title}</h3>
                 <p className="text-gray-400">{feature.description}</p>
               </div>
             ))}
@@ -335,11 +335,11 @@ export default function LandingPage() {
       </section>
 
       {/* How It Works */}
-      <section id="how-it-works" className="py-20 px-4 relative">
+      <section id="how-it-works" className="relative px-4 py-20">
         <div className="max-w-6xl mx-auto">
           <div id="how-it-works-header" data-animate className={`text-center mb-16 fade-in-up ${isVisible['how-it-works-header'] ? 'visible' : ''}`}>
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">How It Works</h2>
-            <p className="text-gray-400 text-lg">Get started in 3 simple steps</p>
+            <h2 className="mb-4 text-4xl font-bold md:text-5xl">How It Works</h2>
+            <p className="text-lg text-gray-400">Get started in 3 simple steps</p>
           </div>
 
           <div className="space-y-12">
@@ -356,13 +356,13 @@ export default function LandingPage() {
                 style={{ transitionDelay: `${index * 0.2}s` }}
               >
                 <div className="flex-shrink-0">
-                  <div className="w-24 h-24 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-5xl">
+                  <div className="flex items-center justify-center w-24 h-24 text-5xl bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl">
                     {item.icon}
                   </div>
                 </div>
                 <div className="flex-1 text-center md:text-left">
-                  <div className="text-purple-400 font-bold text-sm mb-2">STEP {item.step}</div>
-                  <h3 className="text-2xl font-bold mb-2">{item.title}</h3>
+                  <div className="mb-2 text-sm font-bold text-purple-400">STEP {item.step}</div>
+                  <h3 className="mb-2 text-2xl font-bold">{item.title}</h3>
                   <p className="text-gray-400">{item.desc}</p>
                 </div>
               </div>
@@ -372,25 +372,25 @@ export default function LandingPage() {
       </section>
 
       {/* Testimonials */}
-      <section id="testimonials" className="py-20 px-4 relative">
+      <section id="testimonials" className="relative px-4 py-20">
         <div className="max-w-6xl mx-auto">
           <div id="testimonials-header" data-animate className={`text-center mb-16 fade-in-up ${isVisible['testimonials-header'] ? 'visible' : ''}`}>
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">Success Stories</h2>
-            <p className="text-gray-400 text-lg">Join thousands who landed their dream jobs</p>
+            <h2 className="mb-4 text-4xl font-bold md:text-5xl">Success Stories</h2>
+            <p className="text-lg text-gray-400">Join thousands who landed their dream jobs</p>
           </div>
 
           <div className="relative">
-            <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-8 md:p-12 border border-white/10">
-              <div className="text-center mb-6">
-                <div className="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-5xl mx-auto mb-4">
+            <div className="p-8 border bg-white/5 backdrop-blur-lg rounded-2xl md:p-12 border-white/10">
+              <div className="mb-6 text-center">
+                <div className="flex items-center justify-center w-20 h-20 mx-auto mb-4 text-5xl rounded-full bg-gradient-to-r from-purple-500 to-pink-500">
                   {testimonials[activeTestimonial].image}
                 </div>
                 <div className="flex justify-center gap-1 mb-4">
                   {[...Array(testimonials[activeTestimonial].rating)].map((_, i) => (
-                    <span key={i} className="text-yellow-400 text-2xl">⭐</span>
+                    <span key={i} className="text-2xl text-yellow-400">⭐</span>
                   ))}
                 </div>
-                <p className="text-xl md:text-2xl text-gray-300 mb-6 italic">
+                <p className="mb-6 text-xl italic text-gray-300 md:text-2xl">
                   "{testimonials[activeTestimonial].text}"
                 </p>
                 <h4 className="text-lg font-bold">{testimonials[activeTestimonial].name}</h4>
@@ -402,9 +402,8 @@ export default function LandingPage() {
                   <button
                     key={index}
                     onClick={() => setActiveTestimonial(index)}
-                    className={`w-3 h-3 rounded-full transition ${
-                      activeTestimonial === index ? 'bg-purple-500 w-8' : 'bg-white/30'
-                    }`}
+                    className={`w-3 h-3 rounded-full transition ${activeTestimonial === index ? 'bg-purple-500 w-8' : 'bg-white/30'
+                      }`}
                   />
                 ))}
               </div>
@@ -414,37 +413,36 @@ export default function LandingPage() {
       </section>
 
       {/* Pricing */}
-      <section id="pricing" className="py-20 px-4 relative">
-        <div className="max-w-7xl mx-auto">
+      <section id="pricing" className="relative px-4 py-20">
+        <div className="mx-auto max-w-7xl">
           <div id="pricing-header" data-animate className={`text-center mb-16 fade-in-up ${isVisible['pricing-header'] ? 'visible' : ''}`}>
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">Simple Pricing</h2>
-            <p className="text-gray-400 text-lg">Choose the plan that fits your needs</p>
+            <h2 className="mb-4 text-4xl font-bold md:text-5xl">Simple Pricing</h2>
+            <p className="text-lg text-gray-400">Choose the plan that fits your needs</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid gap-8 md:grid-cols-3">
             {pricingPlans.map((plan, index) => (
               <div
                 key={index}
                 id={`plan-${index}`}
                 data-animate
-                className={`scale-in ${isVisible[`plan-${index}`] ? 'visible' : ''} relative bg-white/5 backdrop-blur-lg rounded-2xl p-8 border ${
-                  plan.popular ? 'border-purple-500 shadow-2xl shadow-purple-500/20' : 'border-white/10'
-                } hover:border-purple-500/50 transition`}
+                className={`scale-in ${isVisible[`plan-${index}`] ? 'visible' : ''} relative bg-white/5 backdrop-blur-lg rounded-2xl p-8 border ${plan.popular ? 'border-purple-500 shadow-2xl shadow-purple-500/20' : 'border-white/10'
+                  } hover:border-purple-500/50 transition`}
                 style={{ transitionDelay: `${index * 0.15}s` }}
               >
                 {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-purple-600 to-pink-600 px-4 py-1 rounded-full text-sm font-semibold">
+                  <div className="absolute px-4 py-1 text-sm font-semibold transform -translate-x-1/2 rounded-full -top-4 left-1/2 bg-gradient-to-r from-purple-600 to-pink-600">
                     Most Popular
                   </div>
                 )}
-                
-                <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
+
+                <h3 className="mb-2 text-2xl font-bold">{plan.name}</h3>
                 <div className="mb-6">
                   <span className="text-5xl font-bold">{plan.price}</span>
                   <span className="text-gray-400">{plan.period}</span>
                 </div>
-                
-                <ul className="space-y-3 mb-8">
+
+                <ul className="mb-8 space-y-3">
                   {plan.features.map((feature, i) => (
                     <li key={i} className="flex items-center gap-2">
                       <span className="text-green-400">✓</span>
@@ -452,12 +450,11 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                
-                <button className={`w-full py-3 rounded-xl font-semibold transition transform hover:scale-105 ${
-                  plan.popular
+
+                <button className={`w-full py-3 rounded-xl font-semibold transition transform hover:scale-105 ${plan.popular
                     ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'
                     : 'bg-white/10 hover:bg-white/20 border border-white/20'
-                }`}>
+                  }`}>
                   {plan.buttonText}
                 </button>
               </div>
@@ -467,12 +464,12 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 relative">
+      <section className="relative px-4 py-20">
         <div className="max-w-4xl mx-auto text-center">
           <div id="cta" data-animate className={`fade-in-up ${isVisible.cta ? 'visible' : ''} bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl p-12 md:p-16`}>
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">Ready to Ace Your Interview?</h2>
-            <p className="text-xl mb-8 text-purple-100">Join 50,000+ users who landed their dream jobs</p>
-            <button className="px-8 py-4 bg-white text-purple-600 rounded-xl font-semibold text-lg hover:bg-gray-100 transition transform hover:scale-105 shadow-2xl">
+            <h2 className="mb-4 text-4xl font-bold md:text-5xl">Ready to Ace Your Interview?</h2>
+            <p className="mb-8 text-xl text-purple-100">Join 50,000+ users who landed their dream jobs</p>
+            <button className="px-8 py-4 text-lg font-semibold text-purple-600 transition transform bg-white shadow-2xl rounded-xl hover:bg-gray-100 hover:scale-105">
               Start Your Free Trial Today →
             </button>
           </div>
@@ -480,48 +477,48 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-white/10 py-12 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
+      <footer className="px-4 py-12 border-t border-white/10">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid gap-8 mb-8 md:grid-cols-4">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-xl">AI</span>
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500">
+                  <span className="text-xl font-bold text-white">AI</span>
                 </div>
                 <span className="text-xl font-bold">Intervyo</span>
               </div>
               <p className="text-gray-400">Master your tech interviews with AI</p>
             </div>
-            
+
             <div>
-              <h4 className="font-bold mb-4">Product</h4>
+              <h4 className="mb-4 font-bold">Product</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition">Features</a></li>
-                <li><a href="#" className="hover:text-white transition">Pricing</a></li>
-                <li><a href="#" className="hover:text-white transition">FAQ</a></li>
+                <li><a href="#" className="transition hover:text-white">Features</a></li>
+                <li><a href="#" className="transition hover:text-white">Pricing</a></li>
+                <li><a href="#" className="transition hover:text-white">FAQ</a></li>
               </ul>
             </div>
-            
+
             <div>
-              <h4 className="font-bold mb-4">Company</h4>
+              <h4 className="mb-4 font-bold">Company</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition">About</a></li>
-                <li><a href="#" className="hover:text-white transition">Blog</a></li>
-                <li><a href="#" className="hover:text-white transition">Careers</a></li>
+                <li><a href="#" className="transition hover:text-white">About</a></li>
+                <li><a href="#" className="transition hover:text-white">Blog</a></li>
+                <li><a href="#" className="transition hover:text-white">Careers</a></li>
               </ul>
             </div>
-            
+
             <div>
-              <h4 className="font-bold mb-4">Legal</h4>
+              <h4 className="mb-4 font-bold">Legal</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition">Privacy</a></li>
-                <li><a href="#" className="hover:text-white transition">Terms</a></li>
-                <li><a href="#" className="hover:text-white transition">Contact</a></li>
+                <li><a href="#" className="transition hover:text-white">Privacy</a></li>
+                <li><a href="#" className="transition hover:text-white">Terms</a></li>
+                <li><a href="#" className="transition hover:text-white">Contact</a></li>
               </ul>
             </div>
           </div>
-          
-          <div className="border-t border-white/10 pt-8 text-center text-gray-400">
+
+          <div className="pt-8 text-center text-gray-400 border-t border-white/10">
             <p>&copy; 2024 InterviewPro. All rights reserved.</p>
           </div>
         </div>
