@@ -12,26 +12,29 @@ import DomainSelection from './pages/DomainSelection';
 import InterviewRoom from './components/AiInterview/InterviewRoom';
 import Results from './pages/Results';
 import Settings from './components/Dashboard/Settings';
-import toast from 'react-hot-toast'
 import InterviewWrapper from './components/Interview/InterviewWrapper';
 import Leaderboard from './pages/Leaderboard';
 import ReviewHistory from './components/Dashboard/ReviewHistory';
 import LearningHub from './components/Dashboard/LearningHub';
-import LearningPlatform from './components/Dashboard/LearningHub';
 import BlogPlatform from './components/Blogs/BlogPlatform';
 import Achievements from './components/Dashboard/Achievements';
 import AIChatbot from './components/Chatbot/AiChatBot';
+import FAQ from "./pages/FAQ";
+import Analytics from './pages/Analytics';
+import NotFound from './pages/NotFound';
+import ScrollToTop from './components/shared/ScrollToTop';
 
 function App() {
   return (
     <>
       <Routes>
-        <Route path='/' element = {<Landing />} />
+        <Route path='/' element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path='/verify-email' element={<VerifyEmail />} />
         <Route path="/domain-selection" element={<DomainSelection />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="/faq" element={<FAQ />} />
         
         <Route 
           path="/dashboard" 
@@ -39,44 +42,45 @@ function App() {
             <ProtectedRoute>
               <Dashboard />
             </ProtectedRoute>
-          } 
+          }
         />
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/history" element={<ReviewHistory />} />
         <Route path="/resources" element={<LearningHub />} />
-        <Route path='settings' element={<Settings />} />
+        <Route path='/settings' element={<Settings />} />
         <Route path="/blog" element={<BlogPlatform />} />
         <Route path='/achievements' element={<Achievements />} />
-        <Route 
-        path="/interview-setup" 
-        element={
-          <ProtectedRoute>
-            <InterviewSetup />
-          </ProtectedRoute>
-        } 
-      />
-      
-      {/* UPDATED: Use InterviewWrapper instead of InterviewRoom directly */}
-      <Route 
-        path="/interview/:interviewId" 
-        element={
-          <ProtectedRoute>
-            <InterviewWrapper  />
-          </ProtectedRoute>
-        } 
-      />
-      <Route path="/interview-room/:interviewId" element={<InterviewRoom />} />
-      
-      <Route 
-        path="/results/:interviewId" 
-        element={
-          <ProtectedRoute>
-            <Results />
-          </ProtectedRoute>
-        } 
-      />
+        <Route
+          path="/interview-setup"
+          element={
+            <ProtectedRoute>
+              <InterviewSetup />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* UPDATED: Use InterviewWrapper instead of InterviewRoom directly */}
+        <Route
+          path="/interview/:interviewId"
+          element={
+            <ProtectedRoute>
+              <InterviewWrapper />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/interview-room/:interviewId" element={<InterviewRoom />} />
+
+        <Route
+          path="/results/:interviewId"
+          element={
+            <ProtectedRoute>
+              <Results />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
 
+      <ScrollToTop />
       <AIChatbot defaultContext="general" />
     </>
   );
