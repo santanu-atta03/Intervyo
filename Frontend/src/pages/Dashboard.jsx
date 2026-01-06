@@ -389,8 +389,8 @@ const handleAchievementModalClose = async () => {
 
   const quickActions = [
     { title: 'Start Interview', icon: Target, color: 'from-blue-500 to-cyan-500', description: 'Begin practice session', action: () => navigate('/interview-setup') },
+    { title: 'Analytics', icon: TrendingUp, color: 'from-violet-500 to-purple-500', description: 'View your stats', action: () => navigate('/analytics') },
     { title: 'Review History', icon: BarChart3, color: 'from-emerald-500 to-green-500', description: 'Analyze performance', action: () => navigate('/history') },
-    { title: 'Learning Hub', icon: BookOpen, color: 'from-purple-500 to-pink-500', description: 'Study resources', action: () => navigate('/resources') },
     { title: 'Leaderboard', icon: Trophy, color: 'from-yellow-500 to-orange-500', description: 'View rankings', action: () => navigate('/leaderboard') }
   ];
 
