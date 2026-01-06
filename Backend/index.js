@@ -27,11 +27,15 @@ import { Server } from 'socket.io';
 dotenv.config();
 
 const app = express();
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://intervyo-sage.vercel.app'
+];
 
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || 'https://intervyo-sage.vercel.app',
+    origin: allowedOrigins,
     methods: ['GET', 'POST'],
     credentials: true
   }
@@ -41,9 +45,16 @@ app.use(helmet());
 // MIDDLEWARE
 // ========================================
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'https://intervyo-sage.vercel.app',
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
 }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(apiLimiter);
