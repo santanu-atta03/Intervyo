@@ -18,7 +18,17 @@ export default function InterviewSetup() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [showCustomCompany, setShowCustomCompany] = useState(false);
   const [customCompany, setCustomCompany] = useState('');
-  const [config, setConfig] = useState(interviewConfig);
+  const [config, setConfig] = useState({
+    domain: '',
+    subDomain: '',
+    interviewType: '',
+    difficulty: '',
+    duration: 30,
+    targetCompany: '',
+    questions: [],
+    resume: null,
+    ...interviewConfig // Merge with Redux config if exists
+  });
   const [isPreparingInterview, setIsPreparingInterview] = useState(false);
   const [preparationProgress, setPreparationProgress] = useState(0);  
 
@@ -26,6 +36,16 @@ export default function InterviewSetup() {
     // Reset interview state when component mounts
     dispatch(resetInterview());
   }, [dispatch]);
+
+  // Update config when interviewConfig changes
+  useEffect(() => {
+    if (interviewConfig) {
+      setConfig(prev => ({
+        ...prev,
+        ...interviewConfig
+      }));
+    }
+  }, [interviewConfig]);
 
   
   const domains = [
@@ -176,6 +196,13 @@ export default function InterviewSetup() {
     dispatch(setInterviewConfig(updates));
   };
 
+  // Handle domain selection with subdomain reset
+  const handleDomainSelect = (domainValue) => {
+    updateConfig({ 
+      domain: domainValue, 
+      subDomain: '' // Reset subdomain when domain changes
+    });
+  };
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
@@ -192,133 +219,149 @@ export default function InterviewSetup() {
         });
       }, 100);
     } else {
-      alert('Please upload a PDF file');
+      toast.error('Please upload a PDF file');
     }
   };
 
   const addCustomQuestion = () => {
     if (customQuestion.trim()) {
-      updateConfig({ questions: [...config.questions, customQuestion.trim()] });
+      const newQuestions = [...(config.questions || []), customQuestion.trim()];
+      updateConfig({ questions: newQuestions });
       setCustomQuestion('');
+      toast.success('Custom question added!');
     }
   };
 
   const removeQuestion = (index) => {
-    updateConfig({ questions: config.questions.filter((_, i) => i !== index) });
+    const newQuestions = (config.questions || []).filter((_, i) => i !== index);
+    updateConfig({ questions: newQuestions });
+    toast.success('Question removed');
   };
 
   const isStepComplete = () => {
-  switch(step) {
-    case 1:
-      return config.domain && config.subDomain;
-    case 2:
-      return config.interviewType && config.difficulty;
-    case 3:
-      return config.duration && config.targetCompany;
-    case 4:
-      return true; // Step 4 is optional
-    default:
-      return false;
-  }
-};
+    switch(step) {
+      case 1:
+        return config.domain && config.subDomain;
+      case 2:
+        return config.interviewType && config.difficulty;
+      case 3:
+        return config.duration && config.targetCompany;
+      case 4:
+        return true; // Step 4 is optional
+      default:
+        return false;
+    }
+  };
 
+  const handleStartInterview = async () => {
+    if (!token) {
+      toast.error('Please login to continue');
+      navigate('/login');
+      return;
+    }
 
-const handleStartInterview = async () => {
-  if (!token) {
-    toast.error('Please login to continue');
-    navigate('/login');
-    return;
-  }
+    // Validate required fields
+    if (!config.domain || !config.subDomain || !config.interviewType || !config.difficulty || !config.duration || !config.targetCompany) {
+      toast.error('Please complete all required fields');
+      return;
+    }
 
-  // Show preparation screen
-  setIsPreparingInterview(true);
-  
-  // Simulate AI preparation with progress updates
-  const progressSteps = [
-    { progress: 20, message: 'Analyzing your resume...' },
-    { progress: 40, message: 'Generating personalized questions...' },
-    { progress: 60, message: 'Setting up interview environment...' },
-    { progress: 80, message: 'Configuring AI interviewer...' },
-    { progress: 100, message: 'Ready to start!' }
-  ];
-
-  for (const step of progressSteps) {
-    await new Promise(resolve => setTimeout(resolve, 800));
-    setPreparationProgress(step.progress);
-    toast.loading(step.message, { id: 'prep' });
-  }
-  
-  toast.dismiss('prep');
-
-  // Prepare interview data
-  let interviewData = { ...config };
-  
-  if (config.resume) {
-    const formData = new FormData();
-    formData.append('resume', config.resume);
-    formData.append('domain', config.domain);
-    formData.append('subDomain', config.subDomain);
-    formData.append('interviewType', config.interviewType);
-    formData.append('difficulty', config.difficulty);
-    formData.append('duration', config.duration);
-    formData.append('targetCompany', config.targetCompany);
-    formData.append('customQuestions', JSON.stringify(config.questions));
+    // Show preparation screen
+    setIsPreparingInterview(true);
     
-    interviewData = formData;
-  }
+    // Simulate AI preparation with progress updates
+    const progressSteps = [
+      { progress: 20, message: 'Analyzing your resume...' },
+      { progress: 40, message: 'Generating personalized questions...' },
+      { progress: 60, message: 'Setting up interview environment...' },
+      { progress: 80, message: 'Configuring AI interviewer...' },
+      { progress: 100, message: 'Ready to start!' }
+    ];
 
-  dispatch(createInterview(interviewData, navigate, token));
-};
+    for (const step of progressSteps) {
+      await new Promise(resolve => setTimeout(resolve, 800));
+      setPreparationProgress(step.progress);
+      toast.loading(step.message, { id: 'prep' });
+    }
+    
+    toast.dismiss('prep');
+
+    // Prepare interview data
+    let interviewData = { ...config };
+    
+    // Handle file upload separately
+    if (config.resume) {
+      const formData = new FormData();
+      formData.append('resume', config.resume);
+      formData.append('domain', config.domain);
+      formData.append('subDomain', config.subDomain);
+      formData.append('interviewType', config.interviewType);
+      formData.append('difficulty', config.difficulty);
+      formData.append('duration', config.duration);
+      formData.append('targetCompany', config.targetCompany);
+      
+      // Only append questions if they exist
+      if (config.questions && config.questions.length > 0) {
+        formData.append('customQuestions', JSON.stringify(config.questions));
+      }
+      
+      interviewData = formData;
+    }
+
+    // Call API to create interview
+    dispatch(createInterview(interviewData, navigate, token));
+  };
 
   if (isPreparingInterview) {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-      <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-12 max-w-md w-full border border-white/20">
-        <div className="text-center">
-          <div className="w-24 h-24 mx-auto mb-6 relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full animate-pulse"></div>
-            <div className="absolute inset-2 bg-slate-900 rounded-full flex items-center justify-center">
-              <span className="text-4xl">🤖</span>
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-12 max-w-md w-full border border-white/20">
+          <div className="text-center">
+            <div className="w-24 h-24 mx-auto mb-6 relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full animate-pulse"></div>
+              <div className="absolute inset-2 bg-slate-900 rounded-full flex items-center justify-center">
+                <span className="text-4xl">🤖</span>
+              </div>
             </div>
-          </div>
-          
-          <h2 className="text-3xl font-bold text-white mb-4">
-            Preparing Your Interview
-          </h2>
-          
-          <div className="mb-6">
-            <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-gradient-to-r from-purple-600 to-pink-600 transition-all duration-500"
-                style={{ width: `${preparationProgress}%` }}
-              ></div>
+            
+            <h2 className="text-3xl font-bold text-white mb-4">
+              Preparing Your Interview
+            </h2>
+            
+            <div className="mb-6">
+              <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-purple-600 to-pink-600 transition-all duration-500"
+                  style={{ width: `${preparationProgress}%` }}
+                ></div>
+              </div>
+              <p className="text-white/60 mt-3 text-sm">{preparationProgress}% Complete</p>
             </div>
-            <p className="text-white/60 mt-3 text-sm">{preparationProgress}% Complete</p>
-          </div>
-          
-          <div className="space-y-3 text-left">
-            <div className={`flex items-center gap-3 p-3 rounded-xl ${preparationProgress >= 20 ? 'bg-green-500/20' : 'bg-white/5'}`}>
-              <span className="text-xl">{preparationProgress >= 20 ? '✅' : '⏳'}</span>
-              <span className="text-white/80">Resume Analysis</span>
-            </div>
-            <div className={`flex items-center gap-3 p-3 rounded-xl ${preparationProgress >= 40 ? 'bg-green-500/20' : 'bg-white/5'}`}>
-              <span className="text-xl">{preparationProgress >= 40 ? '✅' : '⏳'}</span>
-              <span className="text-white/80">Question Generation</span>
-            </div>
-            <div className={`flex items-center gap-3 p-3 rounded-xl ${preparationProgress >= 60 ? 'bg-green-500/20' : 'bg-white/5'}`}>
-              <span className="text-xl">{preparationProgress >= 60 ? '✅' : '⏳'}</span>
-              <span className="text-white/80">Environment Setup</span>
-            </div>
-            <div className={`flex items-center gap-3 p-3 rounded-xl ${preparationProgress >= 80 ? 'bg-green-500/20' : 'bg-white/5'}`}>
-              <span className="text-xl">{preparationProgress >= 80 ? '✅' : '⏳'}</span>
-              <span className="text-white/80">AI Configuration</span>
+            
+            <div className="space-y-3 text-left">
+              <div className={`flex items-center gap-3 p-3 rounded-xl ${preparationProgress >= 20 ? 'bg-green-500/20' : 'bg-white/5'}`}>
+                <span className="text-xl">{preparationProgress >= 20 ? '✅' : '⏳'}</span>
+                <span className="text-white/80">Resume Analysis</span>
+              </div>
+              <div className={`flex items-center gap-3 p-3 rounded-xl ${preparationProgress >= 40 ? 'bg-green-500/20' : 'bg-white/5'}`}>
+                <span className="text-xl">{preparationProgress >= 40 ? '✅' : '⏳'}</span>
+                <span className="text-white/80">Question Generation</span>
+              </div>
+              <div className={`flex items-center gap-3 p-3 rounded-xl ${preparationProgress >= 60 ? 'bg-green-500/20' : 'bg-white/5'}`}>
+                <span className="text-xl">{preparationProgress >= 60 ? '✅' : '⏳'}</span>
+                <span className="text-white/80">Environment Setup</span>
+              </div>
+              <div className={`flex items-center gap-3 p-3 rounded-xl ${preparationProgress >= 80 ? 'bg-green-500/20' : 'bg-white/5'}`}>
+                <span className="text-xl">{preparationProgress >= 80 ? '✅' : '⏳'}</span>
+                <span className="text-white/80">AI Configuration</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
       {/* Animated Background */}
@@ -433,7 +476,7 @@ const handleStartInterview = async () => {
                   {domains.map((domain, idx) => (
                     <button
                       key={domain.value}
-                      onClick={() => updateConfig({ domain: domain.value, subDomain: '' })}
+                      onClick={() => handleDomainSelect(domain.value)}
                       style={{ animationDelay: `${idx * 100}ms` }}
                       className={`group relative p-8 rounded-2xl border-2 transition-all duration-500 transform hover:-translate-y-2 text-left overflow-hidden animate-fadeIn ${
                         config.domain === domain.value
@@ -809,13 +852,13 @@ const handleStartInterview = async () => {
                     </button>
                   </div>
 
-                  {config.questions.length > 0 && (
+                  {(config.questions || []).length > 0 && (
                     <div className="space-y-3 mb-6">
                       <div className="flex items-center gap-2 text-white/80 mb-4">
                         <span className="text-xl">📋</span>
-                        <span className="font-semibold">{config.questions.length} custom question(s) added</span>
+                        <span className="font-semibold">{(config.questions || []).length} custom question(s) added</span>
                       </div>
-                      {config.questions.map((q, index) => (
+                      {(config.questions || []).map((q, index) => (
                         <div key={index} className="group flex items-start gap-4 p-4 bg-white/10 rounded-xl border border-white/20 hover:bg-white/20 transition-all animate-slideUp">
                           <div className="flex items-center justify-center w-8 h-8 bg-purple-500/30 rounded-lg font-bold text-white flex-shrink-0">
                             {index + 1}
@@ -832,7 +875,7 @@ const handleStartInterview = async () => {
                     </div>
                   )}
 
-                  {config.questions.length === 0 && (
+                  {(config.questions || []).length === 0 && (
                     <div className="text-center py-8 text-white/40">
                       <span className="text-5xl mb-3 block">📝</span>
                       <p>No custom questions added yet</p>
@@ -877,7 +920,7 @@ const handleStartInterview = async () => {
                     
                     <div className="bg-white/10 rounded-xl p-5 backdrop-blur-xl border border-white/20">
                       <div className="text-white/60 text-sm mb-2 font-semibold">Duration</div>
-                      <div className="text-white font-bold text-lg">{config.duration} minutes</div>
+                      <div className="text-white font-bold text-lg">{config.duration || '—'} minutes</div>
                     </div>
                     
                     <div className="bg-white/10 rounded-xl p-5 backdrop-blur-xl border border-white/20">
@@ -887,7 +930,7 @@ const handleStartInterview = async () => {
                     
                     <div className="bg-white/10 rounded-xl p-5 backdrop-blur-xl border border-white/20">
                       <div className="text-white/60 text-sm mb-2 font-semibold">Custom Questions</div>
-                      <div className="text-white font-bold text-lg">{config.questions.length} added</div>
+                      <div className="text-white font-bold text-lg">{(config.questions || []).length} added</div>
                     </div>
                   </div>
 
@@ -938,12 +981,13 @@ const handleStartInterview = async () => {
             ) : (
               <button
                 onClick={handleStartInterview}
-                className="group relative px-12 py-5 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 text-white font-bold text-xl rounded-xl hover:shadow-2xl hover:shadow-green-500/50 transition-all transform hover:scale-110 overflow-hidden"
+                disabled={!token}
+                className="group relative px-12 py-5 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 text-white font-bold text-xl rounded-xl hover:shadow-2xl hover:shadow-green-500/50 transition-all transform hover:scale-110 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <div className="absolute inset-0 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
                 <div className="relative flex items-center gap-3">
                   <span className="text-3xl">🚀</span>
-                  Launch Interview
+                  Launch Interview Now
                   <span className="text-2xl group-hover:translate-x-2 transition-transform">→</span>
                 </div>
               </button>
