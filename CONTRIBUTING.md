@@ -44,7 +44,8 @@ Stick to the stack. Don’t introduce unnecessary frameworks.
 
 ## 🧩 How to Contribute
 
-### 1. Fork the Repository
+### 1. Star the repo
+### 2. Fork the Repository
 ```bash
 git fork https://github.com/santanu-atta03/intervyo.git
 
