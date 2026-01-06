@@ -537,6 +537,7 @@ export default function LandingPage() {
                 <span className="text-lg md:text-xl font-bold">Intervyo</span>
               </div>
               <p className="text-gray-400 text-sm md:text-base">Master your tech interviews with AI</p>
+              <p className="text-gray-400 text-sm md:text-base">Master your tech interviews with AI </p>
             </div>
             
             <div>
@@ -569,6 +570,8 @@ export default function LandingPage() {
           
           <div className="border-t border-white/10 pt-6 md:pt-8 text-center text-gray-400 text-sm md:text-base">
             <p>&copy; 2024 InterviewPro. All rights reserved.</p>
+          <div className="border-t border-white/10 pt-8 text-center text-gray-400">
+            <p>&copy; {new Date().getFullYear()} InterviewPro. All rights reserved.</p>
           </div>
         </div>
       </footer>
