@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import LearningHub from './LearningHub'; // Make sure this matches your export
+import LearningHub from './LearningHub';
 import { TopicDetailPage } from './TopicDetailPage';
 import { ModuleContentPage } from './ModuleContentPage';
 
@@ -35,7 +35,7 @@ export default function LearningPlatform() {
   };
 
   if (currentView === 'hub') {
-    return <LearningHub onTopicSelect={navigateToTopic(topicId)} />;
+    return <LearningHub onTopicSelect={navigateToTopic} />;
   }
 
   if (currentView === 'topic') {
@@ -53,7 +53,7 @@ export default function LearningPlatform() {
       moduleId={selectedModuleId}
       topicId={selectedTopicId}
       onBack={navigateBackToTopic}
-      onModuleChange={navigateToModule} // Add this prop
+      onModuleChange={navigateToModule}
     />
   );
 }
