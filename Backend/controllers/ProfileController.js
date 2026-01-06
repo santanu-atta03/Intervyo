@@ -1,17 +1,16 @@
-import User from '../models/User.model.js';
-import Profile from '../models/Profile.model.js';
-import { deleteFromCloudinary } from '../config/cloudinary.js';
-
+import User from "../models/User.model.js";
+import Profile from "../models/Profile.model.js";
+import { deleteFromCloudinary } from "../config/cloudinary.js";
 
 export const getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).populate('profile').exec();
+    const user = await User.findById(req.user.id).populate("profile").exec();
     // console.log("User details : ",user)
-    
+
     if (!user) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'User not found' 
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
       });
     }
     // console.log("user : ",user)
@@ -20,15 +19,14 @@ export const getProfile = async (req, res) => {
       user,
     });
   } catch (error) {
-    console.error('Get profile error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Server error',
-      error: error.message 
+    console.error("Get profile error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
     });
   }
 };
-
 
 export const updatePersonalInfo = async (req, res) => {
   try {
@@ -39,23 +37,23 @@ export const updatePersonalInfo = async (req, res) => {
     if (name && name.trim().length < 2) {
       return res.status(400).json({
         success: false,
-        message: 'Name must be at least 2 characters long'
+        message: "Name must be at least 2 characters long",
       });
     }
 
     if (age && (age < 16 || age > 100)) {
       return res.status(400).json({
         success: false,
-        message: 'Age must be between 16 and 100'
+        message: "Age must be between 16 and 100",
       });
     }
 
     // Update User name
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'User not found' 
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
       });
     }
 
@@ -66,7 +64,7 @@ export const updatePersonalInfo = async (req, res) => {
 
     // Find or create profile
     let profile = await Profile.findOne({ user: userId });
-    
+
     if (!profile) {
       profile = await Profile.create({
         user: userId,
@@ -76,7 +74,7 @@ export const updatePersonalInfo = async (req, res) => {
         bio: bio?.trim() || null,
         location: location?.trim() || null,
       });
-      
+
       user.profile = profile._id;
       await user.save();
     } else {
@@ -86,82 +84,83 @@ export const updatePersonalInfo = async (req, res) => {
       if (gender !== undefined) updateData.gender = gender || null;
       if (age !== undefined) updateData.age = age ? parseInt(age) : null;
       if (bio !== undefined) updateData.bio = bio?.trim() || null;
-      if (location !== undefined) updateData.location = location?.trim() || null;
+      if (location !== undefined)
+        updateData.location = location?.trim() || null;
 
-      await Profile.findOneAndUpdate(
-        { user: userId },
-        updateData,
-        { new: true, runValidators: true }
-      );
+      await Profile.findOneAndUpdate({ user: userId }, updateData, {
+        new: true,
+        runValidators: true,
+      });
     }
 
     // Fetch complete user data with profile
     const updatedUser = await User.findById(userId)
-      .select('-password -resetPasswordToken -resetPasswordExpire')
-      .populate('profile');
+      .select("-password -resetPasswordToken -resetPasswordExpire")
+      .populate("profile");
 
     res.status(200).json({
       success: true,
-      message: 'Personal information updated successfully',
+      message: "Personal information updated successfully",
       user: updatedUser,
     });
   } catch (error) {
-    console.error('Update personal info error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Failed to update personal information',
-      error: error.message 
+    console.error("Update personal info error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update personal information",
+      error: error.message,
     });
   }
 };
-
 
 export const updateProfessionalInfo = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { domain, experience, skills, linkedIn, github, portfolio } = req.body;
+    const { domain, experience, skills, linkedIn, github, portfolio } =
+      req.body;
 
     // Update Profile professional fields only
     const updateData = {};
     if (domain !== undefined) updateData.domain = domain || null;
-    if (experience !== undefined) updateData.experience = experience ? parseInt(experience) : null;
+    if (experience !== undefined)
+      updateData.experience = experience ? parseInt(experience) : null;
     if (skills !== undefined) updateData.skills = skills || [];
     if (linkedIn !== undefined) updateData.linkedIn = linkedIn?.trim() || null;
     if (github !== undefined) updateData.github = github?.trim() || null;
-    if (portfolio !== undefined) updateData.portfolio = portfolio?.trim() || null;
+    if (portfolio !== undefined)
+      updateData.portfolio = portfolio?.trim() || null;
 
     const profile = await Profile.findOneAndUpdate(
       { user: userId },
       updateData,
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     if (!profile) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Profile not found' 
+      return res.status(404).json({
+        success: false,
+        message: "Profile not found",
       });
     }
 
     const updatedUser = await User.findById(userId)
-      .select('-password -resetPasswordToken -resetPasswordExpire')
-      .populate('profile');
+      .select("-password -resetPasswordToken -resetPasswordExpire")
+      .populate("profile");
 
     res.status(200).json({
       success: true,
-      message: 'Professional information updated successfully',
+      message: "Professional information updated successfully",
       user: updatedUser,
     });
   } catch (error) {
-    console.error('Update professional info error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Failed to update professional information',
-      error: error.message 
+    console.error("Update professional info error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update professional information",
+      error: error.message,
     });
   }
 };
-
 
 export const updateEducation = async (req, res) => {
   try {
@@ -171,42 +170,41 @@ export const updateEducation = async (req, res) => {
     if (!Array.isArray(education)) {
       return res.status(400).json({
         success: false,
-        message: 'Education must be an array'
+        message: "Education must be an array",
       });
     }
 
     const profile = await Profile.findOneAndUpdate(
       { user: userId },
       { education: education },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     if (!profile) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Profile not found' 
+      return res.status(404).json({
+        success: false,
+        message: "Profile not found",
       });
     }
 
     const updatedUser = await User.findById(userId)
-      .select('-password -resetPasswordToken -resetPasswordExpire')
-      .populate('profile');
+      .select("-password -resetPasswordToken -resetPasswordExpire")
+      .populate("profile");
 
     res.status(200).json({
       success: true,
-      message: 'Education updated successfully',
+      message: "Education updated successfully",
       user: updatedUser,
     });
   } catch (error) {
-    console.error('Update education error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Failed to update education',
-      error: error.message 
+    console.error("Update education error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update education",
+      error: error.message,
     });
   }
 };
-
 
 export const updateCertificates = async (req, res) => {
   try {
@@ -216,42 +214,41 @@ export const updateCertificates = async (req, res) => {
     if (!Array.isArray(certificates)) {
       return res.status(400).json({
         success: false,
-        message: 'Certificates must be an array'
+        message: "Certificates must be an array",
       });
     }
 
     const profile = await Profile.findOneAndUpdate(
       { user: userId },
       { certificates: certificates },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     if (!profile) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Profile not found' 
+      return res.status(404).json({
+        success: false,
+        message: "Profile not found",
       });
     }
 
     const updatedUser = await User.findById(userId)
-      .select('-password -resetPasswordToken -resetPasswordExpire')
-      .populate('profile');
+      .select("-password -resetPasswordToken -resetPasswordExpire")
+      .populate("profile");
 
     res.status(200).json({
       success: true,
-      message: 'Certificates updated successfully',
+      message: "Certificates updated successfully",
       user: updatedUser,
     });
   } catch (error) {
-    console.error('Update certificates error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Failed to update certificates',
-      error: error.message 
+    console.error("Update certificates error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update certificates",
+      error: error.message,
     });
   }
 };
-
 
 export const updateAchievements = async (req, res) => {
   try {
@@ -261,49 +258,48 @@ export const updateAchievements = async (req, res) => {
     if (!Array.isArray(achievements)) {
       return res.status(400).json({
         success: false,
-        message: 'Achievements must be an array'
+        message: "Achievements must be an array",
       });
     }
 
     const profile = await Profile.findOneAndUpdate(
       { user: userId },
       { achievements: achievements },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     if (!profile) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Profile not found' 
+      return res.status(404).json({
+        success: false,
+        message: "Profile not found",
       });
     }
 
     const updatedUser = await User.findById(userId)
-      .select('-password -resetPasswordToken -resetPasswordExpire')
-      .populate('profile');
+      .select("-password -resetPasswordToken -resetPasswordExpire")
+      .populate("profile");
 
     res.status(200).json({
       success: true,
-      message: 'Achievements updated successfully',
+      message: "Achievements updated successfully",
       user: updatedUser,
     });
   } catch (error) {
-    console.error('Update achievements error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Failed to update achievements',
-      error: error.message 
+    console.error("Update achievements error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update achievements",
+      error: error.message,
     });
   }
 };
 
-
 export const uploadProfilePicture = async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'No file uploaded' 
+      return res.status(400).json({
+        success: false,
+        message: "No file uploaded",
       });
     }
 
@@ -311,9 +307,9 @@ export const uploadProfilePicture = async (req, res) => {
     const user = await User.findById(userId);
 
     if (!user) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'User not found' 
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
       });
     }
 
@@ -325,25 +321,24 @@ export const uploadProfilePicture = async (req, res) => {
     await user.save();
 
     const updatedUser = await User.findById(userId)
-      .select('-password -resetPasswordToken -resetPasswordExpire')
-      .populate('profile');
+      .select("-password -resetPasswordToken -resetPasswordExpire")
+      .populate("profile");
 
     res.status(200).json({
       success: true,
-      message: 'Profile picture uploaded successfully',
+      message: "Profile picture uploaded successfully",
       profilePicture: req.file.path,
       user: updatedUser,
     });
   } catch (error) {
-    console.error('Upload picture error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Failed to upload profile picture',
-      error: error.message 
+    console.error("Upload picture error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to upload profile picture",
+      error: error.message,
     });
   }
 };
-
 
 export const deleteProfilePicture = async (req, res) => {
   try {
@@ -351,9 +346,9 @@ export const deleteProfilePicture = async (req, res) => {
     const user = await User.findById(userId);
 
     if (!user) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'User not found' 
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
       });
     }
 
@@ -364,19 +359,19 @@ export const deleteProfilePicture = async (req, res) => {
     }
 
     const updatedUser = await User.findById(userId)
-      .select('-password -resetPasswordToken -resetPasswordExpire')
-      .populate('profile');
+      .select("-password -resetPasswordToken -resetPasswordExpire")
+      .populate("profile");
 
     res.status(200).json({
       success: true,
-      message: 'Profile picture deleted successfully',
+      message: "Profile picture deleted successfully",
       user: updatedUser,
     });
   } catch (error) {
-    console.error('Delete picture error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Failed to delete profile picture' 
+    console.error("Delete picture error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete profile picture",
     });
   }
 };

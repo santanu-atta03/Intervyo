@@ -1,14 +1,14 @@
-import jwt from 'jsonwebtoken';
-import User from '../models/User.model.js';
+import jwt from "jsonwebtoken";
+import User from "../models/User.model.js";
 
 export const authenticate = async (req, res, next) => {
   try {
-    const token = req.headers.authorization?.replace('Bearer ', '');
-    
+    const token = req.headers.authorization?.replace("Bearer ", "");
+
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: 'Authentication required',
+        message: "Authentication required",
       });
     }
 
@@ -18,19 +18,21 @@ export const authenticate = async (req, res, next) => {
   } catch (error) {
     res.status(401).json({
       success: false,
-      message: 'Invalid or expired token',
+      message: "Invalid or expired token",
     });
   }
 };
-
 
 export const protect = async (req, res, next) => {
   try {
     let token;
 
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-      token = req.headers.authorization.replace('Bearer ', '');
-    } 
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      token = req.headers.authorization.replace("Bearer ", "");
+    }
     // Check for token in cookies (optional, if you want to support both)
     else if (req.cookies.token) {
       token = req.cookies.token;
@@ -39,7 +41,7 @@ export const protect = async (req, res, next) => {
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: 'Authentication required. Please login.',
+        message: "Authentication required. Please login.",
       });
     }
 
@@ -47,36 +49,36 @@ export const protect = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // Get user from token and attach to request
-    req.user = await User.findById(decoded.id).select('-password');
+    req.user = await User.findById(decoded.id).select("-password");
 
     if (!req.user) {
       return res.status(401).json({
         success: false,
-        message: 'User not found. Please login again.',
+        message: "User not found. Please login again.",
       });
     }
 
     next();
   } catch (error) {
-    console.error('Auth middleware error:', error);
-    
-    if (error.name === 'JsonWebTokenError') {
+    console.error("Auth middleware error:", error);
+
+    if (error.name === "JsonWebTokenError") {
       return res.status(401).json({
         success: false,
-        message: 'Invalid token. Please login again.',
+        message: "Invalid token. Please login again.",
       });
     }
-    
-    if (error.name === 'TokenExpiredError') {
+
+    if (error.name === "TokenExpiredError") {
       return res.status(401).json({
         success: false,
-        message: 'Token expired. Please login again.',
+        message: "Token expired. Please login again.",
       });
     }
 
     res.status(401).json({
       success: false,
-      message: 'Authentication failed',
+      message: "Authentication failed",
     });
   }
 };

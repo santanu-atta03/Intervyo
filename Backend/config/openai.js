@@ -55,7 +55,7 @@ export const evaluateAnswer = async (
   question,
   answer,
   context,
-  codeSubmitted = null
+  codeSubmitted = null,
 ) => {
   try {
     const response = await openai.chat.completions.create({
@@ -128,7 +128,7 @@ Remember: The "review" field should sound like natural human speech with NO nume
 export const generateNextQuestion = async (
   conversationHistory,
   role,
-  difficulty
+  difficulty,
 ) => {
   try {
     const response = await openai.chat.completions.create({
@@ -151,7 +151,7 @@ Make questions natural and conversational.`,
           content: `Previous questions and evaluations:\n${JSON.stringify(
             conversationHistory,
             null,
-            2
+            2,
           )}\n\nGenerate the next interview question as a JSON object with these keys:
 {
   "question": "Your conversational question here",
@@ -196,7 +196,7 @@ Return ONLY the JSON object, no extra text.`,
 export const generateInterviewQuestions = async (
   role,
   difficulty,
-  resumeText
+  resumeText,
 ) => {
   try {
     const response = await openai.chat.completions.create({

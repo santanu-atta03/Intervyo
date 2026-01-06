@@ -3,23 +3,21 @@
 // File: services/aiContentGenerator.js
 // ============================================
 
-import { Module, AIContentCache } from '../models/LearningHub.model.js';
+import { Module, AIContentCache } from "../models/LearningHub.model.js";
 import OpenAI from "openai";
-import {  Topic } from '../models/LearningHub.model.js';
+import { Topic } from "../models/LearningHub.model.js";
 
 export const openai = new OpenAI({
   apiKey: process.env.GROQ_API_KEY,
   baseURL: "https://api.groq.com/openai/v1",
 });
 
-
-
 // ============================================
 // GENERATE TEXT CONTENT
 // ============================================
 async function generateTextContent(module) {
   const topic = await Topic.findById(module.topicId);
-  
+
   const prompt = `You are an expert technical educator. Create comprehensive learning content for this module:
 
 Topic: ${topic.title}
@@ -45,18 +43,20 @@ Make it engaging, practical, and suitable for someone learning this topic.`;
 
   const message = await openai.chat.completions.create({
     model: "llama-3.3-70b-versatile",
-    messages: [{
-      role: 'user',
-      content: prompt
-    }],
+    messages: [
+      {
+        role: "user",
+        content: prompt,
+      },
+    ],
     temperature: 0.8,
     max_tokens: 2000,
   });
 
   return {
-    type: 'markdown',
+    type: "markdown",
     content: message.choices[0].message.content,
-    resources: []
+    resources: [],
   };
 }
 
@@ -65,7 +65,7 @@ Make it engaging, practical, and suitable for someone learning this topic.`;
 // ============================================
 async function generateCodeContent(module) {
   const topic = await Topic.findById(module.topicId);
-  
+
   const prompt = `Create a hands-on coding lesson for:
 
 Module: ${module.title}
@@ -84,18 +84,20 @@ Format as markdown with code blocks. Make it practical and hands-on.`;
 
   const message = await openai.chat.completions.create({
     model: "llama-3.3-70b-versatile",
-    messages: [{
-      role: 'user',
-      content: prompt
-    }],
+    messages: [
+      {
+        role: "user",
+        content: prompt,
+      },
+    ],
     temperature: 0.8,
     max_tokens: 2000,
   });
 
   return {
-    type: 'code',
+    type: "code",
     content: message.choices[0].message.content,
-    language: determineLanguage(topic.domain)
+    language: determineLanguage(topic.domain),
   };
 }
 
@@ -104,7 +106,7 @@ Format as markdown with code blocks. Make it practical and hands-on.`;
 // ============================================
 async function generateQuizContent(module) {
   const topic = await Topic.findById(module.topicId);
-  
+
   const prompt = `Create a quiz to test understanding of:
 
 Module: ${module.title}
@@ -130,10 +132,12 @@ Return as JSON array:
 
   const message = await openai.chat.completions.create({
     model: "llama-3.3-70b-versatile",
-    messages: [{
-      role: 'user',
-      content: prompt
-    }],
+    messages: [
+      {
+        role: "user",
+        content: prompt,
+      },
+    ],
     temperature: 0.8,
     max_tokens: 2000,
   });
@@ -143,9 +147,9 @@ Return as JSON array:
   const questions = jsonMatch ? JSON.parse(jsonMatch[0]) : [];
 
   return {
-    type: 'quiz',
+    type: "quiz",
     questions: questions,
-    passingScore: 70
+    passingScore: 70,
   };
 }
 
@@ -154,7 +158,7 @@ Return as JSON array:
 // ============================================
 async function generateProjectContent(module) {
   const topic = await Topic.findById(module.topicId);
-  
+
   const prompt = `Create a hands-on project for:
 
 Module: ${module.title}
@@ -174,18 +178,20 @@ Make it practical, industry-relevant, and portfolio-worthy.`;
 
   const message = await openai.chat.completions.create({
     model: "llama-3.3-70b-versatile",
-    messages: [{
-      role: 'user',
-      content: prompt
-    }],
+    messages: [
+      {
+        role: "user",
+        content: prompt,
+      },
+    ],
     temperature: 0.8,
     max_tokens: 2000,
   });
 
   return {
-    type: 'project',
+    type: "project",
     content: message.choices[0].message.content,
-    estimatedHours: Math.ceil(module.estimatedMinutes / 60)
+    estimatedHours: Math.ceil(module.estimatedMinutes / 60),
   };
 }
 
@@ -194,16 +200,16 @@ Make it practical, industry-relevant, and portfolio-worthy.`;
 // ============================================
 function determineLanguage(domain) {
   const languageMap = {
-    'Frontend': 'javascript',
-    'Backend': 'javascript',
-    'Fullstack': 'javascript',
-    'Data Science': 'python',
-    'ML': 'python',
-    'DevOps': 'bash',
-    'Mobile': 'javascript',
-    'Blockchain': 'solidity'
+    Frontend: "javascript",
+    Backend: "javascript",
+    Fullstack: "javascript",
+    "Data Science": "python",
+    ML: "python",
+    DevOps: "bash",
+    Mobile: "javascript",
+    Blockchain: "solidity",
   };
-  return languageMap[domain] || 'javascript';
+  return languageMap[domain] || "javascript";
 }
 // ============================================
 // GENERATE TOPIC CONTENT (Modules Structure)
@@ -215,13 +221,13 @@ export async function generateTopicContent(topic) {
     // Check cache first
     const cached = await AIContentCache.findOne({
       topicId: topic._id,
-      moduleTitle: 'course_structure'
+      moduleTitle: "course_structure",
     });
 
     let moduleStructure;
 
     if (cached && cached.expiresAt > new Date()) {
-      console.log('✅ Using cached content');
+      console.log("✅ Using cached content");
       moduleStructure = cached.content;
       cached.usageCount += 1;
       await cached.save();
@@ -257,21 +263,23 @@ Make it practical, industry-relevant, and suitable for ${topic.difficulty.toLowe
 
       const message = await openai.chat.completions.create({
         model: "llama-3.3-70b-versatile",
-        messages: [{
-          role: 'user',
-          content: prompt
-        }],
+        messages: [
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
         temperature: 0.8,
         max_tokens: 1000,
       });
 
-      console.log("Message : ",message)
+      console.log("Message : ", message);
       const responseText = message.choices[0].message.content;
-      
+
       // Extract JSON from response
       const jsonMatch = responseText.match(/\[[\s\S]*\]/);
       if (!jsonMatch) {
-        throw new Error('Failed to parse AI response');
+        throw new Error("Failed to parse AI response");
       }
 
       moduleStructure = JSON.parse(jsonMatch[0]);
@@ -279,9 +287,9 @@ Make it practical, industry-relevant, and suitable for ${topic.difficulty.toLowe
       // Cache the structure
       await AIContentCache.create({
         topicId: topic._id,
-        moduleTitle: 'course_structure',
+        moduleTitle: "course_structure",
         content: moduleStructure,
-        usageCount: 1
+        usageCount: 1,
       });
     }
 
@@ -293,18 +301,17 @@ Make it practical, industry-relevant, and suitable for ${topic.difficulty.toLowe
         title: moduleData.title,
         description: moduleData.description,
         order: moduleData.order,
-        contentType: moduleData.contentType || 'text',
+        contentType: moduleData.contentType || "text",
         estimatedMinutes: moduleData.estimatedMinutes || 30,
-        content: null // Will be generated on-demand
+        content: null, // Will be generated on-demand
       });
       savedModules.push(module);
     }
 
     console.log(`✅ Generated ${savedModules.length} modules`);
     return savedModules;
-
   } catch (error) {
-    console.error('Error generating topic content:', error);
+    console.error("Error generating topic content:", error);
     throw error;
   }
 }
@@ -319,11 +326,11 @@ export async function generateModuleContent(module) {
     // Check cache first
     const cached = await AIContentCache.findOne({
       topicId: module.topicId,
-      moduleTitle: module.title
+      moduleTitle: module.title,
     });
 
     if (cached && cached.expiresAt > new Date()) {
-      console.log('✅ Using cached module content');
+      console.log("✅ Using cached module content");
       cached.usageCount += 1;
       await cached.save();
       return cached.content;
@@ -332,13 +339,13 @@ export async function generateModuleContent(module) {
     // Generate new content based on type
     let content;
 
-    if (module.contentType === 'text') {
+    if (module.contentType === "text") {
       content = await generateTextContent(module);
-    } else if (module.contentType === 'code') {
+    } else if (module.contentType === "code") {
       content = await generateCodeContent(module);
-    } else if (module.contentType === 'quiz') {
+    } else if (module.contentType === "quiz") {
       content = await generateQuizContent(module);
-    } else if (module.contentType === 'project') {
+    } else if (module.contentType === "project") {
       content = await generateProjectContent(module);
     } else {
       content = await generateTextContent(module);
@@ -349,14 +356,13 @@ export async function generateModuleContent(module) {
       topicId: module.topicId,
       moduleTitle: module.title,
       content: content,
-      usageCount: 1
+      usageCount: 1,
     });
 
-    console.log('✅ Module content generated and cached');
+    console.log("✅ Module content generated and cached");
     return content;
-
   } catch (error) {
-    console.error('Error generating module content:', error);
+    console.error("Error generating module content:", error);
     throw error;
   }
 }
@@ -366,7 +372,7 @@ export async function generateModuleContent(module) {
 // ============================================
 // async function generateTextContent(module) {
 //   const topic = await module.populate('topicId');
-  
+
 //   const prompt = `You are an expert technical educator. Create comprehensive learning content for this module:
 
 // Topic: ${topic.topicId.title}
@@ -412,7 +418,7 @@ export async function generateModuleContent(module) {
 // ============================================
 // async function generateCodeContent(module) {
 //   const topic = await module.populate('topicId');
-  
+
 //   const prompt = `Create a hands-on coding lesson for:
 
 // Module: ${module.title}
@@ -451,7 +457,7 @@ export async function generateModuleContent(module) {
 // ============================================
 // async function generateQuizContent(module) {
 //   const topic = await module.populate('topicId');
-  
+
 //   const prompt = `Create a quiz to test understanding of:
 
 // Module: ${module.title}
@@ -509,7 +515,7 @@ export async function generateModuleContent(module) {
 // ============================================
 // async function generateProjectContent(module) {
 //   const topic = await module.populate('topicId');
-  
+
 //   const prompt = `Create a hands-on project for:
 
 // Module: ${module.title}
@@ -569,9 +575,9 @@ export async function generateLearningPath(userProfile, userGoals) {
     const prompt = `As a career advisor, recommend a learning path for:
 
 User Profile:
-- Current Skills: ${userProfile.skills?.join(', ') || 'Beginner'}
-- Domain: ${userProfile.domain || 'General'}
-- Goal: ${userGoals || 'Career advancement'}
+- Current Skills: ${userProfile.skills?.join(", ") || "Beginner"}
+- Domain: ${userProfile.domain || "General"}
+- Goal: ${userGoals || "Career advancement"}
 
 Suggest 5-7 topics in order of learning, with reasoning.
 
@@ -586,25 +592,25 @@ Return as JSON:
 ]`;
 
     const message = await openai.chat.completions.create({
-    model: "llama-3.3-70b-versatile",
-    messages: [{
-      role: 'user',
-      content: prompt
-    }],
-    temperature: 0.8,
-    max_tokens: 1000,
-  });
+      model: "llama-3.3-70b-versatile",
+      messages: [
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      temperature: 0.8,
+      max_tokens: 1000,
+    });
 
     const responseText = message.content[0].text;
     const jsonMatch = responseText.match(/\[[\s\S]*\]/);
     return jsonMatch ? JSON.parse(jsonMatch[0]) : [];
-
   } catch (error) {
-    console.error('Error generating learning path:', error);
+    console.error("Error generating learning path:", error);
     throw error;
   }
 }
-
 
 // ============================================
 // GENERATE MODULE CONTENT (Missing function)

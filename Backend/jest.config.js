@@ -1,8 +1,8 @@
 export default {
-  testEnvironment: 'node',
+  testEnvironment: "node",
   transform: {},
   verbose: true,
-  testMatch: ['**/tests/**/*.test.js'],
+  testMatch: ["**/tests/**/*.test.js"],
   forceExit: true,
   clearMocks: true,
   resetMocks: true,

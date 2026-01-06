@@ -1,4 +1,4 @@
-import express from 'express';
+import express from "express";
 import {
   getProfile,
   updatePersonalInfo,
@@ -8,9 +8,9 @@ import {
   updateAchievements,
   uploadProfilePicture,
   deleteProfilePicture,
-} from '../controllers/ProfileController.js';
-import { upload } from '../config/cloudinary.js';
-import { protect } from '../middlewares/auth.js';
+} from "../controllers/ProfileController.js";
+import { upload } from "../config/cloudinary.js";
+import { protect } from "../middlewares/auth.js";
 
 const router = express.Router();
 
@@ -18,17 +18,21 @@ const router = express.Router();
 router.use(protect);
 
 // Main profile route
-router.get('/', getProfile);
+router.get("/", getProfile);
 
 // Tab-specific update routes
-router.put('/personal', updatePersonalInfo);
-router.put('/professional', updateProfessionalInfo);
-router.put('/education', updateEducation);
-router.put('/certificates', updateCertificates);
-router.put('/achievements', updateAchievements);
+router.put("/personal", updatePersonalInfo);
+router.put("/professional", updateProfessionalInfo);
+router.put("/education", updateEducation);
+router.put("/certificates", updateCertificates);
+router.put("/achievements", updateAchievements);
 
 // Profile picture routes
-router.post('/upload-picture', upload.single('profilePicture'), uploadProfilePicture);
-router.delete('/picture', deleteProfilePicture);
+router.post(
+  "/upload-picture",
+  upload.single("profilePicture"),
+  uploadProfilePicture,
+);
+router.delete("/picture", deleteProfilePicture);
 
 export default router;

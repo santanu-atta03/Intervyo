@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer';
+import nodemailer from "nodemailer";
 
 export const mailSender = async (email, title, body) => {
   try {
@@ -19,10 +19,10 @@ export const mailSender = async (email, title, body) => {
       html: body,
     });
 
-    console.log('Email sent successfully:', info.messageId);
+    console.log("Email sent successfully:", info.messageId);
     return info;
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.error("Error sending email:", error);
     throw error;
   }
 };

@@ -1,5 +1,5 @@
-import mongoose from 'mongoose';
-import { mailSender } from '../config/email.js';
+import mongoose from "mongoose";
+import { mailSender } from "../config/email.js";
 
 const otpSchema = new mongoose.Schema({
   email: {
@@ -52,21 +52,21 @@ const otpEmailTemplate = (otp) => {
 };
 
 // Send verification email before saving
-otpSchema.pre('save', async function (next) {
+otpSchema.pre("save", async function (next) {
   try {
     if (this.isNew) {
       await mailSender(
         this.email,
-        'Email Verification - Intervyo',
-        otpEmailTemplate(this.otp)
+        "Email Verification - Intervyo",
+        otpEmailTemplate(this.otp),
       );
-      console.log('OTP email sent successfully to:', this.email);
+      console.log("OTP email sent successfully to:", this.email);
     }
     next();
   } catch (error) {
-    console.error('Error sending OTP email:', error);
+    console.error("Error sending OTP email:", error);
     next(error);
   }
 });
 
-export default mongoose.model('OTP', otpSchema);
+export default mongoose.model("OTP", otpSchema);
