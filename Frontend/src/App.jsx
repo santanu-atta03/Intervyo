@@ -20,6 +20,9 @@ import BlogPlatform from './components/Blogs/BlogPlatform';
 import Achievements from './components/Dashboard/Achievements';
 import AIChatbot from './components/Chatbot/AiChatBot';
 import NotFound from './pages/NotFound'; // Import the 404 page
+import Analytics from './pages/Analytics';
+import NotFound from './pages/NotFound';
+import ScrollToTop from './components/shared/ScrollToTop';
 
 function App() {
   return (
@@ -56,6 +59,22 @@ function App() {
         />
         
         {/* UPDATED: Use InterviewWrapper instead of InterviewRoom directly */}
+          path="/analytics" 
+          element={
+            <ProtectedRoute>
+              <Analytics />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+        path="/interview-setup" 
+        element={
+          <ProtectedRoute>
+            <InterviewSetup />
+          </ProtectedRoute>
+        } 
+      />
+        
         <Route 
           path="/interview/:interviewId" 
           element={
@@ -79,6 +98,10 @@ function App() {
         <Route path="*" element={<NotFound />} />
       </Routes>
 
+      {/* Add ScrollToTop first with higher z-index */}
+      <ScrollToTop />
+      
+      {/* Then AIChatbot with lower z-index */}
       <AIChatbot defaultContext="general" />
     </>
   );
