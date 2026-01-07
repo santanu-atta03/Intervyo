@@ -162,4 +162,4 @@ Low-effort, spam, or cosmetic-only contributions will be closed.
 ## 📜 Code of Conduct
 
 This project follows the Contributor Covenant Code of Conduct.  
-Please read CODE_OF_CONDUCT.md before contributing.
+Please read  [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before contributing.
