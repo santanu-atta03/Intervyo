@@ -20,18 +20,25 @@ router.get('/google',
 
 // Google OAuth Callback
 router.get('/google/callback',
-  passport.authenticate('google', { 
+  passport.authenticate('google', {
     session: false,
-    failureRedirect: `${process.env.CLIENT_URL}/login?error=google_auth_failed`
+    failureRedirect: `${process.env.CLIENT_URL}/login?error=google_auth_failed`,
   }),
   (req, res) => {
-    // Generate JWT token
     const token = req.user.generateAuthToken();
-    
-    // Redirect to frontend with token
-    res.redirect(`${process.env.CLIENT_URL}/auth/callback?token=${token}`);
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: true,          // REQUIRED on HTTPS (Render + Vercel)
+      sameSite: 'none',      // REQUIRED for cross-domain cookies
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+
+    // CLEAN redirect (NO token)
+    res.redirect(`${process.env.CLIENT_URL}/auth/callback`);
   }
 );
+
 
 router.get('/github',
   passport.authenticate('github', { 
@@ -41,15 +48,36 @@ router.get('/github',
 );
 
 // GitHub OAuth Callback
-router.get('/github/callback',
-  passport.authenticate('github', { 
+// router.get('/github/callback',
+//   passport.authenticate('github', { 
+//     session: false,
+//     failureRedirect: `${process.env.CLIENT_URL}/login?error=github_auth_failed`
+//   }),
+//   (req, res) => {
+//     const token = req.user.generateAuthToken();
+//     res.redirect(`${process.env.CLIENT_URL}/auth/callback?token=${token}`);
+//   }
+// );
+router.get(
+  '/github/callback',
+  passport.authenticate('github', {
     session: false,
-    failureRedirect: `${process.env.CLIENT_URL}/login?error=github_auth_failed`
+    failureRedirect: `${process.env.CLIENT_URL}/login?error=github_auth_failed`,
   }),
   (req, res) => {
     const token = req.user.generateAuthToken();
-    res.redirect(`${process.env.CLIENT_URL}/auth/callback?token=${token}`);
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: true,      // REQUIRED on HTTPS
+      sameSite: 'none',  // REQUIRED for Vercel ↔ Render
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+
+    // CLEAN redirect (NO token)
+    res.redirect(`${process.env.CLIENT_URL}/auth/callback`);
   }
 );
+
 
 export default router;

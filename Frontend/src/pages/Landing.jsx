@@ -1,6 +1,54 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import {Link, useNavigate} from "react-router-dom"
+// Logo asset (imported as default if needed in future UI tweaks)
+import logo from "../assets/intervyologo.png";
+import {
+  Bot,
+  BarChart3,
+  Code,
+  Database,
+  Cpu,
+  Smartphone,
+  Wrench,
+  Target,
+  TrendingUp,
+  Trophy,
+  Users,
+  Star,
+  Play,
+  User,
+  UserRound,
+  Briefcase,
+  GraduationCap,
+  Globe,
+  ArrowRight,
+  Check,
+  Award,
+  Zap,
+  Lightbulb,
+  Rocket,
+  Settings,
+  Monitor,
+  Server,
+  SmartphoneIcon,
+  Cloud,
+  Shield,
+  Lock,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  Clock,
+  FileText,
+  PieChart,
+  BarChart,
+  TrendingUpIcon,
+  Users2,
+  FileBarChart,
+  StarIcon
+} from 'lucide-react';
+
 
 export default function LandingPage() {
   const [scrollY, setScrollY] = useState(0);
@@ -9,7 +57,7 @@ export default function LandingPage() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const {token} = useSelector((state) => state.auth);
+  const { token } = useSelector((state) => state.auth);
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   const navigate = useNavigate();
 
@@ -18,10 +66,10 @@ export default function LandingPage() {
     const handleMouseMove = (e) => {
       setMousePosition({ x: e.clientX, y: e.clientY });
     };
-    
+
     window.addEventListener('scroll', handleScroll);
     window.addEventListener('mousemove', handleMouseMove);
-    
+
     // Intersection Observer for scroll animations
     const observer = new IntersectionObserver(
       (entries) => {
@@ -46,25 +94,25 @@ export default function LandingPage() {
 
   const features = [
     {
-      icon: '🤖',
+      icon: <Bot className="w-10 h-10" />, // AI-Powered Interviews
       title: 'AI-Powered Interviews',
       description: 'Experience realistic interviews with our advanced AI interviewer',
       gradient: 'from-purple-500 to-pink-500'
     },
     {
-      icon: '📊',
+      icon: <BarChart3 className="w-10 h-10" />, // Real-Time Analytics
       title: 'Real-Time Analytics',
       description: 'Get instant feedback on your performance with detailed metrics',
       gradient: 'from-blue-500 to-cyan-500'
     },
     {
-      icon: '🎯',
+      icon: <Target className="w-10 h-10" />, // Domain-Specific Prep
       title: 'Domain-Specific Prep',
       description: 'Practice for Frontend, Backend, Data Science & more',
       gradient: 'from-green-500 to-emerald-500'
     },
     {
-      icon: '🏆',
+      icon: <Trophy className="w-10 h-10" />, // Gamified Learning
       title: 'Gamified Learning',
       description: 'Earn XP, unlock badges, and compete on leaderboards',
       gradient: 'from-yellow-500 to-orange-500'
@@ -75,21 +123,21 @@ export default function LandingPage() {
     {
       name: 'Sarah Chen',
       role: 'Software Engineer at Google',
-      image: '👩‍💻',
+      image: <UserRound className="w-10 h-10" />,
       text: 'This platform helped me land my dream job! The AI interviewer felt incredibly real.',
       rating: 5
     },
     {
       name: 'Mike Johnson',
       role: 'Data Scientist at Amazon',
-      image: '👨‍💼',
+      image: <UserRound className="w-10 h-10" />,
       text: 'The instant feedback and analytics were game-changers for my interview prep.',
       rating: 5
     },
     {
       name: 'Priya Sharma',
       role: 'Full Stack Developer at Microsoft',
-      image: '👩‍🔬',
+      image: <UserRound className="w-10 h-10" />,
       text: 'I improved my confidence by 10x. The practice sessions were incredibly valuable.',
       rating: 5
     }
@@ -103,12 +151,12 @@ export default function LandingPage() {
   ];
 
   const domains = [
-    { name: 'Frontend', icon: '🎨', color: 'bg-pink-500' },
-    { name: 'Backend', icon: '⚙️', color: 'bg-blue-500' },
-    { name: 'Full Stack', icon: '🚀', color: 'bg-purple-500' },
-    { name: 'Data Science', icon: '📊', color: 'bg-green-500' },
-    { name: 'DevOps', icon: '🔧', color: 'bg-orange-500' },
-    { name: 'Mobile', icon: '📱', color: 'bg-indigo-500' }
+    { name: 'Frontend', icon: <Code className="w-8 h-8" />, color: 'bg-pink-500' },
+    { name: 'Backend', icon: <Server className="w-8 h-8" />, color: 'bg-blue-500' },
+    { name: 'Full Stack', icon: <Globe className="w-8 h-8" />, color: 'bg-purple-500' },
+    { name: 'Data Science', icon: <Database className="w-8 h-8" />, color: 'bg-green-500' },
+    { name: 'DevOps', icon: <Wrench className="w-8 h-8" />, color: 'bg-orange-500' },
+    { name: 'Mobile', icon: <Smartphone className="w-8 h-8" />, color: 'bg-indigo-500' }
   ];
 
   const pricingPlans = [
@@ -198,9 +246,9 @@ export default function LandingPage() {
         }
       `}</style>
 
-      {/* Animated Cursor Effect - Hidden on mobile */}
-      <div 
-        className="fixed w-96 h-96 rounded-full pointer-events-none z-0 mix-blend-screen hidden md:block"
+      {/* Animated Cursor Effect */}
+      <div
+        className="fixed w-96 h-96 rounded-full pointer-events-none z-0 mix-blend-screen"
         style={{
           background: 'radial-gradient(circle, rgba(168,85,247,0.15) 0%, transparent 70%)',
           left: mousePosition.x - 192,
@@ -226,6 +274,7 @@ export default function LandingPage() {
               <a href="#how-it-works" className="hover:text-purple-400 transition">How It Works</a>
               <a href="#pricing" className="hover:text-purple-400 transition">Pricing</a>
               <a href="#testimonials" className="hover:text-purple-400 transition">Testimonials</a>
+              <a href="/faq" className="hover:text-purple-400 transition">FAQ</a>
             </div>
 
             {/* Mobile Menu Button */}
@@ -356,7 +405,7 @@ export default function LandingPage() {
       <section id="features" className="py-12 md:py-20 px-4 relative">
         <div className="max-w-7xl mx-auto">
           <div id="features-header" data-animate className={`text-center mb-8 md:mb-16 fade-in-up ${isVisible['features-header'] ? 'visible' : ''}`}>
-            <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4">Why Choose InterviewPro?</h2>
+            <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4">Why Choose Intervyo?</h2>
             <p className="text-gray-400 text-sm md:text-lg">Everything you need to ace your interview</p>
           </div>
 
@@ -390,9 +439,9 @@ export default function LandingPage() {
 
           <div className="space-y-8 md:space-y-12">
             {[
-              { step: '01', title: 'Choose Your Domain', desc: 'Select from Frontend, Backend, Data Science, and more', icon: '🎯' },
-              { step: '02', title: 'Start AI Interview', desc: 'Experience realistic interviews with our advanced AI', icon: '🤖' },
-              { step: '03', title: 'Get Instant Feedback', desc: 'Receive detailed analytics and improvement suggestions', icon: '📊' }
+              { step: '01', title: 'Choose Your Domain', desc: 'Select from Frontend, Backend, Data Science, and more', icon: <Target className="w-10 h-10" /> },
+              { step: '02', title: 'Start AI Interview', desc: 'Experience realistic interviews with our advanced AI', icon: <Bot className="w-10 h-10" /> },
+              { step: '03', title: 'Get Instant Feedback', desc: 'Receive detailed analytics and improvement suggestions', icon: <BarChart3 className="w-10 h-10" /> }
             ].map((item, index) => (
               <div
                 key={index}
@@ -473,9 +522,8 @@ export default function LandingPage() {
                 key={index}
                 id={`plan-${index}`}
                 data-animate
-                className={`scale-in ${isVisible[`plan-${index}`] ? 'visible' : ''} relative bg-white/5 backdrop-blur-lg rounded-2xl p-6 md:p-8 border ${
-                  plan.popular ? 'border-purple-500 shadow-2xl shadow-purple-500/20' : 'border-white/10'
-                } hover:border-purple-500/50 transition`}
+                className={`scale-in ${isVisible[`plan-${index}`] ? 'visible' : ''} relative bg-white/5 backdrop-blur-lg rounded-2xl p-8 border ${plan.popular ? 'border-purple-500 shadow-2xl shadow-purple-500/20' : 'border-white/10'
+                  } hover:border-purple-500/50 transition`}
                 style={{ transitionDelay: `${index * 0.15}s` }}
               >
                 {plan.popular && (
@@ -503,7 +551,7 @@ export default function LandingPage() {
                   plan.popular
                     ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'
                     : 'bg-white/10 hover:bg-white/20 border border-white/20'
-                }`}>
+                  }`}>
                   {plan.buttonText}
                 </button>
               </div>

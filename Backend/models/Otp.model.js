@@ -34,7 +34,7 @@ const otpEmailTemplate = (otp) => {
     <body>
       <div class="container">
         <div class="header">
-          <h1 style="color: #667eea;">InterviewPro</h1>
+          <h1 style="color: #667eea;">Intervyo</h1>
           <p>Verify Your Email Address</p>
         </div>
         <p>Hello,</p>

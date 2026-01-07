@@ -384,7 +384,8 @@ export const login = async (req, res) => {
 // controllers/Auth.controller.js
 export const getCurrentUser = async (req, res) => {
   try {
-    const token = req.headers.authorization?.replace("Bearer ", "");
+    const token = req.cookies.token;
+
     
     if (!token) {
       return res.status(401).json({
