@@ -34,12 +34,12 @@ export default function Login() {
 
   // Google OAuth Login
   const handleGoogleLogin = () => {
-    window.location.href = `${import.meta.env.VITE_BASE_URL}/auth/google`;
+    window.location.href = "https://intervyo.onrender.com/api/auth/google";
   };
 
   // GitHub OAuth Login
   const handleGitHubLogin = () => {
-    window.location.href = `${import.meta.env.VITE_BASE_URL}/auth/github`;
+    window.location.href = "https://intervyo.onrender.com/api/auth/github";
   };
 
   return (

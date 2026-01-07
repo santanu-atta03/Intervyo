@@ -32,23 +32,48 @@ const AIChatbot = ({ defaultContext = 'general' }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
   const [context, setContext] = useState(defaultContext);
-  
+
+  // Refs for scrolling behavior
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Scroll to bottom of messages
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  // Track whether user is viewing the latest messages
+  const [isAtBottom, setIsAtBottom] = useState(true);
+
+  // Scroll to bottom of messages using sentinel element
+  const scrollToBottom = (behavior = 'smooth') => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior, block: 'end' });
+    }
   };
 
+  // Auto-scroll only when new messages are added AND user is already near the bottom
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    if (!isAtBottom) return;
+    if (!messages.length) return;
+
+    scrollToBottom('smooth');
+  }, [messages.length, isAtBottom]);
+
+  // Keep scroll position stable while user is reading older messages
+  const handleMessagesScroll = () => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    const threshold = 80; // px from bottom considered "at bottom"
+    const distanceFromBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight;
+
+    setIsAtBottom(distanceFromBottom <= threshold);
+  };
 
   // Load conversations when chatbot opens
   useEffect(() => {
     if (isOpen) {
       loadConversations();
+      // When chat opens, consider user at bottom so first messages auto-scroll
+      setIsAtBottom(true);
     }
   }, [isOpen]);
 
@@ -69,6 +94,10 @@ const AIChatbot = ({ defaultContext = 'general' }) => {
       setCurrentConversation(response.data);
       setMessages(response.data.messages);
       setContext(response.data.context);
+      // After loading a conversation, jump directly to the latest message
+      setIsAtBottom(true);
+      // Use next tick to ensure DOM has rendered before scrolling
+      requestAnimationFrame(() => scrollToBottom('auto'));
     } catch (error) {
       console.error('Failed to load conversation:', error);
       toast.error('Failed to load conversation');
@@ -294,7 +323,11 @@ const AIChatbot = ({ defaultContext = 'general' }) => {
 
         {/* Messages Area */}
         <div className="chatbot-messages-container">
-          <div className="chatbot-messages">
+          <div
+            className="chatbot-messages"
+            ref={messagesContainerRef}
+            onScroll={handleMessagesScroll}
+          >
             {messages.length === 0 ? (
               <div className="chatbot-welcome">
                 <h2>👋 Welcome to AI Assistant!</h2>
