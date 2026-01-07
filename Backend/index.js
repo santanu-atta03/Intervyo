@@ -26,6 +26,9 @@ import errorHandler from './middlewares/error.middleware.js';
 import fileUpload from 'express-fileupload'
 import http from 'http'
 import { Server } from 'socket.io';
+import cookieParser from 'cookie-parser';
+
+
 dotenv.config();
 
 const app = express();
@@ -35,16 +38,15 @@ const io = new Server(server, {
   cors: {
     origin: process.env.FRONTEND_URL || 'https://intervyo-sage.vercel.app',
     methods: ['GET', 'POST'],
-    credentials: true
   }
 });
+app.use(cookieParser());
 app.use(helmet());
 // ========================================
 // MIDDLEWARE
 // ========================================
 app.use(cors({
   origin: process.env.CLIENT_URL || 'https://intervyo-sage.vercel.app',
-  credentials: true,
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

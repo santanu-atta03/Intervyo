@@ -1,42 +1,28 @@
 // frontend/src/pages/AuthCallback.jsx
 import { useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default function AuthCallback() {
   const navigate = useNavigate();
-  const location = useLocation();
 
   useEffect(() => {
-    // Extract token from URL
-    const params = new URLSearchParams(location.search);
-    const token = params.get('token');
-    console.log("token : ",token)
-    if (token) {
-      // Save token
-      localStorage.setItem('token', token);
-      
-      // Fetch user data
-      fetch('https://intervyo.onrender.com/api/auth/me', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+    fetch(`${API_URL}/api/auth/me`, {
+      credentials: 'include', // REQUIRED for cookies
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error('Not authenticated');
+        return res.json();
       })
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) {
-            localStorage.setItem('user', JSON.stringify(data.user));
-            navigate('/dashboard');
-          } else {
-            navigate('/login?error=auth_failed');
-          }
-        })
-        .catch(() => {
-          navigate('/login?error=auth_failed');
-        });
-    } else {
-      navigate('/login?error=no_token');
-    }
-  }, [location, navigate]);
+      .then((data) => {
+        localStorage.setItem('user', JSON.stringify(data.user));
+        navigate('/dashboard');
+      })
+      .catch(() => {
+        navigate('/login?error=auth_failed');
+      });
+  }, [navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center">
