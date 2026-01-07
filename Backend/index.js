@@ -19,7 +19,8 @@ import notificationRoutes from './routes/notification.route.js';
 import blogRoutes from './routes/blog.routes.js';
 import profileRoutes from './routes/Profile.route.js'
 import emotionRoutes from './routes/emotion.routes.js';
-import analyticsRoutes from './routes/analytics.route.js'
+import analyticsRoutes from './routes/analytics.route.js';
+import newsletterRoutes from './routes/newsletter.routes.js';
 import { dbConnect } from './config/db.js';
 import { apiLimiter } from './middlewares/rateLimiter.js';
 import errorHandler from './middlewares/error.middleware.js';
@@ -77,6 +78,7 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/achievements', achievementRoutes);
 app.use('/api/chatbot', chatbotRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/newsletter', newsletterRoutes);
 
 // Emotion metrics routes
 app.use('/api/interviews', emotionRoutes);
