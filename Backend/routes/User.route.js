@@ -35,7 +35,7 @@ router.get('/google/callback',
     });
 
     // CLEAN redirect (NO token)
-    res.redirect(`${process.env.CLIENT_URL}/auth/callback`);
+    res.redirect(`${process.env.CLIENT_URL}/auth/google/callback`);
   }
 );
 
@@ -75,7 +75,7 @@ router.get(
     });
 
     // CLEAN redirect (NO token)
-    res.redirect(`${process.env.CLIENT_URL}/auth/callback`);
+    res.redirect(`${process.env.CLIENT_URL}/auth/github/callback`);
   }
 );
 
