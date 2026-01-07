@@ -154,7 +154,7 @@ This platform is built to expose weaknesses, not hide them.
 
 ## 🤝 Contributing
 
-Please read CONTRIBUTING.md before opening a pull request.  
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.  
 Low-effort, spam, or cosmetic-only contributions will be closed.
 
 ---
