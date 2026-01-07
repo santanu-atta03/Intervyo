@@ -38,6 +38,7 @@ const io = new Server(server, {
   cors: {
     origin: process.env.FRONTEND_URL || 'https://intervyo-sage.vercel.app',
     methods: ['GET', 'POST'],
+    credentials: true
   }
 });
 app.use(cookieParser());
@@ -47,6 +48,7 @@ app.use(helmet());
 // ========================================
 app.use(cors({
   origin: process.env.CLIENT_URL || 'https://intervyo-sage.vercel.app',
+  credentials: true,
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
