@@ -7,6 +7,7 @@ import dotenv from "dotenv";
 import passport from "./config/Passport.js";
 import authRoutes from "./routes/User.route.js";
 // import interviewRoutes from './routes/interview.route.js'
+
 import interviewRoutes from "./routes/InterviewRoutes.js";
 import learningHubRoutes from "./routes/learningHub.routes.js";
 import aiRoutes from "./routes/aiRoutes.js";
@@ -26,6 +27,9 @@ import errorHandler from "./middlewares/error.middleware.js";
 import fileUpload from "express-fileupload";
 import http from "http";
 import { Server } from "socket.io";
+import cookieParser from "cookie-parser";
+
+
 dotenv.config();
 
 const app = express();
@@ -35,9 +39,9 @@ const io = new Server(server, {
   cors: {
     origin: process.env.FRONTEND_URL || "https://intervyo-sage.vercel.app",
     methods: ["GET", "POST"],
-    credentials: true,
-  },
+  }
 });
+app.use(cookieParser());
 app.use(helmet());
 // ========================================
 // MIDDLEWARE

@@ -59,99 +59,6 @@ export const sendOTP = async (req, res) => {
   }
 };
 
-// Register with OTP verification and auto profile creation
-// export const register = async (req, res) => {
-//   try {
-//     const { name, email, password, otp } = req.body;
-
-//     if (!name || !email || !password || !otp) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "All fields are required",
-//       });
-//     }
-
-//     const existingUser = await User.findOne({ email });
-//     if (existingUser) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Email already registered",
-//       });
-//     }
-
-//     // Verify OTP
-//     const recentOTP = await OTP.findOne({ email })
-//       .sort({ createdAt: -1 })
-//       .limit(1);
-
-//     if (!recentOTP) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "OTP not found. Please request a new one.",
-//       });
-//     }
-
-//     if (recentOTP.otp !== otp) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Invalid OTP",
-//       });
-//     }
-
-//     // Create empty profile first
-//     const newProfile = await Profile.create({
-//       phone: null,
-//       gender: null,
-//       age: null,
-//       bio: null,
-//       location: null,
-//       domain: null,
-//       experience: null,
-//       skills: [],
-//       linkedIn: null,
-//       github: null,
-//       portfolio: null,
-//       education: [],
-//       certificates: [],
-//       achievements: [],
-//     });
-//     // Create user with profile reference
-//     const user = await User.create({
-//       name,
-//       email,
-//       password,
-//       authProvider: "local",
-//       isVerified: true,
-//       profile : newProfile._id,
-//     });
-
-//     // Generate token
-//     const token = user.generateAuthToken();
-
-//     // Delete used OTP
-//     await OTP.deleteOne({ _id: recentOTP._id });
-
-//     // Fetch complete user data with profile
-//     const completeUser = await User.findById(user._id)
-//       .select('-password -resetPasswordToken -resetPasswordExpire')
-//       .populate('profile');
-
-//     res.status(201).json({
-//       success: true,
-//       message: "Registration successful",
-//       token,
-//       user: completeUser,
-//     });
-//   } catch (error) {
-//     console.error("Register Error:", error);
-//     res.status(500).json({
-//       success: false,
-//       message: "Registration failed",
-//       error: error.message,
-//     });
-//   }
-// };
-
 // controllers/Auth.controller.js - register function
 export const register = async (req, res) => {
   try {
@@ -253,61 +160,6 @@ export const register = async (req, res) => {
 };
 
 // Login
-// export const login = async (req, res) => {
-//   try {
-//     const { email, password } = req.body;
-
-//     if (!email || !password) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Email and password are required",
-//       });
-//     }
-
-//     const user = await User.findOne({ email }).populate('profile');
-//     if (!user) {
-//       return res.status(401).json({
-//         success: false,
-//         message: "Invalid email or password",
-//       });
-//     }
-
-//     if (user.authProvider !== "local") {
-//       return res.status(400).json({
-//         success: false,
-//         message: `Please login with ${user.authProvider}`,
-//       });
-//     }
-
-//     if (await bcrypt.compare(password, user.password)) {
-//       const token = user.generateAuthToken();
-
-//       const userResponse = await User.findById(user._id)
-//         .select('-password -resetPasswordToken -resetPasswordExpire')
-//         .populate('profile');
-
-//       res.json({
-//         success: true,
-//         message: "Login successful",
-//         token,
-//         user: userResponse,
-//       });
-//     } else {
-//       return res.status(401).json({
-//         success: false,
-//         message: "Password incorrect",
-//       });
-//     }
-//   } catch (error) {
-//     console.error("Login Error:", error);
-//     res.status(500).json({
-//       success: false,
-//       message: "Login failed",
-//       error: error.message,
-//     });
-//   }
-// };]
-
 // controllers/Auth.controller.js - login function
 export const login = async (req, res) => {
   try {
@@ -381,7 +233,7 @@ export const login = async (req, res) => {
 // controllers/Auth.controller.js
 export const getCurrentUser = async (req, res) => {
   try {
-    const token = req.headers.authorization?.replace("Bearer ", "");
+    const token = req.cookies.token || req.headers.authorization?.replace("Bearer ", "");
 
     if (!token) {
       return res.status(401).json({
@@ -424,6 +276,7 @@ export const getCurrentUser = async (req, res) => {
 
 // Logout
 export const logout = (req, res) => {
+  res.clearCookie("token");
   res.json({
     success: true,
     message: "Logged out successfully",

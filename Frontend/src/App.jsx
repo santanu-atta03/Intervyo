@@ -23,19 +23,21 @@ import FAQ from "./pages/FAQ";
 import Analytics from './pages/Analytics';
 import NotFound from './pages/NotFound';
 import ScrollToTop from './components/shared/ScrollToTop';
+import Footer from './components/shared/Footer';
+import TermsAndConditions from './pages/Terms';
+import PrivacyPolicy from './pages/Privacy';
 
 function App() {
   return (
     <>
       <Routes>
-        <Route path='/' element={<Landing />} />
+        <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path='/verify-email' element={<VerifyEmail />} />
         <Route path="/domain-selection" element={<DomainSelection />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/faq" element={<FAQ />} />
-        
         <Route 
           path="/dashboard" 
           element={
@@ -78,10 +80,15 @@ function App() {
             </ProtectedRoute>
           }
         />
-      </Routes>
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsAndConditions />} />
+        <Route path='/*' element={<NotFound />} />
 
+      </Routes>
+      
       <ScrollToTop />
       <AIChatbot defaultContext="general" />
+      <Footer />
     </>
   );
 }
