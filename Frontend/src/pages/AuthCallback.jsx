@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const API_URL_LOGIN = 'https://intervyo.onrender.com';
-
 export default function AuthCallback() {
   const navigate = useNavigate();
 
