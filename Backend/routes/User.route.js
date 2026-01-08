@@ -9,7 +9,7 @@ const isProd = process.env.NODE_ENV === 'production';
 router.post('/send-otp', sendOTP);
 router.post('/register', register);
 router.post('/login', login);
-router.get('/me',authenticate, getCurrentUser);
+router.get('/me',protect, getCurrentUser);
 router.post('/logout', logout);
 
 
