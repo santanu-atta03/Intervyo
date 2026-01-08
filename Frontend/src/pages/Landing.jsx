@@ -48,6 +48,7 @@ import {
   FileBarChart,
   StarIcon
 } from 'lucide-react';
+import SEO from '../components/SEO';
 
 
 export default function LandingPage() {
@@ -245,6 +246,11 @@ export default function LandingPage() {
           animation: slideOut 0.3s ease-in forwards;
         }
       `}</style>
+      <SEO
+    title="Intervyo – AI-Powered Interview Preparation Platform"
+    description="Practice interviews with AI-driven mock interviews, real-time feedback, and performance analysis."
+    url="https://intervyo.xyz"
+  />
 
       {/* Animated Cursor Effect */}
       <div
