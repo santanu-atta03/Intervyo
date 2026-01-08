@@ -1,17 +1,4 @@
 {
-  "redirects": [
-    {
-      "source": "/(.*)",
-      "has": [
-        {
-          "type": "host",
-          "value": "www.intervyo.xyz"
-        }
-      ],
-      "destination": "https://intervyo.xyz/$1",
-      "permanent": true
-    }
-  ],
   "headers": [
     {
       "source": "/sitemap.xml",
@@ -22,7 +9,7 @@
         },
         {
           "key": "Cache-Control",
-          "value": "no-store, max-age=0"
+          "value": "no-store"
         }
       ]
     }
