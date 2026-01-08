@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const API_URL = 'https://intervyo.onrender.com';
+const API_URL_LOGIN = 'https://intervyo.onrender.com';
 
 export default function AuthCallback() {
   const navigate = useNavigate();
@@ -19,7 +19,7 @@ export default function AuthCallback() {
     localStorage.setItem('token', token);
 
     // Fetch user using Bearer token
-    fetch(`${API_URL}/api/auth/me`, {
+    fetch(`${API_URL_LOGIN}/api/auth/me`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
