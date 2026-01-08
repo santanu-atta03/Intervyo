@@ -574,7 +574,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-white/10 py-8 md:py-12 px-4">
+      {/* <footer className="border-t border-white/10 py-8 md:py-12 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8 mb-6 md:mb-8">
             <div>
@@ -621,7 +621,7 @@ export default function LandingPage() {
             <p>&copy; {new Date().getFullYear()} InterviewPro. All rights reserved.</p>
           </div>
         </div>
-      </footer>
+      </footer> */}
     </div>
   );
 }

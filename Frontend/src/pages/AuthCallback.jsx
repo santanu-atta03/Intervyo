@@ -2,13 +2,13 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const API_URL = 'https://intervyo.onrender.com';
+const API_URL_LOGIN = 'https://intervyo.onrender.com';
 // const API_URL = 'http://localhost:5000';
 export default function AuthCallback() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`${API_URL}/api/auth/me`, {
+    fetch(`${API_URL_LOGIN}/api/auth/me`, {
       credentials: 'include', // REQUIRED for cookies
     })
       .then((res) => {
