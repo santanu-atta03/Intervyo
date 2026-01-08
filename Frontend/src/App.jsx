@@ -1,5 +1,6 @@
 // frontend/src/App.jsx
 import { Routes, Route } from 'react-router-dom';
+
 import Login from './pages/Login';
 import Register from './pages/Register';
 import AuthCallback from './pages/AuthCallback';
@@ -19,9 +20,9 @@ import LearningHub from './components/Dashboard/LearningHub';
 import BlogPlatform from './components/Blogs/BlogPlatform';
 import Achievements from './components/Dashboard/Achievements';
 import AIChatbot from './components/Chatbot/AiChatBot';
-import FAQ from "./pages/FAQ";
-import Analytics from './pages/Analytics';
 import NotFound from './pages/NotFound';
+import FAQ from './pages/FAQ';
+import Analytics from './pages/Analytics';
 import ScrollToTop from './components/shared/ScrollToTop';
 import Footer from './components/shared/Footer';
 import TermsAndConditions from './pages/Terms';
@@ -30,28 +31,76 @@ import PrivacyPolicy from './pages/Privacy';
 function App() {
   return (
     <>
+      <ScrollToTop />
+
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path='/verify-email' element={<VerifyEmail />} />
-        <Route path="/domain-selection" element={<DomainSelection />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/faq" element={<FAQ />} />
-        <Route 
-          path="/dashboard" 
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsAndConditions />} />
+
+        <Route path="/domain-selection" element={<DomainSelection />} />
+        <Route path="/leaderboard" element={<Leaderboard />} />
+        <Route path="/blog" element={<BlogPlatform />} />
+
+        <Route
+          path="/dashboard"
           element={
             <ProtectedRoute>
               <Dashboard />
             </ProtectedRoute>
           }
         />
-        <Route path="/leaderboard" element={<Leaderboard />} />
-        <Route path="/history" element={<ReviewHistory />} />
-        <Route path="/resources" element={<LearningHub />} />
-        <Route path='/settings' element={<Settings />} />
-        <Route path="/blog" element={<BlogPlatform />} />
-        <Route path='/achievements' element={<Achievements />} />
+
+        <Route
+          path="/analytics"
+          element={
+            <ProtectedRoute>
+              <Analytics />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/history"
+          element={
+            <ProtectedRoute>
+              <ReviewHistory />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/resources"
+          element={
+            <ProtectedRoute>
+              <LearningHub />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Settings />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/achievements"
+          element={
+            <ProtectedRoute>
+              <Achievements />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/interview-setup"
           element={
@@ -61,7 +110,6 @@ function App() {
           }
         />
 
-        {/* UPDATED: Use InterviewWrapper instead of InterviewRoom directly */}
         <Route
           path="/interview/:interviewId"
           element={
@@ -70,7 +118,11 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="/interview-room/:interviewId" element={<InterviewRoom />} />
+
+        <Route
+          path="/interview-room/:interviewId"
+          element={<InterviewRoom />}
+        />
 
         <Route
           path="/results/:interviewId"
@@ -80,13 +132,11 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="/privacy" element={<PrivacyPolicy />} />
-        <Route path="/terms" element={<TermsAndConditions />} />
-        <Route path='/*' element={<NotFound />} />
 
+        {/* 404 – must be last */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
-      
-      <ScrollToTop />
+
       <AIChatbot defaultContext="general" />
       <Footer />
     </>

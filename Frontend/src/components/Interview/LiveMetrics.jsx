@@ -1,13 +1,22 @@
 // src/components/interview/LiveMetrics.jsx
 
-import React, { useEffect, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
 import Webcam from "react-webcam";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
-import { motion } from 'framer-motion';
-import { BarChart3, MessageSquare, Zap, Brain, Clock, Lightbulb, Video, Mic } from 'lucide-react';
+import { motion } from "framer-motion";
+import {
+  BarChart3,
+  MessageSquare,
+  Zap,
+  Brain,
+  Clock,
+  Lightbulb,
+  Video,
+  Mic,
+} from "lucide-react";
 import {
   MicOff,
   VideoOff,
@@ -21,7 +30,9 @@ import {
 } from "lucide-react";
 
 const LiveMetrics = () => {
-  const { interviewData, metrics, progress } = useSelector((state) => state.interview);
+  const { interviewData, metrics, progress } = useSelector(
+    (state) => state.interview
+  );
   const {
     transcript,
     listening,
@@ -35,16 +46,38 @@ const LiveMetrics = () => {
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
   const [isMicEnabled, setIsMicEnabled] = useState(false);
   const metricsData = [
-    { label: 'Technical', value: metrics.technical, icon: BarChart3, color: '#667eea' },
-    { label: 'Communication', value: metrics.communication, icon: MessageSquare, color: '#10b981' },
-    { label: 'Confidence', value: metrics.confidence, icon: Zap, color: '#f59e0b' },
-    { label: 'Problem Solving', value: metrics.problemSolving, icon: Brain, color: '#ef4444' }
+    {
+      label: "Technical",
+      value: metrics.technical,
+      icon: BarChart3,
+      color: "#667eea",
+    },
+    {
+      label: "Communication",
+      value: metrics.communication,
+      icon: MessageSquare,
+      color: "#10b981",
+    },
+    {
+      label: "Confidence",
+      value: metrics.confidence,
+      icon: Zap,
+      color: "#f59e0b",
+    },
+    {
+      label: "Problem Solving",
+      value: metrics.problemSolving,
+      icon: Brain,
+      color: "#ef4444",
+    },
   ];
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${mins.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
   };
 
   useEffect(() => {
@@ -54,39 +87,38 @@ const LiveMetrics = () => {
   }, [interviewData]);
 
   useEffect(() => {
-  if (timeRemaining > 0 && !isPaused) {
-    const timer = setInterval(() => {
-      setTimeElapsed((prevElapsed) => prevElapsed + 1);
-      setTimeRemaining((prevRemaining) => {
-        if (prevRemaining <= 1) {
-          clearInterval(timer);
-          // Optional: Trigger end-of-interview logic here
-        }
-        return prevRemaining - 1;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }
-}, [timeRemaining, isPaused]);
+    if (timeRemaining > 0 && !isPaused) {
+      const timer = setInterval(() => {
+        setTimeElapsed((prevElapsed) => prevElapsed + 1);
+        setTimeRemaining((prevRemaining) => {
+          if (prevRemaining <= 1) {
+            clearInterval(timer);
+            // Optional: Trigger end-of-interview logic here
+          }
+          return prevRemaining - 1;
+        });
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [timeRemaining, isPaused]);
 
+  // Toggle microphone
+  const toggleMic = () => {
+    if (isMicEnabled) {
+      SpeechRecognition.stopListening();
+      setIsMicEnabled(false);
+    } else {
+      SpeechRecognition.startListening({ continuous: true, language: "en-US" });
+      setIsMicEnabled(true);
+    }
+  };
 
-    // Toggle microphone
-    const toggleMic = () => {
-      if (isMicEnabled) {
-        SpeechRecognition.stopListening();
-        setIsMicEnabled(false);
-      } else {
-        SpeechRecognition.startListening({ continuous: true, language: "en-US" });
-        setIsMicEnabled(true);
-      }
-    };
-  
-    // Toggle video
-    const toggleVideo = () => {
-      setIsVideoEnabled(!isVideoEnabled);
-    };
+  // Toggle video
+  const toggleVideo = () => {
+    setIsVideoEnabled(!isVideoEnabled);
+  };
 
-    // Check browser support
+  // Check browser support
   useEffect(() => {
     if (!browserSupportsSpeechRecognition) {
       toast.error(
@@ -94,7 +126,6 @@ const LiveMetrics = () => {
       );
     }
   }, [browserSupportsSpeechRecognition]);
-  
 
   return (
     <div className="live-metrics">
@@ -176,62 +207,57 @@ const LiveMetrics = () => {
         </p> */}
       </div>
       {/* Controls */}
-            <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-6 border border-white/20">
-              <h3 className="text-lg font-bold text-white mb-4">Controls</h3>
+      <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-6 border border-white/20">
+        <h3 className="text-lg font-bold text-white mb-4">Controls</h3>
 
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  onClick={toggleVideo}
-                  className={`flex flex-col items-center gap-2 p-4 rounded-xl transition-all ${
-                    isVideoEnabled
-                      ? "bg-green-500/20 border-2 border-green-500/50 text-green-400"
-                      : "bg-red-500/20 border-2 border-red-500/50 text-red-400"
-                  }`}
-                >
-                  {isVideoEnabled ? (
-                    <Video size={24} />
-                  ) : (
-                    <VideoOff size={24} />
-                  )}
-                  <span className="text-sm font-semibold">
-                    {isVideoEnabled ? "Camera On" : "Camera Off"}
-                  </span>
-                </button>
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            onClick={toggleVideo}
+            className={`flex flex-col items-center gap-2 p-4 rounded-xl transition-all ${
+              isVideoEnabled
+                ? "bg-green-500/20 border-2 border-green-500/50 text-green-400"
+                : "bg-red-500/20 border-2 border-red-500/50 text-red-400"
+            }`}
+          >
+            {isVideoEnabled ? <Video size={24} /> : <VideoOff size={24} />}
+            <span className="text-sm font-semibold">
+              {isVideoEnabled ? "Camera On" : "Camera Off"}
+            </span>
+          </button>
 
-                <button
-                  onClick={toggleMic}
-                  className={`flex flex-col items-center gap-2 p-4 rounded-xl transition-all ${
-                    isMicEnabled
-                      ? "bg-green-500/20 border-2 border-green-500/50 text-green-400"
-                      : "bg-red-500/20 border-2 border-red-500/50 text-red-400"
-                  }`}
-                >
-                  {isMicEnabled ? <Mic size={24} /> : <MicOff size={24} />}
-                  <span className="text-sm font-semibold">
-                    {isMicEnabled ? "Mic On" : "Mic Off"}
-                  </span>
-                </button>
+          <button
+            onClick={toggleMic}
+            className={`flex flex-col items-center gap-2 p-4 rounded-xl transition-all ${
+              isMicEnabled
+                ? "bg-green-500/20 border-2 border-green-500/50 text-green-400"
+                : "bg-red-500/20 border-2 border-red-500/50 text-red-400"
+            }`}
+          >
+            {isMicEnabled ? <Mic size={24} /> : <MicOff size={24} />}
+            <span className="text-sm font-semibold">
+              {isMicEnabled ? "Mic On" : "Mic Off"}
+            </span>
+          </button>
 
-                <button
-                  onClick={() => setIsPaused(!isPaused)}
-                  className="flex flex-col items-center gap-2 p-4 bg-yellow-500/20 border-2 border-yellow-500/50 text-yellow-400 rounded-xl transition-all col-span-2"
-                >
-                  {isPaused ? <Play size={24} /> : <Pause size={24} />}
-                  <span className="text-sm font-semibold">
-                    {isPaused ? "Resume" : "Pause"}
-                  </span>
-                </button>
-              </div>
+          <button
+            onClick={() => setIsPaused(!isPaused)}
+            className="flex flex-col items-center gap-2 p-4 bg-yellow-500/20 border-2 border-yellow-500/50 text-yellow-400 rounded-xl transition-all col-span-2"
+          >
+            {isPaused ? <Play size={24} /> : <Pause size={24} />}
+            <span className="text-sm font-semibold">
+              {isPaused ? "Resume" : "Pause"}
+            </span>
+          </button>
+        </div>
 
-              {!browserSupportsSpeechRecognition && (
-                <div className="mt-4 p-3 bg-red-500/20 border border-red-500/50 rounded-xl">
-                  <p className="text-red-300 text-xs">
-                    ⚠️ Speech recognition not supported. Please use Chrome
-                    browser.
-                  </p>
-                </div>
-              )}
-            </div>
+        {!browserSupportsSpeechRecognition && (
+          <div className="mt-4 p-3 bg-red-500/20 border border-red-500/50 rounded-xl">
+            <p className="text-red-300 text-xs">
+              ⚠️ Speech recognition not supported. Please use Chrome browser.
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
