@@ -1,6 +1,7 @@
 import express from 'express';
 import { sendOTP, register, login, getCurrentUser, logout } from '../controllers/Auth.controller.js';
 import passport from 'passport';
+import { protect } from '../middlewares/auth.js';
 const router = express.Router();
 const isProd = process.env.NODE_ENV === 'production';
 
@@ -8,7 +9,7 @@ const isProd = process.env.NODE_ENV === 'production';
 router.post('/send-otp', sendOTP);
 router.post('/register', register);
 router.post('/login', login);
-router.get('/me', getCurrentUser);
+router.get('/me',protect, getCurrentUser);
 router.post('/logout', logout);
 
 
