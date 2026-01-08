@@ -19,7 +19,8 @@ import notificationRoutes from './routes/notification.route.js';
 import blogRoutes from './routes/blog.routes.js';
 import profileRoutes from './routes/Profile.route.js'
 import emotionRoutes from './routes/emotion.routes.js';
-import analyticsRoutes from './routes/analytics.route.js'
+import analyticsRoutes from './routes/analytics.route.js';
+import newsletterRoutes from './routes/newsletter.routes.js';
 import { dbConnect } from './config/db.js';
 import { apiLimiter } from './middlewares/rateLimiter.js';
 import errorHandler from './middlewares/error.middleware.js';
@@ -38,7 +39,6 @@ const io = new Server(server, {
   cors: {
     origin: process.env.FRONTEND_URL || 'http://localhost:5173',
     methods: ['GET', 'POST'],
-    credentials: true
   }
 });
 app.use(cookieParser());
@@ -79,6 +79,7 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/achievements', achievementRoutes);
 app.use('/api/chatbot', chatbotRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/newsletter', newsletterRoutes);
 
 // Emotion metrics routes
 app.use('/api/interviews', emotionRoutes);

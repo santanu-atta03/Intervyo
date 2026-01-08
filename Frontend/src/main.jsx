@@ -17,12 +17,13 @@ createRoot(document.getElementById("root")).render(
   <StrictMode>
     <Provider store={store}>
       <BrowserRouter>
+      <Toaster position="top-right" />
       <NotificationProvider>
         <ThemeProvider>
           <App />
         </ThemeProvider>
         </NotificationProvider>
-        <Toaster position="top-right" />
+        
       </BrowserRouter>
     </Provider>
   </StrictMode>
