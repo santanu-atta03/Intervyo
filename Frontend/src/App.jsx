@@ -19,7 +19,7 @@ import ReviewHistory from './components/Dashboard/ReviewHistory';
 import LearningHub from './components/Dashboard/LearningHub';
 import BlogPlatform from './components/Blogs/BlogPlatform';
 import Achievements from './components/Dashboard/Achievements';
-import AIChatbot from './components/Chatbot/AiChatBot';
+
 import NotFound from './pages/NotFound';
 import FAQ from './pages/FAQ';
 import Analytics from './pages/Analytics';
@@ -137,7 +137,6 @@ function App() {
         <Route path="*" element={<NotFound />} />
       </Routes>
 
-      <AIChatbot defaultContext="general" />
       <Footer />
     </>
   );
