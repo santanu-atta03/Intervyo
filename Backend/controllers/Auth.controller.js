@@ -384,47 +384,56 @@ export const login = async (req, res) => {
 // controllers/Auth.controller.js
 export const getCurrentUser = async (req, res) => {
   try {
-    const token = req.cookies.token;
+    res.set('Cache-Control', 'no-store');
 
-    
-    if (!token) {
+    // req.user is already set by protect middleware
+    if (!req.user) {
       return res.status(401).json({
         success: false,
-        message: "No token provided",
+        message: 'Unauthorized',
       });
     }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
-    const user = await User.findById(decoded.id)
-      .select("-password -resetPasswordToken -resetPasswordExpire")
-      .populate({
-        path: 'profile',
-        select: '-__v'
-      });
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-    }
-
-    console.log('Current user fetched:', JSON.stringify(user, null, 2));
 
     res.json({
       success: true,
-      user,
+      user: req.user,
     });
   } catch (error) {
-    console.error("Get current user error:", error);
-    res.status(401).json({
+    console.error('Get current user error:', error);
+    res.status(500).json({
       success: false,
-      message: "Invalid token",
-      error: error.message,
+      message: 'Server error',
     });
   }
 };
+
+// export const getCurrentUser = async (req, res) => {
+//   try {
+//     res.set('Cache-Control', 'no-store'); // <-- ADD THIS
+//     const token = req.cookies.token;
+
+//     if (!token) {
+//       return res.status(401).json({ success: false, message: "No token provided" });
+//     }
+
+//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+//     const user = await User.findById(decoded.id)
+//       .select("-password -resetPasswordToken -resetPasswordExpire")
+//       .populate({ path: 'profile', select: '-__v' });
+
+//     if (!user) {
+//       return res.status(404).json({ success: false, message: "User not found" });
+//     }
+
+//     console.log('Current user fetched:', JSON.stringify(user, null, 2));
+
+//     res.json({ success: true, user });
+//   } catch (error) {
+//     console.error("Get current user error:", error);
+//     res.status(401).json({ success: false, message: "Invalid token", error: error.message });
+//   }
+// };
 
 // Logout
 export const logout = (req, res) => {

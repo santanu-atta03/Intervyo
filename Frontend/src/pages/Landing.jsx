@@ -90,6 +90,7 @@ import {
   FileBarChart,
   StarIcon
 } from 'lucide-react';
+import SEO from '../components/SEO';
 
 
 export default function LandingPage() {
@@ -287,6 +288,11 @@ export default function LandingPage() {
           animation: slideOut 0.3s ease-in forwards;
         }
       `}</style>
+      <SEO
+    title="Intervyo – AI-Powered Interview Preparation Platform"
+    description="Practice interviews with AI-driven mock interviews, real-time feedback, and performance analysis."
+    url="https://intervyo.xyz"
+  />
 
       {/* Animated Cursor Effect */}
       <div
@@ -616,7 +622,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-white/10 py-8 md:py-12 px-4">
+      {/* <footer className="border-t border-white/10 py-8 md:py-12 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8 mb-6 md:mb-8">
             <div>
@@ -661,7 +667,7 @@ export default function LandingPage() {
             <p>&copy; {new Date().getFullYear()} InterviewPro. All rights reserved.</p>
           </div>
         </div>
-      </footer>
+      </footer> */}
     </div>
   );
 }

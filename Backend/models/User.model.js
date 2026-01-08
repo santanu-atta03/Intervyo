@@ -56,7 +56,7 @@ const userSchema = new mongoose.Schema({
   // Reference to Profile model
   profile: {
     type: mongoose.Schema.Types.ObjectId,
-    required : true,
+    // required : true,
     ref: 'Profile',
   },
   
