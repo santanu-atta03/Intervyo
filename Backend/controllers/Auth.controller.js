@@ -382,47 +382,74 @@ export const login = async (req, res) => {
 
 // Get current user
 // controllers/Auth.controller.js
-export const getCurrentUser = async (req, res) => {
-  try {
-    const token = req.cookies.token;
+// export const getCurrentUser = async (req, res) => {
+//   try {
+//     const token = req.cookies.token;
 
     
+//     if (!token) {
+//       return res.status(401).json({
+//         success: false,
+//         message: "No token provided",
+//       });
+//     }
+
+//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+//     const user = await User.findById(decoded.id)
+//       .select("-password -resetPasswordToken -resetPasswordExpire")
+//       .populate({
+//         path: 'profile',
+//         select: '-__v'
+//       });
+
+//     if (!user) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "User not found",
+//       });
+//     }
+
+//     console.log('Current user fetched:', JSON.stringify(user, null, 2));
+
+//     res.json({
+//       success: true,
+//       user,
+//     });
+//   } catch (error) {
+//     console.error("Get current user error:", error);
+//     res.status(401).json({
+//       success: false,
+//       message: "Invalid token",
+//       error: error.message,
+//     });
+//   }
+// };
+export const getCurrentUser = async (req, res) => {
+  try {
+    res.set('Cache-Control', 'no-store'); // <-- ADD THIS
+    const token = req.cookies.token;
+
     if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: "No token provided",
-      });
+      return res.status(401).json({ success: false, message: "No token provided" });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
+
     const user = await User.findById(decoded.id)
       .select("-password -resetPasswordToken -resetPasswordExpire")
-      .populate({
-        path: 'profile',
-        select: '-__v'
-      });
+      .populate({ path: 'profile', select: '-__v' });
 
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
+      return res.status(404).json({ success: false, message: "User not found" });
     }
 
     console.log('Current user fetched:', JSON.stringify(user, null, 2));
 
-    res.json({
-      success: true,
-      user,
-    });
+    res.json({ success: true, user });
   } catch (error) {
     console.error("Get current user error:", error);
-    res.status(401).json({
-      success: false,
-      message: "Invalid token",
-      error: error.message,
-    });
+    res.status(401).json({ success: false, message: "Invalid token", error: error.message });
   }
 };
 

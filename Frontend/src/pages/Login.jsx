@@ -35,6 +35,7 @@ export default function Login() {
   // Google OAuth Login
   const handleGoogleLogin = () => {
     window.location.href = "https://intervyo.onrender.com/api/auth/google";
+    // window.location.href = "http://localhost:5000/api/auth/google";
   };
 
   // GitHub OAuth Login
