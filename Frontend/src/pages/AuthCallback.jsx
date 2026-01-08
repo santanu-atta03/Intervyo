@@ -2,7 +2,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = 'https://intervyo.onrender.com';
 
 export default function AuthCallback() {
   const navigate = useNavigate();
