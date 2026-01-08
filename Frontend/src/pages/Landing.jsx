@@ -1,8 +1,50 @@
+import {
+  Bot,
+  BarChart3,
+  Code,
+  Database,
+  Cpu,
+  Smartphone,
+  Wrench,
+  Target,
+  TrendingUp,
+  Trophy,
+  Users,
+  Star,
+  Play,
+  User,
+  UserRound,
+  Briefcase,
+  GraduationCap,
+  Globe,
+  ArrowRight,
+  Check,
+  Award,
+  Zap,
+  Lightbulb,
+  Rocket,
+  Settings,
+  Monitor,
+  Server,
+  SmartphoneIcon,
+  Cloud,
+  Shield,
+  Lock,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  Clock,
+  FileText,
+  PieChart,
+  BarChart,
+  TrendingUpIcon,
+  Users2,
+  FileBarChart,
+  StarIcon
+} from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import {Link, useNavigate} from "react-router-dom"
-// Logo asset (imported as default if needed in future UI tweaks)
-import logo from "../assets/intervyologo.png";
 import {
   Bot,
   BarChart3,
