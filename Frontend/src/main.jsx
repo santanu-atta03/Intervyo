@@ -10,11 +10,13 @@ import rootReducer from "./reducer/index.js";
 import { Toaster } from "react-hot-toast";
 import { ThemeProvider } from "../src/components/shared/ThemeContext";
 import { NotificationProvider } from "./components/shared/NotificationContext.jsx";
+import { HelmetProvider } from 'react-helmet-async';
 const store = configureStore({
   reducer: rootReducer,
 });
 createRoot(document.getElementById("root")).render(
   <StrictMode>
+    <HelmetProvider>
     <Provider store={store}>
       <BrowserRouter>
       <Toaster position="top-right" />
@@ -26,5 +28,6 @@ createRoot(document.getElementById("root")).render(
         
       </BrowserRouter>
     </Provider>
+    </HelmetProvider>
   </StrictMode>
 );
