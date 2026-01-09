@@ -2,7 +2,7 @@ import { Twitter, Linkedin, Github, Youtube } from "lucide-react";
 
 export default function Footer() {
   return (
-   <footer className="bg-gray-950 text-gray-400 py-12 md:py-16 px-4 md:px-6 relative overflow-hidden border-t border-gray-800">
+  <footer className="bg-gray-950 text-gray-400 py-12 md:py-16 px-4 md:px-6 relative overflow-hidden border-t border-gray-800">
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 md:gap-12 mb-12">
             <div className="col-span-2 md:col-span-3 lg:col-span-1">
@@ -18,10 +18,7 @@ export default function Footer() {
                 <Youtube className="w-5 h-5 md:w-6 md:h-6 hover:text-emerald-400 cursor-pointer transition-colors" />
               </div>
             </div>
-          </div>
-        </div>
-        <div>
-          <div>
+
             <div>
               <h4 className="text-white font-semibold mb-4 text-base md:text-lg">Platform</h4>
               <ul className="space-y-2 md:space-y-3 text-sm md:text-base">
@@ -29,10 +26,9 @@ export default function Footer() {
                 <li><a href="#" className="hover:text-emerald-400 transition-colors">AI Feedback</a></li>
                 <li><a href="#" className="hover:text-emerald-400 transition-colors">Role Prep</a></li>
               </ul>
+              <p className="text-gray-400 text-sm md:text-base mt-4">Master your tech interviews with AI </p>
             </div>
-            <p className="text-gray-400 text-sm md:text-base">Master your tech interviews with AI </p>
-          </div>
-          <div>
+
             <div>
               <h4 className="text-white font-semibold mb-4 text-base md:text-lg">Company</h4>
               <ul className="space-y-2 md:space-y-3 text-sm md:text-base">
