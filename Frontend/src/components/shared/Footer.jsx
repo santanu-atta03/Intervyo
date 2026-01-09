@@ -20,7 +20,8 @@ export default function Footer() {
             </div>
           </div>
         </div>
-
+        <div>
+          <div>
             <div>
               <h4 className="text-white font-semibold mb-4 text-base md:text-lg">Platform</h4>
               <ul className="space-y-2 md:space-y-3 text-sm md:text-base">
@@ -31,7 +32,7 @@ export default function Footer() {
             </div>
             <p className="text-gray-400 text-sm md:text-base">Master your tech interviews with AI </p>
           </div>
-
+          <div>
             <div>
               <h4 className="text-white font-semibold mb-4 text-base md:text-lg">Company</h4>
               <ul className="space-y-2 md:space-y-3 text-sm md:text-base">
@@ -76,7 +77,7 @@ export default function Footer() {
                   letterSpacing: '0.05em'
                 }}
               >
-                     INTERVYO 
+                INTERVYO 
               </div>
             </div>
           </div>
