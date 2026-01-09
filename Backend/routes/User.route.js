@@ -7,13 +7,14 @@ import {
   logout,
 } from "../controllers/Auth.controller.js";
 import passport from "passport";
+import { authenticate, protect } from "../middlewares/auth.js";
 const router = express.Router();
 
 // Email/Password Authentication
 router.post("/send-otp", sendOTP);
 router.post("/register", register);
 router.post("/login", login);
-router.get("/me", getCurrentUser);
+router.get("/me", protect, getCurrentUser);
 router.post("/logout", logout);
 
 router.get(
@@ -25,55 +26,53 @@ router.get(
 );
 
 // Google OAuth Callback
-router.get('/google/callback',
-  passport.authenticate('google', {
+router.get(
+  "/google/callback",
+  passport.authenticate("google", {
     session: false,
     failureRedirect: `${process.env.CLIENT_URL}/login?error=google_auth_failed`,
   }),
   (req, res) => {
     const token = req.user.generateAuthToken();
 
-
-
-    res.cookie('token', token, {
+    res.cookie("token", token, {
       httpOnly: true,
-      secure: true,          // REQUIRED on HTTPS (Render + Vercel)
-      sameSite: 'none',      // REQUIRED for cross-domain cookies
-      maxAge: 7 * 24 * 60 * 60 * 1000
+      secure: true, // REQUIRED on HTTPS (Render + Vercel)
+      sameSite: "none", // REQUIRED for cross-domain cookies
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    // CLEAN redirect (NO token)
-    res.redirect(`${process.env.CLIENT_URL}/auth/callback`);
-  }
+    // Double-whammy: Cookie AND Token in URL (Upstream req)
+    res.redirect(`${process.env.CLIENT_URL}/auth/callback?token=${token}`);
+  },
 );
 
-
-router.get('/github',
-  passport.authenticate('github', {
-    scope: ['user:email'],
-    session: false
-  })
+router.get(
+  "/github",
+  passport.authenticate("github", {
+    scope: ["user:email"],
+    session: false,
+  }),
 );
 
 // GitHub OAuth Callback
 router.get(
-  '/github/callback',
-  passport.authenticate('github', {
+  "/github/callback",
+  passport.authenticate("github", {
     session: false,
     failureRedirect: `${process.env.CLIENT_URL}/login?error=github_auth_failed`,
   }),
   (req, res) => {
     const token = req.user.generateAuthToken();
 
-    res.cookie('token', token, {
+    res.cookie("token", token, {
       httpOnly: true,
-      secure: true,      // REQUIRED on HTTPS
-      sameSite: 'none',  // REQUIRED for Vercel ↔ Render
-      maxAge: 7 * 24 * 60 * 60 * 1000
+      secure: true, // REQUIRED on HTTPS
+      sameSite: "none", // REQUIRED for Vercel ↔ Render
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    // CLEAN redirect (NO token)
-    res.redirect(`${process.env.CLIENT_URL}/auth/callback`);
-  }
+    res.redirect(`${process.env.CLIENT_URL}/auth/callback?token=${token}`);
+  },
 );
 export default router;

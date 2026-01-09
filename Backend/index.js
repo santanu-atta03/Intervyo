@@ -21,6 +21,7 @@ import blogRoutes from "./routes/blog.routes.js";
 import profileRoutes from "./routes/Profile.route.js";
 import emotionRoutes from "./routes/emotion.routes.js";
 import analyticsRoutes from "./routes/analytics.route.js";
+import newsletterRoutes from "./routes/newsletter.routes.js";
 import { dbConnect } from "./config/db.js";
 import { apiLimiter } from "./middlewares/rateLimiter.js";
 import errorHandler from "./middlewares/error.middleware.js";
@@ -29,29 +30,52 @@ import http from "http";
 import { Server } from "socket.io";
 import cookieParser from "cookie-parser";
 
-
 dotenv.config();
 
 const app = express();
 
 const server = http.createServer(app);
+const socketOrigins = [
+  "https://intervyo.xyz",
+  "https://www.intervyo.xyz",
+  "https://intervyo-sage.vercel.app",
+];
+
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || "https://intervyo-sage.vercel.app",
+    origin: socketOrigins,
     methods: ["GET", "POST"],
-  }
+    credentials: true,
+  },
 });
+
 app.use(cookieParser());
 app.use(helmet());
 // ========================================
 // MIDDLEWARE
 // ========================================
+const allowedOrigins = [
+  "https://intervyo.xyz",
+  "https://www.intervyo.xyz",
+  "https://intervyo-sage.vercel.app",
+];
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "https://intervyo-sage.vercel.app",
+    origin: function (origin, callback) {
+      // allow server-to-server & Postman
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   }),
 );
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(apiLimiter);
@@ -83,6 +107,7 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/achievements", achievementRoutes);
 app.use("/api/chatbot", chatbotRoutes);
 app.use("/api/analytics", analyticsRoutes);
+app.use("/api/newsletter", newsletterRoutes);
 
 // Emotion metrics routes
 app.use("/api/interviews", emotionRoutes);

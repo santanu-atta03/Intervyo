@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs";
 import User from "../models/User.model.js";
 import dotenv from "dotenv";
 dotenv.config();
+
 // ========================================
 // 1. LOCAL STRATEGY (Email/Password)
 // ========================================
@@ -85,6 +86,7 @@ passport.use(
   ),
 );
 
+
 // ========================================
 // 3. GITHUB STRATEGY
 // ========================================
@@ -99,17 +101,13 @@ passport.use(
     async (accessToken, refreshToken, profile, done) => {
       try {
         const email = profile.emails?.[0]?.value;
+        if (!email) return done(new Error('No email associated with GitHub account'), null);
 
-        if (!email) {
-          return done(
-            new Error("No email associated with GitHub account"),
-            null,
-          );
-        }
-
-        // Check if user exists
         let user = await User.findOne({
-          $or: [{ githubId: profile.id }, { email: email }],
+          $or: [
+            { githubId: profile.id },
+            { email }
+          ]
         });
 
         if (user) {
@@ -124,12 +122,12 @@ passport.use(
         // Create new user
         user = await User.create({
           githubId: profile.id,
-          email: email,
+          email,
           name: profile.displayName || profile.username,
           profilePicture: profile.photos?.[0]?.value,
           authProvider: "github",
           isVerified: true,
-          "profile.github": profile.username,
+          profile: { github: profile.username },
         });
 
         return done(null, user);
