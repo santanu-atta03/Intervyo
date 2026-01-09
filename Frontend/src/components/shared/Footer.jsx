@@ -71,7 +71,7 @@ export default function Footer() {
                   letterSpacing: '0.05em'
                 }}
               >
-                     INTERVYO 
+                INTERVYO 
               </div>
             </div>
           </div>
