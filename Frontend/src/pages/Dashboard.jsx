@@ -21,7 +21,7 @@ export default function Dashboard() {
   const { user } = useSelector((state) => state.profile);
   const { token } = useSelector((state) => state.auth);
   const { notifications, unreadCount, refreshNotifications, setNotifications, setUnreadCount } = useNotifications();
-
+  
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [scrollY, setScrollY] = useState(0);
@@ -47,7 +47,7 @@ export default function Dashboard() {
 
       try {
         const result = await achievementService.checkAchievements(token);
-
+        
         if (result.success && result.data.newAchievements.length > 0) {
           setNewAchievements(result.data.newAchievements);
           setCurrentAchievementIndex(0);
@@ -69,8 +69,8 @@ export default function Dashboard() {
     try {
       if (!notification.isRead) {
         await markNotificationAsRead(notification._id, token);
-
-        setNotifications(prev =>
+        
+        setNotifications(prev => 
           prev.map(n => n._id === notification._id ? { ...n, isRead: true } : n)
         );
         setUnreadCount(prev => Math.max(0, prev - 1));
@@ -88,8 +88,8 @@ export default function Dashboard() {
   const handleMarkAllAsRead = async () => {
     try {
       await markAllNotificationsAsRead(token);
-
-      setNotifications(prev =>
+      
+      setNotifications(prev => 
         prev.map(n => ({ ...n, isRead: true }))
       );
       setUnreadCount(0);
@@ -100,13 +100,13 @@ export default function Dashboard() {
 
   const handleDeleteNotification = async (e, notificationId) => {
     e.stopPropagation();
-
+    
     try {
       await deleteNotification(notificationId, token);
-
+      
       const deletedNotification = notifications.find(n => n._id === notificationId);
       setNotifications(prev => prev.filter(n => n._id !== notificationId));
-
+      
       if (deletedNotification && !deletedNotification.isRead) {
         setUnreadCount(prev => Math.max(0, prev - 1));
       }
@@ -118,7 +118,7 @@ export default function Dashboard() {
   const handleClearRead = async () => {
     try {
       await clearReadNotifications(token);
-
+      
       setNotifications(prev => prev.filter(n => !n.isRead));
     } catch (error) {
       console.error('Error clearing read notifications:', error);
@@ -127,7 +127,7 @@ export default function Dashboard() {
 
   const formatTimeAgo = (date) => {
     const seconds = Math.floor((new Date() - new Date(date)) / 1000);
-
+    
     if (seconds < 60) return 'Just now';
     if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
     if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
@@ -151,16 +151,16 @@ export default function Dashboard() {
   const handleAchievementModalClose = async () => {
     if (newAchievements.length > 0 && currentAchievementIndex < newAchievements.length) {
       const currentAchievement = newAchievements[currentAchievementIndex];
-
+      
       await achievementService.markAsNotified(currentAchievement._id, token);
-
+      
       if (currentAchievementIndex + 1 < newAchievements.length) {
         setCurrentAchievementIndex(currentAchievementIndex + 1);
       } else {
         setShowAchievementModal(false);
         setNewAchievements([]);
         setCurrentAchievementIndex(0);
-
+        
         dispatch(getUserProfile(token));
       }
     } else {
@@ -178,7 +178,7 @@ export default function Dashboard() {
 
       try {
         setLoading(true);
-
+        
         const [profileResult, interviewsResult] = await Promise.all([
           dispatch(getUserProfile(token)),
           getAllInterviews(setLoading, token)
@@ -190,7 +190,7 @@ export default function Dashboard() {
           recentInterviews: interviewsArray,
           stats: user?.stats || null,
         });
-
+        
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
         setDashboardData({
@@ -250,13 +250,13 @@ export default function Dashboard() {
     if (!dashboardData.recentInterviews || dashboardData.recentInterviews.length === 0) {
       return 0;
     }
-
-    const validScores = dashboardData.recentInterviews.filter(i =>
+    
+    const validScores = dashboardData.recentInterviews.filter(i => 
       i.overallScore !== undefined && i.overallScore !== null
     );
-
+    
     if (validScores.length === 0) return 0;
-
+    
     const sum = validScores.reduce((acc, interview) => acc + interview.overallScore, 0);
     return Math.round((sum / validScores.length) * 10) / 10;
   };
@@ -266,67 +266,59 @@ export default function Dashboard() {
     if (!dashboardData.recentInterviews || dashboardData.recentInterviews.length < 2) {
       return '+0%';
     }
-
-    const validInterviews = dashboardData.recentInterviews.filter(i =>
+    
+    const validInterviews = dashboardData.recentInterviews.filter(i => 
       i.overallScore !== undefined && i.overallScore !== null
     );
-
+    
     if (validInterviews.length < 2) return '+0%';
-
+    
     const recent = validInterviews.slice(0, Math.min(3, validInterviews.length));
     const older = validInterviews.slice(3, Math.min(6, validInterviews.length));
-
+    
     if (older.length === 0) return '+0%';
-
+    
     const recentAvg = recent.reduce((acc, i) => acc + i.overallScore, 0) / recent.length;
     const olderAvg = older.reduce((acc, i) => acc + i.overallScore, 0) / older.length;
-
+    
     if (olderAvg === 0) return '+0%';
-
+    
     const trend = ((recentAvg - olderAvg) / olderAvg) * 100;
     return trend > 0 ? `+${trend.toFixed(1)}%` : `${trend.toFixed(1)}%`;
   };
 
   const stats = [
-    {
-      label: 'Total Interviews',
-      value: user?.stats?.totalInterviews || dashboardData.recentInterviews.length || 0,
-      icon: BarChart3,
-      color: 'from-blue-500 to-cyan-500',
+    { 
+      label: 'Total Interviews', 
+      value: user?.stats?.totalInterviews || dashboardData.recentInterviews.length || 0, 
+      icon: BarChart3, 
+      color: 'from-blue-500 to-cyan-500', 
       trend: dashboardData.recentInterviews.length > 0 ? `+${dashboardData.recentInterviews.length}` : '0'
     },
-    {
-      label: 'Average Score',
-      value: calculateAverageScore() > 0 ? `${calculateAverageScore()}%` : '0%',
-      icon: TrendingUp,
-      color: 'from-emerald-500 to-green-500',
-      trend: calculateTrend()
+    { 
+      label: 'Average Score', 
+      value: calculateAverageScore() > 0 ? `${calculateAverageScore()}%` : '0%', 
+      icon: TrendingUp, 
+      color: 'from-emerald-500 to-green-500', 
+      trend: calculateTrend() 
     },
-    {
-      label: 'Current Streak',
-      value: `${user?.stats?.streak || 0} days`,
-      icon: Flame,
-      color: 'from-orange-500 to-red-500',
-      trend: user?.stats?.streak > 0 ? 'Active' : 'Start now'
+    { 
+      label: 'Current Streak', 
+      value: `${user?.stats?.streak || 0} days`, 
+      icon: Flame, 
+      color: 'from-orange-500 to-red-500', 
+      trend: user?.stats?.streak > 0 ? 'Active' : 'Start now' 
     },
-    {
-      label: 'XP Points',
-      value: (user?.stats?.xpPoints || 0).toLocaleString(),
-      icon: Sparkles,
-      color: 'from-purple-500 to-pink-500',
-      trend: '+340'
+    { 
+      label: 'XP Points', 
+      value: (user?.stats?.xpPoints || 0).toLocaleString(), 
+      icon: Sparkles, 
+      color: 'from-purple-500 to-pink-500', 
+      trend: '+340' 
     }
   ];
 
   const quickActions = [
-    {
-      title: '🚀 Advanced Features',
-      icon: Sparkles,
-      color: 'from-purple-600 to-pink-600',
-      description: 'NEW: AI Recommendations & More',
-      action: () => navigate('/advanced-features'),
-      isNew: true
-    },
     { title: 'Start Interview', icon: Target, color: 'from-blue-500 to-cyan-500', description: 'Begin practice session', action: () => navigate('/interview-setup') },
     { title: 'Analytics', icon: TrendingUp, color: 'from-violet-500 to-purple-500', description: 'View your stats', action: () => navigate('/analytics') },
     { title: 'Review History', icon: BarChart3, color: 'from-emerald-500 to-green-500', description: 'Analyze performance', action: () => navigate('/history') },
@@ -348,8 +340,8 @@ export default function Dashboard() {
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
+    return new Date(dateString).toLocaleDateString('en-US', { 
+      month: 'short', 
       day: 'numeric',
       year: 'numeric'
     });
@@ -366,8 +358,9 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       {/* Navigation Bar */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrollY > 20 ? 'bg-gray-900/95 backdrop-blur-xl shadow-lg shadow-black/20' : 'bg-transparent'
-        }`}>
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrollY > 20 ? 'bg-gray-900/95 backdrop-blur-xl shadow-lg shadow-black/20' : 'bg-transparent'
+      }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16 sm:h-20">
             <div className="flex items-center gap-2 sm:gap-3">
@@ -386,7 +379,7 @@ export default function Dashboard() {
             </div>
 
             {/* Mobile Menu Button */}
-            <button
+            <button 
               className="sm:hidden p-2 rounded-lg hover:bg-gray-800/50 transition"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
@@ -399,7 +392,7 @@ export default function Dashboard() {
 
             <div className="hidden sm:flex items-center gap-3">
               <div className="relative">
-                <button
+                <button 
                   onClick={() => setShowNotifications(!showNotifications)}
                   className="relative p-3 hover:bg-gray-800/50 rounded-xl transition group"
                 >
@@ -414,7 +407,7 @@ export default function Dashboard() {
                     <div className="px-4 py-3 border-b border-gray-700/50 flex justify-between items-center">
                       <h3 className="text-white font-semibold">Notifications</h3>
                       {unreadCount > 0 && (
-                        <button
+                        <button 
                           onClick={handleMarkAllAsRead}
                           className="text-xs text-purple-400 hover:text-purple-300"
                         >
@@ -424,18 +417,19 @@ export default function Dashboard() {
                     </div>
                     {notifications.length > 0 ? (
                       notifications.map(notif => (
-                        <div
-                          key={notif._id}
+                        <div 
+                          key={notif._id} 
                           onClick={() => handleNotificationClick(notif)}
-                          className={`px-4 py-3 hover:bg-gray-700/50 transition cursor-pointer border-l-4 ${!notif.isRead ? 'border-l-purple-500 bg-gray-800/50' : 'border-l-transparent'
-                            }`}
+                          className={`px-4 py-3 hover:bg-gray-700/50 transition cursor-pointer border-l-4 ${
+                            !notif.isRead ? 'border-l-purple-500 bg-gray-800/50' : 'border-l-transparent'
+                          }`}
                         >
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
                               <p className="text-sm text-gray-300">{notif.message}</p>
                               <p className="text-xs text-gray-500 mt-1">{formatTimeAgo(notif.createdAt)}</p>
                             </div>
-                            <button
+                            <button 
                               onClick={(e) => handleDeleteNotification(e, notif._id)}
                               className="ml-2 text-gray-500 hover:text-red-400 transition"
                             >
@@ -453,13 +447,13 @@ export default function Dashboard() {
                   </div>
                 )}
               </div>
-
+              
               <Link to={'/blog'} className='p-3 text-white hover:bg-gray-800/50 rounded-xl transition font-medium'>
                 Blog
               </Link>
-
+              
               <div className="relative">
-                <button
+                <button 
                   onClick={() => setShowProfileMenu(!showProfileMenu)}
                   className="flex items-center gap-2 sm:gap-3 hover:bg-gray-800/50 px-2 sm:px-3 py-2 rounded-xl transition group"
                 >
@@ -491,7 +485,7 @@ export default function Dashboard() {
                       <div className="text-sm font-semibold text-white">{user?.name || 'User'}</div>
                       <div className="text-xs text-gray-400 truncate">{user?.email || 'email@example.com'}</div>
                     </div>
-                    <button
+                    <button 
                       onClick={() => {
                         navigate('/settings');
                         setShowProfileMenu(false);
@@ -501,7 +495,7 @@ export default function Dashboard() {
                       <Settings className="w-4 h-4 group-hover:text-purple-400" />
                       Profile Settings
                     </button>
-                    <button
+                    <button 
                       onClick={() => {
                         navigate('/subscription');
                         setShowProfileMenu(false);
@@ -512,7 +506,7 @@ export default function Dashboard() {
                       Subscription
                     </button>
                     <hr className="my-2 border-gray-700/50" />
-                    <button
+                    <button 
                       onClick={() => dispatch(logout(navigate))}
                       className="flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 transition group w-full text-left"
                     >
@@ -532,7 +526,7 @@ export default function Dashboard() {
             <div className="px-4 py-3 space-y-2">
               {/* Mobile Notifications */}
               <div className="relative">
-                <button
+                <button 
                   onClick={() => setShowNotifications(!showNotifications)}
                   className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800/50 rounded-xl transition w-full text-left"
                 >
@@ -545,37 +539,37 @@ export default function Dashboard() {
                   )}
                 </button>
               </div>
-
-              <Link
-                to="/blog"
+              
+              <Link 
+                to="/blog" 
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800/50 rounded-xl transition"
               >
                 <MessageSquare className="w-5 h-5" />
                 Blog
               </Link>
-
-              <Link
-                to="/settings"
+              
+              <Link 
+                to="/settings" 
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800/50 rounded-xl transition"
               >
                 <Settings className="w-5 h-5" />
                 Profile Settings
               </Link>
-
-              <Link
-                to="/subscription"
+              
+              <Link 
+                to="/subscription" 
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800/50 rounded-xl transition"
               >
                 <Crown className="w-5 h-5" />
                 Subscription
               </Link>
-
+              
               <hr className="my-2 border-gray-700/50" />
-
-              <button
+              
+              <button 
                 onClick={() => dispatch(logout(navigate))}
                 className="flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-xl transition w-full text-left"
               >
@@ -670,11 +664,9 @@ export default function Dashboard() {
                     </span>
                   </div>
                 </div>
-                  <div
-                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-500 shadow-lg shadow-purple-500/50">
                 <div className="relative h-4 bg-gray-700/50 rounded-full overflow-hidden backdrop-blur-sm border border-gray-600/30">
                   <div 
-                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 rounded-full transition-all duration-700 ease-out shadow-lg shadow-purple-500/50  overflow-hidden"
+                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 rounded-full transition-all duration-700 ease-out shadow-lg shadow-purple-500/50 relative overflow-hidden"
                     style={{ width: `${levelProgress}%` }}
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"></div>
@@ -703,31 +695,7 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-        </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-6 sm:mb-8">
-          {stats.map((stat, index) => {
-            const Icon = stat.icon;
-            return (
-              <div
-                key={index}
-                onMouseEnter={() => setHoveredCard(index)}
-                onMouseLeave={() => setHoveredCard(null)}
-                className="group relative"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <div className={`absolute inset-0 bg-gradient-to-r ${stat.color} rounded-lg sm:rounded-xl blur-lg opacity-0 group-hover:opacity-50 transition duration-300`}></div>
-                <div className="relative bg-gray-800/50 backdrop-blur-xl rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 border border-gray-700/50 hover:border-gray-600/50 transition shadow-lg hover:shadow-2xl transform hover:-translate-y-1">
-                  <div className="flex items-start justify-between mb-2 sm:mb-4">
-                    <div className={`w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br ${stat.color} rounded-lg flex items-center justify-center shadow-lg group-hover:scale-110 transition`}>
-                      <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                    </div>
-                  </div>
-                </div>
-                </div>
-            )})}
-            </div>
         {/* Stats Grid - Asymmetric & Dynamic Layout */}
         <div className="mb-8 sm:mb-10">
           <h2 className="text-xl sm:text-2xl font-bold text-white mb-5 flex items-center gap-2">
@@ -858,21 +826,6 @@ export default function Dashboard() {
                   onClick={action.action}
                   className="group relative overflow-hidden bg-gray-800/70 backdrop-blur-xl rounded-2xl p-6 border border-gray-700/50 hover:border-gray-600/50 transition-all text-left shadow-lg hover:shadow-2xl transform hover:-translate-y-1"
                 >
-                  {action.isNew && (
-                    <div className="absolute top-2 right-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
-                      NEW
-                    </div>
-                  )}
-                  <div className={`absolute inset-0 bg-gradient-to-br ${action.color} opacity-0 group-hover:opacity-10 transition`}></div>
-                  <div className={`w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-gradient-to-br ${action.color} rounded-lg sm:rounded-xl flex items-center justify-center mb-2 sm:mb-3 md:mb-4 shadow-lg group-hover:scale-110 transition`}>
-                    <Icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-white" />
-                  </div>
-                  <h3 className="font-bold text-white mb-0.5 sm:mb-1 text-sm sm:text-base md:text-lg">{action.title}</h3>
-                  <p className="text-xs sm:text-sm text-gray-400 mb-2 sm:mb-3">{action.description}</p>
-                  <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-semibold text-purple-400">
-                    <span>Get Started</span>
-                    <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 group-hover:translate-x-1 transition" />
-                    </div>
                   <div className={`absolute inset-0 bg-gradient-to-br ${action.color} opacity-0 group-hover:opacity-10 transition duration-300`}></div>
                   <div className="relative">
                     <div className={`w-14 h-14 bg-gradient-to-br ${action.color} rounded-xl flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
@@ -886,7 +839,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                 </button>
-              )
+              );
             })}
           </div>
         </div>
@@ -900,7 +853,7 @@ export default function Dashboard() {
                   <BarChart3 className="w-6 h-6 text-blue-400" />
                   Your Interview Journey
                 </h2>
-                <button
+                <button 
                   onClick={() => navigate('/history')}
                   className="text-sm text-purple-400 hover:text-purple-300 font-semibold flex items-center gap-1 hover:gap-2 transition-all group"
                 >
@@ -910,7 +863,7 @@ export default function Dashboard() {
               </div>
               <div className="space-y-4">
                 {dashboardData.recentInterviews.length > 0 ? (
-                  dashboardData.recentInterviews.slice(0, 3).map((interview,idx) => (
+                  dashboardData.recentInterviews.slice(0, 3).map((interview, idx) => (
                     <div 
                       key={interview._id}
                       onClick={() => navigate(`/results/${interview._id}`)}
@@ -959,6 +912,7 @@ export default function Dashboard() {
                             </span>
                           </div>
                         </div>
+                        
                         {/* Progress Bar */}
                         <div className="relative h-2 bg-gray-800 rounded-full overflow-hidden">
                           <div 
@@ -972,10 +926,6 @@ export default function Dashboard() {
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-8 sm:py-12">
-                    <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">📋</div>
-                    <p className="text-gray-400 text-base sm:text-lg mb-3 sm:mb-4">No interviews yet</p>
-                    
                   <div className="text-center py-12 sm:py-16">
                     <div className="text-6xl sm:text-7xl mb-4 animate-bounce">🎯</div>
                     <h3 className="text-xl sm:text-2xl font-bold text-white mb-3">Ready to Begin?</h3>
@@ -989,12 +939,12 @@ export default function Dashboard() {
                       Start Your First Interview 🚀
                     </button>
                   </div>
-                  </div>
                 )}
               </div>
             </div>
-            <div className="mt-4 sm:mt-6">
-              <ContributionGraph interviews={dashboardData.recentInterviews} />
+            <div>
+              <ContributionGraph interviews={dashboardData.recentInterviews}/>
+            </div>
           </div>
 
           {/* Sidebar - Enhanced with personality */}
@@ -1018,22 +968,17 @@ export default function Dashboard() {
                         </div>
                         <span className="text-sm font-black text-purple-400">{topic.progress || 0}%</span>
                       </div>
-                      <div className="relative h-1.5 sm:h-2 bg-gray-700/50 rounded-full overflow-hidden">
-                        <div
-                          className="absolute inset-y-0 left-0 bg-gradient-to-r from-emerald-400 to-cyan-500 rounded-full transition-all duration-500 group-hover:shadow-lg group-hover:shadow-emerald-500/50">
-                          <div className="relative h-2.5 bg-gray-700/50 rounded-full overflow-hidden">
-                            <div 
-                              className="absolute inset-y-0 left-0 bg-gradient-to-r from-emerald-400 via-cyan-500 to-blue-500 rounded-full transition-all duration-700 group-hover:shadow-lg group-hover:shadow-emerald-500/50"
-                              style={{ width: `${topic.progress || 0}%` }}
-                            >
-                              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"></div>
-                            </div>
-                          </div>
+                      <div className="relative h-2.5 bg-gray-700/50 rounded-full overflow-hidden">
+                        <div 
+                          className="absolute inset-y-0 left-0 bg-gradient-to-r from-emerald-400 via-cyan-500 to-blue-500 rounded-full transition-all duration-700 group-hover:shadow-lg group-hover:shadow-emerald-500/50 relative"
+                          style={{ width: `${topic.progress || 0}%` }}
+                        >
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"></div>
                         </div>
+                      </div>
                       <div className="flex items-center justify-between mt-1.5 text-xs text-gray-500">
                         <span className="font-medium">{topic.totalTimeSpent || '0'} invested</span>
                         {topic.progress === 100 && <span className="text-emerald-400 font-bold">✓ Complete</span>}
-                      </div>
                       </div>
                     </div>
                   ))
@@ -1046,7 +991,7 @@ export default function Dashboard() {
                   </div>
                 )}
               </div>
-            
+            </div>
 
             {/* Achievements - More celebratory */}
             <div className="bg-gray-800/60 backdrop-blur-xl rounded-2xl border border-gray-700/50 p-5 sm:p-6 shadow-xl">
@@ -1085,7 +1030,7 @@ export default function Dashboard() {
                   </div>
                 )}
                 {user?.stats?.badges && user.stats.badges.length > 0 && (
-                  <button
+                  <button 
                     onClick={() => navigate('/achievements')}
                     className="w-full py-3 text-sm text-purple-400 hover:text-purple-300 font-bold hover:bg-purple-500/10 rounded-xl transition-all flex items-center justify-center gap-2 border border-purple-500/20 hover:border-purple-500/40"
                   >
@@ -1095,8 +1040,6 @@ export default function Dashboard() {
                 )}
               </div>
             </div>
-
-            {/* Subscription Status */}
             
             {/* Subscription Status - More engaging */}
             <div className="relative group overflow-hidden">
@@ -1121,11 +1064,6 @@ export default function Dashboard() {
                       of {user?.subscription?.plan === 'pro' ? '25' : user?.subscription?.plan === 'enterprise' ? '∞' : '2'} left
                     </span>
                   </div>
-                  <div className="mt-2 sm:mt-3 h-1.5 sm:h-2 bg-white/20 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-white to-yellow-200 rounded-full transition-all"
-                      style={{
-                        width: `${user?.subscription?.plan === 'enterprise' ? 100 : ((user?.subscription?.interviewsRemaining || 0) / (user?.subscription?.plan === 'pro' ? 25 : 2)) * 100}%`}}></div>
                   <div className="mt-3 h-2.5 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm">
                     <div 
                       className="h-full bg-gradient-to-r from-white via-yellow-200 to-white rounded-full transition-all duration-700 relative overflow-hidden"
@@ -1136,9 +1074,8 @@ export default function Dashboard() {
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer"></div>
                     </div>
                   </div>
-                  </div>
                 </div>
-                <button
+                <button 
                   onClick={() => navigate('/subscription')}
                   className="w-full bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 group/btn transform hover:scale-[1.02]"
                 >
@@ -1149,8 +1086,6 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-      </div>
-      </div>
       </div>
 
       <style>{`
