@@ -62,7 +62,7 @@ export const sendOTP = async (req, res) => {
 // controllers/Auth.controller.js - register function
 export const register = async (req, res) => {
   try {
-    const { name, email, password, otp } = req.body;
+    const { name, email, password, otp, profilePicture } = req.body;
 
     if (!name || !email || !password || !otp) {
       return res.status(400).json({
@@ -105,6 +105,7 @@ export const register = async (req, res) => {
       password,
       authProvider: "local",
       isVerified: true,
+      profilePicture
     });
 
     // Step 2: Create profile and assign user

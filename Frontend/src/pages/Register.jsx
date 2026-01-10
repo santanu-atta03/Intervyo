@@ -53,10 +53,12 @@ export default function Register() {
   const handleNextStep = () => {
     if (validateStep1()) {
       // Store signup data in Redux
+      const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${formData.name}`;
       dispatch(setSignupData({
         name: formData.name,
         email: formData.email,
         password: formData.password,
+        profilePicture : avatarUrl,
       }));
       
       // Send OTP and navigate to verify email
