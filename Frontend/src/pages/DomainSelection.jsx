@@ -38,7 +38,7 @@ export default function DomainSelection() {
     }
 
     // Get stored OTP from signupData
-    const { name, email, password, otp } = signupData;
+    const { name, email, password, otp, profilePicture } = signupData;
     
     const profile = {
       domain: formData.domain,
@@ -46,7 +46,7 @@ export default function DomainSelection() {
     };
 
     // Call signup with all required data
-    dispatch(signup(name, email, password, otp, profile, navigate));
+    dispatch(signup(name, email, password, otp,profilePicture, profile, navigate));
   };
 
   return (

@@ -33,7 +33,7 @@ export function sendOtp(email, navigate) {
 }
 
 // Register
-export function signup(name, email, password, otp, profile, navigate) {
+export function signup(name, email, password, otp,profilePicure, profile, navigate) {
   return async (dispatch) => {
     const toastId = customToast.loading('Creating account...');
     dispatch(setLoading(true));
