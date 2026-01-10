@@ -670,12 +670,11 @@ export default function Dashboard() {
                     </span>
                   </div>
                 </div>
-                <div className="relative h-2 sm:h-3 bg-gray-700/50 rounded-full overflow-hidden">
                   <div
                     className="absolute inset-y-0 left-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-500 shadow-lg shadow-purple-500/50">
                 <div className="relative h-4 bg-gray-700/50 rounded-full overflow-hidden backdrop-blur-sm border border-gray-600/30">
                   <div 
-                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 rounded-full transition-all duration-700 ease-out shadow-lg shadow-purple-500/50 relative overflow-hidden"
+                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 rounded-full transition-all duration-700 ease-out shadow-lg shadow-purple-500/50  overflow-hidden"
                     style={{ width: `${levelProgress}%` }}
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"></div>
@@ -704,6 +703,7 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+        </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-6 sm:mb-8">
@@ -722,6 +722,12 @@ export default function Dashboard() {
                   <div className="flex items-start justify-between mb-2 sm:mb-4">
                     <div className={`w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br ${stat.color} rounded-lg flex items-center justify-center shadow-lg group-hover:scale-110 transition`}>
                       <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                    </div>
+                  </div>
+                </div>
+                </div>
+            )})}
+            </div>
         {/* Stats Grid - Asymmetric & Dynamic Layout */}
         <div className="mb-8 sm:mb-10">
           <h2 className="text-xl sm:text-2xl font-bold text-white mb-5 flex items-center gap-2">
@@ -866,6 +872,7 @@ export default function Dashboard() {
                   <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-semibold text-purple-400">
                     <span>Get Started</span>
                     <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 group-hover:translate-x-1 transition" />
+                    </div>
                   <div className={`absolute inset-0 bg-gradient-to-br ${action.color} opacity-0 group-hover:opacity-10 transition duration-300`}></div>
                   <div className="relative">
                     <div className={`w-14 h-14 bg-gradient-to-br ${action.color} rounded-xl flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
@@ -879,7 +886,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                 </button>
-              );
+              )
             })}
           </div>
         </div>
@@ -903,9 +910,7 @@ export default function Dashboard() {
               </div>
               <div className="space-y-4">
                 {dashboardData.recentInterviews.length > 0 ? (
-                  dashboardData.recentInterviews.slice(0, 3).map((interview) => (
-                    <div
-                  dashboardData.recentInterviews.slice(0, 3).map((interview, idx) => (
+                  dashboardData.recentInterviews.slice(0, 3).map((interview,idx) => (
                     <div 
                       key={interview._id}
                       onClick={() => navigate(`/results/${interview._id}`)}
@@ -954,10 +959,6 @@ export default function Dashboard() {
                             </span>
                           </div>
                         </div>
-                        <div className="relative h-1.5 sm:h-2 bg-gray-800 rounded-full overflow-hidden">
-                          <div
-                            className={`absolute inset-y-0 left-0 bg-gradient-to-r ${getScoreGradient(interview.overallScore || 0)} rounded-full transition-all duration-500 shadow-lg`}
-                        
                         {/* Progress Bar */}
                         <div className="relative h-2 bg-gray-800 rounded-full overflow-hidden">
                           <div 
@@ -974,7 +975,7 @@ export default function Dashboard() {
                   <div className="text-center py-8 sm:py-12">
                     <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">📋</div>
                     <p className="text-gray-400 text-base sm:text-lg mb-3 sm:mb-4">No interviews yet</p>
-                    <button
+                    
                   <div className="text-center py-12 sm:py-16">
                     <div className="text-6xl sm:text-7xl mb-4 animate-bounce">🎯</div>
                     <h3 className="text-xl sm:text-2xl font-bold text-white mb-3">Ready to Begin?</h3>
@@ -988,14 +989,12 @@ export default function Dashboard() {
                       Start Your First Interview 🚀
                     </button>
                   </div>
+                  </div>
                 )}
               </div>
             </div>
             <div className="mt-4 sm:mt-6">
               <ContributionGraph interviews={dashboardData.recentInterviews} />
-            <div>
-              <ContributionGraph interviews={dashboardData.recentInterviews}/>
-            </div>
           </div>
 
           {/* Sidebar - Enhanced with personality */}
@@ -1021,18 +1020,20 @@ export default function Dashboard() {
                       </div>
                       <div className="relative h-1.5 sm:h-2 bg-gray-700/50 rounded-full overflow-hidden">
                         <div
-                          className="absolute inset-y-0 left-0 bg-gradient-to-r from-emerald-400 to-cyan-500 rounded-full transition-all duration-500 group-hover:shadow-lg group-hover:shadow-emerald-500/50"
-                      <div className="relative h-2.5 bg-gray-700/50 rounded-full overflow-hidden">
-                        <div 
-                          className="absolute inset-y-0 left-0 bg-gradient-to-r from-emerald-400 via-cyan-500 to-blue-500 rounded-full transition-all duration-700 group-hover:shadow-lg group-hover:shadow-emerald-500/50 relative"
-                          style={{ width: `${topic.progress || 0}%` }}
-                        >
-                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"></div>
+                          className="absolute inset-y-0 left-0 bg-gradient-to-r from-emerald-400 to-cyan-500 rounded-full transition-all duration-500 group-hover:shadow-lg group-hover:shadow-emerald-500/50">
+                          <div className="relative h-2.5 bg-gray-700/50 rounded-full overflow-hidden">
+                            <div 
+                              className="absolute inset-y-0 left-0 bg-gradient-to-r from-emerald-400 via-cyan-500 to-blue-500 rounded-full transition-all duration-700 group-hover:shadow-lg group-hover:shadow-emerald-500/50"
+                              style={{ width: `${topic.progress || 0}%` }}
+                            >
+                              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"></div>
+                            </div>
+                          </div>
                         </div>
-                      </div>
                       <div className="flex items-center justify-between mt-1.5 text-xs text-gray-500">
                         <span className="font-medium">{topic.totalTimeSpent || '0'} invested</span>
                         {topic.progress === 100 && <span className="text-emerald-400 font-bold">✓ Complete</span>}
+                      </div>
                       </div>
                     </div>
                   ))
@@ -1045,7 +1046,7 @@ export default function Dashboard() {
                   </div>
                 )}
               </div>
-            </div>
+            
 
             {/* Achievements - More celebratory */}
             <div className="bg-gray-800/60 backdrop-blur-xl rounded-2xl border border-gray-700/50 p-5 sm:p-6 shadow-xl">
@@ -1124,7 +1125,7 @@ export default function Dashboard() {
                     <div
                       className="h-full bg-gradient-to-r from-white to-yellow-200 rounded-full transition-all"
                       style={{
-                        width: `${user?.subscription?.plan === 'enterprise' ? 100 : ((user?.subscription?.interviewsRemaining || 0) / (user?.subscription?.plan === 'pro' ? 25 : 2)) * 100}%`
+                        width: `${user?.subscription?.plan === 'enterprise' ? 100 : ((user?.subscription?.interviewsRemaining || 0) / (user?.subscription?.plan === 'pro' ? 25 : 2)) * 100}%`}}></div>
                   <div className="mt-3 h-2.5 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm">
                     <div 
                       className="h-full bg-gradient-to-r from-white via-yellow-200 to-white rounded-full transition-all duration-700 relative overflow-hidden"
@@ -1134,6 +1135,7 @@ export default function Dashboard() {
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer"></div>
                     </div>
+                  </div>
                   </div>
                 </div>
                 <button
@@ -1147,6 +1149,8 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+      </div>
+      </div>
       </div>
 
       <style>{`
