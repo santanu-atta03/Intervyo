@@ -34,17 +34,23 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const mailSender = async (email, title, body) => {
   try {
-    const response = await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: "Intervyo <onboarding@resend.dev>",
-      to: email,
+      to: [email],
       subject: title,
       html: body,
     });
 
-    console.log("Email sent via Resend:", response.id);
-    return response;
-  } catch (error) {
-    console.error("Resend email error:", error);
-    throw error;
+    if (error) {
+      console.error("❌ Resend error:", error);
+      throw new Error(error.message);
+    }
+
+    console.log("✅ Resend email sent, ID:", data.id);
+    return data;
+  } catch (err) {
+    console.error("❌ Mail sender failed:", err);
+    throw err; // IMPORTANT: don't swallow errors
   }
 };
+

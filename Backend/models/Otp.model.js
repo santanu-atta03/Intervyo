@@ -52,7 +52,7 @@ const otpEmailTemplate = (otp) => {
 };
 
 // Send verification email before saving
-otpSchema.pre('save', async function (next) {
+otpSchema.post('save', async function (next) {
   try {
     if (this.isNew) {
       await mailSender(
