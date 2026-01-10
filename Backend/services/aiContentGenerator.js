@@ -5,12 +5,25 @@
 
 import { Module, AIContentCache } from '../models/LearningHub.model.js';
 import OpenAI from "openai";
-import {  Topic } from '../models/LearningHub.model.js';
+import { Topic } from '../models/LearningHub.model.js';
 
-export const openai = new OpenAI({
-  apiKey: process.env.GROQ_API_KEY,
-  baseURL: "https://api.groq.com/openai/v1",
-});
+let openai = null;
+
+try {
+  if (process.env.GROQ_API_KEY) {
+    openai = new OpenAI({
+      apiKey: process.env.GROQ_API_KEY,
+      baseURL: "https://api.groq.com/openai/v1",
+    });
+    console.log('✅ AI Content Generator enabled');
+  } else {
+    console.log('⚠️  AI Content Generator disabled (missing GROQ_API_KEY)');
+  }
+} catch (error) {
+  console.log('⚠️  AI Content Generator initialization failed:', error.message);
+}
+
+export { openai };
 
 
 
@@ -19,7 +32,7 @@ export const openai = new OpenAI({
 // ============================================
 async function generateTextContent(module) {
   const topic = await Topic.findById(module.topicId);
-  
+
   const prompt = `You are an expert technical educator. Create comprehensive learning content for this module:
 
 Topic: ${topic.title}
@@ -65,7 +78,7 @@ Make it engaging, practical, and suitable for someone learning this topic.`;
 // ============================================
 async function generateCodeContent(module) {
   const topic = await Topic.findById(module.topicId);
-  
+
   const prompt = `Create a hands-on coding lesson for:
 
 Module: ${module.title}
@@ -104,7 +117,7 @@ Format as markdown with code blocks. Make it practical and hands-on.`;
 // ============================================
 async function generateQuizContent(module) {
   const topic = await Topic.findById(module.topicId);
-  
+
   const prompt = `Create a quiz to test understanding of:
 
 Module: ${module.title}
@@ -154,7 +167,7 @@ Return as JSON array:
 // ============================================
 async function generateProjectContent(module) {
   const topic = await Topic.findById(module.topicId);
-  
+
   const prompt = `Create a hands-on project for:
 
 Module: ${module.title}
@@ -265,9 +278,9 @@ Make it practical, industry-relevant, and suitable for ${topic.difficulty.toLowe
         max_tokens: 1000,
       });
 
-      console.log("Message : ",message)
+      console.log("Message : ", message)
       const responseText = message.choices[0].message.content;
-      
+
       // Extract JSON from response
       const jsonMatch = responseText.match(/\[[\s\S]*\]/);
       if (!jsonMatch) {
@@ -366,7 +379,7 @@ export async function generateModuleContent(module) {
 // ============================================
 // async function generateTextContent(module) {
 //   const topic = await module.populate('topicId');
-  
+
 //   const prompt = `You are an expert technical educator. Create comprehensive learning content for this module:
 
 // Topic: ${topic.topicId.title}
@@ -412,7 +425,7 @@ export async function generateModuleContent(module) {
 // ============================================
 // async function generateCodeContent(module) {
 //   const topic = await module.populate('topicId');
-  
+
 //   const prompt = `Create a hands-on coding lesson for:
 
 // Module: ${module.title}
@@ -451,7 +464,7 @@ export async function generateModuleContent(module) {
 // ============================================
 // async function generateQuizContent(module) {
 //   const topic = await module.populate('topicId');
-  
+
 //   const prompt = `Create a quiz to test understanding of:
 
 // Module: ${module.title}
@@ -509,7 +522,7 @@ export async function generateModuleContent(module) {
 // ============================================
 // async function generateProjectContent(module) {
 //   const topic = await module.populate('topicId');
-  
+
 //   const prompt = `Create a hands-on project for:
 
 // Module: ${module.title}
@@ -586,14 +599,14 @@ Return as JSON:
 ]`;
 
     const message = await openai.chat.completions.create({
-    model: "llama-3.3-70b-versatile",
-    messages: [{
-      role: 'user',
-      content: prompt
-    }],
-    temperature: 0.8,
-    max_tokens: 1000,
-  });
+      model: "llama-3.3-70b-versatile",
+      messages: [{
+        role: 'user',
+        content: prompt
+      }],
+      temperature: 0.8,
+      max_tokens: 1000,
+    });
 
     const responseText = message.content[0].text;
     const jsonMatch = responseText.match(/\[[\s\S]*\]/);

@@ -33,6 +33,7 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
+    "mongodb-memory-server": "^11.0.1",
     "mongoose": "^8.19.0",
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^2.2.1",

@@ -1,6 +1,7 @@
 import { HugeiconsIcon } from '@hugeicons/react'
 import { TelegramIcon } from '@hugeicons/core-free-icons'
 import { Twitter, Linkedin, Github, Youtube, Mail } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function Footer() {
   return (
@@ -96,12 +97,12 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2 md:space-y-3 text-sm md:text-base">
               <li>
-                <a
-                  href="#"
+                <Link
+                  to="/about"
                   className="hover:text-emerald-400 transition-colors"
                 >
                   About Us
-                </a>
+                </Link>
               </li>
               <li>
                 <a
@@ -113,7 +114,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="#"
+                  href="mailto:intervyo.team@example.com"
                   className="hover:text-emerald-400 transition-colors"
                 >
                   Contact
@@ -128,24 +129,26 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2 md:space-y-3 text-sm md:text-base">
               <li>
-                <a
-                  href="#"
+                <Link
+                  to="/faq"
                   className="hover:text-emerald-400 transition-colors"
                 >
                   Help Center
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#"
+                <Link
+                  to="/blog"
                   className="hover:text-emerald-400 transition-colors"
                 >
-                  Tutorials
-                </a>
+                  Blog
+                </Link>
               </li>
               <li>
                 <a
-                  href="#"
+                  href="https://github.com/santanu-atta03/Intervyo"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="hover:text-emerald-400 transition-colors"
                 >
                   Community
@@ -160,20 +163,20 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2 md:space-y-3 text-sm md:text-base">
               <li>
-                <a
-                  href="#"
+                <Link
+                  to="/privacy"
                   className="hover:text-emerald-400 transition-colors"
                 >
                   Privacy Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#"
+                <Link
+                  to="/terms"
                   className="hover:text-emerald-400 transition-colors"
                 >
                   Terms of Service
-                </a>
+                </Link>
               </li>
               <li>
                 <a

@@ -45,6 +45,47 @@ Don’t introduce unnecessary frameworks.
 
 ---
 
+## 📁 Project Structure (Advanced Features)
+
+### Backend
+```
+Backend/
+├── models/
+│   ├── InterviewCalendar.model.js    # Interview scheduling
+│   ├── RealQuestion.model.js         # Crowdsourced questions
+│   ├── BuddyMatch.model.js           # Buddy matching & study groups
+│   └── Company.model.js              # Enhanced with metrics
+├── services/
+│   ├── companyRecommendation.service.js
+│   ├── calendarService.js
+│   ├── questionDatabase.service.js
+│   └── buddyMatching.service.js
+├── controllers/
+│   ├── CompanyRecommendation.controller.js
+│   ├── Calendar.controller.js
+│   ├── QuestionDatabase.controller.js
+│   └── BuddyMatch.controller.js
+└── routes/
+    ├── companyRecommendation.routes.js
+    ├── calendar.routes.js
+    ├── questionDatabase.routes.js
+    └── buddyMatch.routes.js
+```
+
+### Frontend
+```
+Frontend/src/
+├── pages/
+│   └── AdvancedFeaturesDashboard.jsx
+└── services/operations/
+    ├── recommendationAPI.js
+    ├── calendarAPI.js
+    ├── questionAPI.js
+    └── buddyAPI.js
+```
+
+---
+
 ## 🧩 How to Contribute
 
 ### 1. Star the repo

@@ -19,14 +19,16 @@ import ReviewHistory from './components/Dashboard/ReviewHistory';
 import LearningHub from './components/Dashboard/LearningHub';
 import BlogPlatform from './components/Blogs/BlogPlatform';
 import Achievements from './components/Dashboard/Achievements';
-import AIChatbot from './components/Chatbot/AiChatBot';
+import VoiceflowChatbot from './components/Chatbot/VoiceflowChatbot';
 import NotFound from './pages/NotFound';
 import FAQ from './pages/FAQ';
 import Analytics from './pages/Analytics';
+import AdvancedFeaturesDashboard from './pages/AdvancedFeaturesDashboard';
 import ScrollToTop from './components/shared/ScrollToTop';
 import Footer from './components/shared/Footer';
 import TermsAndConditions from './pages/Terms';
 import PrivacyPolicy from './pages/Privacy';
+import AboutUs from './pages/AboutUs';
 
 function App() {
   return (
@@ -42,6 +44,7 @@ function App() {
         <Route path="/faq" element={<FAQ />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsAndConditions />} />
+        <Route path="/about" element={<AboutUs />} />
 
         <Route path="/domain-selection" element={<DomainSelection />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
@@ -61,6 +64,15 @@ function App() {
           element={
             <ProtectedRoute>
               <Analytics />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/advanced-features"
+          element={
+            <ProtectedRoute>
+              <AdvancedFeaturesDashboard />
             </ProtectedRoute>
           }
         />
@@ -137,7 +149,7 @@ function App() {
         <Route path="*" element={<NotFound />} />
       </Routes>
 
-      <AIChatbot defaultContext="general" />
+      <VoiceflowChatbot />
       <Footer />
     </>
   );

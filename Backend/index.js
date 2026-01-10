@@ -12,6 +12,10 @@ import learningHubRoutes from './routes/learningHub.routes.js';
 import aiRoutes from './routes/aiRoutes.js';
 import dashboardRoutes from './routes/Dashboard.route.js';
 import leaderboardRoutes from './routes/Leaderboard.routes.js';
+import companyRecommendationRoutes from './routes/companyRecommendation.routes.js';
+import calendarRoutes from './routes/calendar.routes.js';
+import questionDatabaseRoutes from './routes/questionDatabase.routes.js';
+import buddyMatchRoutes from './routes/buddyMatch.routes.js';
 import interviewSocket from './sockets/InterviewSocket.js';
 import achievementRoutes from './routes/achievement.routes.js';
 import chatbotRoutes from './routes/chatbot.route.js';
@@ -93,7 +97,7 @@ dbConnect();
 
 app.use('/api/auth', authRoutes);
 app.use('/api/interviews', interviewRoutes);
-app.use('/api/ai',aiRoutes)
+app.use('/api/ai', aiRoutes)
 app.use('/api/profile', profileRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
@@ -104,6 +108,10 @@ app.use('/api/achievements', achievementRoutes);
 app.use('/api/chatbot', chatbotRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/newsletter', newsletterRoutes);
+app.use('/api/recommendations', companyRecommendationRoutes);
+app.use('/api/calendar', calendarRoutes);
+app.use('/api/questions', questionDatabaseRoutes);
+app.use('/api/buddy', buddyMatchRoutes);
 
 // Emotion metrics routes
 app.use('/api/interviews', emotionRoutes);

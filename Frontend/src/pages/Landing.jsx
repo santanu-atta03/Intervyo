@@ -72,6 +72,7 @@ export default function LandingPage() {
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-8">
             <a href="#features" onClick={(e) => scrollToSection(e, '#features')} className="text-gray-600 hover:text-gray-900 font-medium transition-colors cursor-pointer">Features</a>
+            <a href="/about" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">About</a>
             <a href="#how-it-works" onClick={(e) => scrollToSection(e, '#how-it-works')} className="text-gray-600 hover:text-gray-900 font-medium transition-colors cursor-pointer">How it Works</a>
             <a href="#pricing" onClick={(e) => scrollToSection(e, '#pricing')} className="text-gray-600 hover:text-gray-900 font-medium transition-colors cursor-pointer">Pricing</a>
             <a href="#faq" onClick={(e) => scrollToSection(e, '#faq')} className="text-gray-600 hover:text-gray-900 font-medium transition-colors cursor-pointer">FAQ</a>
@@ -134,6 +135,12 @@ export default function LandingPage() {
                 className="block text-gray-600 hover:text-gray-900 font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
               >
                 FAQ
+              </a>
+              <a
+                href="/about"
+                className="block text-gray-600 hover:text-gray-900 font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                About
               </a>
               
               <div className="pt-4 border-t border-gray-200 space-y-3">
