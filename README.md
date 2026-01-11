@@ -51,6 +51,46 @@ If it doesn’t help you perform better in a real interview, it doesn’t belong
 
 ---
 
+## 🚀 Advanced Multi-Company Features (NEW)
+
+### 🤖 Smart Company Recommendation Engine
+- AI-powered analysis of your interview performance
+- Personalized company recommendations based on skill level
+- Success probability calculation for each company
+- Gap analysis with improvement suggestions
+- **Route:** `/advanced-features` or `/api/recommendations`
+
+### 📅 Company Interview Calendar Integration
+- Track upcoming interview dates with countdown timers
+- Automatically generated preparation milestones
+- Daily practice recommendations based on days remaining
+- Progress tracking and readiness score
+- **Route:** `/api/calendar`
+
+### 💎 Real Interview Question Database
+- Crowdsourced real interview questions from actual interviews
+- Voting system (upvote/downvote) for question quality
+- Question verification workflow
+- Frequency tracking (how often questions are asked)
+- Search and filter by company, difficulty, type
+- Trending questions feature
+- **Route:** `/api/questions`
+
+### 🤝 Interview Buddy Matching
+- Find compatible study partners preparing for same companies
+- Compatibility algorithm based on target companies and skill level
+- 1-on-1 buddy connections with mock interview scheduling
+- Study group creation and management
+- **Route:** `/api/buddy`
+
+### 📊 Company-Specific Success Metrics
+- Enhanced company profiles with hiring bar benchmarks
+- Success thresholds for each interview type
+- Difficulty ratings and acceptance rates
+- Historical performance statistics
+
+---
+
 ## 🛠 Tech Stack
 
 ### 🎨 Frontend

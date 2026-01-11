@@ -166,4 +166,4 @@ userSchema.methods.generateAuthToken = function () {
   });
 };
 
-export default mongoose.models.User || mongoose.model("User", userSchema);
+export default mongoose.models.User || mongoose.model('User', userSchema);
