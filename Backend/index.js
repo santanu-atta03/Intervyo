@@ -25,6 +25,7 @@ import profileRoutes from './routes/Profile.route.js'
 import emotionRoutes from './routes/emotion.routes.js';
 import analyticsRoutes from './routes/analytics.route.js';
 import newsletterRoutes from './routes/newsletter.routes.js';
+import contactRoutes from './routes/contact.routes.js';
 import { dbConnect } from './config/db.js';
 import { apiLimiter } from './middlewares/rateLimiter.js';
 import errorHandler from './middlewares/error.middleware.js';
@@ -95,6 +96,7 @@ app.use(passport.initialize());
 interviewSocket(io);
 dbConnect();
 
+app.use('/api/contact', contactRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/interviews', interviewRoutes);
 app.use('/api/ai', aiRoutes)

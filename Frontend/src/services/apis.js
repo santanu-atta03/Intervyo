@@ -9,6 +9,10 @@ export const authEndpoints = {
   GET_CURRENT_USER_API: `${BASE_URL}/auth/me`,
 };
 
+export const contactEndpoints = {
+  CONTACT_US_API: `${BASE_URL}/contact`,
+};
+
 
 export const profileEndpoints = {
   GET_PROFILE_API: `${BASE_URL}/profile`,

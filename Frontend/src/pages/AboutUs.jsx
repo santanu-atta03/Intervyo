@@ -80,6 +80,7 @@ export default function AboutUs() {
             <a href="/#how-it-works" className="text-gray-600 hover:text-gray-900 font-medium transition-colors cursor-pointer">How it Works</a>
             <a href="/#pricing" className="text-gray-600 hover:text-gray-900 font-medium transition-colors cursor-pointer">Pricing</a>
             <a href="/#faq" className="text-gray-600 hover:text-gray-900 font-medium transition-colors cursor-pointer">FAQ</a>
+            <Link to="/contact" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">Contact</Link>
           </div>
 
           {/* Desktop Buttons */}
@@ -124,6 +125,9 @@ export default function AboutUs() {
               <a href="/#faq" className="block text-gray-600 hover:text-gray-900 font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors" onClick={closeMobileMenu}>
                 FAQ
               </a>
+              <Link to="/contact" onClick={closeMobileMenu} className="block text-gray-600 hover:text-gray-900 font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors">
+                Contact
+              </Link>
               <Link to="/about" onClick={closeMobileMenu} className="block text-emerald-500 font-medium py-3 px-4 rounded-lg bg-emerald-50">
                 About
               </Link>

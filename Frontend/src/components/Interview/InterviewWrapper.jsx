@@ -34,6 +34,7 @@ const InterviewWrapper = () => {
     return (
       <InterviewPermissionCheck
         onPermissionsGranted={() => setPermissionsGranted(true)}
+        //  onPermissionsGranted={() => setPermissionsGranted(true)}
       />
     );
   }
