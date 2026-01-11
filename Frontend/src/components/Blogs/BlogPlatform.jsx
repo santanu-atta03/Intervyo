@@ -1,12 +1,75 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect ,useMemo} from 'react';
 import { 
   Search, Plus, TrendingUp, Clock, Eye, Heart, MessageCircle, 
   Tag, User, Calendar, Edit, Trash2, Share2, Bookmark, Filter,
   ChevronRight, Sparkles, X, ArrowLeft, Send, MoreVertical, Star
 } from 'lucide-react';
-
+import { motion, useScroll, useSpring, AnimatePresence } from 'framer-motion';
 const API_URL = 'https://intervyo.onrender.com/api';
-
+// ============================================
+// SEED CONTENT & SKELETON (Add at top)
+// ============================================
+const SEED_ARTICLES = [
+  {
+    _id: 'seed-1',
+    title: "Mastering System Design: From Monolith to Microservices",
+    slug: "mastering-system-design",
+    excerpt: "Learn how to scale applications effectively using load balancers and caching strategies.",
+    author: { name: "System Architect", avatar: "SA" },
+    publishedAt: new Date().toISOString(),
+    tags: ["System Design", "Backend"],
+    likesCount: 124, views: 1540, readTime: 12, featured: true
+  },
+  {
+    _id: 'seed-2',
+    title: "Cracking the FAANG Interview: A 3-Month Roadmap",
+    slug: "faang-roadmap",
+    excerpt: "A comprehensive guide on Data Structures, Algorithms, and behavioral preparation.",
+    author: { name: "Interview Expert", avatar: "IE" },
+    publishedAt: new Date().toISOString(),
+    tags: ["Interview Prep", "Career"],
+    likesCount: 89, views: 3200, readTime: 8, featured: true
+  },
+  {
+    _id: 'seed-3',
+    title: "10 React Performance Optimization Techniques",
+    slug: "react-performance",
+    excerpt: "Boost your web app speed using useMemo, useCallback, and dynamic imports.",
+    author: { name: "Frontend Pro", avatar: "FP" },
+    publishedAt: new Date().toISOString(),
+    tags: ["React", "Frontend"],
+    likesCount: 45, views: 980, readTime: 6, featured: false
+  },
+  {
+    _id: 'seed-4',
+    title: "Navigating Career Growth in Remote Tech",
+    slug: "remote-career-growth",
+    excerpt: "How to stay visible and get promoted while working from home in a global team.",
+    author: { name: "Career Coach", avatar: "CC" },
+    publishedAt: new Date().toISOString(),
+    tags: ["Career", "Soft Skills"],
+    likesCount: 67, views: 1100, readTime: 5, featured: false
+  }
+];
+const ReadingProgressBar = () => {
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
+  return <motion.div className="fixed top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-orange-500 via-purple-500 to-cyan-500 z-[100] origin-left" style={{ scaleX }} />;
+};
+const BlogSkeleton = () => (
+  <div className="bg-[#1a1f2e] rounded-2xl border border-gray-800 p-6 animate-pulse">
+    <div className="h-48 bg-gray-700/20 rounded-xl mb-4" />
+    <div className="flex gap-3 mb-4">
+      <div className="w-10 h-10 bg-gray-700/40 rounded-full" />
+      <div className="flex-1 space-y-2">
+        <div className="h-3 bg-gray-700/40 rounded w-1/2" />
+        <div className="h-2 bg-gray-700/40 rounded w-1/4" />
+      </div>
+    </div>
+    <div className="h-6 bg-gray-700/40 rounded w-3/4 mb-3" />
+    <div className="h-10 bg-gray-700/40 rounded-xl w-full" />
+  </div>
+);
 // ============================================
 // MAIN BLOG PAGE
 // ============================================
@@ -37,29 +100,28 @@ export default function BlogPlatform() {
   }, [searchQuery, selectedTag, sortBy, currentPageNum]);
 
   const fetchBlogs = async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({
-        page: currentPageNum,
-        limit: 12,
-        search: searchQuery,
-        tag: selectedTag,
-        sort: sortBy
-      });
-
-      const response = await fetch(`${API_URL}/blogs?${params}`);
-      const data = await response.json();
-      
-      if (data.success) {
-        setBlogs(data.blogs);
-        setTotalPages(data.pagination.pages);
-      }
-    } catch (error) {
-      console.error('Error fetching blogs:', error);
-    } finally {
-      setLoading(false);
+  setLoading(true);
+  try {
+    const params = new URLSearchParams({ 
+      page: currentPageNum, limit: 12, search: searchQuery, tag: selectedTag, sort: sortBy 
+    });
+    const response = await fetch(`${API_URL}/blogs?${params}`);
+    const data = await response.json();
+    
+    if (data.success) {
+      setBlogs(data.blogs);
+      setTotalPages(data.pagination.pages);
+    } else {
+      setBlogs(SEED_ARTICLES); // Fallback if success is false
     }
-  };
+  } catch (error) {
+    console.error('API Error:', error);
+    setBlogs(SEED_ARTICLES); // Fallback if API is blocked (CORS)
+  } finally {
+    // Add a slight delay for a smooth "Wow" transition from skeleton to content
+    setTimeout(() => setLoading(false), 800); 
+  }
+};
 
   const fetchFeaturedBlogs = async () => {
     try {
@@ -70,7 +132,21 @@ export default function BlogPlatform() {
       console.error('Error fetching featured blogs:', error);
     }
   };
+  // Ensure this useMemo is inside your BlogPlatform function
+const displayBlogs = useMemo(() => {
+  // Use API blogs if available, otherwise fall back to SEED_ARTICLES
+  let list = blogs.length > 0 ? blogs : SEED_ARTICLES;
 
+  // Real-time filtering logic
+  return list.filter(blog => {
+    const titleMatch = blog.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const excerptMatch = blog.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
+    const tagMatch = blog.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    // Show if search matches title, excerpt, OR tags
+    return titleMatch || excerptMatch || tagMatch;
+  });
+}, [blogs, searchQuery]);
   const fetchPopularTags = async () => {
     try {
       const response = await fetch(`${API_URL}/blogs/tags`);
@@ -268,203 +344,201 @@ function BlogList({
           <div className="lg:col-span-1">
             <div className="sticky top-6 space-y-6">
               {/* Filters */}
-              <div className="bg-[#1a1f2e] rounded-xl border border-gray-800 p-5">
-                <div className="flex items-center gap-2 mb-4">
-                  <Filter className="w-4 h-4 text-[#8b5cf6]" />
-                  <h3 className="font-bold text-white">Filters</h3>
+                              {/* Sidebar - Clickable Filters */}
+                <div className="lg:col-span-3 space-y-8">
+                  <div className="p-6 bg-[#161b22] rounded-3xl border border-gray-800/50">
+                    <h3 className="text-white font-black mb-6 flex items-center gap-2">
+                      <Filter className="w-5 h-5 text-orange-500" /> DISCOVER
+                    </h3>
+                    
+                    <div className="space-y-4">
+                      <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest px-1">
+                        Sort by
+                      </p>
+                      <div className="flex flex-col gap-3">
+                        {[
+                          { label: 'Latest Stories', value: '-publishedAt' },
+                          { label: 'Most Viewed', value: '-views' },
+                          { label: 'Highly Rated', value: '-likes' }
+                        ].map((item) => (
+                          <button
+                            key={item.value}
+                            onClick={() => setSortBy(item.value)}
+                            className={`text-left px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                              sortBy === item.value 
+                              ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20 shadow-[0_0_15px_rgba(212,88,31,0.1)]' 
+                              : 'text-gray-400 hover:text-white hover:bg-gray-800/50 border border-transparent'
+                            }`}
+                          >
+                            {sortBy === item.value && <span className="mr-2">●</span>}
+                            {item.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                  {/* Clear All Option - Only shows if a tag or specific sort is active */}
+                  {(selectedTag || sortBy !== '-publishedAt') && (
+                    <button
+                      onClick={() => {
+                        setSelectedTag('');
+                        setSortBy('-publishedAt');
+                      }}
+                      className="mt-6 w-full text-[11px] font-bold text-gray-500 hover:text-red-400 transition-colors uppercase tracking-tighter flex items-center justify-center gap-2"
+                    >
+                      <X className="w-3 h-3" /> Reset all filters
+                    </button>
+                  )}
                 </div>
+
+                {/* Tags section follows below... */}
+              </div>
+                            {/* In the Blog Grid section of BlogList */}
+              
+                            {/* Popular Tags */}
+                            <div className="flex flex-wrap gap-2">
+                {/* Standard "All" button */}
                 
-                <div className="mb-4">
-                  <label className="text-gray-400 text-sm mb-2 block">Sort By</label>
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#0f1419] border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-[#8b5cf6]"
-                  >
-                    <option value="-publishedAt">Latest</option>
-                    <option value="-views">Most Viewed</option>
-                    <option value="-likes">Most Liked</option>
-                  </select>
-                </div>
 
-                {selectedTag && (
+                {/* Dynamic tags from your data */}
+                {popularTags.map(tag => (
                   <button
-                    onClick={() => setSelectedTag('')}
-                    className="w-full px-3 py-2 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm flex items-center justify-center gap-2 hover:bg-red-500/20 transition-all"
+                    key={tag.name}
+                    onClick={() => setSelectedTag(tag.name)}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
+                      selectedTag === tag.name 
+                      ? 'bg-orange-500 border-orange-500 text-white' 
+                      : 'bg-[#0d1117] border-gray-800 text-gray-400 hover:border-gray-600'
+                    }`}
                   >
-                    <X className="w-4 h-4" />
-                    Clear Filter
+                    {tag.name}
                   </button>
-                )}
+                ))}
               </div>
+                          </div>
+                        </div>
 
-              {/* Popular Tags */}
-              <div className="bg-[#1a1f2e] rounded-xl border border-gray-800 p-5">
-                <div className="flex items-center gap-2 mb-4">
-                  <Tag className="w-4 h-4 text-[#d946ef]" />
-                  <h3 className="font-bold text-white">Popular Tags</h3>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {popularTags.slice(0, 15).map(tag => (
-                    <button
-                      key={tag.name}
-                      onClick={() => setSelectedTag(tag.name)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                        selectedTag === tag.name
-                          ? 'bg-[#8b5cf6] text-white'
-                          : 'bg-[#0f1419] text-gray-400 hover:bg-[#8b5cf6]/20 hover:text-[#8b5cf6]'
-                      }`}
-                    >
-                      {tag.name} ({tag.count})
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+                          {/* Blog Grid */}
+                          <div className="lg:col-span-3">
+                            {loading ? (
+                              <div className="text-center py-20">
+                                <div className="w-12 h-12 border-3 border-[#8b5cf6] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                                <p className="text-gray-400">Loading articles...</p>
+                              </div>
+                            ) : blogs.length === 0 ? (
+                              <div className="text-center py-20 bg-[#1a1f2e] rounded-xl border border-gray-800">
+                                <p className="text-gray-400 text-lg mb-4">No articles found</p>
+                                <button
+                                  onClick={onCreateBlog}
+                                  className="px-6 py-3 bg-[#8b5cf6] hover:bg-[#7c3aed] rounded-xl text-white font-semibold transition-all"
+                                >
+                                  Write the first article
+                                </button>
+                              </div>
+                            ) : (
+                              <>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                                  {blogs.map(blog => (
+                                    <BlogCard key={blog._id} blog={blog} onView={onViewBlog} />
+                                  ))}
+                                </div>
 
-          {/* Blog Grid */}
-          <div className="lg:col-span-3">
-            {loading ? (
-              <div className="text-center py-20">
-                <div className="w-12 h-12 border-3 border-[#8b5cf6] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                <p className="text-gray-400">Loading articles...</p>
-              </div>
-            ) : blogs.length === 0 ? (
-              <div className="text-center py-20 bg-[#1a1f2e] rounded-xl border border-gray-800">
-                <p className="text-gray-400 text-lg mb-4">No articles found</p>
-                <button
-                  onClick={onCreateBlog}
-                  className="px-6 py-3 bg-[#8b5cf6] hover:bg-[#7c3aed] rounded-xl text-white font-semibold transition-all"
-                >
-                  Write the first article
-                </button>
-              </div>
-            ) : (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                  {blogs.map(blog => (
-                    <BlogCard key={blog._id} blog={blog} onView={onViewBlog} />
-                  ))}
-                </div>
-
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="flex items-center justify-center gap-2">
-                    <button
-                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                      disabled={currentPage === 1}
-                      className="px-4 py-2 bg-[#1a1f2e] hover:bg-[#8b5cf6]/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white text-sm font-medium transition-all border border-gray-800"
-                    >
-                      Previous
-                    </button>
-                    
-                    {[...Array(Math.min(5, totalPages))].map((_, idx) => {
-                      const pageNum = idx + 1;
-                      return (
-                        <button
-                          key={pageNum}
-                          onClick={() => setCurrentPage(pageNum)}
-                          className={`w-10 h-10 rounded-lg font-semibold text-sm transition-all ${
-                            currentPage === pageNum
-                              ? 'bg-[#8b5cf6] text-white'
-                              : 'bg-[#1a1f2e] text-gray-400 hover:bg-[#8b5cf6]/20 border border-gray-800'
-                          }`}
-                        >
-                          {pageNum}
-                        </button>
-                      );
-                    })}
-                    
-                    <button
-                      onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                      disabled={currentPage === totalPages}
-                      className="px-4 py-2 bg-[#1a1f2e] hover:bg-[#8b5cf6]/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white text-sm font-medium transition-all border border-gray-800"
-                    >
-                      Next
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+                                {/* Pagination */}
+                                {totalPages > 1 && (
+                                  <div className="flex items-center justify-center gap-2">
+                                    <button
+                                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                                      disabled={currentPage === 1}
+                                      className="px-4 py-2 bg-[#1a1f2e] hover:bg-[#8b5cf6]/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white text-sm font-medium transition-all border border-gray-800"
+                                    >
+                                      Previous
+                                    </button>
+                                    
+                                    {[...Array(Math.min(5, totalPages))].map((_, idx) => {
+                                      const pageNum = idx + 1;
+                                      return (
+                                        <button
+                                          key={pageNum}
+                                          onClick={() => setCurrentPage(pageNum)}
+                                          className={`w-10 h-10 rounded-lg font-semibold text-sm transition-all ${
+                                            currentPage === pageNum
+                                              ? 'bg-[#8b5cf6] text-white'
+                                              : 'bg-[#1a1f2e] text-gray-400 hover:bg-[#8b5cf6]/20 border border-gray-800'
+                                          }`}
+                                        >
+                                          {pageNum}
+                                        </button>
+                                      );
+                                    })}
+                                    
+                                    <button
+                                      onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                                      disabled={currentPage === totalPages}
+                                      className="px-4 py-2 bg-[#1a1f2e] hover:bg-[#8b5cf6]/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white text-sm font-medium transition-all border border-gray-800"
+                                    >
+                                      Next
+                                    </button>
+                                  </div>
+                                )}
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
 
 // ============================================
 // BLOG CARD COMPONENT
 // ============================================
 function BlogCard({ blog, onView }) {
   return (
-    <div
-      onClick={() => onView(blog.slug)}
-      className="group bg-[#1a1f2e] rounded-xl border border-gray-800 overflow-hidden cursor-pointer hover:border-[#8b5cf6] transition-all"
+    <motion.div
+      layout
+      whileHover={{ y: -8, transition: { duration: 0.2 } }}
+      onClick={() => onView(blog)}
+      className="relative group bg-[#161b22] rounded-3xl border border-gray-800/50 p-6 cursor-pointer overflow-hidden transition-all hover:border-orange-500/50 hover:shadow-[0_20px_50px_rgba(212,88,31,0.15)]"
     >
-      <div className="h-44 bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] relative">
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-      </div>
+      {/* Top Accent Line */}
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity" />
       
-      <div className="p-5">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="w-8 h-8 bg-gradient-to-r from-[#8b5cf6] to-[#d946ef] rounded-full flex items-center justify-center text-white text-xs font-bold">
-            {blog.author?.avatar || blog.author?.name?.charAt(0) || 'U'}
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-orange-500 to-purple-500 flex items-center justify-center text-white font-bold">
+            {blog.author?.avatar || 'U'}
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-white font-semibold text-sm truncate">{blog.author?.name}</p>
-            <p className="text-gray-500 text-xs">
-              {new Date(blog.publishedAt).toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: 'numeric',
-                year: 'numeric'
-              })}
-            </p>
+          <div>
+            <h4 className="text-white font-bold text-sm leading-tight">{blog.author?.name}</h4>
+            <span className="text-[10px] uppercase tracking-widest text-orange-500 font-bold">Expert</span>
           </div>
-        </div>
-
-        <h3 className="text-lg font-bold text-white mb-2 line-clamp-2 group-hover:text-[#8b5cf6] transition-colors">
-          {blog.title}
-        </h3>
-        
-        <p className="text-gray-400 text-sm mb-4 line-clamp-2">
-          {blog.excerpt}
-        </p>
-
-        <div className="flex flex-wrap gap-2 mb-4">
-          {blog.tags.slice(0, 3).map(tag => (
-            <span key={tag} className="px-2.5 py-1 bg-[#8b5cf6]/10 text-[#8b5cf6] rounded-lg text-xs font-medium">
-              {tag}
-            </span>
-          ))}
-        </div>
-
-        <div className="flex items-center justify-between text-gray-500 text-sm">
-          <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1.5">
-              <Heart className="w-4 h-4" />
-              {blog.likesCount}
-            </span>
-            <span className="flex items-center gap-1.5">
-              <MessageCircle className="w-4 h-4" />
-              {blog.commentsCount}
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Eye className="w-4 h-4" />
-              {blog.views}
-            </span>
-          </div>
-          <span className="flex items-center gap-1.5 text-[#8b5cf6]">
-            <Clock className="w-4 h-4" />
-            {blog.readTime} min
-          </span>
         </div>
       </div>
-    </div>
+
+      <h3 className="text-xl font-extrabold text-white mb-3 group-hover:text-orange-400 transition-colors line-clamp-2">
+        {blog.title}
+      </h3>
+      
+      <div className="flex flex-wrap gap-2 mb-6">
+        {blog.tags.slice(0, 3).map(tag => (
+          <span key={tag} className="text-[10px] font-bold px-3 py-1 bg-gray-800/50 text-gray-300 rounded-lg border border-gray-700 group-hover:border-orange-500/30">
+            #{tag}
+          </span>
+        ))}
+      </div>
+
+      <div className="flex items-center justify-between pt-4 border-t border-gray-800/50">
+        <div className="flex gap-4 text-gray-400">
+          <span className="flex items-center gap-1.5"><Heart className="w-4 h-4 hover:text-red-500" /> {blog.likesCount}</span>
+          <span className="flex items-center gap-1.5"><MessageCircle className="w-4 h-4" /> {blog.commentsCount || 0}</span>
+        </div>
+        <button className="p-2 rounded-xl bg-gray-800/50 text-orange-500 hover:bg-orange-500 hover:text-white transition-all">
+          <ArrowLeft className="w-4 h-4 rotate-180" />
+        </button>
+      </div>
+    </motion.div>
   );
 }
-
 // ============================================
 // BLOG DETAIL PAGE
 // ============================================
