@@ -3,86 +3,85 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logout } from "../../services/operations/authAPI";
 import toast from "react-hot-toast";
-import { 
+import {
   uploadProfilePicture,
   updatePersonalInfo,
   updateProfessionalInfo,
   updateEducation,
   updateCertificates,
   updateAchievements,
-  getUserProfile
+  getUserProfile,
 } from "../../services/operations/profileAPI";
 import { setLoading } from "../../slices/authSlice";
 
 export default function Settings() {
   const fileInputRef = useRef(null);
   const { user } = useSelector((state) => state.profile);
-  console.log("User profile : ",user)
+  console.log("User profile : ", user);
   const { token } = useSelector((state) => state.auth);
   const [activeTab, setActiveTab] = useState("profile");
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [userData,setUserData] = useState('');
+  const [userData, setUserData] = useState("");
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   useEffect(() => {
-  const fetchUserDetails = async () => {
-    if (token) {
-      try {
+    const fetchUserDetails = async () => {
+      if (token) {
+        try {
+          dispatch(setLoading(true));
+          const result = await dispatch(getUserProfile(token));
+          console.log("Fetched user result:", result);
+        } catch (error) {
+          console.error("Error fetching user:", error);
+        } finally {
+          dispatch(setLoading(false));
+        }
+      }
+    };
+    fetchUserDetails();
+  }, [dispatch, token]);
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      if (token) {
         dispatch(setLoading(true));
-        const result = await dispatch(getUserProfile(token));
-        console.log('Fetched user result:', result);
-      } catch (error) {
-        console.error('Error fetching user:', error);
-      } finally {
+        await dispatch(getUserProfile(token));
         dispatch(setLoading(false));
       }
+    };
+    fetchUserDetails();
+  }, [dispatch, token]);
+
+  // Update the profile data loading useEffect
+  useEffect(() => {
+    if (user && user.profile) {
+      setProfileData({
+        name: user.name || "",
+        email: user.email || "",
+        phone: user.profile.phone || "",
+        gender: user.profile.gender || "",
+        age: user.profile.age || "",
+        bio: user.profile.bio || "",
+        location: user.profile.location || "",
+        profilePicture: user.profilePicture || "",
+      });
+
+      setProfessionalData({
+        domain: user.profile.domain || "",
+        experience: user.profile.experience || "",
+        skills: user.profile.skills || [],
+        linkedIn: user.profile.linkedIn || "",
+        github: user.profile.github || "",
+        portfolio: user.profile.portfolio || "",
+      });
+
+      setEducation(user.profile.education || []);
+      setCertificates(user.profile.certificates || []);
+      setAchievements(user.profile.achievements || []);
     }
-  };
-  fetchUserDetails();
-}, [dispatch, token]);
-useEffect(() => {
-  const fetchUserDetails = async () => {
-    if (token) {
-      dispatch(setLoading(true));
-      await dispatch(getUserProfile(token));
-      dispatch(setLoading(false));
-    }
-  };
-  fetchUserDetails();
-}, [dispatch, token]);
-
-// Update the profile data loading useEffect
-useEffect(() => {
-  if (user && user.profile) {
-    setProfileData({
-      name: user.name || "",
-      email: user.email || "",
-      phone: user.profile.phone || "",
-      gender: user.profile.gender || "",
-      age: user.profile.age || "",
-      bio: user.profile.bio || "",
-      location: user.profile.location || "",
-      profilePicture: user.profilePicture || "",
-    });
-
-    setProfessionalData({
-      domain: user.profile.domain || "",
-      experience: user.profile.experience || "",
-      skills: user.profile.skills || [],
-      linkedIn: user.profile.linkedIn || "",
-      github: user.profile.github || "",
-      portfolio: user.profile.portfolio || "",
-    });
-
-    setEducation(user.profile.education || []);
-    setCertificates(user.profile.certificates || []);
-    setAchievements(user.profile.achievements || []);
-  }
-}, [user]);
-
+  }, [user]);
 
   // Profile Data
   const [profileData, setProfileData] = useState({
@@ -136,7 +135,7 @@ useEffect(() => {
   });
 
   const [skillInput, setSkillInput] = useState("");
-  
+
   const tabs = [
     { id: "profile", name: "Profile", icon: "👤" },
     { id: "professional", name: "Professional", icon: "💼" },
@@ -186,6 +185,8 @@ useEffect(() => {
 
     if (file.size > 5 * 1024 * 1024) {
       toast.error("File size should be less than 5MB");
+      //  toast.error("File size should be less than 5MB");
+      //  toast.error("File size should be less than 5MB");
       return;
     }
 
@@ -193,11 +194,11 @@ useEffect(() => {
 
     try {
       const result = await dispatch(uploadProfilePicture(token, file));
-      
+
       if (result.success) {
-        setProfileData(prev => ({ 
-          ...prev, 
-          profilePicture: result.profilePicture 
+        setProfileData((prev) => ({
+          ...prev,
+          profilePicture: result.profilePicture,
         }));
       }
     } catch (error) {
@@ -208,7 +209,10 @@ useEffect(() => {
   };
 
   const handleAddSkill = () => {
-    if (skillInput.trim() && !professionalData.skills.includes(skillInput.trim())) {
+    if (
+      skillInput.trim() &&
+      !professionalData.skills.includes(skillInput.trim())
+    ) {
       setProfessionalData({
         ...professionalData,
         skills: [...professionalData.skills, skillInput.trim()],
@@ -226,7 +230,10 @@ useEffect(() => {
 
   const handleAddEducation = () => {
     if (newEducation.degree && newEducation.institution) {
-      setEducation([...education, { ...newEducation, _id: Date.now().toString() }]);
+      setEducation([
+        ...education,
+        { ...newEducation, _id: Date.now().toString() },
+      ]);
       setNewEducation({
         degree: "",
         institution: "",
@@ -244,7 +251,10 @@ useEffect(() => {
 
   const handleAddCertificate = () => {
     if (newCertificate.name && newCertificate.issuer) {
-      setCertificates([...certificates, { ...newCertificate, _id: Date.now().toString() }]);
+      setCertificates([
+        ...certificates,
+        { ...newCertificate, _id: Date.now().toString() },
+      ]);
       setNewCertificate({
         name: "",
         issuer: "",
@@ -261,7 +271,10 @@ useEffect(() => {
 
   const handleAddAchievement = () => {
     if (newAchievement.title) {
-      setAchievements([...achievements, { ...newAchievement, _id: Date.now().toString() }]);
+      setAchievements([
+        ...achievements,
+        { ...newAchievement, _id: Date.now().toString() },
+      ]);
       setNewAchievement({
         title: "",
         description: "",
@@ -367,115 +380,123 @@ useEffect(() => {
   // };
 
   const handleSaveProfile = async () => {
-  if (!token) {
-    toast.error("Please login to update profile");
-    navigate("/login");
-    return;
-  }
-
-  setSaving(true);
-
-  try {
-    let result;
-
-    switch (activeTab) {
-      case "profile":
-        result = await dispatch(updatePersonalInfo(token, {
-          name: profileData.name,
-          phone: profileData.phone,
-          gender: profileData.gender,
-          age: parseInt(profileData.age) || null,
-          bio: profileData.bio,
-          location: profileData.location,
-        }));
-        break;
-
-      case "professional":
-        result = await dispatch(updateProfessionalInfo(token, {
-          domain: professionalData.domain,
-          experience: parseInt(professionalData.experience) || null,
-          skills: professionalData.skills,
-          linkedIn: professionalData.linkedIn,
-          github: professionalData.github,
-          portfolio: professionalData.portfolio,
-        }));
-        break;
-
-      case "education":
-        const cleanedEducation = education.map(edu => {
-          const eduObj = {
-            degree: edu.degree,
-            institution: edu.institution,
-            field: edu.field || "",
-            startYear: edu.startYear || "",
-            endYear: edu.endYear || "",
-            grade: edu.grade || "",
-          };
-          // Only include _id if it's a valid MongoDB ObjectId
-          if (edu._id && edu._id.match(/^[0-9a-fA-F]{24}$/)) {
-            eduObj._id = edu._id;
-          }
-          return eduObj;
-        });
-        result = await dispatch(updateEducation(token, cleanedEducation));
-        break;
-
-      case "certificates":
-        const cleanedCertificates = certificates.map(cert => {
-          const certObj = {
-            name: cert.name,
-            issuer: cert.issuer,
-            issueDate: cert.issueDate || "",
-            credentialId: cert.credentialId || "",
-            url: cert.url || "",
-          };
-          if (cert._id && cert._id.match(/^[0-9a-fA-F]{24}$/)) {
-            certObj._id = cert._id;
-          }
-          return certObj;
-        });
-        result = await dispatch(updateCertificates(token, cleanedCertificates));
-        break;
-
-      case "achievements":
-        const cleanedAchievements = achievements.map(ach => {
-          const achObj = {
-            title: ach.title,
-            description: ach.description || "",
-            date: ach.date || "",
-          };
-          if (ach._id && ach._id.match(/^[0-9a-fA-F]{24}$/)) {
-            achObj._id = ach._id;
-          }
-          return achObj;
-        });
-        result = await dispatch(updateAchievements(token, cleanedAchievements));
-        break;
-
-      default:
-        toast.error("Invalid tab");
-        setSaving(false);
-        return;
+    if (!token) {
+      toast.error("Please login to update profile");
+      navigate("/login");
+      return;
     }
 
-    // Check if result is successful
-    if (result && !result.success) {
-      toast.error(result.message || "Failed to save changes");
+    setSaving(true);
+
+    try {
+      let result;
+
+      switch (activeTab) {
+        case "profile":
+          result = await dispatch(
+            updatePersonalInfo(token, {
+              name: profileData.name,
+              phone: profileData.phone,
+              gender: profileData.gender,
+              age: parseInt(profileData.age) || null,
+              bio: profileData.bio,
+              location: profileData.location,
+            })
+          );
+          break;
+
+        case "professional":
+          result = await dispatch(
+            updateProfessionalInfo(token, {
+              domain: professionalData.domain,
+              experience: parseInt(professionalData.experience) || null,
+              skills: professionalData.skills,
+              linkedIn: professionalData.linkedIn,
+              github: professionalData.github,
+              portfolio: professionalData.portfolio,
+            })
+          );
+          break;
+
+        case "education":
+          const cleanedEducation = education.map((edu) => {
+            const eduObj = {
+              degree: edu.degree,
+              institution: edu.institution,
+              field: edu.field || "",
+              startYear: edu.startYear || "",
+              endYear: edu.endYear || "",
+              grade: edu.grade || "",
+            };
+            // Only include _id if it's a valid MongoDB ObjectId
+            if (edu._id && edu._id.match(/^[0-9a-fA-F]{24}$/)) {
+              eduObj._id = edu._id;
+            }
+            return eduObj;
+          });
+          result = await dispatch(updateEducation(token, cleanedEducation));
+          break;
+
+        case "certificates":
+          const cleanedCertificates = certificates.map((cert) => {
+            const certObj = {
+              name: cert.name,
+              issuer: cert.issuer,
+              issueDate: cert.issueDate || "",
+              credentialId: cert.credentialId || "",
+              url: cert.url || "",
+            };
+            if (cert._id && cert._id.match(/^[0-9a-fA-F]{24}$/)) {
+              certObj._id = cert._id;
+            }
+            return certObj;
+          });
+          result = await dispatch(
+            updateCertificates(token, cleanedCertificates)
+          );
+          break;
+
+        case "achievements":
+          const cleanedAchievements = achievements.map((ach) => {
+            const achObj = {
+              title: ach.title,
+              description: ach.description || "",
+              date: ach.date || "",
+            };
+            if (ach._id && ach._id.match(/^[0-9a-fA-F]{24}$/)) {
+              achObj._id = ach._id;
+            }
+            return achObj;
+          });
+          result = await dispatch(
+            updateAchievements(token, cleanedAchievements)
+          );
+          break;
+
+        default:
+          toast.error("Invalid tab");
+          setSaving(false);
+          return;
+      }
+
+      // Check if result is successful
+      if (result && !result.success) {
+        toast.error(result.message || "Failed to save changes");
+      }
+    } catch (error) {
+      console.error("Save error:", error);
+      toast.error("Failed to save profile");
+    } finally {
+      setSaving(false);
     }
-  } catch (error) {
-    console.error("Save error:", error);
-    toast.error("Failed to save profile");
-  } finally {
-    setSaving(false);
-  }
-};
+  };
 
   const handleLogout = () => {
     dispatch(logout(navigate));
   };
 
   const handleBackToDashboard = () => {
-    navigate('/dashboard');
+    navigate("/dashboard");
   };
 
   return (
@@ -1384,7 +1405,9 @@ useEffect(() => {
                     disabled={saving}
                     className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {saving ? "Saving..." : `Save ${tabs.find(t => t.id === activeTab)?.name}`}
+                    {saving
+                      ? "Saving..."
+                      : `Save ${tabs.find((t) => t.id === activeTab)?.name}`}
                   </button>
                 </div>
               )}

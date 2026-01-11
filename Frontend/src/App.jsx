@@ -29,6 +29,7 @@ import Footer from './components/shared/Footer';
 import TermsAndConditions from './pages/Terms';
 import PrivacyPolicy from './pages/Privacy';
 import AboutUs from './pages/AboutUs';
+import ContactUs from './pages/ContactUs';
 
 function App() {
   return (
@@ -45,6 +46,7 @@ function App() {
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsAndConditions />} />
         <Route path="/about" element={<AboutUs />} />
+        <Route path="/contact" element={<ContactUs />} />
 
         <Route path="/domain-selection" element={<DomainSelection />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
