@@ -182,13 +182,11 @@ Return ONLY valid JSON:
       });
     } catch (error) {
       console.error("Ask question error:", error);
-      res
-        .status(500)
-        .json({
-          success: false,
-          message: "Failed to ask question",
-          error: error.message,
-        });
+      res.status(500).json({
+        success: false,
+        message: "Failed to ask question",
+        error: error.message,
+      });
     }
   }
 
@@ -295,13 +293,11 @@ Respond with ONLY valid JSON:
       });
     } catch (error) {
       console.error("Real-time response error:", error);
-      res
-        .status(500)
-        .json({
-          success: false,
-          message: "Failed to get AI response",
-          error: error.message,
-        });
+      res.status(500).json({
+        success: false,
+        message: "Failed to get AI response",
+        error: error.message,
+      });
     }
   }
 
@@ -390,13 +386,11 @@ Return ONLY valid JSON:
       });
     } catch (error) {
       console.error("Code evaluation error:", error);
-      res
-        .status(500)
-        .json({
-          success: false,
-          message: "Failed to evaluate code",
-          error: error.message,
-        });
+      res.status(500).json({
+        success: false,
+        message: "Failed to evaluate code",
+        error: error.message,
+      });
     }
   }
 
@@ -447,13 +441,11 @@ Return ONLY valid JSON:
       });
     } catch (error) {
       console.error("Submit answer error:", error);
-      res
-        .status(500)
-        .json({
-          success: false,
-          message: "Failed to submit answer",
-          error: error.message,
-        });
+      res.status(500).json({
+        success: false,
+        message: "Failed to submit answer",
+        error: error.message,
+      });
     }
   }
 }
