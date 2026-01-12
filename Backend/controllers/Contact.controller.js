@@ -38,7 +38,7 @@ export const contactUs = async (req, res) => {
             <p>Best Regards,</p>
             <p>The Intervyo Team</p>
           </div>
-        `
+        `,
       );
     } catch (emailError) {
       console.error("Error sending acknowledgment email:", emailError);

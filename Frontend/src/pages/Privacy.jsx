@@ -4,16 +4,16 @@ export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-purple-900 to-slate-900 text-white px-4 py-24">
       <div className="max-w-5xl mx-auto bg-white/5 backdrop-blur-lg rounded-3xl p-6 md:p-12 border border-white/10">
-        
         <h1 className="text-3xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
           Privacy Policy
         </h1>
 
         <p className="text-gray-300 mb-8">
-          This Privacy Policy describes how <span className="text-purple-400 font-semibold">Intervyo</span>
-          ("we", "our", or "us") collects, uses, stores, and protects your personal
-          information when you access or use our AI-powered interview preparation
-          platform.
+          This Privacy Policy describes how{" "}
+          <span className="text-purple-400 font-semibold">Intervyo</span>
+          ("we", "our", or "us") collects, uses, stores, and protects your
+          personal information when you access or use our AI-powered interview
+          preparation platform.
         </p>
 
         {/* 1 */}
@@ -27,7 +27,9 @@ export default function PrivacyPolicy() {
           </p>
           <ul className="list-disc list-inside space-y-2 text-gray-300">
             <li>
-              <span className="text-white font-medium">Personal Information:</span>{" "}
+              <span className="text-white font-medium">
+                Personal Information:
+              </span>{" "}
               Name, email address, profile details, authentication credentials.
             </li>
             <li>
@@ -37,11 +39,15 @@ export default function PrivacyPolicy() {
             </li>
             <li>
               <span className="text-white font-medium">Usage Information:</span>{" "}
-              Pages visited, features used, session duration, and interaction logs.
+              Pages visited, features used, session duration, and interaction
+              logs.
             </li>
             <li>
-              <span className="text-white font-medium">Device Information:</span>{" "}
-              Browser type, operating system, IP address, and device identifiers.
+              <span className="text-white font-medium">
+                Device Information:
+              </span>{" "}
+              Browser type, operating system, IP address, and device
+              identifiers.
             </li>
           </ul>
         </section>
@@ -52,8 +58,8 @@ export default function PrivacyPolicy() {
             2. How We Use Your Information
           </h2>
           <p className="text-gray-300 mb-4">
-            Your information is used strictly for legitimate business and platform
-            functionality purposes, including:
+            Your information is used strictly for legitimate business and
+            platform functionality purposes, including:
           </p>
           <ul className="list-disc list-inside space-y-2 text-gray-300">
             <li>Providing AI-powered interview simulations</li>
@@ -71,9 +77,10 @@ export default function PrivacyPolicy() {
           </h2>
           <p className="text-gray-300">
             Intervyo uses artificial intelligence and machine learning models to
-            analyze interview responses and generate feedback. These processes are
-            automated and designed solely to assist learning and preparation.
-            AI outputs should not be considered professional hiring advice.
+            analyze interview responses and generate feedback. These processes
+            are automated and designed solely to assist learning and
+            preparation. AI outputs should not be considered professional hiring
+            advice.
           </p>
         </section>
 
@@ -99,9 +106,9 @@ export default function PrivacyPolicy() {
             5. Data Retention
           </h2>
           <p className="text-gray-300">
-            We retain your data only for as long as necessary to provide services,
-            comply with legal obligations, resolve disputes, and enforce policies.
-            You may request deletion of your data at any time.
+            We retain your data only for as long as necessary to provide
+            services, comply with legal obligations, resolve disputes, and
+            enforce policies. You may request deletion of your data at any time.
           </p>
         </section>
 
@@ -130,9 +137,9 @@ export default function PrivacyPolicy() {
             7. Cookies & Tracking
           </h2>
           <p className="text-gray-300">
-            Intervyo may use cookies or similar technologies to maintain sessions,
-            enhance user experience, and analyze platform usage. You can control
-            cookie settings through your browser.
+            Intervyo may use cookies or similar technologies to maintain
+            sessions, enhance user experience, and analyze platform usage. You
+            can control cookie settings through your browser.
           </p>
         </section>
 

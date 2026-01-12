@@ -20,7 +20,7 @@
 //       // Load models (download from: https://github.com/justadudewhohacks/face-api.js-models)
 //       await faceapi.nets.tinyFaceDetector.loadFromDisk(this.modelPath);
 //       await faceapi.nets.faceExpressionNet.loadFromDisk(this.modelPath);
-      
+
 //       this.initialized = true;
 //       console.log('Emotion analyzer initialized');
 //     } catch (error) {
@@ -52,9 +52,9 @@
 //       }
 
 //       const expressions = detection.expressions;
-      
+
 //       // Calculate overall confidence
-//       const maxEmotion = Object.keys(expressions).reduce((a, b) => 
+//       const maxEmotion = Object.keys(expressions).reduce((a, b) =>
 //         expressions[a] > expressions[b] ? a : b
 //       );
 
@@ -101,48 +101,45 @@
 
 // module.exports = new EmotionAnalyzer();
 
-
 // services/emotionAnalyzer.js
 class EmotionAnalyzer {
-  
   constructor() {
     this.baseline = {
       neutral: 60,
       confident: 20,
       happy: 10,
       nervous: 5,
-      confused: 5
+      confused: 5,
     };
   }
 
   async analyzeFrame(frameData) {
     // For now, return simulated data
     // TODO: Integrate real emotion detection API later
-    
+
     try {
       // Simulate emotion detection with slight variations
       const emotions = this._generateRealisticEmotions();
-      
+
       return {
         detected: true,
         emotions,
-        confidence: emotions.confident + (emotions.neutral / 2),
+        confidence: emotions.confident + emotions.neutral / 2,
         dominantEmotion: this._getDominantEmotion(emotions),
         timestamp: Date.now(),
         metrics: {
           eyeContact: Math.random() > 0.2, // 80% eye contact
           facingCamera: Math.random() > 0.1, // 90% facing camera
-          lighting: 'good'
-        }
+          lighting: "good",
+        },
       };
-
     } catch (error) {
-      console.error('Emotion analysis error:', error);
+      console.error("Emotion analysis error:", error);
       return {
         detected: false,
         emotions: null,
         confidence: 0,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -150,27 +147,39 @@ class EmotionAnalyzer {
   _generateRealisticEmotions() {
     // Generate realistic emotion distributions with natural variation
     const variation = () => (Math.random() - 0.5) * 20;
-    
-    const confident = Math.max(0, Math.min(100, this.baseline.confident + variation()));
-    const neutral = Math.max(0, Math.min(100, this.baseline.neutral + variation()));
-    const nervous = Math.max(0, Math.min(100, this.baseline.nervous + variation() / 2));
-    const confused = Math.max(0, Math.min(100, this.baseline.confused + variation() / 2));
+
+    const confident = Math.max(
+      0,
+      Math.min(100, this.baseline.confident + variation()),
+    );
+    const neutral = Math.max(
+      0,
+      Math.min(100, this.baseline.neutral + variation()),
+    );
+    const nervous = Math.max(
+      0,
+      Math.min(100, this.baseline.nervous + variation() / 2),
+    );
+    const confused = Math.max(
+      0,
+      Math.min(100, this.baseline.confused + variation() / 2),
+    );
     const happy = Math.max(0, Math.min(100, this.baseline.happy + variation()));
-    
+
     const total = confident + neutral + nervous + confused + happy;
-    
+
     return {
       confident: Math.round((confident / total) * 100),
       neutral: Math.round((neutral / total) * 100),
       nervous: Math.round((nervous / total) * 100),
       confused: Math.round((confused / total) * 100),
-      happy: Math.round((happy / total) * 100)
+      happy: Math.round((happy / total) * 100),
     };
   }
 
   _getDominantEmotion(emotions) {
-    return Object.entries(emotions).reduce((a, b) => 
-      emotions[a[0]] > emotions[b[0]] ? a : b
+    return Object.entries(emotions).reduce((a, b) =>
+      emotions[a[0]] > emotions[b[0]] ? a : b,
     )[0];
   }
 
@@ -179,13 +188,23 @@ class EmotionAnalyzer {
       return this._getDefaultSpeechMetrics();
     }
 
-    const words = transcript.split(/\s+/).filter(w => w.length > 0);
+    const words = transcript.split(/\s+/).filter((w) => w.length > 0);
     const wordCount = words.length;
     const wpm = duration > 0 ? Math.round((wordCount / duration) * 60) : 0;
 
-    const fillerWords = ['um', 'uh', 'like', 'you know', 'actually', 'basically', 'literally', 'so', 'well'];
-    const fillerCount = words.filter(word => 
-      fillerWords.includes(word.toLowerCase())
+    const fillerWords = [
+      "um",
+      "uh",
+      "like",
+      "you know",
+      "actually",
+      "basically",
+      "literally",
+      "so",
+      "well",
+    ];
+    const fillerCount = words.filter((word) =>
+      fillerWords.includes(word.toLowerCase()),
     ).length;
 
     const pausePattern = /\.{2,}|…|\s{3,}/g;
@@ -195,16 +214,17 @@ class EmotionAnalyzer {
       wordsPerMinute: wpm,
       totalWords: wordCount,
       fillerWords: fillerCount,
-      fillerPercentage: wordCount > 0 ? Math.round((fillerCount / wordCount) * 100) : 0,
+      fillerPercentage:
+        wordCount > 0 ? Math.round((fillerCount / wordCount) * 100) : 0,
       pauseCount,
-      pace: wpm < 120 ? 'slow' : wpm > 160 ? 'fast' : 'optimal',
-      clarity: this._calculateClarity(fillerCount, wordCount, pauseCount)
+      pace: wpm < 120 ? "slow" : wpm > 160 ? "fast" : "optimal",
+      clarity: this._calculateClarity(fillerCount, wordCount, pauseCount),
     };
   }
 
   _calculateClarity(fillers, words, pauses) {
     if (words === 0) return 50;
-    
+
     const fillerPenalty = (fillers / words) * 50;
     const pausePenalty = (pauses / words) * 30;
     const clarity = 100 - fillerPenalty - pausePenalty;
@@ -218,8 +238,8 @@ class EmotionAnalyzer {
       fillerWords: 0,
       fillerPercentage: 0,
       pauseCount: 0,
-      pace: 'unknown',
-      clarity: 50
+      pace: "unknown",
+      clarity: 50,
     };
   }
 }

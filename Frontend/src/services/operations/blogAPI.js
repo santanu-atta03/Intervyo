@@ -1,12 +1,19 @@
-const API_URL = import.meta.env.VITE_API_URL || 'https://intervyo.onrender.com/api';
+const API_URL =
+  import.meta.env.VITE_API_URL || "https://intervyo.onrender.com/api";
 
 // Get auth token from localStorage
-const getAuthToken = () => localStorage.getItem('token');
+const getAuthToken = () => localStorage.getItem("token");
 
 // Blog API calls
 export const blogService = {
   // Get all blogs with filters
-  async getBlogs({ page = 1, limit = 12, search = '', tag = '', sort = '-publishedAt' } = {}) {
+  async getBlogs({
+    page = 1,
+    limit = 12,
+    search = "",
+    tag = "",
+    sort = "-publishedAt",
+  } = {}) {
     const params = new URLSearchParams({ page, limit, search, tag, sort });
     const response = await fetch(`${API_URL}/blogs?${params}`);
     return response.json();
@@ -33,12 +40,12 @@ export const blogService = {
   // Create blog
   async createBlog(blogData) {
     const response = await fetch(`${API_URL}/blogs`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${getAuthToken()}`
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getAuthToken()}`,
       },
-      body: JSON.stringify(blogData)
+      body: JSON.stringify(blogData),
     });
     return response.json();
   },
@@ -46,12 +53,12 @@ export const blogService = {
   // Update blog
   async updateBlog(id, blogData) {
     const response = await fetch(`${API_URL}/blogs/${id}`, {
-      method: 'PUT',
+      method: "PUT",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${getAuthToken()}`
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getAuthToken()}`,
       },
-      body: JSON.stringify(blogData)
+      body: JSON.stringify(blogData),
     });
     return response.json();
   },
@@ -59,10 +66,10 @@ export const blogService = {
   // Delete blog
   async deleteBlog(id) {
     const response = await fetch(`${API_URL}/blogs/${id}`, {
-      method: 'DELETE',
+      method: "DELETE",
       headers: {
-        'Authorization': `Bearer ${getAuthToken()}`
-      }
+        Authorization: `Bearer ${getAuthToken()}`,
+      },
     });
     return response.json();
   },
@@ -70,10 +77,10 @@ export const blogService = {
   // Like/Unlike blog
   async toggleLike(id) {
     const response = await fetch(`${API_URL}/blogs/${id}/like`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${getAuthToken()}`
-      }
+        Authorization: `Bearer ${getAuthToken()}`,
+      },
     });
     return response.json();
   },
@@ -81,30 +88,35 @@ export const blogService = {
   // Add comment
   async addComment(blogId, content) {
     const response = await fetch(`${API_URL}/blogs/${blogId}/comments`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${getAuthToken()}`
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getAuthToken()}`,
       },
-      body: JSON.stringify({ content })
+      body: JSON.stringify({ content }),
     });
     return response.json();
   },
 
   // Delete comment
   async deleteComment(blogId, commentId) {
-    const response = await fetch(`${API_URL}/blogs/${blogId}/comments/${commentId}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${getAuthToken()}`
-      }
-    });
+    const response = await fetch(
+      `${API_URL}/blogs/${blogId}/comments/${commentId}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${getAuthToken()}`,
+        },
+      },
+    );
     return response.json();
   },
 
   // Get user's blogs
   async getUserBlogs(userId, page = 1, limit = 10) {
-    const response = await fetch(`${API_URL}/users/${userId}/blogs?page=${page}&limit=${limit}`);
+    const response = await fetch(
+      `${API_URL}/users/${userId}/blogs?page=${page}&limit=${limit}`,
+    );
     return response.json();
-  }
+  },
 };

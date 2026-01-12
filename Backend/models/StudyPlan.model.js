@@ -1,34 +1,39 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const resourceSchema = new mongoose.Schema({
   title: String,
   url: String,
-  estimatedTime: Number
+  estimatedTime: Number,
 });
 
 const dailyTaskSchema = new mongoose.Schema({
   day: Number,
   topics: [String],
   resources: [resourceSchema],
-  practiceQuestions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Question' }]
+  practiceQuestions: [
+    { type: mongoose.Schema.Types.ObjectId, ref: "Question" },
+  ],
 });
 
 const progressSchema = new mongoose.Schema({
   currentDay: Number,
   completedTasks: [Number],
-  nextReviewDate: Date
+  nextReviewDate: Date,
 });
 
 const studyPlanSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  generatedAfterInterview: { type: mongoose.Schema.Types.ObjectId, ref: 'Interview' },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  generatedAfterInterview: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Interview",
+  },
   plan: {
     duration: Number,
     weakAreas: [String],
-    dailyTasks: [dailyTaskSchema]
+    dailyTasks: [dailyTaskSchema],
   },
   progress: progressSchema,
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
 });
 
-module.exports = mongoose.model('StudyPlan', studyPlanSchema);
+module.exports = mongoose.model("StudyPlan", studyPlanSchema);

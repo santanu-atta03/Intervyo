@@ -1,21 +1,21 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
-const API_URL_LOGIN = 'https://intervyo.onrender.com';
+const API_URL_LOGIN = "https://intervyo.onrender.com";
 export default function AuthCallback() {
   const navigate = useNavigate();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const token = params.get('token');
+    const token = params.get("token");
 
     if (!token) {
-      navigate('/login?error=missing_token');
+      navigate("/login?error=missing_token");
       return;
     }
 
     // Store token
-    localStorage.setItem('token', token);
+    localStorage.setItem("token", token);
 
     // Fetch user using Bearer token
     fetch(`${API_URL_LOGIN}/api/auth/me`, {
@@ -24,15 +24,15 @@ export default function AuthCallback() {
       },
     })
       .then((res) => {
-        if (!res.ok) throw new Error('Unauthorized');
+        if (!res.ok) throw new Error("Unauthorized");
         return res.json();
       })
       .then((data) => {
-        localStorage.setItem('user', JSON.stringify(data.user));
-        navigate('/dashboard');
+        localStorage.setItem("user", JSON.stringify(data.user));
+        navigate("/dashboard");
       })
       .catch(() => {
-        navigate('/login?error=auth_failed');
+        navigate("/login?error=auth_failed");
       });
   }, [navigate]);
 

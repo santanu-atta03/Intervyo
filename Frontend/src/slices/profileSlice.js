@@ -1,5 +1,5 @@
 // reducers/profileSlice.js
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from "@reduxjs/toolkit";
 
 let parsedUser = null;
 try {
@@ -50,5 +50,6 @@ const profileSlice = createSlice({
   },
 });
 
-export const { setUser, setLoading, updateUserProfilePicture, clearUser } = profileSlice.actions;
+export const { setUser, setLoading, updateUserProfilePicture, clearUser } =
+  profileSlice.actions;
 export default profileSlice.reducer;

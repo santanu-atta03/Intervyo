@@ -401,7 +401,7 @@ export default function Settings() {
               age: parseInt(profileData.age) || null,
               bio: profileData.bio,
               location: profileData.location,
-            })
+            }),
           );
           break;
 
@@ -414,7 +414,7 @@ export default function Settings() {
               linkedIn: professionalData.linkedIn,
               github: professionalData.github,
               portfolio: professionalData.portfolio,
-            })
+            }),
           );
           break;
 
@@ -452,7 +452,7 @@ export default function Settings() {
             return certObj;
           });
           result = await dispatch(
-            updateCertificates(token, cleanedCertificates)
+            updateCertificates(token, cleanedCertificates),
           );
           break;
 
@@ -469,7 +469,7 @@ export default function Settings() {
             return achObj;
           });
           result = await dispatch(
-            updateAchievements(token, cleanedAchievements)
+            updateAchievements(token, cleanedAchievements),
           );
           break;
 
@@ -1261,7 +1261,7 @@ export default function Settings() {
                                 {achievement.date && (
                                   <p className="text-sm text-gray-500">
                                     {new Date(
-                                      achievement.date
+                                      achievement.date,
                                     ).toLocaleDateString()}
                                   </p>
                                 )}

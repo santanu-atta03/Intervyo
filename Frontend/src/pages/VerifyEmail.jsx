@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { setSignupData } from '../slices/authSlice';
-import { toast } from 'react-hot-toast';
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { setSignupData } from "../slices/authSlice";
+import { toast } from "react-hot-toast";
 
 export default function VerifyEmail() {
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { signupData } = useSelector((state) => state.auth);
@@ -24,34 +24,36 @@ export default function VerifyEmail() {
   };
 
   const handleKeyDown = (e, index) => {
-    if (e.key === 'Backspace' && !otp[index] && e.target.previousSibling) {
+    if (e.key === "Backspace" && !otp[index] && e.target.previousSibling) {
       e.target.previousSibling.focus();
     }
   };
 
   const handleVerify = () => {
-    const otpValue = otp.join('');
-    
+    const otpValue = otp.join("");
+
     if (otpValue.length !== 6) {
-      toast.error('Please enter complete OTP');
+      toast.error("Please enter complete OTP");
       return;
     }
 
     if (!signupData) {
-      toast.error('Please complete registration form first');
-      navigate('/register');
+      toast.error("Please complete registration form first");
+      navigate("/register");
       return;
     }
 
     // Store OTP in signupData
-    dispatch(setSignupData({
-      ...signupData,
-      otp: otpValue
-    }));
+    dispatch(
+      setSignupData({
+        ...signupData,
+        otp: otpValue,
+      }),
+    );
 
-    toast.success('Email verified! Choose your domain');
+    toast.success("Email verified! Choose your domain");
     // Navigate to domain selection
-    navigate('/domain-selection');
+    navigate("/domain-selection");
   };
 
   return (
@@ -83,9 +85,9 @@ export default function VerifyEmail() {
             <span className="text-sm text-gray-500">66%</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
+            <div
               className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-500"
-              style={{ width: '66%' }}
+              style={{ width: "66%" }}
             ></div>
           </div>
         </div>
@@ -94,10 +96,15 @@ export default function VerifyEmail() {
           <div className="inline-block p-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mb-4">
             <span className="text-5xl">📧</span>
           </div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Verify Email</h1>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+            Verify Email
+          </h1>
           <p className="text-gray-600">
-            Enter the 6-digit code sent to<br />
-            <span className="font-semibold text-purple-600">{signupData?.email}</span>
+            Enter the 6-digit code sent to
+            <br />
+            <span className="font-semibold text-purple-600">
+              {signupData?.email}
+            </span>
           </p>
         </div>
 
@@ -123,7 +130,7 @@ export default function VerifyEmail() {
         </button>
 
         <button
-          onClick={() => navigate('/register')}
+          onClick={() => navigate("/register")}
           className="w-full text-purple-600 font-semibold hover:text-purple-700 transition"
         >
           ← Back to Registration

@@ -111,18 +111,18 @@ const InterviewSchema = new mongoose.Schema({
       },
     ],
     conversationHistory: [
-  {
-    role: { type: String, enum: ['user', 'assistant'], required: true },
-    content: { type: String, required: true },
-    timestamp: { type: Date, default: Date.now },
-    metadata: {
-      type: { type: String }, // 'text', 'code', 'code_review', 'diagram'
-      language: String,
-      code: String,
-      evaluation: mongoose.Schema.Types.Mixed
-    }
-  }
-],
+      {
+        role: { type: String, enum: ["user", "assistant"], required: true },
+        content: { type: String, required: true },
+        timestamp: { type: Date, default: Date.now },
+        metadata: {
+          type: { type: String }, // 'text', 'code', 'code_review', 'diagram'
+          language: String,
+          code: String,
+          evaluation: mongoose.Schema.Types.Mixed,
+        },
+      },
+    ],
     speechMetrics: {
       averagePace: Number,
       fillerWords: Number,
@@ -174,10 +174,14 @@ const InterviewSchema = new mongoose.Schema({
     ],
     overallAssessment: String,
   },
-   results: {
+  results: {
     summary: {
       overallScore: { type: Number, default: 0, min: 0, max: 100 },
-      grade: { type: String, enum: ['A+', 'A', 'B+', 'B', 'C+', 'C', 'D', 'F'], default: 'F' },
+      grade: {
+        type: String,
+        enum: ["A+", "A", "B+", "B", "C+", "C", "D", "F"],
+        default: "F",
+      },
       percentile: { type: Number, default: 0, min: 0, max: 100 },
       passed: { type: Boolean, default: false },
       totalQuestions: { type: Number, default: 0 },
@@ -187,111 +191,111 @@ const InterviewSchema = new mongoose.Schema({
       partialAnswers: { type: Number, default: 0 },
       incorrectAnswers: { type: Number, default: 0 },
       averageTimePerQuestion: { type: Number, default: 0 },
-      totalHintsUsed: { type: Number, default: 0 }
+      totalHintsUsed: { type: Number, default: 0 },
     },
-    
+
     categoryBreakdown: {
       technical: {
         score: { type: Number, default: 0, min: 0, max: 100 },
         questionsAnswered: { type: Number, default: 0 },
         strengths: [String],
-        weaknesses: [String]
+        weaknesses: [String],
       },
       communication: {
         score: { type: Number, default: 0, min: 0, max: 100 },
         clarity: { type: Number, default: 0 },
         articulation: { type: Number, default: 0 },
-        confidence: { type: Number, default: 0 }
+        confidence: { type: Number, default: 0 },
       },
       problemSolving: {
         score: { type: Number, default: 0, min: 0, max: 100 },
         analyticalThinking: { type: Number, default: 0 },
         creativity: { type: Number, default: 0 },
-        efficiency: { type: Number, default: 0 }
-      }
+        efficiency: { type: Number, default: 0 },
+      },
     },
-    
+
     detailedFeedback: {
-      overallAssessment: { type: String, default: '' },
+      overallAssessment: { type: String, default: "" },
       strengths: [String],
       weaknesses: [String],
       keyHighlights: [String],
       areasOfConcern: [String],
-      
+
       technicalAnalysis: {
-        coreConcepts: { type: String, default: '' },
-        problemSolvingApproach: { type: String, default: '' },
-        codeQuality: { type: String, default: '' },
-        bestPractices: { type: String, default: '' }
+        coreConcepts: { type: String, default: "" },
+        problemSolvingApproach: { type: String, default: "" },
+        codeQuality: { type: String, default: "" },
+        bestPractices: { type: String, default: "" },
       },
-      
+
       behavioralAnalysis: {
-        communication: { type: String, default: '' },
-        confidence: { type: String, default: '' },
-        professionalism: { type: String, default: '' },
-        adaptability: { type: String, default: '' }
-      }
+        communication: { type: String, default: "" },
+        confidence: { type: String, default: "" },
+        professionalism: { type: String, default: "" },
+        adaptability: { type: String, default: "" },
+      },
     },
-    
+
     improvementPlan: {
       shortTerm: [
         {
           title: String,
           description: String,
-          priority: { type: String, enum: ['high', 'medium', 'low'] },
+          priority: { type: String, enum: ["high", "medium", "low"] },
           estimatedTime: String,
-          resources: [String]
-        }
+          resources: [String],
+        },
       ],
-      
+
       mediumTerm: [
         {
           title: String,
           description: String,
-          priority: { type: String, enum: ['high', 'medium', 'low'] },
+          priority: { type: String, enum: ["high", "medium", "low"] },
           estimatedTime: String,
-          resources: [String]
-        }
+          resources: [String],
+        },
       ],
-      
+
       longTerm: [
         {
           title: String,
           description: String,
-          priority: { type: String, enum: ['high', 'medium', 'low'] },
+          priority: { type: String, enum: ["high", "medium", "low"] },
           estimatedTime: String,
-          resources: [String]
-        }
+          resources: [String],
+        },
       ],
-      
+
       recommendedCourses: [
         {
           title: String,
           platform: String,
           url: String,
           duration: String,
-          level: String
-        }
+          level: String,
+        },
       ],
-      
+
       practiceResources: [
         {
           title: String,
           type: String,
           url: String,
-          description: String
-        }
-      ]
+          description: String,
+        },
+      ],
     },
-    
+
     comparisonData: {
       averageScore: { type: Number, default: 0 },
       topPercentile: { type: Number, default: 0 },
       yourRank: { type: Number, default: 0 },
       totalCandidates: { type: Number, default: 0 },
-      betterThan: { type: Number, default: 0 }
+      betterThan: { type: Number, default: 0 },
     },
-    
+
     questionAnalysis: [
       {
         questionId: String,
@@ -305,26 +309,26 @@ const InterviewSchema = new mongoose.Schema({
         strengths: [String],
         improvements: [String],
         modelAnswer: String,
-        tags: [String]
-      }
+        tags: [String],
+      },
     ],
-    
+
     timeline: [
       {
         timestamp: Date,
         event: String,
         description: String,
-        score: Number
-      }
+        score: Number,
+      },
     ],
-    
+
     certificateData: {
       certificateId: String,
       issuedAt: Date,
       validUntil: Date,
       shareableLink: String,
-      verificationCode: String
-    }
+      verificationCode: String,
+    },
   },
   startTime: Date,
   endTime: Date,
@@ -344,8 +348,7 @@ InterviewSchema.index({ userId: 1, status: 1 });
 InterviewSchema.index({ createdAt: -1 });
 InterviewSchema.index({ "performance.overallScore": -1 });
 
-const Interview = mongoose.models.Interview || mongoose.model("Interview", InterviewSchema);
+const Interview =
+  mongoose.models.Interview || mongoose.model("Interview", InterviewSchema);
 
 export default Interview;
-
-

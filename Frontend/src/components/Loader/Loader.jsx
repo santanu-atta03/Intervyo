@@ -1,5 +1,5 @@
-import React from 'react';
-import { Sparkles, Zap, Trophy, Target, Brain } from 'lucide-react';
+import React from "react";
+import { Sparkles, Zap, Trophy, Target, Brain } from "lucide-react";
 
 // ============================================
 // OPTION 1: AI Brain Pulse Loader (Recommended)
@@ -10,15 +10,15 @@ export const AIBrainLoader = () => {
       <div className="relative w-24 h-24">
         {/* Outer rotating ring */}
         <div className="absolute inset-0 border-4 border-transparent border-t-purple-500 border-r-pink-500 rounded-full animate-spin"></div>
-        
+
         {/* Middle rotating ring (opposite direction) */}
         <div className="absolute inset-2 border-4 border-transparent border-b-blue-500 border-l-cyan-500 rounded-full animate-spin-reverse"></div>
-        
+
         {/* Inner pulsing circle */}
         <div className="absolute inset-4 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center animate-pulse">
           <Brain className="w-8 h-8 text-white" />
         </div>
-        
+
         {/* Orbiting dots */}
         {[0, 1, 2].map((i) => (
           <div
@@ -33,9 +33,11 @@ export const AIBrainLoader = () => {
           </div>
         ))}
       </div>
-      
+
       <div className="text-center">
-        <p className="text-white font-semibold text-lg mb-1">Loading Dashboard</p>
+        <p className="text-white font-semibold text-lg mb-1">
+          Loading Dashboard
+        </p>
         <p className="text-gray-400 text-sm">Analyzing your progress...</p>
       </div>
     </div>
@@ -56,24 +58,30 @@ export const XPCrystalLoader = () => {
           <div className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-blue-500 rotate-45"></div>
           <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-cyan-500 rotate-45"></div>
         </div>
-        
+
         {/* Center icon */}
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center shadow-lg animate-pulse-scale">
             <Sparkles className="w-6 h-6 text-white" />
           </div>
         </div>
-        
+
         {/* Glow effect */}
         <div className="absolute inset-0 bg-gradient-to-br from-purple-500/30 to-pink-500/30 rounded-full blur-xl animate-pulse"></div>
       </div>
-      
+
       <div className="flex items-center gap-2">
         <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"></div>
-        <div className="w-2 h-2 bg-pink-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-        <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+        <div
+          className="w-2 h-2 bg-pink-500 rounded-full animate-bounce"
+          style={{ animationDelay: "0.1s" }}
+        ></div>
+        <div
+          className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"
+          style={{ animationDelay: "0.2s" }}
+        ></div>
       </div>
-      
+
       <p className="text-white font-semibold">Loading your dashboard...</p>
     </div>
   );
@@ -90,26 +98,26 @@ export const TrophyLoader = () => {
         <div className="absolute inset-0">
           <div className="w-full h-full border-8 border-transparent border-t-yellow-400 border-r-orange-400 rounded-full animate-spin"></div>
         </div>
-        
+
         {/* Inner circle with trophy */}
         <div className="absolute inset-3 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-xl animate-bounce-gentle">
           <Trophy className="w-10 h-10 text-white" />
         </div>
-        
+
         {/* Sparkle effects */}
         {[0, 1, 2, 3].map((i) => (
           <div
             key={i}
             className="absolute w-1 h-1 bg-yellow-300 rounded-full animate-sparkle"
             style={{
-              top: `${25 + Math.sin(i * Math.PI / 2) * 40}%`,
-              left: `${50 + Math.cos(i * Math.PI / 2) * 40}%`,
+              top: `${25 + Math.sin((i * Math.PI) / 2) * 40}%`,
+              left: `${50 + Math.cos((i * Math.PI) / 2) * 40}%`,
               animationDelay: `${i * 0.2}s`,
             }}
           />
         ))}
       </div>
-      
+
       <div className="text-center">
         <p className="text-white font-semibold">Loading Dashboard</p>
         <div className="flex items-center gap-1 justify-center mt-1">
@@ -130,9 +138,15 @@ export const TargetFocusLoader = () => {
       <div className="relative w-28 h-28">
         {/* Concentric circles */}
         <div className="absolute inset-0 border-4 border-blue-500/30 rounded-full animate-ping-slow"></div>
-        <div className="absolute inset-3 border-4 border-purple-500/40 rounded-full animate-ping-slow" style={{ animationDelay: '0.3s' }}></div>
-        <div className="absolute inset-6 border-4 border-pink-500/50 rounded-full animate-ping-slow" style={{ animationDelay: '0.6s' }}></div>
-        
+        <div
+          className="absolute inset-3 border-4 border-purple-500/40 rounded-full animate-ping-slow"
+          style={{ animationDelay: "0.3s" }}
+        ></div>
+        <div
+          className="absolute inset-6 border-4 border-pink-500/50 rounded-full animate-ping-slow"
+          style={{ animationDelay: "0.6s" }}
+        ></div>
+
         {/* Center target */}
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-16 h-16 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-2xl animate-pulse-scale">
@@ -140,7 +154,7 @@ export const TargetFocusLoader = () => {
           </div>
         </div>
       </div>
-      
+
       <div className="text-center">
         <p className="text-white font-semibold text-lg">Loading Dashboard</p>
         <div className="flex gap-1 justify-center mt-2">
@@ -165,7 +179,10 @@ export const LightningLoader = () => {
     <div className="flex flex-col items-center justify-center gap-4">
       <div className="relative w-20 h-20">
         {/* Rotating arcs */}
-        <svg className="absolute inset-0 w-full h-full animate-spin" viewBox="0 0 100 100">
+        <svg
+          className="absolute inset-0 w-full h-full animate-spin"
+          viewBox="0 0 100 100"
+        >
           <circle
             cx="50"
             cy="50"
@@ -183,13 +200,16 @@ export const LightningLoader = () => {
             </linearGradient>
           </defs>
         </svg>
-        
+
         {/* Lightning bolt */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <Zap className="w-10 h-10 text-yellow-400 animate-pulse" fill="currentColor" />
+          <Zap
+            className="w-10 h-10 text-yellow-400 animate-pulse"
+            fill="currentColor"
+          />
         </div>
       </div>
-      
+
       <div className="text-center">
         <p className="text-white font-semibold">Loading at light speed</p>
         <div className="h-1 w-32 bg-gray-700 rounded-full overflow-hidden mt-2">
@@ -216,10 +236,12 @@ const LoaderStyles = () => (
 
     @keyframes orbit {
       0% {
-        transform: translate(-50%, -50%) rotate(0deg) translateX(45px) rotate(0deg);
+        transform: translate(-50%, -50%) rotate(0deg) translateX(45px)
+          rotate(0deg);
       }
       100% {
-        transform: translate(-50%, -50%) rotate(360deg) translateX(45px) rotate(-360deg);
+        transform: translate(-50%, -50%) rotate(360deg) translateX(45px)
+          rotate(-360deg);
       }
     }
 
@@ -233,7 +255,8 @@ const LoaderStyles = () => (
     }
 
     @keyframes pulse-scale {
-      0%, 100% {
+      0%,
+      100% {
         transform: scale(1);
       }
       50% {
@@ -242,7 +265,8 @@ const LoaderStyles = () => (
     }
 
     @keyframes bounce-gentle {
-      0%, 100% {
+      0%,
+      100% {
         transform: translateY(0);
       }
       50% {
@@ -251,7 +275,8 @@ const LoaderStyles = () => (
     }
 
     @keyframes sparkle {
-      0%, 100% {
+      0%,
+      100% {
         opacity: 0;
         transform: scale(0);
       }
@@ -273,7 +298,8 @@ const LoaderStyles = () => (
     }
 
     @keyframes wave {
-      0%, 100% {
+      0%,
+      100% {
         transform: translateY(0);
       }
       50% {
@@ -331,9 +357,9 @@ export default function DashboardLoadingDemo() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
       <LoaderStyles />
-      
+
       {/* Choose ONE of these: */}
-      
+
       {/* <AIBrainLoader /> */}
       {/* <XPCrystalLoader /> */}
       {/* <TrophyLoader /> */}
@@ -353,7 +379,7 @@ export default function DashboardLoadingDemo() {
 if (loading) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
-      <AIBrainLoader />  {/* or any other loader *//*}
+      <AIBrainLoader />  {/* or any other loader */ /*}
     </div>
   );
 }

@@ -1,52 +1,84 @@
-import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { signup } from '../services/operations/authAPI';
-import { toast } from 'react-hot-toast';
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { signup } from "../services/operations/authAPI";
+import { toast } from "react-hot-toast";
 
 export default function DomainSelection() {
   const [formData, setFormData] = useState({
-    domain: '',
-    experience: ''
+    domain: "",
+    experience: "",
   });
   const [errors, setErrors] = useState({});
-  
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading, signupData } = useSelector((state) => state.auth);
 
   const domains = [
-    { id: 'frontend', name: 'Frontend', icon: '🎨', color: 'from-pink-500 to-rose-500' },
-    { id: 'backend', name: 'Backend', icon: '⚙️', color: 'from-blue-500 to-cyan-500' },
-    { id: 'fullstack', name: 'Full Stack', icon: '🚀', color: 'from-purple-500 to-pink-500' },
-    { id: 'data-science', name: 'Data Science', icon: '📊', color: 'from-green-500 to-emerald-500' },
-    { id: 'devops', name: 'DevOps', icon: '🔧', color: 'from-orange-500 to-amber-500' },
-    { id: 'mobile', name: 'Mobile', icon: '📱', color: 'from-indigo-500 to-blue-500' }
+    {
+      id: "frontend",
+      name: "Frontend",
+      icon: "🎨",
+      color: "from-pink-500 to-rose-500",
+    },
+    {
+      id: "backend",
+      name: "Backend",
+      icon: "⚙️",
+      color: "from-blue-500 to-cyan-500",
+    },
+    {
+      id: "fullstack",
+      name: "Full Stack",
+      icon: "🚀",
+      color: "from-purple-500 to-pink-500",
+    },
+    {
+      id: "data-science",
+      name: "Data Science",
+      icon: "📊",
+      color: "from-green-500 to-emerald-500",
+    },
+    {
+      id: "devops",
+      name: "DevOps",
+      icon: "🔧",
+      color: "from-orange-500 to-amber-500",
+    },
+    {
+      id: "mobile",
+      name: "Mobile",
+      icon: "📱",
+      color: "from-indigo-500 to-blue-500",
+    },
   ];
 
   const handleSubmit = () => {
     if (!formData.domain) {
-      setErrors({ domain: 'Please select a domain' });
-      toast.error('Please select a domain');
+      setErrors({ domain: "Please select a domain" });
+      toast.error("Please select a domain");
       return;
     }
 
     if (!signupData) {
-      toast.error('Session expired. Please register again.');
-      navigate('/register');
+      toast.error("Session expired. Please register again.");
+      navigate("/register");
       return;
     }
 
     // Get stored OTP from signupData
     const { name, email, password, otp, profilePicture } = signupData;
-    
+
     const profile = {
       domain: formData.domain,
-      experience: parseInt(formData.experience) || 0
+      experience: parseInt(formData.experience) || 0,
     };
 
     // Call signup with all required data
-    dispatch(signup(name, email, password, otp,profilePicture, profile, navigate));
+    dispatch(
+      signup(name, email, password, otp, profilePicture, profile, navigate),
+    );
   };
 
   return (
@@ -98,9 +130,9 @@ export default function DomainSelection() {
             <span className="text-sm text-gray-500">100%</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
+            <div
               className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-500"
-              style={{ width: '100%' }}
+              style={{ width: "100%" }}
             ></div>
           </div>
         </div>
@@ -128,12 +160,12 @@ export default function DomainSelection() {
                 key={domain.id}
                 onClick={() => {
                   setFormData({ ...formData, domain: domain.id });
-                  setErrors({ ...errors, domain: '' });
+                  setErrors({ ...errors, domain: "" });
                 }}
                 className={`p-4 rounded-xl border-2 transition transform hover:scale-105 ${
                   formData.domain === domain.id
                     ? `bg-gradient-to-br ${domain.color} text-white border-transparent shadow-lg`
-                    : 'bg-white border-gray-200 hover:border-purple-300'
+                    : "bg-white border-gray-200 hover:border-purple-300"
                 }`}
               >
                 <div className="text-3xl mb-2">{domain.icon}</div>
@@ -149,7 +181,9 @@ export default function DomainSelection() {
             <select
               name="experience"
               value={formData.experience}
-              onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, experience: e.target.value })
+              }
               className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition"
             >
               <option value="">Select experience</option>
@@ -168,13 +202,25 @@ export default function DomainSelection() {
             {loading ? (
               <span className="flex items-center justify-center gap-2">
                 <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    fill="none"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
                 </svg>
                 Creating Account...
               </span>
             ) : (
-              'Complete Registration 🎉'
+              "Complete Registration 🎉"
             )}
           </button>
         </div>

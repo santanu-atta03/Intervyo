@@ -1,33 +1,52 @@
-import { useState, useEffect } from 'react';
-import { 
-  Search, Plus, TrendingUp, Clock, Eye, Heart, MessageCircle, 
-  Tag, User, Calendar, Edit, Trash2, Share2, Bookmark, Filter,
-  ChevronRight, Sparkles, X, ArrowLeft, Send, MoreVertical, Star
-} from 'lucide-react';
+import { useState, useEffect } from "react";
+import {
+  Search,
+  Plus,
+  TrendingUp,
+  Clock,
+  Eye,
+  Heart,
+  MessageCircle,
+  Tag,
+  User,
+  Calendar,
+  Edit,
+  Trash2,
+  Share2,
+  Bookmark,
+  Filter,
+  ChevronRight,
+  Sparkles,
+  X,
+  ArrowLeft,
+  Send,
+  MoreVertical,
+  Star,
+} from "lucide-react";
 
-const API_URL = 'https://intervyo.onrender.com/api';
+const API_URL = "https://intervyo.onrender.com/api";
 
 // ============================================
 // MAIN BLOG PAGE
 // ============================================
 export default function BlogPlatform() {
-  const [currentPage, setCurrentPage] = useState('list');
+  const [currentPage, setCurrentPage] = useState("list");
   const [selectedBlog, setSelectedBlog] = useState(null);
   const [blogs, setBlogs] = useState([]);
   const [featuredBlogs, setFeaturedBlogs] = useState([]);
   const [popularTags, setPopularTags] = useState([]);
   const [loading, setLoading] = useState(true);
-  
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTag, setSelectedTag] = useState('');
-  const [sortBy, setSortBy] = useState('-publishedAt');
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedTag, setSelectedTag] = useState("");
+  const [sortBy, setSortBy] = useState("-publishedAt");
   const [currentPageNum, setCurrentPageNum] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
   const [currentUser, setCurrentUser] = useState({
-    id: 'user123',
-    name: 'Manmohan Atta',
-    avatar: 'M'
+    id: "user123",
+    name: "Manmohan Atta",
+    avatar: "M",
   });
 
   useEffect(() => {
@@ -44,18 +63,18 @@ export default function BlogPlatform() {
         limit: 12,
         search: searchQuery,
         tag: selectedTag,
-        sort: sortBy
+        sort: sortBy,
       });
 
       const response = await fetch(`${API_URL}/blogs?${params}`);
       const data = await response.json();
-      
+
       if (data.success) {
         setBlogs(data.blogs);
         setTotalPages(data.pagination.pages);
       }
     } catch (error) {
-      console.error('Error fetching blogs:', error);
+      console.error("Error fetching blogs:", error);
     } finally {
       setLoading(false);
     }
@@ -67,7 +86,7 @@ export default function BlogPlatform() {
       const data = await response.json();
       if (data.success) setFeaturedBlogs(data.blogs);
     } catch (error) {
-      console.error('Error fetching featured blogs:', error);
+      console.error("Error fetching featured blogs:", error);
     }
   };
 
@@ -77,7 +96,7 @@ export default function BlogPlatform() {
       const data = await response.json();
       if (data.success) setPopularTags(data.tags);
     } catch (error) {
-      console.error('Error fetching tags:', error);
+      console.error("Error fetching tags:", error);
     }
   };
 
@@ -87,17 +106,17 @@ export default function BlogPlatform() {
       const data = await response.json();
       if (data.success) {
         setSelectedBlog(data.blog);
-        setCurrentPage('detail');
+        setCurrentPage("detail");
       }
     } catch (error) {
-      console.error('Error fetching blog:', error);
+      console.error("Error fetching blog:", error);
     }
   };
 
   return (
     <div className="min-h-screen bg-[#0f1419]">
-      {currentPage === 'list' && (
-        <BlogList 
+      {currentPage === "list" && (
+        <BlogList
           blogs={blogs}
           featuredBlogs={featuredBlogs}
           popularTags={popularTags}
@@ -112,41 +131,41 @@ export default function BlogPlatform() {
           totalPages={totalPages}
           setCurrentPage={setCurrentPageNum}
           onViewBlog={viewBlog}
-          onCreateBlog={() => setCurrentPage('create')}
+          onCreateBlog={() => setCurrentPage("create")}
           currentUser={currentUser}
         />
       )}
 
-      {currentPage === 'detail' && selectedBlog && (
-        <BlogDetail 
+      {currentPage === "detail" && selectedBlog && (
+        <BlogDetail
           blog={selectedBlog}
           currentUser={currentUser}
-          onBack={() => setCurrentPage('list')}
-          onEdit={() => setCurrentPage('edit')}
+          onBack={() => setCurrentPage("list")}
+          onEdit={() => setCurrentPage("edit")}
         />
       )}
 
-      {currentPage === 'create' && (
-        <BlogEditor 
+      {currentPage === "create" && (
+        <BlogEditor
           mode="create"
           currentUser={currentUser}
-          onBack={() => setCurrentPage('list')}
+          onBack={() => setCurrentPage("list")}
           onSuccess={() => {
-            setCurrentPage('list');
+            setCurrentPage("list");
             fetchBlogs();
           }}
         />
       )}
 
-      {currentPage === 'edit' && selectedBlog && (
-        <BlogEditor 
+      {currentPage === "edit" && selectedBlog && (
+        <BlogEditor
           mode="edit"
           blog={selectedBlog}
           currentUser={currentUser}
-          onBack={() => setCurrentPage('detail')}
+          onBack={() => setCurrentPage("detail")}
           onSuccess={(updatedBlog) => {
             setSelectedBlog(updatedBlog);
-            setCurrentPage('detail');
+            setCurrentPage("detail");
             fetchBlogs();
           }}
         />
@@ -158,10 +177,23 @@ export default function BlogPlatform() {
 // ============================================
 // BLOG LIST PAGE
 // ============================================
-function BlogList({ 
-  blogs, featuredBlogs, popularTags, searchQuery, setSearchQuery, 
-  selectedTag, setSelectedTag, sortBy, setSortBy, loading,
-  currentPage, totalPages, setCurrentPage, onViewBlog, onCreateBlog, currentUser
+function BlogList({
+  blogs,
+  featuredBlogs,
+  popularTags,
+  searchQuery,
+  setSearchQuery,
+  selectedTag,
+  setSelectedTag,
+  sortBy,
+  setSortBy,
+  loading,
+  currentPage,
+  totalPages,
+  setCurrentPage,
+  onViewBlog,
+  onCreateBlog,
+  currentUser,
 }) {
   return (
     <div className="min-h-screen">
@@ -223,11 +255,14 @@ function BlogList({
                     </span>
                   </div>
                 </div>
-                
+
                 <div className="p-5">
                   <div className="flex items-center gap-2 mb-3">
-                    {blog.tags.slice(0, 2).map(tag => (
-                      <span key={tag} className="px-2.5 py-1 bg-[#8b5cf6]/10 text-[#8b5cf6] rounded-lg text-xs font-medium">
+                    {blog.tags.slice(0, 2).map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-2.5 py-1 bg-[#8b5cf6]/10 text-[#8b5cf6] rounded-lg text-xs font-medium"
+                      >
                         {tag}
                       </span>
                     ))}
@@ -273,9 +308,11 @@ function BlogList({
                   <Filter className="w-4 h-4 text-[#8b5cf6]" />
                   <h3 className="font-bold text-white">Filters</h3>
                 </div>
-                
+
                 <div className="mb-4">
-                  <label className="text-gray-400 text-sm mb-2 block">Sort By</label>
+                  <label className="text-gray-400 text-sm mb-2 block">
+                    Sort By
+                  </label>
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
@@ -289,7 +326,7 @@ function BlogList({
 
                 {selectedTag && (
                   <button
-                    onClick={() => setSelectedTag('')}
+                    onClick={() => setSelectedTag("")}
                     className="w-full px-3 py-2 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm flex items-center justify-center gap-2 hover:bg-red-500/20 transition-all"
                   >
                     <X className="w-4 h-4" />
@@ -305,14 +342,14 @@ function BlogList({
                   <h3 className="font-bold text-white">Popular Tags</h3>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {popularTags.slice(0, 15).map(tag => (
+                  {popularTags.slice(0, 15).map((tag) => (
                     <button
                       key={tag.name}
                       onClick={() => setSelectedTag(tag.name)}
                       className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                         selectedTag === tag.name
-                          ? 'bg-[#8b5cf6] text-white'
-                          : 'bg-[#0f1419] text-gray-400 hover:bg-[#8b5cf6]/20 hover:text-[#8b5cf6]'
+                          ? "bg-[#8b5cf6] text-white"
+                          : "bg-[#0f1419] text-gray-400 hover:bg-[#8b5cf6]/20 hover:text-[#8b5cf6]"
                       }`}
                     >
                       {tag.name} ({tag.count})
@@ -343,7 +380,7 @@ function BlogList({
             ) : (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                  {blogs.map(blog => (
+                  {blogs.map((blog) => (
                     <BlogCard key={blog._id} blog={blog} onView={onViewBlog} />
                   ))}
                 </div>
@@ -352,13 +389,15 @@ function BlogList({
                 {totalPages > 1 && (
                   <div className="flex items-center justify-center gap-2">
                     <button
-                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                      onClick={() =>
+                        setCurrentPage(Math.max(1, currentPage - 1))
+                      }
                       disabled={currentPage === 1}
                       className="px-4 py-2 bg-[#1a1f2e] hover:bg-[#8b5cf6]/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white text-sm font-medium transition-all border border-gray-800"
                     >
                       Previous
                     </button>
-                    
+
                     {[...Array(Math.min(5, totalPages))].map((_, idx) => {
                       const pageNum = idx + 1;
                       return (
@@ -367,17 +406,19 @@ function BlogList({
                           onClick={() => setCurrentPage(pageNum)}
                           className={`w-10 h-10 rounded-lg font-semibold text-sm transition-all ${
                             currentPage === pageNum
-                              ? 'bg-[#8b5cf6] text-white'
-                              : 'bg-[#1a1f2e] text-gray-400 hover:bg-[#8b5cf6]/20 border border-gray-800'
+                              ? "bg-[#8b5cf6] text-white"
+                              : "bg-[#1a1f2e] text-gray-400 hover:bg-[#8b5cf6]/20 border border-gray-800"
                           }`}
                         >
                           {pageNum}
                         </button>
                       );
                     })}
-                    
+
                     <button
-                      onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                      onClick={() =>
+                        setCurrentPage(Math.min(totalPages, currentPage + 1))
+                      }
                       disabled={currentPage === totalPages}
                       className="px-4 py-2 bg-[#1a1f2e] hover:bg-[#8b5cf6]/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white text-sm font-medium transition-all border border-gray-800"
                     >
@@ -406,19 +447,21 @@ function BlogCard({ blog, onView }) {
       <div className="h-44 bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] relative">
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
       </div>
-      
+
       <div className="p-5">
         <div className="flex items-center gap-3 mb-3">
           <div className="w-8 h-8 bg-gradient-to-r from-[#8b5cf6] to-[#d946ef] rounded-full flex items-center justify-center text-white text-xs font-bold">
-            {blog.author?.avatar || blog.author?.name?.charAt(0) || 'U'}
+            {blog.author?.avatar || blog.author?.name?.charAt(0) || "U"}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-white font-semibold text-sm truncate">{blog.author?.name}</p>
+            <p className="text-white font-semibold text-sm truncate">
+              {blog.author?.name}
+            </p>
             <p className="text-gray-500 text-xs">
-              {new Date(blog.publishedAt).toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: 'numeric',
-                year: 'numeric'
+              {new Date(blog.publishedAt).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
               })}
             </p>
           </div>
@@ -427,14 +470,17 @@ function BlogCard({ blog, onView }) {
         <h3 className="text-lg font-bold text-white mb-2 line-clamp-2 group-hover:text-[#8b5cf6] transition-colors">
           {blog.title}
         </h3>
-        
+
         <p className="text-gray-400 text-sm mb-4 line-clamp-2">
           {blog.excerpt}
         </p>
 
         <div className="flex flex-wrap gap-2 mb-4">
-          {blog.tags.slice(0, 3).map(tag => (
-            <span key={tag} className="px-2.5 py-1 bg-[#8b5cf6]/10 text-[#8b5cf6] rounded-lg text-xs font-medium">
+          {blog.tags.slice(0, 3).map((tag) => (
+            <span
+              key={tag}
+              className="px-2.5 py-1 bg-[#8b5cf6]/10 text-[#8b5cf6] rounded-lg text-xs font-medium"
+            >
               {tag}
             </span>
           ))}
@@ -472,15 +518,15 @@ function BlogDetail({ blog, currentUser, onBack, onEdit }) {
   const [liked, setLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(blog.likesCount);
   const [comments, setComments] = useState(blog.comments || []);
-  const [newComment, setNewComment] = useState('');
+  const [newComment, setNewComment] = useState("");
 
   const handleLike = async () => {
     try {
       const response = await fetch(`${API_URL}/blogs/${blog._id}/like`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
       });
       const data = await response.json();
       if (data.success) {
@@ -488,7 +534,7 @@ function BlogDetail({ blog, currentUser, onBack, onEdit }) {
         setLikesCount(data.likesCount);
       }
     } catch (error) {
-      console.error('Error liking blog:', error);
+      console.error("Error liking blog:", error);
     }
   };
 
@@ -497,20 +543,20 @@ function BlogDetail({ blog, currentUser, onBack, onEdit }) {
 
     try {
       const response = await fetch(`${API_URL}/blogs/${blog._id}/comments`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify({ content: newComment })
+        body: JSON.stringify({ content: newComment }),
       });
       const data = await response.json();
       if (data.success) {
         setComments(data.comments);
-        setNewComment('');
+        setNewComment("");
       }
     } catch (error) {
-      console.error('Error adding comment:', error);
+      console.error("Error adding comment:", error);
     }
   };
 
@@ -538,17 +584,19 @@ function BlogDetail({ blog, currentUser, onBack, onEdit }) {
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-gradient-to-r from-[#8b5cf6] to-[#d946ef] rounded-full flex items-center justify-center text-white font-bold text-lg">
-                  {blog.author?.avatar || blog.author?.name?.charAt(0) || 'U'}
+                  {blog.author?.avatar || blog.author?.name?.charAt(0) || "U"}
                 </div>
                 <div>
-                  <p className="text-white font-bold text-lg">{blog.author?.name}</p>
+                  <p className="text-white font-bold text-lg">
+                    {blog.author?.name}
+                  </p>
                   <div className="flex items-center gap-3 text-gray-400 text-sm">
                     <span className="flex items-center gap-1.5">
                       <Calendar className="w-3.5 h-3.5" />
-                      {new Date(blog.publishedAt).toLocaleDateString('en-US', { 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
+                      {new Date(blog.publishedAt).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
                       })}
                     </span>
                     <span>•</span>
@@ -583,8 +631,11 @@ function BlogDetail({ blog, currentUser, onBack, onEdit }) {
 
             {/* Tags */}
             <div className="flex flex-wrap gap-2 mb-8 pb-8 border-b border-gray-800">
-              {blog.tags.map(tag => (
-                <span key={tag} className="px-3 py-1.5 bg-[#8b5cf6]/10 text-[#8b5cf6] rounded-lg text-sm font-medium">
+              {blog.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="px-3 py-1.5 bg-[#8b5cf6]/10 text-[#8b5cf6] rounded-lg text-sm font-medium"
+                >
                   {tag}
                 </span>
               ))}
@@ -603,11 +654,11 @@ function BlogDetail({ blog, currentUser, onBack, onEdit }) {
                 onClick={handleLike}
                 className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold transition-all ${
                   liked
-                    ? 'bg-red-500 text-white'
-                    : 'bg-[#0f1419] text-gray-300 hover:bg-red-500/20 border border-gray-700'
+                    ? "bg-red-500 text-white"
+                    : "bg-[#0f1419] text-gray-300 hover:bg-red-500/20 border border-gray-700"
                 }`}
               >
-                <Heart className={`w-5 h-5 ${liked ? 'fill-current' : ''}`} />
+                <Heart className={`w-5 h-5 ${liked ? "fill-current" : ""}`} />
                 {likesCount}
               </button>
 
@@ -651,14 +702,21 @@ function BlogDetail({ blog, currentUser, onBack, onEdit }) {
               {/* Comments List */}
               <div className="space-y-4">
                 {comments.map((comment) => (
-                  <div key={comment._id} className="bg-[#0f1419] rounded-xl p-5 border border-gray-800">
+                  <div
+                    key={comment._id}
+                    className="bg-[#0f1419] rounded-xl p-5 border border-gray-800"
+                  >
                     <div className="flex items-start gap-3">
                       <div className="w-10 h-10 bg-gradient-to-r from-[#8b5cf6] to-[#d946ef] rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold">
-                        {comment.userId?.avatar || comment.userId?.name?.charAt(0) || 'U'}
+                        {comment.userId?.avatar ||
+                          comment.userId?.name?.charAt(0) ||
+                          "U"}
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
-                          <span className="text-white font-semibold">{comment.userId?.name}</span>
+                          <span className="text-white font-semibold">
+                            {comment.userId?.name}
+                          </span>
                           <span className="text-gray-500 text-xs">
                             {new Date(comment.createdAt).toLocaleDateString()}
                           </span>
@@ -681,38 +739,40 @@ function BlogDetail({ blog, currentUser, onBack, onEdit }) {
 // BLOG EDITOR (Create/Edit)
 // ============================================
 function BlogEditor({ mode, blog, currentUser, onBack, onSuccess }) {
-  const [title, setTitle] = useState(blog?.title || '');
-  const [content, setContent] = useState(blog?.content || '');
-  const [tags, setTags] = useState(blog?.tags?.join(', ') || '');
-  const [status, setStatus] = useState(blog?.status || 'draft');
+  const [title, setTitle] = useState(blog?.title || "");
+  const [content, setContent] = useState(blog?.content || "");
+  const [tags, setTags] = useState(blog?.tags?.join(", ") || "");
+  const [status, setStatus] = useState(blog?.status || "draft");
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
     if (!title.trim() || !content.trim()) {
-      alert('Title and content are required');
+      alert("Title and content are required");
       return;
     }
 
     setSaving(true);
     try {
-      const url = mode === 'create' 
-        ? `${API_URL}/blogs`
-        : `${API_URL}/blogs/${blog._id}`;
-      
-      const method = mode === 'create' ? 'POST' : 'PUT';
+      const url =
+        mode === "create" ? `${API_URL}/blogs` : `${API_URL}/blogs/${blog._id}`;
+
+      const method = mode === "create" ? "POST" : "PUT";
 
       const response = await fetch(url, {
         method,
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify({
           title,
           content,
-          tags: tags.split(',').map(t => t.trim()).filter(Boolean),
-          status
-        })
+          tags: tags
+            .split(",")
+            .map((t) => t.trim())
+            .filter(Boolean),
+          status,
+        }),
       });
 
       const data = await response.json();
@@ -720,8 +780,8 @@ function BlogEditor({ mode, blog, currentUser, onBack, onSuccess }) {
         onSuccess(data.blog);
       }
     } catch (error) {
-      console.error('Error saving blog:', error);
-      alert('Failed to save blog');
+      console.error("Error saving blog:", error);
+      alert("Failed to save blog");
     } finally {
       setSaving(false);
     }
@@ -762,7 +822,7 @@ function BlogEditor({ mode, blog, currentUser, onBack, onSuccess }) {
               ) : (
                 <>
                   <Send className="w-4 h-4" />
-                  {mode === 'create' ? 'Create Article' : 'Update Article'}
+                  {mode === "create" ? "Create Article" : "Update Article"}
                 </>
               )}
             </button>
@@ -771,12 +831,14 @@ function BlogEditor({ mode, blog, currentUser, onBack, onSuccess }) {
 
         <div className="bg-[#1a1f2e] rounded-xl border border-gray-800 p-8">
           <h2 className="text-3xl font-bold text-white mb-8">
-            {mode === 'create' ? 'Write New Article' : 'Edit Article'}
+            {mode === "create" ? "Write New Article" : "Edit Article"}
           </h2>
 
           {/* Title Input */}
           <div className="mb-6">
-            <label className="block text-white font-semibold mb-2 text-sm">Article Title</label>
+            <label className="block text-white font-semibold mb-2 text-sm">
+              Article Title
+            </label>
             <input
               type="text"
               value={title}
@@ -788,7 +850,9 @@ function BlogEditor({ mode, blog, currentUser, onBack, onSuccess }) {
 
           {/* Tags Input */}
           <div className="mb-6">
-            <label className="block text-white font-semibold mb-2 text-sm">Tags</label>
+            <label className="block text-white font-semibold mb-2 text-sm">
+              Tags
+            </label>
             <input
               type="text"
               value={tags}
@@ -796,12 +860,16 @@ function BlogEditor({ mode, blog, currentUser, onBack, onSuccess }) {
               placeholder="javascript, react, tutorials (comma separated)"
               className="w-full px-4 py-3 bg-[#0f1419] border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[#8b5cf6] transition-all"
             />
-            <p className="text-gray-500 text-xs mt-2">Separate tags with commas</p>
+            <p className="text-gray-500 text-xs mt-2">
+              Separate tags with commas
+            </p>
           </div>
 
           {/* Content Editor */}
           <div className="mb-6">
-            <label className="block text-white font-semibold mb-2 text-sm">Content</label>
+            <label className="block text-white font-semibold mb-2 text-sm">
+              Content
+            </label>
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
@@ -811,7 +879,9 @@ function BlogEditor({ mode, blog, currentUser, onBack, onSuccess }) {
             />
             <div className="flex items-center justify-between mt-2">
               <p className="text-gray-500 text-xs">
-                {content.split(/\s+/).filter(Boolean).length} words • {Math.ceil(content.split(/\s+/).filter(Boolean).length / 200)} min read
+                {content.split(/\s+/).filter(Boolean).length} words •{" "}
+                {Math.ceil(content.split(/\s+/).filter(Boolean).length / 200)}{" "}
+                min read
               </p>
               <p className="text-gray-500 text-xs">
                 {content.length} characters
@@ -823,16 +893,24 @@ function BlogEditor({ mode, blog, currentUser, onBack, onSuccess }) {
           <div className="mt-8 p-6 bg-[#0f1419] rounded-xl border border-gray-800">
             <h3 className="text-xl font-bold text-white mb-4">Preview</h3>
             <div className="prose prose-invert max-w-none">
-              <h2 className="text-2xl font-bold text-white mb-4">{title || 'Your Title Here'}</h2>
+              <h2 className="text-2xl font-bold text-white mb-4">
+                {title || "Your Title Here"}
+              </h2>
               <div className="flex flex-wrap gap-2 mb-4">
-                {tags.split(',').filter(t => t.trim()).map((tag, idx) => (
-                  <span key={idx} className="px-2.5 py-1 bg-[#8b5cf6]/10 text-[#8b5cf6] rounded-lg text-xs font-medium">
-                    {tag.trim()}
-                  </span>
-                ))}
+                {tags
+                  .split(",")
+                  .filter((t) => t.trim())
+                  .map((tag, idx) => (
+                    <span
+                      key={idx}
+                      className="px-2.5 py-1 bg-[#8b5cf6]/10 text-[#8b5cf6] rounded-lg text-xs font-medium"
+                    >
+                      {tag.trim()}
+                    </span>
+                  ))}
               </div>
               <div className="text-gray-300 whitespace-pre-wrap leading-relaxed">
-                {content || 'Your content will appear here...'}
+                {content || "Your content will appear here..."}
               </div>
             </div>
           </div>

@@ -1,4 +1,4 @@
-const BASE_URL = 'https://intervyo.onrender.com/api';
+const BASE_URL = "https://intervyo.onrender.com/api";
 // const BASE_URL = 'http://localhost:5000/api';
 
 export const authEndpoints = {
@@ -13,7 +13,6 @@ export const contactEndpoints = {
   CONTACT_US_API: `${BASE_URL}/contact`,
 };
 
-
 export const profileEndpoints = {
   GET_PROFILE_API: `${BASE_URL}/profile`,
   UPDATE_PROFILE_API: `${BASE_URL}/profile`,
@@ -26,18 +25,18 @@ export const profileEndpoints = {
   DELETE_PROFILE_PICTURE_API: `${BASE_URL}/profile/picture`,
 };
 
-
 export const interviewEndpoints = {
   // Match your backend routes
-  CREATE_INTERVIEW_API: BASE_URL + '/interview/create',
-  START_INTERVIEW_API: BASE_URL + '/interview/:interviewId/start',
-  SUBMIT_ANSWER_API: BASE_URL + '/interview/:interviewId/answer',
-  GET_HINT_API: BASE_URL + '/interview/:interviewId/hint/:questionId',
-  ANALYZE_EMOTION_API: BASE_URL + '/interview/:interviewId/emotion',
-  COMPLETE_INTERVIEW_API: BASE_URL + '/interview/:interviewId/complete',
+  CREATE_INTERVIEW_API: BASE_URL + "/interview/create",
+  START_INTERVIEW_API: BASE_URL + "/interview/:interviewId/start",
+  SUBMIT_ANSWER_API: BASE_URL + "/interview/:interviewId/answer",
+  GET_HINT_API: BASE_URL + "/interview/:interviewId/hint/:questionId",
+  ANALYZE_EMOTION_API: BASE_URL + "/interview/:interviewId/emotion",
+  COMPLETE_INTERVIEW_API: BASE_URL + "/interview/:interviewId/complete",
   GET_RESULTS_API: `${BASE_URL}/interview/:interviewId/results`,
   // or if you have a separate detailed results endpoint:
   GET_DETAILED_RESULTS_API: `${BASE_URL}/interview/:interviewId/detailed-results`,
-  GET_HISTORY_API: BASE_URL + '/interview/history',
-  START_CONVERSATION_API : BASE_URL + '/interview/:interviewId/start-conversation'
+  GET_HISTORY_API: BASE_URL + "/interview/history",
+  START_CONVERSATION_API:
+    BASE_URL + "/interview/:interviewId/start-conversation",
 };

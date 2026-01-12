@@ -53,4 +53,3 @@ export const mailSender = async (email, title, body) => {
     throw err; // IMPORTANT: don't swallow errors
   }
 };
-

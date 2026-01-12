@@ -1,13 +1,13 @@
 // frontend/src/components/Chatbot/VoiceflowChatbot.jsx
-import { useEffect } from 'react';
+import { useEffect } from "react";
 
 const VoiceflowChatbot = () => {
   useEffect(() => {
     // Check if the Voiceflow script is already loaded
     if (!window.voiceflow) {
-      const script = document.createElement('script');
-      script.type = 'text/javascript';
-      
+      const script = document.createElement("script");
+      script.type = "text/javascript";
+
       script.innerHTML = `
         (function(d, t) {
           var v = d.createElement(t), s = d.getElementsByTagName(t)[0];
@@ -26,9 +26,9 @@ const VoiceflowChatbot = () => {
           s.parentNode.insertBefore(v, s);
         })(document, 'script');
       `;
-      
+
       document.body.appendChild(script);
-      
+
       // Clean up the script when component unmounts
       return () => {
         document.body.removeChild(script);
@@ -37,12 +37,12 @@ const VoiceflowChatbot = () => {
       // If already loaded, initialize the chat
       if (window.voiceflow?.chat) {
         window.voiceflow.chat.load({
-          verify: { projectID: '695f3fcb847e07b5c98aefe7' },
-          url: 'https://general-runtime.voiceflow.com',
-          versionID: 'production',
+          verify: { projectID: "695f3fcb847e07b5c98aefe7" },
+          url: "https://general-runtime.voiceflow.com",
+          versionID: "production",
           voice: {
-            url: "https://runtime-api.voiceflow.com"
-          }
+            url: "https://runtime-api.voiceflow.com",
+          },
         });
       }
     }

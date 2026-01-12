@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback } from "react";
 
 export const useAudioPlayer = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -9,8 +9,8 @@ export const useAudioPlayer = () => {
   const playAudio = useCallback(async (base64Data) => {
     try {
       if (!base64Data) {
-        console.error('No audio data provided');
-        return Promise.reject('No audio data');
+        console.error("No audio data provided");
+        return Promise.reject("No audio data");
       }
 
       // Stop any currently playing audio
@@ -23,18 +23,18 @@ export const useAudioPlayer = () => {
       // Convert base64 to blob
       const byteCharacters = atob(base64Data);
       const byteNumbers = new Array(byteCharacters.length);
-      
+
       for (let i = 0; i < byteCharacters.length; i++) {
         byteNumbers[i] = byteCharacters.charCodeAt(i);
       }
-      
+
       const byteArray = new Uint8Array(byteNumbers);
-      const blob = new Blob([byteArray], { type: 'audio/mpeg' });
+      const blob = new Blob([byteArray], { type: "audio/mpeg" });
       const url = URL.createObjectURL(blob);
 
       // Create and configure audio element
       const audio = new Audio(url);
-      audio.preload = 'auto';
+      audio.preload = "auto";
       audioRef.current = audio;
 
       return new Promise((resolve, reject) => {
@@ -48,7 +48,7 @@ export const useAudioPlayer = () => {
         };
 
         audio.onerror = (error) => {
-          console.error('Audio playback error:', error);
+          console.error("Audio playback error:", error);
           setIsPlaying(false);
           URL.revokeObjectURL(url);
           audioRef.current = null;
@@ -56,8 +56,8 @@ export const useAudioPlayer = () => {
         };
 
         audio.oncanplaythrough = () => {
-          audio.play().catch(error => {
-            console.error('Play error:', error);
+          audio.play().catch((error) => {
+            console.error("Play error:", error);
             setIsPlaying(false);
             URL.revokeObjectURL(url);
             reject(error);
@@ -68,7 +68,7 @@ export const useAudioPlayer = () => {
         audio.load();
       });
     } catch (error) {
-      console.error('Error playing audio:', error);
+      console.error("Error playing audio:", error);
       setIsPlaying(false);
       return Promise.reject(error);
     }
@@ -87,8 +87,8 @@ export const useAudioPlayer = () => {
   // Play text using Web Speech API (fallback)
   const speakText = useCallback((text, options = {}) => {
     return new Promise((resolve, reject) => {
-      if (!('speechSynthesis' in window)) {
-        reject('Speech synthesis not supported');
+      if (!("speechSynthesis" in window)) {
+        reject("Speech synthesis not supported");
         return;
       }
 
@@ -99,18 +99,18 @@ export const useAudioPlayer = () => {
       utterance.rate = options.rate || 0.9;
       utterance.pitch = options.pitch || 1;
       utterance.volume = options.volume || 1;
-      utterance.lang = options.lang || 'en-US';
+      utterance.lang = options.lang || "en-US";
 
       // Try to get a better voice
       const voices = window.speechSynthesis.getVoices();
       const preferredVoice = voices.find(
-        (voice) => 
-          voice.lang.startsWith('en') && 
-          (voice.name.includes('Google') || 
-           voice.name.includes('Female') ||
-           voice.name.includes('Samantha'))
+        (voice) =>
+          voice.lang.startsWith("en") &&
+          (voice.name.includes("Google") ||
+            voice.name.includes("Female") ||
+            voice.name.includes("Samantha")),
       );
-      
+
       if (preferredVoice) {
         utterance.voice = preferredVoice;
       }
@@ -123,7 +123,7 @@ export const useAudioPlayer = () => {
       };
 
       utterance.onerror = (error) => {
-        console.error('Speech synthesis error:', error);
+        console.error("Speech synthesis error:", error);
         setIsPlaying(false);
         reject(error);
       };
@@ -142,7 +142,7 @@ export const useAudioPlayer = () => {
   // Cleanup
   const cleanup = useCallback(() => {
     stopAudio();
-    if ('speechSynthesis' in window) {
+    if ("speechSynthesis" in window) {
       window.speechSynthesis.cancel();
     }
   }, [stopAudio]);

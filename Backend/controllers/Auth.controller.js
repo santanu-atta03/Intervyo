@@ -3,8 +3,8 @@ import Profile from "../models/Profile.model.js";
 import OTP from "../models/Otp.model.js";
 import otpGenerator from "otp-generator";
 import bcrypt from "bcryptjs";
-import dotenv from 'dotenv';
-import jwt from 'jsonwebtoken';
+import dotenv from "dotenv";
+import jwt from "jsonwebtoken";
 dotenv.config();
 
 // Send OTP
@@ -98,8 +98,6 @@ export const sendOTP = async (req, res) => {
 //       });
 //     }
 
-    
-
 //     // Create empty profile first
 //     const newProfile = await Profile.create({
 //       phone: null,
@@ -126,7 +124,6 @@ export const sendOTP = async (req, res) => {
 //       isVerified: true,
 //       profile : newProfile._id,
 //     });
-
 
 //     // Generate token
 //     const token = user.generateAuthToken();
@@ -195,38 +192,37 @@ export const register = async (req, res) => {
     }
 
     // Step 1: Create user first (but not saved yet)
-const user = new User({
-  name,
-  email,
-  password,
-  authProvider: "local",
-  isVerified: true,
-  profilePicture
-});
+    const user = new User({
+      name,
+      email,
+      password,
+      authProvider: "local",
+      isVerified: true,
+      profilePicture,
+    });
 
-// Step 2: Create profile and assign user
-const profile = await Profile.create({
-  user: user._id, // ✅ This is the key fix
-  phone: null,
-  gender: null,
-  age: null,
-  bio: null,
-  location: null,
-  domain: null,
-  experience: null,
-  skills: [],
-  linkedIn: null,
-  github: null,
-  portfolio: null,
-  education: [],
-  certificates: [],
-  achievements: [],
-});
+    // Step 2: Create profile and assign user
+    const profile = await Profile.create({
+      user: user._id, // ✅ This is the key fix
+      phone: null,
+      gender: null,
+      age: null,
+      bio: null,
+      location: null,
+      domain: null,
+      experience: null,
+      skills: [],
+      linkedIn: null,
+      github: null,
+      portfolio: null,
+      education: [],
+      certificates: [],
+      achievements: [],
+    });
 
-// Step 3: Save user with profile reference
-user.profile = profile._id;
-await user.save(); // ✅ Save after assigning profile
-
+    // Step 3: Save user with profile reference
+    user.profile = profile._id;
+    await user.save(); // ✅ Save after assigning profile
 
     // Generate token
     const token = user.generateAuthToken();
@@ -236,9 +232,10 @@ await user.save(); // ✅ Save after assigning profile
 
     // Fetch complete user data with populated profile
     const completeUser = await User.findById(user._id)
-      .select('-password -resetPasswordToken -resetPasswordExpire')
-      .populate('profile').exec();
-      // console.log("Completed user : ",completeUser)
+      .select("-password -resetPasswordToken -resetPasswordExpire")
+      .populate("profile")
+      .exec();
+    // console.log("Completed user : ",completeUser)
 
     res.status(201).json({
       success: true,
@@ -326,10 +323,10 @@ export const login = async (req, res) => {
 
     // Find user and populate profile
     const user = await User.findOne({ email })
-      .select('+password') // Include password for comparison
+      .select("+password") // Include password for comparison
       .populate({
-        path: 'profile',
-        select: '-__v'
+        path: "profile",
+        select: "-__v",
       });
 
     if (!user) {
@@ -347,7 +344,7 @@ export const login = async (req, res) => {
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    
+
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
@@ -363,7 +360,7 @@ export const login = async (req, res) => {
     delete userResponse.resetPasswordToken;
     delete userResponse.resetPasswordExpire;
 
-    console.log('User on login:', JSON.stringify(userResponse, null, 2));
+    console.log("User on login:", JSON.stringify(userResponse, null, 2));
 
     res.json({
       success: true,
@@ -385,13 +382,13 @@ export const login = async (req, res) => {
 // controllers/Auth.controller.js
 export const getCurrentUser = async (req, res) => {
   try {
-    res.set('Cache-Control', 'no-store');
+    res.set("Cache-Control", "no-store");
 
     // req.user is already set by protect middleware
     if (!req.user) {
       return res.status(401).json({
         success: false,
-        message: 'Unauthorized',
+        message: "Unauthorized",
       });
     }
 
@@ -400,10 +397,10 @@ export const getCurrentUser = async (req, res) => {
       user: req.user,
     });
   } catch (error) {
-    console.error('Get current user error:', error);
+    console.error("Get current user error:", error);
     res.status(500).json({
       success: false,
-      message: 'Server error',
+      message: "Server error",
     });
   }
 };
