@@ -164,11 +164,12 @@ export default function Login() {
 
             <button
               onClick={handleEmailLogin}
-              disabled={loading}
+              // Disable if loading OR if strength is less than 2 (out of 4)
+              disabled={loading || !email || !password}
               className="relative w-full overflow-hidden rounded-lg bg-emerald-500 py-3 font-semibold text-black
               transition-all duration-300
               hover:scale-[1.02] hover:shadow-[0_0_25px_rgba(16,185,129,0.8)]
-              active:scale-95 disabled:opacity-50"
+              active:scale-95 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
             >
               <span className="relative z-10">
                 {loading ? "Signing in..." : "Sign In"}

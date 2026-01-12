@@ -14,7 +14,31 @@
     opacity: 1;
   }
 }
+/* GLASS-MORPHISM INTERACTION */
+.group:hover {
+  background: linear-gradient(145deg, #1c2128, #161b22);
+}
 
+/* CUSTOM SCROLLBAR FOR HUB */
+.max-h-600::-webkit-scrollbar {
+  width: 6px;
+}
+
+.max-h-600::-webkit-scrollbar-track {
+  background: #0d1117;
+}
+
+.max-h-600::-webkit-scrollbar-thumb {
+  background: #30363d;
+  border-radius: 10px;
+}
+
+/* NEON GRADIENT TEXT */
+.gradient-text {
+  background: linear-gradient(135deg, #ff7043, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
 @keyframes slide-out-right {
   0% {
     transform: translateX(0);

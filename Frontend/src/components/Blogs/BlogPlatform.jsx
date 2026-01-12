@@ -78,7 +78,14 @@ export default function BlogPlatform() {
     } finally {
       setLoading(false);
     }
-  };
+  } catch (error) {
+    console.error('API Error:', error);
+    setBlogs(SEED_ARTICLES); // Fallback if API is blocked (CORS)
+  } finally {
+    // Add a slight delay for a smooth "Wow" transition from skeleton to content
+    setTimeout(() => setLoading(false), 800); 
+  }
+};
 
   const fetchFeaturedBlogs = async () => {
     try {
@@ -89,7 +96,21 @@ export default function BlogPlatform() {
       console.error("Error fetching featured blogs:", error);
     }
   };
+  // Ensure this useMemo is inside your BlogPlatform function
+const displayBlogs = useMemo(() => {
+  // Use API blogs if available, otherwise fall back to SEED_ARTICLES
+  let list = blogs.length > 0 ? blogs : SEED_ARTICLES;
 
+  // Real-time filtering logic
+  return list.filter(blog => {
+    const titleMatch = blog.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const excerptMatch = blog.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
+    const tagMatch = blog.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    // Show if search matches title, excerpt, OR tags
+    return titleMatch || excerptMatch || tagMatch;
+  });
+}, [blogs, searchQuery]);
   const fetchPopularTags = async () => {
     try {
       const response = await fetch(`${API_URL}/blogs/tags`);
@@ -352,30 +373,34 @@ function BlogList({
                           : "bg-[#0f1419] text-gray-400 hover:bg-[#8b5cf6]/20 hover:text-[#8b5cf6]"
                       }`}
                     >
-                      {tag.name} ({tag.count})
+                      <X className="w-3 h-3" /> Reset all filters
                     </button>
-                  ))}
+                  )}
                 </div>
-              </div>
-            </div>
-          </div>
 
-          {/* Blog Grid */}
-          <div className="lg:col-span-3">
-            {loading ? (
-              <div className="text-center py-20">
-                <div className="w-12 h-12 border-3 border-[#8b5cf6] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                <p className="text-gray-400">Loading articles...</p>
+                {/* Tags section follows below... */}
               </div>
-            ) : blogs.length === 0 ? (
-              <div className="text-center py-20 bg-[#1a1f2e] rounded-xl border border-gray-800">
-                <p className="text-gray-400 text-lg mb-4">No articles found</p>
-                <button
-                  onClick={onCreateBlog}
-                  className="px-6 py-3 bg-[#8b5cf6] hover:bg-[#7c3aed] rounded-xl text-white font-semibold transition-all"
-                >
-                  Write the first article
-                </button>
+                            {/* In the Blog Grid section of BlogList */}
+              
+                            {/* Popular Tags */}
+                            <div className="flex flex-wrap gap-2">
+                {/* Standard "All" button */}
+                
+
+                {/* Dynamic tags from your data */}
+                {popularTags.map(tag => (
+                  <button
+                    key={tag.name}
+                    onClick={() => setSelectedTag(tag.name)}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
+                      selectedTag === tag.name 
+                      ? 'bg-orange-500 border-orange-500 text-white' 
+                      : 'bg-[#0d1117] border-gray-800 text-gray-400 hover:border-gray-600'
+                    }`}
+                  >
+                    {tag.name}
+                  </button>
+                ))}
               </div>
             ) : (
               <>
@@ -440,9 +465,11 @@ function BlogList({
 // ============================================
 function BlogCard({ blog, onView }) {
   return (
-    <div
-      onClick={() => onView(blog.slug)}
-      className="group bg-[#1a1f2e] rounded-xl border border-gray-800 overflow-hidden cursor-pointer hover:border-[#8b5cf6] transition-all"
+    <motion.div
+      layout
+      whileHover={{ y: -8, transition: { duration: 0.2 } }}
+      onClick={() => onView(blog)}
+      className="relative group bg-[#161b22] rounded-3xl border border-gray-800/50 p-6 cursor-pointer overflow-hidden transition-all hover:border-orange-500/50 hover:shadow-[0_20px_50px_rgba(212,88,31,0.15)]"
     >
       <div className="h-44 bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] relative">
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
@@ -466,6 +493,7 @@ function BlogCard({ blog, onView }) {
             </p>
           </div>
         </div>
+      </div>
 
         <h3 className="text-lg font-bold text-white mb-2 line-clamp-2 group-hover:text-[#8b5cf6] transition-colors">
           {blog.title}
@@ -505,12 +533,21 @@ function BlogCard({ blog, onView }) {
             <Clock className="w-4 h-4" />
             {blog.readTime} min
           </span>
-        </div>
+        ))}
       </div>
-    </div>
+
+      <div className="flex items-center justify-between pt-4 border-t border-gray-800/50">
+        <div className="flex gap-4 text-gray-400">
+          <span className="flex items-center gap-1.5"><Heart className="w-4 h-4 hover:text-red-500" /> {blog.likesCount}</span>
+          <span className="flex items-center gap-1.5"><MessageCircle className="w-4 h-4" /> {blog.commentsCount || 0}</span>
+        </div>
+        <button className="p-2 rounded-xl bg-gray-800/50 text-orange-500 hover:bg-orange-500 hover:text-white transition-all">
+          <ArrowLeft className="w-4 h-4 rotate-180" />
+        </button>
+      </div>
+    </motion.div>
   );
 }
-
 // ============================================
 // BLOG DETAIL PAGE
 // ============================================
