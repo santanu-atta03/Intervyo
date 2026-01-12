@@ -1,10 +1,10 @@
 // services/groqService.js - ENSURE THIS METHOD EXISTS
 
-import Groq from "groq-sdk";
-import config from "../config/ai.config.js";
+import Groq from 'groq-sdk';
+import config from '../config/ai.config.js';
 
 const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
+  apiKey: process.env.GROQ_API_KEY
 });
 
 class GroqService {
@@ -15,17 +15,17 @@ class GroqService {
         messages: messages,
         temperature: temperature,
         max_tokens: config.groq.maxTokens,
-        response_format: { type: "json_object" },
+        response_format: { type: "json_object" }
       });
 
       const content = completion.choices[0]?.message?.content;
       if (!content) {
-        throw new Error("No content in response");
+        throw new Error('No content in response');
       }
 
       return JSON.parse(content);
     } catch (error) {
-      console.error("Groq JSON generation error:", error);
+      console.error('Groq JSON generation error:', error);
       throw error;
     }
   }
@@ -36,12 +36,12 @@ class GroqService {
         model: config.groq.defaultModel,
         messages: messages,
         temperature: temperature,
-        max_tokens: config.groq.maxTokens,
+        max_tokens: config.groq.maxTokens
       });
 
-      return completion.choices[0]?.message?.content || "";
+      return completion.choices[0]?.message?.content || '';
     } catch (error) {
-      console.error("Groq text generation error:", error);
+      console.error('Groq text generation error:', error);
       throw error;
     }
   }

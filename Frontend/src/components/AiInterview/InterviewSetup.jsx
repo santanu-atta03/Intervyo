@@ -1,48 +1,33 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  Upload,
-  Briefcase,
-  Clock,
-  TrendingUp,
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { 
+  Upload, 
+  Briefcase, 
+  Clock, 
+  TrendingUp, 
   Calendar,
   FileText,
   ArrowRight,
-  X,
-} from "lucide-react";
-import { createInterview } from "../../services/operations/aiInterviewApi";
-import { useSelector } from "react-redux";
+  X
+} from 'lucide-react';
+import { createInterview } from '../../services/operations/aiInterviewApi';
+import { useSelector } from 'react-redux';
 
 const InterviewSetup = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [resumeFile, setResumeFile] = useState(null);
   const [formData, setFormData] = useState({
-    role: "",
-    difficulty: "medium",
+    role: '',
+    difficulty: 'medium',
     duration: 30,
     scheduledAt: new Date().toISOString().slice(0, 16),
   });
-  const { token } = useSelector((state) => state.auth);
+  const {token} = useSelector((state) => state.auth);
   const difficultyLevels = [
-    {
-      value: "easy",
-      label: "Easy",
-      color: "text-green-400",
-      bg: "bg-green-400/10",
-    },
-    {
-      value: "medium",
-      label: "Medium",
-      color: "text-yellow-400",
-      bg: "bg-yellow-400/10",
-    },
-    {
-      value: "hard",
-      label: "Hard",
-      color: "text-red-400",
-      bg: "bg-red-400/10",
-    },
+    { value: 'easy', label: 'Easy', color: 'text-green-400', bg: 'bg-green-400/10' },
+    { value: 'medium', label: 'Medium', color: 'text-yellow-400', bg: 'bg-yellow-400/10' },
+    { value: 'hard', label: 'Hard', color: 'text-red-400', bg: 'bg-red-400/10' },
   ];
 
   const durationOptions = [15, 30, 45, 60, 90];
@@ -51,7 +36,7 @@ const InterviewSetup = () => {
     const file = e.target.files[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        alert("File size should be less than 5MB");
+        alert('File size should be less than 5MB');
         return;
       }
       setResumeFile(file);
@@ -73,27 +58,27 @@ const InterviewSetup = () => {
     e.preventDefault();
 
     if (!formData.role.trim()) {
-      alert("Please enter the role");
+      alert('Please enter the role');
       return;
     }
 
     if (!resumeFile) {
-      alert("Please upload your resume");
+      alert('Please upload your resume');
       return;
     }
 
     const data = new FormData();
-    data.append("role", formData.role);
-    data.append("difficulty", formData.difficulty);
-    data.append("duration", formData.duration);
-    data.append("scheduledAt", formData.scheduledAt);
-    data.append("resume", resumeFile);
+    data.append('role', formData.role);
+    data.append('difficulty', formData.difficulty);
+    data.append('duration', formData.duration);
+    data.append('scheduledAt', formData.scheduledAt);
+    data.append('resume', resumeFile);
 
     try {
-      const interview = await createInterview(data, setLoading, token);
+      const interview = await createInterview(data, setLoading,token);
       navigate(`/interview/${interview._id}`);
     } catch (error) {
-      console.error("Setup error:", error);
+      console.error('Setup error:', error);
     }
   };
 
@@ -107,14 +92,12 @@ const InterviewSetup = () => {
               <Briefcase className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white">
-                AI Interview Platform
-              </h1>
+              <h1 className="text-xl font-bold text-white">AI Interview Platform</h1>
               <p className="text-sm text-gray-400">Setup Your Interview</p>
             </div>
           </div>
           <button
-            onClick={() => navigate("/dashboard")}
+            onClick={() => navigate('/dashboard')}
             className="text-gray-400 hover:text-white transition-colors"
           >
             <X className="w-6 h-6" />
@@ -129,8 +112,7 @@ const InterviewSetup = () => {
             Schedule Your AI Interview
           </h2>
           <p className="text-lg text-gray-400">
-            Configure your interview settings and get ready for an immersive
-            experience
+            Configure your interview settings and get ready for an immersive experience
           </p>
         </div>
 
@@ -181,17 +163,17 @@ const InterviewSetup = () => {
                       }
                       className={`p-4 rounded-xl border-2 transition-all ${
                         formData.difficulty === level.value
-                          ? `${level.bg} border-${level.color.split("-")[1]}-400`
-                          : "bg-gray-900/30 border-gray-600 hover:border-gray-500"
+                          ? `${level.bg} border-${level.color.split('-')[1]}-400`
+                          : 'bg-gray-900/30 border-gray-600 hover:border-gray-500'
                       }`}
                     >
                       <div className={`text-lg font-bold ${level.color}`}>
                         {level.label}
                       </div>
                       <div className="text-xs text-gray-400 mt-1">
-                        {level.value === "easy" && "5-7 questions"}
-                        {level.value === "medium" && "7-10 questions"}
-                        {level.value === "hard" && "10-12 questions"}
+                        {level.value === 'easy' && '5-7 questions'}
+                        {level.value === 'medium' && '7-10 questions'}
+                        {level.value === 'hard' && '10-12 questions'}
                       </div>
                     </button>
                   ))}
@@ -218,8 +200,8 @@ const InterviewSetup = () => {
                       onClick={() => setFormData({ ...formData, duration })}
                       className={`px-6 py-3 rounded-xl font-semibold transition-all ${
                         formData.duration === duration
-                          ? "bg-purple-500 text-white"
-                          : "bg-gray-900/50 text-gray-300 border border-gray-600 hover:border-purple-500"
+                          ? 'bg-purple-500 text-white'
+                          : 'bg-gray-900/50 text-gray-300 border border-gray-600 hover:border-purple-500'
                       }`}
                     >
                       {duration} min
@@ -286,9 +268,7 @@ const InterviewSetup = () => {
                     <div className="flex items-center gap-3">
                       <FileText className="w-8 h-8 text-orange-400" />
                       <div>
-                        <p className="text-white font-medium">
-                          {resumeFile.name}
-                        </p>
+                        <p className="text-white font-medium">{resumeFile.name}</p>
                         <p className="text-sm text-gray-400">
                           {(resumeFile.size / 1024 / 1024).toFixed(2)} MB
                         </p>

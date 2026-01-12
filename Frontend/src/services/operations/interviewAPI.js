@@ -24,10 +24,10 @@ const {
   SUBMIT_ANSWER_API,
   COMPLETE_INTERVIEW_API,
   GET_INTERVIEW_API,
-  START_CONVERSATION_API,
+  START_CONVERSATION_API
 } = interviewEndpoints;
 
-const BASE_URL = "https://intervyo.onrender.com";
+const BASE_URL = 'https://intervyo.onrender.com';
 // export const createInterview = (interviewConfig, navigate,token) => {
 //   return async (dispatch) => {
 //     const toastId = toast.loading('Creating your interview...');
@@ -95,7 +95,7 @@ export const createInterview = (interviewConfig, navigate, token) => {
         dataToSend,
         {
           Authorization: `Bearer ${token}`,
-        },
+        }
       );
 
       if (!response.data.success) {
@@ -112,7 +112,7 @@ export const createInterview = (interviewConfig, navigate, token) => {
       toast.error(
         error.response?.data?.message ||
           error.message ||
-          "Failed to create interview",
+          "Failed to create interview"
       );
       dispatch(setError(error.message));
     } finally {
@@ -121,6 +121,7 @@ export const createInterview = (interviewConfig, navigate, token) => {
     }
   };
 };
+
 
 export const startInterview = (interviewId, token) => {
   return async (dispatch) => {
@@ -134,7 +135,7 @@ export const startInterview = (interviewId, token) => {
         {},
         {
           Authorization: `Bearer ${token}`,
-        },
+        }
       );
 
       if (!response.data.success) {
@@ -145,9 +146,7 @@ export const startInterview = (interviewId, token) => {
       customToast.success("Interview started! Good luck! 🚀");
     } catch (error) {
       console.error("START_INTERVIEW_API ERROR:", error);
-      customToast.error(
-        error.response?.data?.message || "Failed to start interview",
-      );
+      customToast.error(error.response?.data?.message || "Failed to start interview");
       dispatch(setError(error.message));
     } finally {
       toast.dismiss(toastId);
@@ -155,6 +154,7 @@ export const startInterview = (interviewId, token) => {
     }
   };
 };
+
 
 // export const submitAnswer = (interviewId, answerData, token,navigate) => {
 //   return async (dispatch, getState) => {
@@ -241,7 +241,7 @@ export const completeInterview = (interviewId, navigate, token) => {
   return async (dispatch) => {
     const toastId = toast.loading("Generating your results...");
     dispatch(setLoading(true));
-    const url = COMPLETE_INTERVIEW_API.replace(":interviewId", interviewId);
+    const url = COMPLETE_INTERVIEW_API.replace(':interviewId', interviewId);
     try {
       const response = await apiConnector(
         "POST",
@@ -249,7 +249,7 @@ export const completeInterview = (interviewId, navigate, token) => {
         {},
         {
           Authorization: `Bearer ${token}`,
-        },
+        }
       );
 
       if (!response.data.success) {
@@ -266,7 +266,7 @@ export const completeInterview = (interviewId, navigate, token) => {
     } catch (error) {
       console.error("COMPLETE_INTERVIEW_API ERROR:", error);
       toast.error(
-        error.response?.data?.message || "Failed to complete interview",
+        error.response?.data?.message || "Failed to complete interview"
       );
       dispatch(setError(error.message));
     } finally {
@@ -287,7 +287,7 @@ export const getInterviewData = (interviewId, token) => {
         null,
         {
           Authorization: `Bearer ${token}`,
-        },
+        }
       );
 
       if (!response.data.success) {
@@ -311,16 +311,16 @@ export const getInterviewData = (interviewId, token) => {
 export const getRealTimeAIResponse = async (interviewId, data, token) => {
   try {
     const response = await apiConnector(
-      "POST",
+      'POST',
       `${BASE_URL}/api/interview/${interviewId}/real-time-response`,
       data,
       {
-        Authorization: `Bearer ${token}`,
-      },
+        Authorization: `Bearer ${token}`
+      }
     );
     return response.data;
   } catch (error) {
-    console.error("Real-time AI response error:", error);
+    console.error('Real-time AI response error:', error);
     throw error;
   }
 };
@@ -328,16 +328,16 @@ export const getRealTimeAIResponse = async (interviewId, data, token) => {
 export const evaluateCodeSubmission = async (interviewId, data, token) => {
   try {
     const response = await apiConnector(
-      "POST",
+      'POST',
       `${BASE_URL}/api/interview/${interviewId}/evaluate-code`,
       data,
       {
-        Authorization: `Bearer ${token}`,
-      },
+        Authorization: `Bearer ${token}`
+      }
     );
     return response.data;
   } catch (error) {
-    console.error("Code evaluation error:", error);
+    console.error('Code evaluation error:', error);
     throw error;
   }
 };
@@ -347,16 +347,16 @@ export const startConversation = async (interviewId, token) => {
   const url = START_CONVERSATION_API.replace(":interviewId", interviewId);
   try {
     const response = await apiConnector(
-      "POST",
+      'POST',
       url,
       {},
       {
-        Authorization: `Bearer ${token}`,
-      },
+        Authorization: `Bearer ${token}`
+      }
     );
     return response.data;
   } catch (error) {
-    console.error("Start conversation error:", error);
+    console.error('Start conversation error:', error);
     throw error;
   }
 };
@@ -364,33 +364,34 @@ export const startConversation = async (interviewId, token) => {
 export const askNextQuestion = async (interviewId, token) => {
   try {
     const response = await apiConnector(
-      "POST",
+      'POST',
       `${BASE_URL}/api/interview/${interviewId}/ask-next-question`,
       {},
       {
-        Authorization: `Bearer ${token}`,
-      },
+        Authorization: `Bearer ${token}`
+      }
     );
     return response.data;
   } catch (error) {
-    console.error("Ask question error:", error);
+    console.error('Ask question error:', error);
     throw error;
   }
 };
 
+
 export const submitAnswer = async (interviewId, answerData, token) => {
   try {
     const response = await apiConnector(
-      "POST",
+      'POST',
       `${process.env.REACT_APP_BASE_URL}/api/interview/${interviewId}/submit-answer`,
       answerData,
       {
-        Authorization: `Bearer ${token}`,
-      },
+        Authorization: `Bearer ${token}`
+      }
     );
     return response.data;
   } catch (error) {
-    console.error("Submit answer error:", error);
+    console.error('Submit answer error:', error);
     throw error;
   }
 };

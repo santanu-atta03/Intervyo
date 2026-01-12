@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const contactSchema = new mongoose.Schema({
   name: {
@@ -23,8 +23,8 @@ const contactSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["New", "In Progress", "Resolved"],
-    default: "New",
+    enum: ['New', 'In Progress', 'Resolved'],
+    default: 'New',
   },
   createdAt: {
     type: Date,
@@ -32,5 +32,4 @@ const contactSchema = new mongoose.Schema({
   },
 });
 
-export default mongoose.models.Contact ||
-  mongoose.model("Contact", contactSchema);
+export default mongoose.models.Contact || mongoose.model('Contact', contactSchema);

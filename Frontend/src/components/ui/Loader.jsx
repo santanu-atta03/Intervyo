@@ -9,7 +9,7 @@ export default function Loader({ text = "Loading..." }) {
           border: "4px solid #ddd",
           borderTop: "4px solid black",
           borderRadius: "50%",
-          animation: "spin 1s linear infinite",
+          animation: "spin 1s linear infinite"
         }}
       />
       <p style={{ marginTop: 8, color: "#666" }}>{text}</p>

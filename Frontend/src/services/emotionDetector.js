@@ -1,4 +1,4 @@
-import * as faceapi from "face-api.js";
+import * as faceapi from 'face-api.js';
 
 class EmotionDetector {
   constructor() {
@@ -10,8 +10,8 @@ class EmotionDetector {
 
   async loadModels() {
     if (this.modelsLoaded) return;
-    const localUrl = "/models";
-    const cdnUrl = "https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/";
+    const localUrl = '/models';
+    const cdnUrl = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
 
     const tryLoad = async (url) => {
       await Promise.all([
@@ -26,22 +26,19 @@ class EmotionDetector {
       await tryLoad(localUrl);
       this.modelsLoaded = true;
       this.modelUrl = localUrl;
-      console.log("✅ Emotion detection models loaded from local /models");
+      console.log('✅ Emotion detection models loaded from local /models');
       return;
     } catch (localErr) {
-      console.warn(
-        "Local models not found or failed to load, falling back to CDN:",
-        localErr.message,
-      );
+      console.warn('Local models not found or failed to load, falling back to CDN:', localErr.message);
     }
 
     try {
       await tryLoad(cdnUrl);
       this.modelsLoaded = true;
       this.modelUrl = cdnUrl;
-      console.log("✅ Emotion detection models loaded from CDN");
+      console.log('✅ Emotion detection models loaded from CDN');
     } catch (cdnErr) {
-      console.error("Failed to load emotion models from CDN:", cdnErr);
+      console.error('Failed to load emotion models from CDN:', cdnErr);
       throw cdnErr;
     }
   }
@@ -59,7 +56,7 @@ class EmotionDetector {
 
       const expressions = detections[0].expressions;
       const dominantEmotion = Object.keys(expressions).reduce((a, b) =>
-        expressions[a] > expressions[b] ? a : b,
+        expressions[a] > expressions[b] ? a : b
       );
 
       const data = {
@@ -82,7 +79,7 @@ class EmotionDetector {
 
       return data;
     } catch (error) {
-      console.error("Detection error:", error);
+      console.error('Detection error:', error);
       return null;
     }
   }
@@ -111,7 +108,7 @@ class EmotionDetector {
     const stats = {
       totalSamples: this.emotionHistory.length,
       emotions: {},
-      timeline: this.emotionHistory.map((e) => ({
+      timeline: this.emotionHistory.map(e => ({
         timestamp: e.timestamp,
         emotion: e.dominantEmotion,
         confidence: e.confidence,
@@ -119,18 +116,15 @@ class EmotionDetector {
     };
 
     const emotionCounts = {};
-    this.emotionHistory.forEach((entry) => {
+    this.emotionHistory.forEach(entry => {
       const emotion = entry.dominantEmotion;
       emotionCounts[emotion] = (emotionCounts[emotion] || 0) + 1;
     });
 
-    Object.keys(emotionCounts).forEach((emotion) => {
+    Object.keys(emotionCounts).forEach(emotion => {
       stats.emotions[emotion] = {
         count: emotionCounts[emotion],
-        percentage: (
-          (emotionCounts[emotion] / stats.totalSamples) *
-          100
-        ).toFixed(1),
+        percentage: ((emotionCounts[emotion] / stats.totalSamples) * 100).toFixed(1),
       };
     });
 

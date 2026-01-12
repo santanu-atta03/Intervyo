@@ -1,6 +1,6 @@
-import Interview from "../models/Interview.js";
-import InterviewSession from "../models/InterviewSession.js";
-import { uploadToCloudinary } from "../config/cloudinary.js";
+import Interview from '../models/Interview.js';
+import InterviewSession from '../models/InterviewSession.js';
+import { uploadToCloudinary } from '../config/cloudinary.js';
 
 // Create new interview
 export const createInterview = async (req, res) => {
@@ -12,12 +12,12 @@ export const createInterview = async (req, res) => {
     if (!req.files || !req.files.resume) {
       return res.status(400).json({
         success: false,
-        message: "Resume file is required",
+        message: 'Resume file is required'
       });
     }
 
     const resume = req.files.resume;
-    const resumeUpload = await uploadToCloudinary(resume, "resumes");
+    const resumeUpload = await uploadToCloudinary(resume, 'resumes');
 
     const interview = await Interview.create({
       userId,
@@ -25,20 +25,20 @@ export const createInterview = async (req, res) => {
       difficulty,
       duration,
       scheduledAt,
-      resumeUrl: resumeUpload.secure_url,
+      resumeUrl: resumeUpload.secure_url
     });
 
     res.status(201).json({
       success: true,
-      message: "Interview scheduled successfully",
-      data: interview,
+      message: 'Interview scheduled successfully',
+      data: interview
     });
   } catch (error) {
-    console.error("Error creating interview:", error);
+    console.error('Error creating interview:', error);
     res.status(500).json({
       success: false,
-      message: "Failed to schedule interview",
-      error: error.message,
+      message: 'Failed to schedule interview',
+      error: error.message
     });
   }
 };
@@ -56,14 +56,14 @@ export const getUserInterviews = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data: interviews,
+      data: interviews
     });
   } catch (error) {
-    console.error("Error fetching interviews:", error);
+    console.error('Error fetching interviews:', error);
     res.status(500).json({
       success: false,
-      message: "Failed to fetch interviews",
-      error: error.message,
+      message: 'Failed to fetch interviews',
+      error: error.message
     });
   }
 };
@@ -79,20 +79,20 @@ export const getInterviewById = async (req, res) => {
     if (!interview) {
       return res.status(404).json({
         success: false,
-        message: "Interview not found",
+        message: 'Interview not found'
       });
     }
 
     res.status(200).json({
       success: true,
-      data: interview,
+      data: interview
     });
   } catch (error) {
-    console.error("Error fetching interview:", error);
+    console.error('Error fetching interview:', error);
     res.status(500).json({
       success: false,
-      message: "Failed to fetch interview",
-      error: error.message,
+      message: 'Failed to fetch interview',
+      error: error.message
     });
   }
 };
@@ -108,19 +108,19 @@ export const startInterview = async (req, res) => {
     if (!interview) {
       return res.status(404).json({
         success: false,
-        message: "Interview not found",
+        message: 'Interview not found'
       });
     }
 
-    if (interview.status !== "scheduled") {
+    if (interview.status !== 'scheduled') {
       return res.status(400).json({
         success: false,
-        message: "Interview cannot be started",
+        message: 'Interview cannot be started'
       });
     }
 
     // Update interview status
-    interview.status = "in-progress";
+    interview.status = 'in-progress';
     interview.startedAt = new Date();
     await interview.save();
 
@@ -128,29 +128,27 @@ export const startInterview = async (req, res) => {
     const session = await InterviewSession.create({
       interviewId: interview._id,
       userId,
-      conversation: [
-        {
-          speaker: "ai",
-          message: `Hello! Welcome to your ${interview.role} interview. I'm your AI interviewer today. Let's begin with a brief introduction. Could you tell me about yourself and your experience?`,
-          type: "greeting",
-        },
-      ],
+      conversation: [{
+        speaker: 'ai',
+        message: `Hello! Welcome to your ${interview.role} interview. I'm your AI interviewer today. Let's begin with a brief introduction. Could you tell me about yourself and your experience?`,
+        type: 'greeting'
+      }]
     });
 
     res.status(200).json({
       success: true,
-      message: "Interview started successfully",
+      message: 'Interview started successfully',
       data: {
         interview,
-        session,
-      },
+        session
+      }
     });
   } catch (error) {
-    console.error("Error starting interview:", error);
+    console.error('Error starting interview:', error);
     res.status(500).json({
       success: false,
-      message: "Failed to start interview",
-      error: error.message,
+      message: 'Failed to start interview',
+      error: error.message
     });
   }
 };
@@ -161,28 +159,26 @@ export const getInterviewSession = async (req, res) => {
     const { id } = req.params;
     const userId = req.user.id;
 
-    const session = await InterviewSession.findOne({
-      interviewId: id,
-      userId,
-    }).populate("interviewId");
+    const session = await InterviewSession.findOne({ interviewId: id, userId })
+      .populate('interviewId');
 
     if (!session) {
       return res.status(404).json({
         success: false,
-        message: "Session not found",
+        message: 'Session not found'
       });
     }
 
     res.status(200).json({
       success: true,
-      data: session,
+      data: session
     });
   } catch (error) {
-    console.error("Error fetching session:", error);
+    console.error('Error fetching session:', error);
     res.status(500).json({
       success: false,
-      message: "Failed to fetch session",
-      error: error.message,
+      message: 'Failed to fetch session',
+      error: error.message
     });
   }
 };
@@ -199,7 +195,7 @@ export const endInterview = async (req, res) => {
     if (!interview || !session) {
       return res.status(404).json({
         success: false,
-        message: "Interview or session not found",
+        message: 'Interview or session not found'
       });
     }
 
@@ -207,35 +203,33 @@ export const endInterview = async (req, res) => {
     const technicalAvg = session.technicalScore || 0;
     const communicationAvg = session.communicationScore || 0;
     const problemSolvingAvg = session.problemSolvingScore || 0;
-
-    const overallScore = Math.round(
-      (technicalAvg + communicationAvg + problemSolvingAvg) / 3,
-    );
+    
+    const overallScore = Math.round((technicalAvg + communicationAvg + problemSolvingAvg) / 3);
 
     // Update interview
-    interview.status = "completed";
+    interview.status = 'completed';
     interview.completedAt = new Date();
     interview.overallScore = overallScore;
     await interview.save();
 
     // Update session
-    session.sessionStatus = "completed";
+    session.sessionStatus = 'completed';
     await session.save();
 
     res.status(200).json({
       success: true,
-      message: "Interview completed successfully",
+      message: 'Interview completed successfully',
       data: {
         interview,
-        session,
-      },
+        session
+      }
     });
   } catch (error) {
-    console.error("Error ending interview:", error);
+    console.error('Error ending interview:', error);
     res.status(500).json({
       success: false,
-      message: "Failed to end interview",
-      error: error.message,
+      message: 'Failed to end interview',
+      error: error.message
     });
   }
 };
@@ -251,7 +245,7 @@ export const deleteInterview = async (req, res) => {
     if (!interview) {
       return res.status(404).json({
         success: false,
-        message: "Interview not found",
+        message: 'Interview not found'
       });
     }
 
@@ -260,14 +254,14 @@ export const deleteInterview = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Interview deleted successfully",
+      message: 'Interview deleted successfully'
     });
   } catch (error) {
-    console.error("Error deleting interview:", error);
+    console.error('Error deleting interview:', error);
     res.status(500).json({
       success: false,
-      message: "Failed to delete interview",
-      error: error.message,
+      message: 'Failed to delete interview',
+      error: error.message
     });
   }
 };
@@ -278,36 +272,36 @@ export const getInterviewResults = async (req, res) => {
     const userId = req.user.id;
 
     // Find interview
-    const interview = await Interview.findOne({
-      _id: interviewId,
-      userId: userId,
+    const interview = await Interview.findOne({ 
+      _id: interviewId, 
+      userId: userId 
     });
 
     if (!interview) {
       return res.status(404).json({
         success: false,
-        message: "Interview not found",
+        message: 'Interview not found'
       });
     }
 
     // Check if completed
-    if (interview.status !== "completed") {
+    if (interview.status !== 'completed') {
       return res.status(400).json({
         success: false,
-        message: "Interview not yet completed",
+        message: 'Interview not yet completed'
       });
     }
 
     // Find session
     const session = await InterviewSession.findOne({
       interviewId: interviewId,
-      userId: userId,
+      userId: userId
     });
 
     if (!session) {
       return res.status(404).json({
         success: false,
-        message: "Session not found",
+        message: 'Session not found'
       });
     }
 
@@ -326,30 +320,30 @@ export const getInterviewResults = async (req, res) => {
         problemSolvingScore: session.problemSolvingScore,
         feedback: session.feedback,
         createdAt: session.createdAt,
-        updatedAt: session.updatedAt,
+        updatedAt: session.updatedAt
       },
       feedback: {
         summary: interview.feedback || session.feedback?.summary,
         strengths: interview.strengths || session.feedback?.strengths || [],
-        improvements:
-          interview.improvements || session.feedback?.improvements || [],
+        improvements: interview.improvements || session.feedback?.improvements || [],
         overallScore: interview.overallScore,
         technicalScore: interview.technicalScore,
         communicationScore: interview.communicationScore,
-        problemSolvingScore: interview.problemSolvingScore,
-      },
+        problemSolvingScore: interview.problemSolvingScore
+      }
     };
 
     res.json({
       success: true,
-      data: responseData,
+      data: responseData
     });
+
   } catch (error) {
-    console.error("Get results error:", error);
+    console.error('Get results error:', error);
     res.status(500).json({
       success: false,
-      message: "Failed to get results",
-      error: error.message,
+      message: 'Failed to get results',
+      error: error.message
     });
   }
 };

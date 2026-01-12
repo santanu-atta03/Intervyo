@@ -24,7 +24,11 @@ const InterviewWrapper = () => {
   const [permissionsGranted, setPermissionsGranted] = useState(false);
 
   // ✅ Hook MUST be inside component
-  const { isThinking, currentQuestion, askNextQuestion } = useInterviewFlow();
+  const {
+    isThinking,
+    currentQuestion,
+    askNextQuestion,
+  } = useInterviewFlow();
 
   if (!permissionsGranted) {
     return (
@@ -38,8 +42,11 @@ const InterviewWrapper = () => {
   return (
     <div className="relative">
       {/* Smooth question transition */}
+  
 
-      {currentQuestion && <QuestionTransition question={currentQuestion} />}
+      {currentQuestion && (
+        <QuestionTransition question={currentQuestion} />
+      )}
 
       {/* Thinking / loading feedback */}
       {isThinking && <ThinkingIndicator />}

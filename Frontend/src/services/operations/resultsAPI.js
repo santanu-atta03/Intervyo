@@ -14,12 +14,17 @@ export function fetchInterviewResults(interviewId) {
     try {
       const { token } = getState().auth;
 
-      const url = GET_RESULTS_API.replace(":interviewId", interviewId);
+      const url = GET_RESULTS_API.replace(':interviewId', interviewId);
       console.log("Fetching results from:", url);
 
-      const response = await apiConnector("GET", url, null, {
-        Authorization: `Bearer ${token}`,
-      });
+      const response = await apiConnector(
+        "GET",
+        url,
+        null,
+        {
+          Authorization: `Bearer ${token}`,
+        }
+      );
 
       console.log("Results API response:", response.data);
 
@@ -36,10 +41,7 @@ export function fetchInterviewResults(interviewId) {
       dispatch(setResults(data));
       return { success: true, data };
     } catch (error) {
-      const message =
-        error?.response?.data?.message ||
-        error.message ||
-        "Failed to fetch results";
+      const message = error?.response?.data?.message || error.message || "Failed to fetch results";
       console.error("FETCH_RESULTS ERROR:", message);
       dispatch(setError(message));
       toast.error(message);

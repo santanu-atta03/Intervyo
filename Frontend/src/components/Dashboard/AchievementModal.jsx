@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Trophy, X, Sparkles, Star, Crown, Zap } from "lucide-react";
+import React, { useEffect, useState } from 'react';
+import { Trophy, X, Sparkles, Star, Crown, Zap } from 'lucide-react';
 
 const AchievementModal = ({ achievement, onClose }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -9,7 +9,7 @@ const AchievementModal = ({ achievement, onClose }) => {
     if (achievement) {
       setIsVisible(true);
       generateConfetti();
-
+      
       // Auto close after 5 seconds
       const timer = setTimeout(() => {
         handleClose();
@@ -26,7 +26,7 @@ const AchievementModal = ({ achievement, onClose }) => {
         id: i,
         left: Math.random() * 100,
         delay: Math.random() * 0.5,
-        duration: 2 + Math.random() * 2,
+        duration: 2 + Math.random() * 2
       });
     }
     setConfetti(pieces);
@@ -42,33 +42,33 @@ const AchievementModal = ({ achievement, onClose }) => {
   const getRarityConfig = (rarity) => {
     const configs = {
       common: {
-        gradient: "from-gray-500 to-gray-600",
-        glow: "shadow-gray-500/50",
-        border: "border-gray-400",
-        bg: "from-gray-500/20 to-gray-600/20",
-        text: "text-gray-300",
+        gradient: 'from-gray-500 to-gray-600',
+        glow: 'shadow-gray-500/50',
+        border: 'border-gray-400',
+        bg: 'from-gray-500/20 to-gray-600/20',
+        text: 'text-gray-300'
       },
       rare: {
-        gradient: "from-blue-500 to-cyan-500",
-        glow: "shadow-blue-500/50",
-        border: "border-blue-400",
-        bg: "from-blue-500/20 to-cyan-500/20",
-        text: "text-blue-300",
+        gradient: 'from-blue-500 to-cyan-500',
+        glow: 'shadow-blue-500/50',
+        border: 'border-blue-400',
+        bg: 'from-blue-500/20 to-cyan-500/20',
+        text: 'text-blue-300'
       },
       epic: {
-        gradient: "from-purple-500 to-pink-500",
-        glow: "shadow-purple-500/50",
-        border: "border-purple-400",
-        bg: "from-purple-500/20 to-pink-500/20",
-        text: "text-purple-300",
+        gradient: 'from-purple-500 to-pink-500',
+        glow: 'shadow-purple-500/50',
+        border: 'border-purple-400',
+        bg: 'from-purple-500/20 to-pink-500/20',
+        text: 'text-purple-300'
       },
       legendary: {
-        gradient: "from-yellow-400 to-orange-500",
-        glow: "shadow-yellow-500/50",
-        border: "border-yellow-400",
-        bg: "from-yellow-500/20 to-orange-500/20",
-        text: "text-yellow-300",
-      },
+        gradient: 'from-yellow-400 to-orange-500',
+        glow: 'shadow-yellow-500/50',
+        border: 'border-yellow-400',
+        bg: 'from-yellow-500/20 to-orange-500/20',
+        text: 'text-yellow-300'
+      }
     };
     return configs[rarity] || configs.common;
   };
@@ -78,13 +78,13 @@ const AchievementModal = ({ achievement, onClose }) => {
   const rarityConfig = getRarityConfig(achievement.rarity);
 
   return (
-    <div
+    <div 
       className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-opacity duration-300 ${
-        isVisible ? "opacity-100" : "opacity-0"
+        isVisible ? 'opacity-100' : 'opacity-0'
       }`}
     >
       {/* Overlay */}
-      <div
+      <div 
         className="absolute inset-0 bg-black/80 backdrop-blur-sm"
         onClick={handleClose}
       ></div>
@@ -98,16 +98,16 @@ const AchievementModal = ({ achievement, onClose }) => {
             style={{
               left: `${piece.left}%`,
               animationDelay: `${piece.delay}s`,
-              animationDuration: `${piece.duration}s`,
+              animationDuration: `${piece.duration}s`
             }}
           />
         ))}
       </div>
 
       {/* Modal Content */}
-      <div
+      <div 
         className={`relative bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl border-2 ${rarityConfig.border} shadow-2xl ${rarityConfig.glow} max-w-md w-full transform transition-all duration-300 ${
-          isVisible ? "scale-100 rotate-0" : "scale-50 rotate-12"
+          isVisible ? 'scale-100 rotate-0' : 'scale-50 rotate-12'
         }`}
       >
         {/* Close Button */}
@@ -119,24 +119,16 @@ const AchievementModal = ({ achievement, onClose }) => {
         </button>
 
         {/* Animated Background */}
-        <div
-          className={`absolute inset-0 bg-gradient-to-br ${rarityConfig.bg} rounded-3xl opacity-50 animate-pulse`}
-        ></div>
+        <div className={`absolute inset-0 bg-gradient-to-br ${rarityConfig.bg} rounded-3xl opacity-50 animate-pulse`}></div>
 
         {/* Content */}
         <div className="relative p-8">
           {/* Rarity Badge */}
           <div className="absolute top-6 left-6">
-            <div
-              className={`px-3 py-1 rounded-full bg-gradient-to-r ${rarityConfig.gradient} text-white text-xs font-bold uppercase flex items-center gap-1 shadow-lg`}
-            >
-              {achievement.rarity === "legendary" && (
-                <Crown className="w-3 h-3" />
-              )}
-              {achievement.rarity === "epic" && <Star className="w-3 h-3" />}
-              {achievement.rarity === "rare" && (
-                <Sparkles className="w-3 h-3" />
-              )}
+            <div className={`px-3 py-1 rounded-full bg-gradient-to-r ${rarityConfig.gradient} text-white text-xs font-bold uppercase flex items-center gap-1 shadow-lg`}>
+              {achievement.rarity === 'legendary' && <Crown className="w-3 h-3" />}
+              {achievement.rarity === 'epic' && <Star className="w-3 h-3" />}
+              {achievement.rarity === 'rare' && <Sparkles className="w-3 h-3" />}
               {achievement.rarity}
             </div>
           </div>
@@ -145,18 +137,12 @@ const AchievementModal = ({ achievement, onClose }) => {
           <div className="flex justify-center mb-6 mt-8">
             <div className="relative">
               {/* Glow Effect */}
-              <div
-                className={`absolute inset-0 bg-gradient-to-br ${rarityConfig.gradient} rounded-full blur-2xl opacity-60 animate-pulse`}
-              ></div>
-
+              <div className={`absolute inset-0 bg-gradient-to-br ${rarityConfig.gradient} rounded-full blur-2xl opacity-60 animate-pulse`}></div>
+              
               {/* Icon Container */}
-              <div
-                className={`relative w-32 h-32 bg-gradient-to-br ${rarityConfig.gradient} rounded-full flex items-center justify-center shadow-2xl ${rarityConfig.glow} transform hover:scale-110 transition-transform duration-300`}
-              >
-                <span className="text-6xl animate-bounce">
-                  {achievement.icon}
-                </span>
-
+              <div className={`relative w-32 h-32 bg-gradient-to-br ${rarityConfig.gradient} rounded-full flex items-center justify-center shadow-2xl ${rarityConfig.glow} transform hover:scale-110 transition-transform duration-300`}>
+                <span className="text-6xl animate-bounce">{achievement.icon}</span>
+                
                 {/* Sparkle Effects */}
                 <Sparkles className="absolute -top-2 -right-2 w-8 h-8 text-yellow-300 animate-spin-slow" />
                 <Star className="absolute -bottom-2 -left-2 w-6 h-6 text-yellow-400 animate-pulse" />
@@ -179,9 +165,7 @@ const AchievementModal = ({ achievement, onClose }) => {
             {/* XP Reward */}
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-full">
               <Zap className="w-5 h-5 text-yellow-400" />
-              <span className="text-white font-bold">
-                +{achievement.xpReward} XP
-              </span>
+              <span className="text-white font-bold">+{achievement.xpReward} XP</span>
             </div>
           </div>
 
@@ -189,9 +173,7 @@ const AchievementModal = ({ achievement, onClose }) => {
           <div className="text-center mb-6">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/10">
               <Trophy className="w-4 h-4 text-purple-400" />
-              <span className="text-sm text-gray-300 capitalize">
-                {achievement.category}
-              </span>
+              <span className="text-sm text-gray-300 capitalize">{achievement.category}</span>
             </div>
           </div>
 
@@ -208,12 +190,8 @@ const AchievementModal = ({ achievement, onClose }) => {
 
         {/* Decorative Elements */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden rounded-3xl pointer-events-none">
-          <div
-            className={`absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br ${rarityConfig.gradient} rounded-full blur-3xl opacity-30 animate-pulse`}
-          ></div>
-          <div
-            className={`absolute -bottom-20 -left-20 w-40 h-40 bg-gradient-to-br ${rarityConfig.gradient} rounded-full blur-3xl opacity-30 animate-pulse`}
-          ></div>
+          <div className={`absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br ${rarityConfig.gradient} rounded-full blur-3xl opacity-30 animate-pulse`}></div>
+          <div className={`absolute -bottom-20 -left-20 w-40 h-40 bg-gradient-to-br ${rarityConfig.gradient} rounded-full blur-3xl opacity-30 animate-pulse`}></div>
         </div>
       </div>
 

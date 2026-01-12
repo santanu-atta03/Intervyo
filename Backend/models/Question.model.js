@@ -1,10 +1,10 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const testCaseSchema = new mongoose.Schema({
   input: String,
   output: String,
   explanation: String,
-  isHidden: Boolean,
+  isHidden: Boolean
 });
 
 const codingDetailsSchema = new mongoose.Schema({
@@ -12,27 +12,27 @@ const codingDetailsSchema = new mongoose.Schema({
     javascript: String,
     python: String,
     java: String,
-    cpp: String,
+    cpp: String
   },
   testCases: [testCaseSchema],
   constraints: String,
   hints: [String],
   timeComplexity: String,
-  spaceComplexity: String,
+  spaceComplexity: String
 });
 
 const evaluationSchema = new mongoose.Schema({
   idealAnswer: String,
   keyPoints: [String],
   commonMistakes: [String],
-  followUpQuestions: [String],
+  followUpQuestions: [String]
 });
 
 const statsSchema = new mongoose.Schema({
   timesAsked: Number,
   averageScore: Number,
   averageTimeToAnswer: Number,
-  skipRate: Number,
+  skipRate: Number
 });
 
 const questionSchema = new mongoose.Schema({
@@ -50,7 +50,7 @@ const questionSchema = new mongoose.Schema({
   tags: [String],
   createdBy: String,
   source: String,
-  createdAt: { type: Date, default: Date.now },
+  createdAt: { type: Date, default: Date.now }
 });
 
-export default mongoose.model("Question", questionSchema);
+export default mongoose.model('Question', questionSchema);

@@ -1,24 +1,13 @@
-import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import {
-  Trophy,
-  Award,
-  Star,
-  Crown,
-  Sparkles,
-  Lock,
-  TrendingUp,
-  Flame,
-  Target,
-  Brain,
-  ChevronLeft,
-  Filter,
-  Search,
-  CheckCircle,
-} from "lucide-react";
-import { LightningLoader } from "../Loader/Loader";
-import AchievementModal from "../Dashboard/AchievementModal";
+import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { 
+  Trophy, Award, Star, Crown, Sparkles, Lock, 
+  TrendingUp, Flame, Target, Brain, ChevronLeft,
+  Filter, Search, CheckCircle
+} from 'lucide-react';
+import { LightningLoader } from '../Loader/Loader';
+import AchievementModal from '../Dashboard/AchievementModal';
 
 export default function Achievements() {
   const navigate = useNavigate();
@@ -29,9 +18,9 @@ export default function Achievements() {
   const [achievements, setAchievements] = useState([]);
   const [groupedAchievements, setGroupedAchievements] = useState({});
   const [stats, setStats] = useState(null);
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [selectedRarity, setSelectedRarity] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedRarity, setSelectedRarity] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedAchievement, setSelectedAchievement] = useState(null);
 
   useEffect(() => {
@@ -42,14 +31,11 @@ export default function Achievements() {
   const fetchAchievements = async () => {
     try {
       setLoading(true);
-      const response = await fetch(
-        `${import.meta.env.REACT_APP_BASE_URL}/achievements/all`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
+      const response = await fetch(`${import.meta.env.REACT_APP_BASE_URL}/achievements/all`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
 
       const data = await response.json();
 
@@ -58,7 +44,7 @@ export default function Achievements() {
         setGroupedAchievements(data.data.grouped);
       }
     } catch (error) {
-      console.error("Error fetching achievements:", error);
+      console.error('Error fetching achievements:', error);
     } finally {
       setLoading(false);
     }
@@ -66,14 +52,11 @@ export default function Achievements() {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch(
-        `${import.meta.env.REACT_APP_BASE_URL}/achievements/stats`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
+      const response = await fetch(`${import.meta.env.REACT_APP_BASE_URL}/achievements/stats`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
 
       const data = await response.json();
 
@@ -81,44 +64,44 @@ export default function Achievements() {
         setStats(data.data);
       }
     } catch (error) {
-      console.error("Error fetching achievement stats:", error);
+      console.error('Error fetching achievement stats:', error);
     }
   };
 
   const getRarityConfig = (rarity) => {
     const configs = {
       common: {
-        gradient: "from-gray-500 to-gray-600",
-        glow: "shadow-gray-500/30",
-        border: "border-gray-500/30",
-        bg: "from-gray-500/10 to-gray-600/10",
-        text: "text-gray-400",
-        icon: Star,
+        gradient: 'from-gray-500 to-gray-600',
+        glow: 'shadow-gray-500/30',
+        border: 'border-gray-500/30',
+        bg: 'from-gray-500/10 to-gray-600/10',
+        text: 'text-gray-400',
+        icon: Star
       },
       rare: {
-        gradient: "from-blue-500 to-cyan-500",
-        glow: "shadow-blue-500/30",
-        border: "border-blue-500/30",
-        bg: "from-blue-500/10 to-cyan-500/10",
-        text: "text-blue-400",
-        icon: Sparkles,
+        gradient: 'from-blue-500 to-cyan-500',
+        glow: 'shadow-blue-500/30',
+        border: 'border-blue-500/30',
+        bg: 'from-blue-500/10 to-cyan-500/10',
+        text: 'text-blue-400',
+        icon: Sparkles
       },
       epic: {
-        gradient: "from-purple-500 to-pink-500",
-        glow: "shadow-purple-500/30",
-        border: "border-purple-500/30",
-        bg: "from-purple-500/10 to-pink-500/10",
-        text: "text-purple-400",
-        icon: Award,
+        gradient: 'from-purple-500 to-pink-500',
+        glow: 'shadow-purple-500/30',
+        border: 'border-purple-500/30',
+        bg: 'from-purple-500/10 to-pink-500/10',
+        text: 'text-purple-400',
+        icon: Award
       },
       legendary: {
-        gradient: "from-yellow-400 to-orange-500",
-        glow: "shadow-yellow-500/30",
-        border: "border-yellow-500/30",
-        bg: "from-yellow-500/10 to-orange-500/10",
-        text: "text-yellow-400",
-        icon: Crown,
-      },
+        gradient: 'from-yellow-400 to-orange-500',
+        glow: 'shadow-yellow-500/30',
+        border: 'border-yellow-500/30',
+        bg: 'from-yellow-500/10 to-orange-500/10',
+        text: 'text-yellow-400',
+        icon: Crown
+      }
     };
     return configs[rarity] || configs.common;
   };
@@ -129,31 +112,21 @@ export default function Achievements() {
       streak: Flame,
       performance: TrendingUp,
       mastery: Brain,
-      special: Sparkles,
+      special: Sparkles
     };
     return icons[category] || Trophy;
   };
 
-  const filteredAchievements = achievements.filter((achievement) => {
-    const matchesCategory =
-      selectedCategory === "all" || achievement.category === selectedCategory;
-    const matchesRarity =
-      selectedRarity === "all" || achievement.rarity === selectedRarity;
-    const matchesSearch =
-      achievement.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      achievement.description.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredAchievements = achievements.filter(achievement => {
+    const matchesCategory = selectedCategory === 'all' || achievement.category === selectedCategory;
+    const matchesRarity = selectedRarity === 'all' || achievement.rarity === selectedRarity;
+    const matchesSearch = achievement.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         achievement.description.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesRarity && matchesSearch;
   });
 
-  const categories = [
-    "all",
-    "milestone",
-    "streak",
-    "performance",
-    "mastery",
-    "special",
-  ];
-  const rarities = ["all", "common", "rare", "epic", "legendary"];
+  const categories = ['all', 'milestone', 'streak', 'performance', 'mastery', 'special'];
+  const rarities = ['all', 'common', 'rare', 'epic', 'legendary'];
 
   if (loading) {
     return (
@@ -171,7 +144,7 @@ export default function Achievements() {
           <div className="flex items-center justify-between h-20">
             <div className="flex items-center gap-4">
               <button
-                onClick={() => navigate("/dashboard")}
+                onClick={() => navigate('/dashboard')}
                 className="p-2 hover:bg-gray-800/50 rounded-xl transition group"
               >
                 <ChevronLeft className="w-6 h-6 text-gray-400 group-hover:text-white" />
@@ -181,9 +154,7 @@ export default function Achievements() {
                   <Trophy className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-white">
-                    Achievements
-                  </h1>
+                  <h1 className="text-2xl font-bold text-white">Achievements</h1>
                   <p className="text-sm text-gray-400">Track your progress</p>
                 </div>
               </div>
@@ -217,9 +188,7 @@ export default function Achievements() {
                 <div className="flex items-center justify-between mb-2">
                   <Target className="w-8 h-8 text-purple-400" />
                   <div className="text-right">
-                    <div className="text-3xl font-bold text-white">
-                      {stats.completionPercentage}%
-                    </div>
+                    <div className="text-3xl font-bold text-white">{stats.completionPercentage}%</div>
                     <div className="text-sm text-gray-400">Complete</div>
                   </div>
                 </div>
@@ -232,9 +201,7 @@ export default function Achievements() {
                 <div className="flex items-center justify-between mb-2">
                   <Crown className="w-8 h-8 text-yellow-400" />
                   <div className="text-right">
-                    <div className="text-3xl font-bold text-white">
-                      {stats.rarityCount.legendary}
-                    </div>
+                    <div className="text-3xl font-bold text-white">{stats.rarityCount.legendary}</div>
                     <div className="text-sm text-gray-400">Legendary</div>
                   </div>
                 </div>
@@ -247,9 +214,7 @@ export default function Achievements() {
                 <div className="flex items-center justify-between mb-2">
                   <Award className="w-8 h-8 text-emerald-400" />
                   <div className="text-right">
-                    <div className="text-3xl font-bold text-white">
-                      {stats.rarityCount.epic}
-                    </div>
+                    <div className="text-3xl font-bold text-white">{stats.rarityCount.epic}</div>
                     <div className="text-sm text-gray-400">Epic</div>
                   </div>
                 </div>
@@ -278,16 +243,15 @@ export default function Achievements() {
             {/* Category Filter */}
             <div className="flex gap-2 flex-wrap">
               {categories.map((category) => {
-                const Icon =
-                  category === "all" ? Filter : getCategoryIcon(category);
+                const Icon = category === 'all' ? Filter : getCategoryIcon(category);
                 return (
                   <button
                     key={category}
                     onClick={() => setSelectedCategory(category)}
                     className={`px-4 py-2 rounded-xl font-semibold transition flex items-center gap-2 ${
                       selectedCategory === category
-                        ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30"
-                        : "bg-gray-900/50 text-gray-400 hover:text-white border border-gray-700/50"
+                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30'
+                        : 'bg-gray-900/50 text-gray-400 hover:text-white border border-gray-700/50'
                     }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -300,8 +264,7 @@ export default function Achievements() {
             {/* Rarity Filter */}
             <div className="flex gap-2 flex-wrap">
               {rarities.map((rarity) => {
-                const config =
-                  rarity !== "all" ? getRarityConfig(rarity) : null;
+                const config = rarity !== 'all' ? getRarityConfig(rarity) : null;
                 return (
                   <button
                     key={rarity}
@@ -310,8 +273,8 @@ export default function Achievements() {
                       selectedRarity === rarity
                         ? config
                           ? `bg-gradient-to-r ${config.gradient} text-white shadow-lg ${config.glow}`
-                          : "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30"
-                        : "bg-gray-900/50 text-gray-400 hover:text-white border border-gray-700/50"
+                          : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30'
+                        : 'bg-gray-900/50 text-gray-400 hover:text-white border border-gray-700/50'
                     }`}
                   >
                     {rarity}
@@ -332,20 +295,16 @@ export default function Achievements() {
             return (
               <div
                 key={achievement._id}
-                onClick={() =>
-                  achievement.earned && setSelectedAchievement(achievement)
-                }
+                onClick={() => achievement.earned && setSelectedAchievement(achievement)}
                 className={`group relative overflow-hidden rounded-xl transition-all duration-300 ${
                   achievement.earned
                     ? `cursor-pointer hover:scale-105 bg-gray-800/50 border-2 ${rarityConfig.border} ${rarityConfig.glow}`
-                    : "bg-gray-800/30 border border-gray-700/30"
+                    : 'bg-gray-800/30 border border-gray-700/30'
                 }`}
               >
                 {/* Animated Background */}
                 {achievement.earned && (
-                  <div
-                    className={`absolute inset-0 bg-gradient-to-br ${rarityConfig.bg} opacity-50`}
-                  ></div>
+                  <div className={`absolute inset-0 bg-gradient-to-br ${rarityConfig.bg} opacity-50`}></div>
                 )}
 
                 {/* Lock Overlay for Locked Achievements */}
@@ -358,9 +317,7 @@ export default function Achievements() {
                 <div className="relative p-6">
                   {/* Header */}
                   <div className="flex items-start justify-between mb-4">
-                    <div
-                      className={`w-16 h-16 rounded-xl bg-gradient-to-br ${rarityConfig.gradient} flex items-center justify-center shadow-lg ${rarityConfig.glow} ${achievement.earned ? "group-hover:scale-110" : "grayscale opacity-50"} transition-transform`}
-                    >
+                    <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${rarityConfig.gradient} flex items-center justify-center shadow-lg ${rarityConfig.glow} ${achievement.earned ? 'group-hover:scale-110' : 'grayscale opacity-50'} transition-transform`}>
                       <span className="text-3xl">{achievement.icon}</span>
                     </div>
 
@@ -370,47 +327,31 @@ export default function Achievements() {
                           <CheckCircle className="w-5 h-5 text-white" />
                         </div>
                       )}
-                      <div
-                        className={`px-2 py-1 rounded-lg text-xs font-bold uppercase ${achievement.earned ? rarityConfig.text : "text-gray-600"}`}
-                      >
+                      <div className={`px-2 py-1 rounded-lg text-xs font-bold uppercase ${achievement.earned ? rarityConfig.text : 'text-gray-600'}`}>
                         {achievement.rarity}
                       </div>
                     </div>
                   </div>
 
                   {/* Content */}
-                  <h3
-                    className={`font-bold text-lg mb-2 ${achievement.earned ? "text-white" : "text-gray-600"}`}
-                  >
+                  <h3 className={`font-bold text-lg mb-2 ${achievement.earned ? 'text-white' : 'text-gray-600'}`}>
                     {achievement.name}
                   </h3>
-                  <p
-                    className={`text-sm mb-4 ${achievement.earned ? "text-gray-400" : "text-gray-700"}`}
-                  >
-                    {achievement.earned ? achievement.description : "???"}
+                  <p className={`text-sm mb-4 ${achievement.earned ? 'text-gray-400' : 'text-gray-700'}`}>
+                    {achievement.earned ? achievement.description : '???'}
                   </p>
 
                   {/* Footer */}
                   <div className="flex items-center justify-between pt-4 border-t border-gray-700/30">
                     <div className="flex items-center gap-2">
-                      <CategoryIcon
-                        className={`w-4 h-4 ${achievement.earned ? "text-gray-400" : "text-gray-700"}`}
-                      />
-                      <span
-                        className={`text-xs capitalize ${achievement.earned ? "text-gray-400" : "text-gray-700"}`}
-                      >
+                      <CategoryIcon className={`w-4 h-4 ${achievement.earned ? 'text-gray-400' : 'text-gray-700'}`} />
+                      <span className={`text-xs capitalize ${achievement.earned ? 'text-gray-400' : 'text-gray-700'}`}>
                         {achievement.category}
                       </span>
                     </div>
-                    <div
-                      className={`flex items-center gap-1 px-2 py-1 rounded-lg ${achievement.earned ? "bg-purple-500/20" : "bg-gray-700/30"}`}
-                    >
-                      <Sparkles
-                        className={`w-4 h-4 ${achievement.earned ? "text-yellow-400" : "text-gray-700"}`}
-                      />
-                      <span
-                        className={`text-xs font-bold ${achievement.earned ? "text-white" : "text-gray-700"}`}
-                      >
+                    <div className={`flex items-center gap-1 px-2 py-1 rounded-lg ${achievement.earned ? 'bg-purple-500/20' : 'bg-gray-700/30'}`}>
+                      <Sparkles className={`w-4 h-4 ${achievement.earned ? 'text-yellow-400' : 'text-gray-700'}`} />
+                      <span className={`text-xs font-bold ${achievement.earned ? 'text-white' : 'text-gray-700'}`}>
                         +{achievement.xpReward}
                       </span>
                     </div>
@@ -418,17 +359,14 @@ export default function Achievements() {
 
                   {achievement.earned && achievement.earnedAt && (
                     <div className="mt-3 text-xs text-gray-500 text-center">
-                      Earned{" "}
-                      {new Date(achievement.earnedAt).toLocaleDateString()}
+                      Earned {new Date(achievement.earnedAt).toLocaleDateString()}
                     </div>
                   )}
                 </div>
 
                 {/* Glow Effect on Hover */}
                 {achievement.earned && (
-                  <div
-                    className={`absolute inset-0 bg-gradient-to-br ${rarityConfig.gradient} opacity-0 group-hover:opacity-10 transition-opacity rounded-xl`}
-                  ></div>
+                  <div className={`absolute inset-0 bg-gradient-to-br ${rarityConfig.gradient} opacity-0 group-hover:opacity-10 transition-opacity rounded-xl`}></div>
                 )}
               </div>
             );

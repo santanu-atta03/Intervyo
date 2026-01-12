@@ -726,7 +726,7 @@ class InterviewController {
         return res.status(400).json({
           success: false,
           message: `Invalid interview type. Must be one of: ${validTypes.join(
-            ", ",
+            ", "
           )}`,
         });
       }
@@ -761,7 +761,7 @@ class InterviewController {
       });
 
       await interview.save();
-      await interview.populate("userId");
+      await interview.populate('userId');
 
       res.status(201).json({
         success: true,
@@ -769,7 +769,7 @@ class InterviewController {
         data: {
           interviewId: interview._id,
           id: interview._id,
-          user: interview.userId,
+          user : interview.userId,
           config: interview.config,
           status: interview.status,
         },
@@ -916,8 +916,9 @@ class InterviewController {
         interviewType: actualInterviewType,
       };
 
-      const questions =
-        await questionGenerator.generateQuestions(configForGeneration);
+      const questions = await questionGenerator.generateQuestions(
+        configForGeneration
+      );
 
       if (!questions || questions.length === 0) {
         return res.status(500).json({
@@ -947,7 +948,7 @@ class InterviewController {
             "performance.hintsUsed": 0,
           },
         },
-        { new: true },
+        { new: true }
       );
 
       if (!updatedInterview) {
@@ -995,13 +996,13 @@ class InterviewController {
     }
   }
 
+
   // Add this method to the InterviewController class
 
-  async getRealTimeResponse(req, res) {
+async getRealTimeResponse(req, res) {
     try {
       const { interviewId } = req.params;
-      const { questionId, answer, conversationHistory, questionType, type } =
-        req.body;
+      const { questionId, answer, conversationHistory, questionType, type } = req.body;
       const userId = req.user.id;
 
       const interview = await Interview.findOne({ _id: interviewId, userId });
@@ -1009,32 +1010,29 @@ class InterviewController {
       if (!interview) {
         return res.status(404).json({
           success: false,
-          message: "Interview not found",
+          message: 'Interview not found'
         });
       }
 
       const round = interview.rounds[interview.rounds.length - 1];
-      const question = round.questions.find((q) => q.questionId === questionId);
+      const question = round.questions.find(q => q.questionId === questionId);
 
       if (!question) {
         return res.status(404).json({
           success: false,
-          message: "Question not found",
+          message: 'Question not found'
         });
       }
 
       // Build conversation context
       const conversationContext = conversationHistory
-        .map(
-          (msg) =>
-            `${msg.role === "user" ? "Candidate" : "Interviewer"}: ${msg.content}`,
-        )
-        .join("\n");
+        .map(msg => `${msg.role === 'user' ? 'Candidate' : 'Interviewer'}: ${msg.content}`)
+        .join('\n');
 
       // Prepare messages for Groq
       const messages = [
         {
-          role: "system",
+          role: 'system',
           content: `You are an expert technical interviewer conducting a ${interview.config.interviewType} interview for ${interview.config.domain} - ${interview.config.subDomain}.
 Difficulty level: ${interview.config.difficulty}
 
@@ -1043,10 +1041,10 @@ Your responsibilities:
 2. Ask follow-up questions if answers are incomplete or unclear
 3. Provide constructive feedback when answers are complete
 4. Be encouraging yet professional
-5. Determine if the answer is sufficient to move forward`,
+5. Determine if the answer is sufficient to move forward`
         },
         {
-          role: "user",
+          role: 'user',
           content: `Current Question: "${question.question}"
 
 Conversation History:
@@ -1066,26 +1064,27 @@ Evaluate the response and provide your feedback in the following JSON structure:
     "strengths": ["point1", "point2"],
     "improvements": ["point1", "point2"]
   }
-}`,
-        },
+}`
+        }
       ];
 
       // Use GroqService to get JSON response
       const aiData = await groqService.generateJSON(messages, {
         temperature: 0.7,
-        maxTokens: 1500,
+        maxTokens: 1500
       });
 
       res.json({
         success: true,
-        data: aiData,
+        data: aiData
       });
+
     } catch (error) {
-      console.error("Real-time response error:", error);
+      console.error('Real-time response error:', error);
       res.status(500).json({
         success: false,
-        message: "Failed to get real-time response",
-        error: error.message,
+        message: 'Failed to get real-time response',
+        error: error.message
       });
     }
   }
@@ -1099,7 +1098,7 @@ Evaluate the response and provide your feedback in the following JSON structure:
       if (!code || !language) {
         return res.status(400).json({
           success: false,
-          message: "Code and language are required",
+          message: 'Code and language are required'
         });
       }
 
@@ -1108,21 +1107,21 @@ Evaluate the response and provide your feedback in the following JSON structure:
       if (!interview) {
         return res.status(404).json({
           success: false,
-          message: "Interview not found",
+          message: 'Interview not found'
         });
       }
 
       const round = interview.rounds[interview.rounds.length - 1];
-      const question = round.questions.find((q) => q.questionId === questionId);
+      const question = round.questions.find(q => q.questionId === questionId);
 
       // Prepare messages for code evaluation
       const messages = [
         {
-          role: "system",
-          content: `You are an expert code reviewer conducting technical interviews. Provide comprehensive, constructive feedback as you would in a real interview setting.`,
+          role: 'system',
+          content: `You are an expert code reviewer conducting technical interviews. Provide comprehensive, constructive feedback as you would in a real interview setting.`
         },
         {
-          role: "user",
+          role: 'user',
           content: `Review this ${language} code for the following question:
 
 **Question:** "${question.question}"
@@ -1151,26 +1150,27 @@ Provide a comprehensive code review in JSON format:
   "errors": ["error description if any"]
 }
 
-Be encouraging but honest. Provide specific, actionable feedback.`,
-        },
+Be encouraging but honest. Provide specific, actionable feedback.`
+        }
       ];
 
       // Use GroqService to get JSON response
       const evaluation = await groqService.generateJSON(messages, {
         temperature: 0.6,
-        maxTokens: 2000,
+        maxTokens: 2000
       });
 
       res.json({
         success: true,
-        data: evaluation,
+        data: evaluation
       });
+
     } catch (error) {
-      console.error("Code evaluation error:", error);
+      console.error('Code evaluation error:', error);
       res.status(500).json({
         success: false,
-        message: "Failed to evaluate code",
-        error: error.message,
+        message: 'Failed to evaluate code',
+        error: error.message
       });
     }
   }
@@ -1186,27 +1186,27 @@ Be encouraging but honest. Provide specific, actionable feedback.`,
       if (!interview) {
         return res.status(404).json({
           success: false,
-          message: "Interview not found",
+          message: 'Interview not found'
         });
       }
 
       const round = interview.rounds[interview.rounds.length - 1];
-      const question = round.questions.find((q) => q.questionId === questionId);
+      const question = round.questions.find(q => q.questionId === questionId);
 
       // Set headers for SSE
-      res.setHeader("Content-Type", "text/event-stream");
-      res.setHeader("Cache-Control", "no-cache");
-      res.setHeader("Connection", "keep-alive");
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
 
       const messages = [
         {
-          role: "system",
-          content: `You are an interviewer providing real-time feedback.`,
+          role: 'system',
+          content: `You are an interviewer providing real-time feedback.`
         },
         {
-          role: "user",
-          content: `Question: "${question.question}"\nAnswer: "${answer}"\n\nProvide brief feedback.`,
-        },
+          role: 'user',
+          content: `Question: "${question.question}"\nAnswer: "${answer}"\n\nProvide brief feedback.`
+        }
       ];
 
       // Stream the response
@@ -1214,14 +1214,15 @@ Be encouraging but honest. Provide specific, actionable feedback.`,
         res.write(`data: ${JSON.stringify({ chunk })}\n\n`);
       }
 
-      res.write("data: [DONE]\n\n");
+      res.write('data: [DONE]\n\n');
       res.end();
+
     } catch (error) {
-      console.error("Stream error:", error);
+      console.error('Stream error:', error);
       res.status(500).json({
         success: false,
-        message: "Streaming failed",
-        error: error.message,
+        message: 'Streaming failed',
+        error: error.message
       });
     }
   }
@@ -1230,7 +1231,7 @@ Be encouraging but honest. Provide specific, actionable feedback.`,
   async submitAnswer(req, res) {
     try {
       const { interviewId } = req.params;
-      const { questionId, answer, timeTaken, hintsUsed, skipped } = req.body;
+      const { questionId, answer, timeTaken, hintsUsed,skipped } = req.body;
       const userId = req.user.id;
 
       // Validate inputs
@@ -1277,7 +1278,7 @@ Be encouraging but honest. Provide specific, actionable feedback.`,
 
       // Check if already answered
       const alreadyAnswered = round.answers.find(
-        (a) => a.questionId === questionId,
+        (a) => a.questionId === questionId
       );
       if (alreadyAnswered) {
         return res.status(400).json({
@@ -1292,7 +1293,7 @@ Be encouraging but honest. Provide specific, actionable feedback.`,
         question,
         answer,
         interview.config.domain,
-        interview.config.difficulty,
+        interview.config.difficulty
       );
 
       // Save the complete evaluation
@@ -1330,7 +1331,7 @@ Be encouraging but honest. Provide specific, actionable feedback.`,
 
       // Calculate updated metrics - only from non-skipped answers
       const validAnswers = round.answers.filter(
-        (a) => !a.skipped && a.evaluation,
+        (a) => !a.skipped && a.evaluation
       );
       const answeredCount = validAnswers.length;
       const skippedCount = round.answers.filter((a) => a.skipped).length;
@@ -1341,8 +1342,8 @@ Be encouraging but honest. Provide specific, actionable feedback.`,
           ? Math.round(
               validAnswers.reduce(
                 (sum, a) => sum + (a.evaluation?.score || 0),
-                0,
-              ) / validAnswers.length,
+                0
+              ) / validAnswers.length
             )
           : 0;
 
@@ -1352,8 +1353,8 @@ Be encouraging but honest. Provide specific, actionable feedback.`,
           ? Math.round(
               validAnswers.reduce(
                 (sum, a) => sum + (a.evaluation?.clarity || 0),
-                0,
-              ) / validAnswers.length,
+                0
+              ) / validAnswers.length
             )
           : 0;
 
@@ -1362,8 +1363,8 @@ Be encouraging but honest. Provide specific, actionable feedback.`,
           ? Math.round(
               validAnswers.reduce(
                 (sum, a) => sum + (a.evaluation?.completeness || 0),
-                0,
-              ) / validAnswers.length,
+                0
+              ) / validAnswers.length
             )
           : 0;
 
@@ -1372,7 +1373,7 @@ Be encouraging but honest. Provide specific, actionable feedback.`,
       interview.performance.categoryScores.technical = avgTechnical;
       interview.performance.categoryScores.communication = avgClarity;
       interview.performance.categoryScores.confidence = Math.round(
-        (avgTechnical + avgClarity) / 2,
+        (avgTechnical + avgClarity) / 2
       );
       interview.performance.categoryScores.problemSolving = avgCompleteness;
       interview.performance.questionsAnswered = answeredCount;
@@ -1397,7 +1398,7 @@ Be encouraging but honest. Provide specific, actionable feedback.`,
         // Find next unanswered question
         const answeredIds = round.answers.map((a) => a.questionId);
         const nextQ = round.questions.find(
-          (q) => !answeredIds.includes(q.questionId),
+          (q) => !answeredIds.includes(q.questionId)
         );
 
         if (nextQ) {
@@ -1495,7 +1496,7 @@ Be encouraging but honest. Provide specific, actionable feedback.`,
       if (!isComplete) {
         const answeredIds = round.answers.map((a) => a.questionId);
         nextQuestion = round.questions.find(
-          (q) => !answeredIds.includes(q.questionId),
+          (q) => !answeredIds.includes(q.questionId)
         );
 
         if (nextQuestion) {
@@ -1550,7 +1551,7 @@ Be encouraging but honest. Provide specific, actionable feedback.`,
 
       const currentRound = interview.rounds[interview.rounds.length - 1];
       const question = currentRound.questions.find(
-        (q) => q.questionId === questionId,
+        (q) => q.questionId === questionId
       );
 
       if (!question) {
@@ -1704,14 +1705,12 @@ Be encouraging but honest. Provide specific, actionable feedback.`,
       const { interviewId } = req.params;
       const userId = req.user.id;
 
-      const interview = await Interview.findOne({
-        _id: interviewId,
-        userId,
-      }).populate({
-        path: "userId",
-        select: "name email", // select only needed fields
-      });
-      console.log("Interview certificate data section : ", interview);
+      const interview = await Interview.findOne({ _id: interviewId, userId })
+  .populate({
+    path: 'userId',
+    select: 'name email', // select only needed fields
+  });
+  console.log("Interview certificate data section : ",interview)
 
       if (!interview) {
         return res.status(404).json({
@@ -1735,7 +1734,7 @@ Be encouraging but honest. Provide specific, actionable feedback.`,
       interview.status = "completed";
       interview.endTime = new Date();
       interview.totalDuration = Math.floor(
-        (interview.endTime - interview.startTime) / 1000,
+        (interview.endTime - interview.startTime) / 1000
       );
 
       // Generate comprehensive results
@@ -1814,6 +1813,7 @@ Be encouraging but honest. Provide specific, actionable feedback.`,
               .toString(36)
               .substring(2, 10)
               .toUpperCase(),
+              
           },
           timeline: [],
         };
@@ -1828,9 +1828,9 @@ Be encouraging but honest. Provide specific, actionable feedback.`,
           interviewId: interview._id,
           results: interview.results,
           user: {
-            name: interview.userId.name,
-            email: interview.userId.email,
-          },
+          name: interview.userId.name,
+          email: interview.userId.email,
+        },
         },
       });
     } catch (error) {
@@ -1999,4 +1999,8 @@ Be encouraging but honest. Provide specific, actionable feedback.`,
   }
 }
 
+
+
 export default new InterviewController();
+
+

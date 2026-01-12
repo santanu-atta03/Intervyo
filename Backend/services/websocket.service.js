@@ -1,7 +1,8 @@
 // services/websocket.service.js
-const socketIO = require("socket.io");
+const socketIO = require('socket.io');
 
 class WebSocketService {
+  
   constructor() {
     this.io = null;
     this.connectedUsers = new Map();
@@ -10,16 +11,16 @@ class WebSocketService {
   initialize(server) {
     this.io = socketIO(server, {
       cors: {
-        origin: process.env.CLIENT_URL || "https://intervyo-sage.vercel.app",
-        methods: ["GET", "POST"],
-      },
+        origin: process.env.CLIENT_URL || 'https://intervyo-sage.vercel.app',
+        methods: ['GET', 'POST']
+      }
     });
 
-    this.io.on("connection", (socket) => {
-      console.log("Client connected:", socket.id);
+    this.io.on('connection', (socket) => {
+      console.log('Client connected:', socket.id);
 
       // Join interview room
-      socket.on("join-interview", (data) => {
+      socket.on('join-interview', (data) => {
         const { interviewId, userId } = data;
         socket.join(interviewId);
         this.connectedUsers.set(socket.id, { interviewId, userId });
@@ -27,40 +28,38 @@ class WebSocketService {
       });
 
       // Real-time emotion updates
-      socket.on("emotion-update", (data) => {
+      socket.on('emotion-update', (data) => {
         const { interviewId, emotions, confidence } = data;
-        this.io.to(interviewId).emit("emotion-data", {
+        this.io.to(interviewId).emit('emotion-data', {
           emotions,
           confidence,
-          timestamp: Date.now(),
+          timestamp: Date.now()
         });
       });
 
       // Speech metrics updates
-      socket.on("speech-update", (data) => {
+      socket.on('speech-update', (data) => {
         const { interviewId, metrics } = data;
-        this.io.to(interviewId).emit("speech-metrics", {
+        this.io.to(interviewId).emit('speech-metrics', {
           metrics,
-          timestamp: Date.now(),
+          timestamp: Date.now()
         });
       });
 
       // Timer updates
-      socket.on("timer-update", (data) => {
+      socket.on('timer-update', (data) => {
         const { interviewId, timeRemaining } = data;
-        this.io.to(interviewId).emit("timer-sync", {
+        this.io.to(interviewId).emit('timer-sync', {
           timeRemaining,
-          timestamp: Date.now(),
+          timestamp: Date.now()
         });
       });
 
       // Disconnect
-      socket.on("disconnect", () => {
+      socket.on('disconnect', () => {
         const userData = this.connectedUsers.get(socket.id);
         if (userData) {
-          console.log(
-            `User ${userData.userId} disconnected from interview ${userData.interviewId}`,
-          );
+          console.log(`User ${userData.userId} disconnected from interview ${userData.interviewId}`);
           this.connectedUsers.delete(socket.id);
         }
       });
@@ -69,27 +68,27 @@ class WebSocketService {
 
   // Emit AI interviewer speech
   emitAISpeech(interviewId, data) {
-    this.io.to(interviewId).emit("ai-speaking", {
+    this.io.to(interviewId).emit('ai-speaking', {
       text: data.text,
       audioUrl: data.audioUrl,
       duration: data.duration,
-      timestamp: Date.now(),
+      timestamp: Date.now()
     });
   }
 
   // Emit question transition
   emitQuestionChange(interviewId, question) {
-    this.io.to(interviewId).emit("new-question", {
+    this.io.to(interviewId).emit('new-question', {
       question,
-      timestamp: Date.now(),
+      timestamp: Date.now()
     });
   }
 
   // Emit evaluation feedback
   emitEvaluation(interviewId, evaluation) {
-    this.io.to(interviewId).emit("answer-evaluated", {
+    this.io.to(interviewId).emit('answer-evaluated', {
       evaluation,
-      timestamp: Date.now(),
+      timestamp: Date.now()
     });
   }
 }

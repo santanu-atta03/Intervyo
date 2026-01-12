@@ -1,34 +1,34 @@
 // frontend/src/components/Chatbot/AIChatbot.jsx
-import React, { useState, useEffect, useRef } from "react";
-import {
-  MessageCircle,
-  X,
-  Send,
-  Loader2,
-  Trash2,
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  MessageCircle, 
+  X, 
+  Send, 
+  Loader2, 
+  Trash2, 
   Plus,
   Menu,
   Settings,
-  Minimize2,
-} from "lucide-react";
+  Minimize2
+} from 'lucide-react';
 import {
   createConversation,
   getUserConversations,
   getConversation,
   sendMessage,
   deleteConversation,
-  clearMessages,
-} from "../../services/operations/chatbotAPI";
-import toast from "react-hot-toast";
-import "./AIChatbot.css";
+  clearMessages
+} from '../../services/operations/chatbotAPI';
+import toast from 'react-hot-toast';
+import './AIChatbot.css';
 
-const AIChatbot = ({ defaultContext = "general" }) => {
+const AIChatbot = ({ defaultContext = 'general' }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [conversations, setConversations] = useState([]);
   const [currentConversation, setCurrentConversation] = useState(null);
   const [messages, setMessages] = useState([]);
-  const [inputMessage, setInputMessage] = useState("");
+  const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
   const [context, setContext] = useState(defaultContext);
@@ -42,9 +42,9 @@ const AIChatbot = ({ defaultContext = "general" }) => {
   const [isAtBottom, setIsAtBottom] = useState(true);
 
   // Scroll to bottom of messages using sentinel element
-  const scrollToBottom = (behavior = "smooth") => {
+  const scrollToBottom = (behavior = 'smooth') => {
     if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior, block: "end" });
+      messagesEndRef.current.scrollIntoView({ behavior, block: 'end' });
     }
   };
 
@@ -53,7 +53,7 @@ const AIChatbot = ({ defaultContext = "general" }) => {
     if (!isAtBottom) return;
     if (!messages.length) return;
 
-    scrollToBottom("smooth");
+    scrollToBottom('smooth');
   }, [messages.length, isAtBottom]);
 
   // Keep scroll position stable while user is reading older messages
@@ -79,14 +79,11 @@ const AIChatbot = ({ defaultContext = "general" }) => {
 
   const loadConversations = async () => {
     try {
-      const response = await getUserConversations({
-        limit: 20,
-        isActive: true,
-      });
+      const response = await getUserConversations({ limit: 20, isActive: true });
       setConversations(response.data);
     } catch (error) {
-      console.error("Failed to load conversations:", error);
-      toast.error("Failed to load conversation history");
+      console.error('Failed to load conversations:', error);
+      toast.error('Failed to load conversation history');
     }
   };
 
@@ -100,10 +97,10 @@ const AIChatbot = ({ defaultContext = "general" }) => {
       // After loading a conversation, jump directly to the latest message
       setIsAtBottom(true);
       // Use next tick to ensure DOM has rendered before scrolling
-      requestAnimationFrame(() => scrollToBottom("auto"));
+      requestAnimationFrame(() => scrollToBottom('auto'));
     } catch (error) {
-      console.error("Failed to load conversation:", error);
-      toast.error("Failed to load conversation");
+      console.error('Failed to load conversation:', error);
+      toast.error('Failed to load conversation');
     } finally {
       setIsLoading(false);
     }
@@ -113,33 +110,33 @@ const AIChatbot = ({ defaultContext = "general" }) => {
     try {
       const response = await createConversation({
         context,
-        title: "New Conversation",
+        title: 'New Conversation'
       });
       setCurrentConversation(response.data);
       setMessages([]);
       setConversations([response.data, ...conversations]);
-      toast.success("New conversation started");
+      toast.success('New conversation started');
     } catch (error) {
-      console.error("Failed to create conversation:", error);
-      toast.error("Failed to start new conversation");
+      console.error('Failed to create conversation:', error);
+      toast.error('Failed to start new conversation');
     }
   };
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
-
+    
     if (!inputMessage.trim() || isLoading) return;
 
     const userMessage = inputMessage.trim();
-    setInputMessage("");
+    setInputMessage('');
 
     // Add user message to UI immediately
     const tempUserMessage = {
-      role: "user",
+      role: 'user',
       content: userMessage,
-      timestamp: new Date(),
+      timestamp: new Date()
     };
-    setMessages((prev) => [...prev, tempUserMessage]);
+    setMessages(prev => [...prev, tempUserMessage]);
 
     try {
       setIsLoading(true);
@@ -158,59 +155,59 @@ const AIChatbot = ({ defaultContext = "general" }) => {
 
       // Add AI response to messages
       const aiMessage = {
-        role: "assistant",
+        role: 'assistant',
         content: response.data.message,
-        timestamp: new Date(),
+        timestamp: new Date()
       };
-      setMessages((prev) => [...prev, aiMessage]);
+      setMessages(prev => [...prev, aiMessage]);
 
       // Update conversation in list
       loadConversations();
     } catch (error) {
-      console.error("Failed to send message:", error);
-      toast.error("Failed to send message. Please try again.");
+      console.error('Failed to send message:', error);
+      toast.error('Failed to send message. Please try again.');
       // Remove the temporary user message on error
-      setMessages((prev) => prev.slice(0, -1));
+      setMessages(prev => prev.slice(0, -1));
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleDeleteConversation = async (sessionId) => {
-    if (!confirm("Are you sure you want to delete this conversation?")) return;
+    if (!confirm('Are you sure you want to delete this conversation?')) return;
 
     try {
       await deleteConversation(sessionId);
-      setConversations(conversations.filter((c) => c.sessionId !== sessionId));
+      setConversations(conversations.filter(c => c.sessionId !== sessionId));
       if (currentConversation?.sessionId === sessionId) {
         setCurrentConversation(null);
         setMessages([]);
       }
-      toast.success("Conversation deleted");
+      toast.success('Conversation deleted');
     } catch (error) {
-      console.error("Failed to delete conversation:", error);
-      toast.error("Failed to delete conversation");
+      console.error('Failed to delete conversation:', error);
+      toast.error('Failed to delete conversation');
     }
   };
 
   const handleClearMessages = async () => {
-    if (!currentConversation || !confirm("Clear all messages?")) return;
+    if (!currentConversation || !confirm('Clear all messages?')) return;
 
     try {
       await clearMessages(currentConversation.sessionId);
       setMessages([]);
-      toast.success("Messages cleared");
+      toast.success('Messages cleared');
     } catch (error) {
-      console.error("Failed to clear messages:", error);
-      toast.error("Failed to clear messages");
+      console.error('Failed to clear messages:', error);
+      toast.error('Failed to clear messages');
     }
   };
 
   const contextOptions = [
-    { value: "general", label: "General Help", icon: "💬" },
-    { value: "interview-prep", label: "Interview Prep", icon: "🎯" },
-    { value: "technical-help", label: "Technical Help", icon: "💻" },
-    { value: "career-advice", label: "Career Advice", icon: "📈" },
+    { value: 'general', label: 'General Help', icon: '💬' },
+    { value: 'interview-prep', label: 'Interview Prep', icon: '🎯' },
+    { value: 'technical-help', label: 'Technical Help', icon: '💻' },
+    { value: 'career-advice', label: 'Career Advice', icon: '📈' }
   ];
 
   if (!isOpen) {
@@ -226,7 +223,7 @@ const AIChatbot = ({ defaultContext = "general" }) => {
   }
 
   return (
-    <div className={`chatbot-container ${isMinimized ? "minimized" : ""}`}>
+    <div className={`chatbot-container ${isMinimized ? 'minimized' : ''}`}>
       {/* Header */}
       <div className="chatbot-header">
         <div className="chatbot-header-left">
@@ -277,12 +274,12 @@ const AIChatbot = ({ defaultContext = "general" }) => {
             {/* Context Selector */}
             <div className="chatbot-context-selector">
               <label>Mode:</label>
-              <select
-                value={context}
+              <select 
+                value={context} 
                 onChange={(e) => setContext(e.target.value)}
                 className="chatbot-select"
               >
-                {contextOptions.map((opt) => (
+                {contextOptions.map(opt => (
                   <option key={opt.value} value={opt.value}>
                     {opt.icon} {opt.label}
                   </option>
@@ -292,18 +289,18 @@ const AIChatbot = ({ defaultContext = "general" }) => {
 
             {/* Conversations List */}
             <div className="chatbot-conversations">
-              {conversations.map((conv) => (
+              {conversations.map(conv => (
                 <div
                   key={conv.sessionId}
                   className={`chatbot-conversation-item ${
-                    currentConversation?.sessionId === conv.sessionId
-                      ? "active"
-                      : ""
+                    currentConversation?.sessionId === conv.sessionId ? 'active' : ''
                   }`}
                   onClick={() => loadConversation(conv.sessionId)}
                 >
                   <div className="conversation-content">
-                    <span className="conversation-title">{conv.title}</span>
+                    <span className="conversation-title">
+                      {conv.title}
+                    </span>
                     <span className="conversation-time">
                       {new Date(conv.lastActivity).toLocaleDateString()}
                     </span>
@@ -345,16 +342,19 @@ const AIChatbot = ({ defaultContext = "general" }) => {
               </div>
             ) : (
               messages.map((msg, index) => (
-                <div key={index} className={`chatbot-message ${msg.role}`}>
+                <div
+                  key={index}
+                  className={`chatbot-message ${msg.role}`}
+                >
                   <div className="message-avatar">
-                    {msg.role === "user" ? "👤" : "🤖"}
+                    {msg.role === 'user' ? '👤' : '🤖'}
                   </div>
                   <div className="message-content">
                     <div className="message-text">{msg.content}</div>
                     <div className="message-time">
                       {new Date(msg.timestamp).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
+                        hour: '2-digit',
+                        minute: '2-digit'
                       })}
                     </div>
                   </div>

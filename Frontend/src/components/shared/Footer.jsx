@@ -1,5 +1,5 @@
-import { HugeiconsIcon } from "@hugeicons/react";
-import { TelegramIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from '@hugeicons/react'
+import { TelegramIcon } from '@hugeicons/core-free-icons'
 import { Twitter, Linkedin, Github, Youtube, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -17,6 +17,8 @@ export default function Footer() {
               AI-powered interview prep for tech professionals.
             </p>
             <div className="flex gap-4">
+              
+
               <a href="mailto:intervyo.team@example.com" aria-label="Email">
                 <Mail className="w-5 h-5 md:w-6 md:h-6 hover:text-green-400 cursor-pointer transition-colors" />
               </a>
@@ -45,10 +47,7 @@ export default function Footer() {
                 rel="noopener noreferrer"
                 aria-label="YouTube"
               >
-                <HugeiconsIcon
-                  icon={TelegramIcon}
-                  className="w-5 h-5 md:w-6 md:h-6 hover:text-blue-800 cursor-pointer transition-colors"
-                />
+                <HugeiconsIcon icon={TelegramIcon} className="w-5 h-5 md:w-6 md:h-6 hover:text-blue-800 cursor-pointer transition-colors"/>
               </a>
             </div>
           </div>

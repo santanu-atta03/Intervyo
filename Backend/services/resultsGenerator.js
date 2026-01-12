@@ -88,7 +88,7 @@ Make it professional, constructive, and actionable. Focus on growth and improvem
             "Content-Type": "application/json",
           },
           timeout: 60000, // optional: to avoid timeout on long prompts
-        },
+        }
       );
 
       const generated = response.data?.[0]?.generated_text || "";
@@ -283,19 +283,19 @@ Make it professional, constructive, and actionable. Focus on growth and improvem
       const percentile = this.calculatePercentile(overallScore);
 
       const correctAnswers = validAnswers.filter(
-        (a) => (a.evaluation?.score || 0) >= 80,
+        (a) => (a.evaluation?.score || 0) >= 80
       ).length;
       const partialAnswers = validAnswers.filter((a) => {
         const score = a.evaluation?.score || 0;
         return score >= 50 && score < 80;
       }).length;
       const incorrectAnswers = validAnswers.filter(
-        (a) => (a.evaluation?.score || 0) < 50,
+        (a) => (a.evaluation?.score || 0) < 50
       ).length;
 
       const totalTime = validAnswers.reduce(
         (sum, a) => sum + (a.timeTaken || 0),
-        0,
+        0
       );
       const avgTimePerQuestion =
         validAnswers.length > 0
@@ -352,7 +352,7 @@ Make it professional, constructive, and actionable. Focus on growth and improvem
         return {
           timestamp: new Date(
             (interview.startTime?.getTime() || Date.now()) +
-              cumulativeTime * 1000,
+              cumulativeTime * 1000
           ),
           event: a.skipped ? "Skipped" : "Answered",
           description:
@@ -411,7 +411,7 @@ Make it professional, constructive, and actionable. Focus on growth and improvem
             clarity: interview.performance?.categoryScores?.communication || 0,
             articulation: Math.max(
               0,
-              (interview.performance?.categoryScores?.communication || 0) - 5,
+              (interview.performance?.categoryScores?.communication || 0) - 5
             ),
             confidence: interview.performance?.categoryScores?.confidence || 0,
           },
@@ -421,11 +421,11 @@ Make it professional, constructive, and actionable. Focus on growth and improvem
               interview.performance?.categoryScores?.problemSolving || 0,
             creativity: Math.min(
               100,
-              (interview.performance?.categoryScores?.problemSolving || 0) + 5,
+              (interview.performance?.categoryScores?.problemSolving || 0) + 5
             ),
             efficiency: Math.max(
               0,
-              (interview.performance?.categoryScores?.problemSolving || 0) - 3,
+              (interview.performance?.categoryScores?.problemSolving || 0) - 3
             ),
           },
         },
