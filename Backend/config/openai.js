@@ -6,9 +6,9 @@ if (process.env.OPENAI_API_KEY) {
   openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
   });
-  console.log("✅ OpenAI API enabled");
+  console.log('✅ OpenAI API enabled');
 } else {
-  console.log("⚠️  OpenAI API disabled (missing API key)");
+  console.log('⚠️  OpenAI API disabled (missing API key)');
 }
 
 export default openai;
@@ -40,9 +40,8 @@ Say: "Good start! Let me hear more about..."
 INTERVIEW FLOW:
 1. Start with a warm greeting and brief introduction
 2. Ask about the candidate's background (if not covered in resume)
-3. Ask ${
-    difficulty === "easy" ? "5-7" : difficulty === "medium" ? "7-10" : "10-12"
-  } technical questions
+3. Ask ${difficulty === "easy" ? "5-7" : difficulty === "medium" ? "7-10" : "10-12"
+    } technical questions
 4. Include 2-3 behavioral questions
 5. For at least 2 questions, ask the candidate to write code
 6. Provide brief, natural feedback after each answer (1-2 sentences max)
@@ -216,9 +215,8 @@ export const generateInterviewQuestions = async (
         },
         {
           role: "user",
-          content: `Generate a list of ${
-            difficulty === "easy" ? 7 : difficulty === "medium" ? 10 : 12
-          } interview questions for a ${role} position. Include a mix of technical, coding, and behavioral questions. 
+          content: `Generate a list of ${difficulty === "easy" ? 7 : difficulty === "medium" ? 10 : 12
+            } interview questions for a ${role} position. Include a mix of technical, coding, and behavioral questions. 
 
 Format as JSON array with structure: 
 [

@@ -1,23 +1,23 @@
 // services/achievementService.js
 
-const API_BASE_URL = "https://intervyo.onrender.com/api";
+const API_BASE_URL = 'https://intervyo.onrender.com/api';
 
 export const achievementService = {
   // Check for new achievements
   checkAchievements: async (token) => {
     try {
       const response = await fetch(`${API_BASE_URL}/achievements/check`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error("Error checking achievements:", error);
+      console.error('Error checking achievements:', error);
       return { success: false, data: { newAchievements: [] } };
     }
   },
@@ -27,14 +27,14 @@ export const achievementService = {
     try {
       const response = await fetch(`${API_BASE_URL}/achievements/all`, {
         headers: {
-          Authorization: `Bearer ${token}`,
-        },
+          'Authorization': `Bearer ${token}`
+        }
       });
 
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error("Error fetching achievements:", error);
+      console.error('Error fetching achievements:', error);
       return { success: false, data: { all: [], grouped: {} } };
     }
   },
@@ -42,21 +42,18 @@ export const achievementService = {
   // Mark achievement as notified
   markAsNotified: async (achievementId, token) => {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/achievements/mark-notified/${achievementId}`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        },
-      );
+      const response = await fetch(`${API_BASE_URL}/achievements/mark-notified/${achievementId}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
 
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error("Error marking achievement as notified:", error);
+      console.error('Error marking achievement as notified:', error);
       return { success: false };
     }
   },
@@ -65,18 +62,18 @@ export const achievementService = {
   initializeAchievements: async (token) => {
     try {
       const response = await fetch(`${API_BASE_URL}/achievements/initialize`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error("Error initializing achievements:", error);
+      console.error('Error initializing achievements:', error);
       return { success: false };
     }
-  },
+  }
 };

@@ -1,53 +1,29 @@
-import React, { useState } from "react";
-import { useSelector } from "react-redux";
-import {
-  Search,
-  BookOpen,
-  Clock,
-  TrendingUp,
-  CheckCircle,
-  Play,
-  ChevronRight,
-  Sparkles,
-  Brain,
-  Target,
-  AlertCircle,
-  ArrowLeft,
-  FileText,
-  Code,
-  HelpCircle,
-  Bookmark,
-  Share2,
-  Download,
-  Eye,
-  BarChart3,
-  MessageSquare,
-  Lightbulb,
-  Lock,
-} from "lucide-react";
-import ModuleContentPage from "./ModuleContentPage";
-import { TopicDetailPage } from "./TopicDetailPage";
+import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
+import { Search, BookOpen, Clock, TrendingUp, CheckCircle, Play, ChevronRight, Sparkles, Brain, Target, AlertCircle, ArrowLeft, FileText, Code, HelpCircle, Bookmark, Share2, Download, Eye, BarChart3, MessageSquare, Lightbulb, Lock } from 'lucide-react';
+import ModuleContentPage from './ModuleContentPage';
+import { TopicDetailPage } from './TopicDetailPage';
 
-const API_BASE_URL = "https://intervyo.onrender.com/api";
+const API_BASE_URL = 'https://intervyo.onrender.com/api';
 
 export default function LearningHub() {
   const { token } = useSelector((state) => state.auth);
-  const [currentView, setCurrentView] = useState("hub"); // 'hub', 'topic', 'module'
+  const [currentView, setCurrentView] = useState('hub'); // 'hub', 'topic', 'module'
   const [selectedTopicId, setSelectedTopicId] = useState(null);
   const [selectedModuleId, setSelectedModuleId] = useState(null);
   const [isEnrolled, setIsEnrolled] = useState(false);
-
+  
   const [topics, setTopics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState("all");
-  const [selectedDomain, setSelectedDomain] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState('all');
+  const [selectedDomain, setSelectedDomain] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [stats, setStats] = useState({
     enrolledCount: 0,
     completedCount: 0,
     inProgressCount: 0,
-    totalTimeSpent: 0,
+    totalTimeSpent: 0
   });
 
   // Topic Detail State
@@ -57,40 +33,40 @@ export default function LearningHub() {
   // Module Content State
   const [module, setModule] = useState(null);
   const [showNotes, setShowNotes] = useState(false);
-  const [note, setNote] = useState("");
+  const [note, setNote] = useState('');
   const [completing, setCompleting] = useState(false);
   const [startTime] = useState(Date.now());
 
   const domains = [
-    { name: "All Topics", value: "all", icon: "🌐" },
-    { name: "Frontend", value: "Frontend", icon: "⚛️" },
-    { name: "Backend", value: "Backend", icon: "🔧" },
-    { name: "Fullstack", value: "Fullstack", icon: "🌟" },
-    { name: "System Design", value: "System Design", icon: "🏗️" },
-    { name: "Data Science", value: "Data Science", icon: "📊" },
-    { name: "DevOps", value: "DevOps", icon: "🚀" },
-    { name: "Mobile", value: "Mobile", icon: "📱" },
-    { name: "ML", value: "ML", icon: "🤖" },
+    { name: 'All Topics', value: 'all', icon: '🌐' },
+    { name: 'Frontend', value: 'Frontend', icon: '⚛️' },
+    { name: 'Backend', value: 'Backend', icon: '🔧' },
+    { name: 'Fullstack', value: 'Fullstack', icon: '🌟' },
+    { name: 'System Design', value: 'System Design', icon: '🏗️' },
+    { name: 'Data Science', value: 'Data Science', icon: '📊' },
+    { name: 'DevOps', value: 'DevOps', icon: '🚀' },
+    { name: 'Mobile', value: 'Mobile', icon: '📱' },
+    { name: 'ML', value: 'ML', icon: '🤖' }
   ];
 
   // ==========================================
   // FETCH FUNCTIONS
   // ==========================================
   React.useEffect(() => {
-    if (currentView === "hub") {
+    if (currentView === 'hub') {
       fetchTopics();
       fetchStats();
     }
   }, [currentView, selectedDomain, activeTab, searchQuery]);
 
   React.useEffect(() => {
-    if (currentView === "topic" && selectedTopicId) {
+    if (currentView === 'topic' && selectedTopicId) {
       fetchTopicData();
     }
   }, [currentView, selectedTopicId]);
 
   React.useEffect(() => {
-    if (currentView === "module" && selectedModuleId) {
+    if (currentView === 'module' && selectedModuleId) {
       fetchModuleData();
     }
   }, [currentView, selectedModuleId]);
@@ -98,29 +74,26 @@ export default function LearningHub() {
   const fetchTopics = async () => {
     setLoading(true);
     setError(null);
-
+    
     try {
       const params = new URLSearchParams();
-      if (selectedDomain !== "all") params.append("domain", selectedDomain);
-      if (searchQuery) params.append("search", searchQuery);
+      if (selectedDomain !== 'all') params.append('domain', selectedDomain);
+      if (searchQuery) params.append('search', searchQuery);
 
-      const response = await fetch(
-        `${API_BASE_URL}/learning-hub/topics?${params}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
+      const response = await fetch(`${API_BASE_URL}/learning-hub/topics?${params}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
 
-      if (!response.ok) throw new Error("Failed to fetch topics");
+      if (!response.ok) throw new Error('Failed to fetch topics');
       const data = await response.json();
-
+      
       let filteredTopics = data.data || [];
-      if (activeTab === "enrolled") {
-        filteredTopics = filteredTopics.filter((t) => t.isEnrolled);
+      if (activeTab === 'enrolled') {
+        filteredTopics = filteredTopics.filter(t => t.isEnrolled);
       }
       setTopics(filteredTopics);
     } catch (err) {
-      console.error("Error fetching topics:", err);
+      console.error('Error fetching topics:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -130,45 +103,37 @@ export default function LearningHub() {
   const fetchStats = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/learning-hub/stats`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       if (response.ok) {
         const data = await response.json();
         setStats(data.data);
       }
     } catch (err) {
-      console.error("Error fetching stats:", err);
+      console.error('Error fetching stats:', err);
     }
   };
 
   const fetchTopicData = async () => {
     setLoading(true);
     setError(null);
-
+    
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/learning-hub/topics/${selectedTopicId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
+      const response = await fetch(`${API_BASE_URL}/learning-hub/topics/${selectedTopicId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
 
-      if (!response.ok) throw new Error("Failed to fetch topic");
+      if (!response.ok) throw new Error('Failed to fetch topic');
       const data = await response.json();
       setIsEnrolled(data.data.isEnrolled);
       setTopic(data.data.topic);
       setModules(data.data.modules || []);
-
-      if (
-        data.data.isEnrolled &&
-        (!data.data.modules || data.data.modules.length === 0)
-      ) {
-        setError(
-          "AI is generating your course content. Please refresh in a moment...",
-        );
+      
+      if (data.data.isEnrolled && (!data.data.modules || data.data.modules.length === 0)) {
+        setError('AI is generating your course content. Please refresh in a moment...');
       }
     } catch (err) {
-      console.error("Error fetching topic:", err);
+      console.error('Error fetching topic:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -178,20 +143,17 @@ export default function LearningHub() {
   const fetchModuleData = async () => {
     setLoading(true);
     setError(null);
-
+    
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/learning-hub/modules/${selectedModuleId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
+      const response = await fetch(`${API_BASE_URL}/learning-hub/modules/${selectedModuleId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
 
-      if (!response.ok) throw new Error("Failed to fetch module");
+      if (!response.ok) throw new Error('Failed to fetch module');
       const data = await response.json();
       setModule(data.data);
     } catch (err) {
-      console.error("Error fetching module:", err);
+      console.error('Error fetching module:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -203,16 +165,13 @@ export default function LearningHub() {
   // ==========================================
   const handleEnroll = async (topicId) => {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/learning-hub/topics/${topicId}/enroll`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        },
-      );
+      const response = await fetch(`${API_BASE_URL}/learning-hub/topics/${topicId}/enroll`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
 
       if (response.ok) {
         const data = await response.json();
@@ -221,40 +180,40 @@ export default function LearningHub() {
         fetchStats();
       } else {
         const error = await response.json();
-        alert(error.message || "Failed to enroll");
+        alert(error.message || 'Failed to enroll');
       }
     } catch (err) {
-      console.error("Error enrolling:", err);
-      alert("Failed to enroll. Please try again.");
+      console.error('Error enrolling:', err);
+      alert('Failed to enroll. Please try again.');
     }
   };
 
   const handleTopicSelect = (topicId) => {
     setSelectedTopicId(topicId);
-    setCurrentView("topic");
+    setCurrentView('topic');
     window.scrollTo(0, 0);
   };
 
   const handleModuleSelect = (moduleId) => {
     setSelectedModuleId(moduleId);
-    setCurrentView("module");
+    setCurrentView('module');
     window.scrollTo(0, 0);
   };
 
   const handleBackToHub = () => {
-    setCurrentView("hub");
+    setCurrentView('hub');
     setSelectedTopicId(null);
     setSelectedModuleId(null);
     window.scrollTo(0, 0);
   };
 
   const handleBackToTopic = () => {
-    setCurrentView("topic");
+    setCurrentView('topic');
     setSelectedModuleId(null);
     window.scrollTo(0, 0);
   };
 
-  const handleNextModule = (moduleId) => {
+   const handleNextModule = (moduleId) => {
     setSelectedModuleId(moduleId);
     window.scrollTo(0, 0);
   };
@@ -269,17 +228,14 @@ export default function LearningHub() {
     const timeSpent = Math.floor((Date.now() - startTime) / 60000);
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/learning-hub/modules/${selectedModuleId}/complete`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ timeSpent: Math.max(timeSpent, 1) }),
+      const response = await fetch(`${API_BASE_URL}/learning-hub/modules/${selectedModuleId}/complete`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         },
-      );
+        body: JSON.stringify({ timeSpent: Math.max(timeSpent, 1) })
+      });
 
       if (response.ok) {
         const data = await response.json();
@@ -287,25 +243,26 @@ export default function LearningHub() {
         await fetchModuleData();
       }
     } catch (err) {
-      console.error("Error marking complete:", err);
+      console.error('Error marking complete:', err);
     } finally {
       setCompleting(false);
     }
   };
 
   const getDifficultyColor = (difficulty) => {
-    if (difficulty === "Beginner")
-      return "bg-green-500/20 text-green-400 border-green-500/30";
-    if (difficulty === "Intermediate")
-      return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
-    return "bg-red-500/20 text-red-400 border-red-500/30";
+    if (difficulty === 'Beginner') return 'bg-green-500/20 text-green-400 border-green-500/30';
+    if (difficulty === 'Intermediate') return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
+    return 'bg-red-500/20 text-red-400 border-red-500/30';
   };
 
   const getStatusColor = (status) => {
-    if (status === "completed") return "bg-emerald-500/20 text-emerald-400";
-    if (status === "in_progress") return "bg-blue-500/20 text-blue-400";
-    return "bg-gray-500/20 text-gray-400";
+    if (status === 'completed') return 'bg-emerald-500/20 text-emerald-400';
+    if (status === 'in_progress') return 'bg-blue-500/20 text-blue-400';
+    return 'bg-gray-500/20 text-gray-400';
   };
+
+
+  
 
   // if (currentView === 'module' && module) {
   //   const content = module.content?.content || module.content || '';
@@ -365,7 +322,7 @@ export default function LearningHub() {
   //   );
   // }
 
-  if (currentView === "module" && selectedModuleId) {
+  if (currentView === 'module' && selectedModuleId) {
     return (
       <ModuleContentPage
         moduleId={selectedModuleId}
@@ -376,6 +333,8 @@ export default function LearningHub() {
       />
     );
   }
+
+
 
   // if (currentView === 'topic' && topic) {
   //   const userProgress = topic.userProgress;
@@ -482,7 +441,7 @@ export default function LearningHub() {
   //   );
   // }
 
-  if (currentView === "topic" && selectedTopicId) {
+  if (currentView === 'topic' && selectedTopicId) {
     return (
       <TopicDetailPage
         topicId={selectedTopicId}
@@ -492,6 +451,7 @@ export default function LearningHub() {
       />
     );
   }
+
 
   if (loading) {
     return (
@@ -514,9 +474,7 @@ export default function LearningHub() {
             </div>
             <div>
               <h1 className="text-4xl font-bold text-white">Learning Hub</h1>
-              <p className="text-gray-400">
-                Expand your skills with AI-powered courses
-              </p>
+              <p className="text-gray-400">Expand your skills with AI-powered courses</p>
             </div>
           </div>
 
@@ -529,30 +487,22 @@ export default function LearningHub() {
           <div className="grid grid-cols-4 gap-4 mb-6">
             <div className="bg-gray-800/50 rounded-xl p-5 border border-gray-700/50">
               <Brain className="w-8 h-8 text-purple-400 mb-2" />
-              <div className="text-2xl font-bold text-white">
-                {stats.enrolledCount}
-              </div>
+              <div className="text-2xl font-bold text-white">{stats.enrolledCount}</div>
               <p className="text-sm text-gray-400">Enrolled</p>
             </div>
             <div className="bg-gray-800/50 rounded-xl p-5 border border-gray-700/50">
               <CheckCircle className="w-8 h-8 text-emerald-400 mb-2" />
-              <div className="text-2xl font-bold text-white">
-                {stats.completedCount}
-              </div>
+              <div className="text-2xl font-bold text-white">{stats.completedCount}</div>
               <p className="text-sm text-gray-400">Completed</p>
             </div>
             <div className="bg-gray-800/50 rounded-xl p-5 border border-gray-700/50">
               <TrendingUp className="w-8 h-8 text-blue-400 mb-2" />
-              <div className="text-2xl font-bold text-white">
-                {stats.inProgressCount}
-              </div>
+              <div className="text-2xl font-bold text-white">{stats.inProgressCount}</div>
               <p className="text-sm text-gray-400">In Progress</p>
             </div>
             <div className="bg-gray-800/50 rounded-xl p-5 border border-gray-700/50">
               <Clock className="w-8 h-8 text-orange-400 mb-2" />
-              <div className="text-2xl font-bold text-white">
-                {Math.floor(stats.totalTimeSpent / 60)}h
-              </div>
+              <div className="text-2xl font-bold text-white">{Math.floor(stats.totalTimeSpent / 60)}h</div>
               <p className="text-sm text-gray-400">Time Invested</p>
             </div>
           </div>
@@ -569,14 +519,14 @@ export default function LearningHub() {
               />
             </div>
             <button
-              onClick={() => setActiveTab("all")}
-              className={`px-6 py-3 rounded-xl font-semibold ${activeTab === "all" ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white" : "bg-gray-800/50 text-gray-400"}`}
+              onClick={() => setActiveTab('all')}
+              className={`px-6 py-3 rounded-xl font-semibold ${activeTab === 'all' ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white' : 'bg-gray-800/50 text-gray-400'}`}
             >
               All Topics
             </button>
             <button
-              onClick={() => setActiveTab("enrolled")}
-              className={`px-6 py-3 rounded-xl font-semibold ${activeTab === "enrolled" ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white" : "bg-gray-800/50 text-gray-400"}`}
+              onClick={() => setActiveTab('enrolled')}
+              className={`px-6 py-3 rounded-xl font-semibold ${activeTab === 'enrolled' ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white' : 'bg-gray-800/50 text-gray-400'}`}
             >
               My Learning
             </button>
@@ -589,8 +539,8 @@ export default function LearningHub() {
                 onClick={() => setSelectedDomain(domain.value)}
                 className={`px-4 py-2 rounded-xl whitespace-nowrap ${
                   selectedDomain === domain.value
-                    ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
-                    : "bg-gray-800/30 text-gray-400"
+                    ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                    : 'bg-gray-800/30 text-gray-400'
                 }`}
               >
                 {domain.icon} {domain.name}
@@ -610,20 +560,14 @@ export default function LearningHub() {
                 <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-3xl">
                   {topic.icon}
                 </div>
-                <span
-                  className={`text-xs px-3 py-1 rounded-full border ${getDifficultyColor(topic.difficulty)}`}
-                >
+                <span className={`text-xs px-3 py-1 rounded-full border ${getDifficultyColor(topic.difficulty)}`}>
                   {topic.difficulty}
                 </span>
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">
-                {topic.title}
-              </h3>
+              <h3 className="text-xl font-bold text-white mb-2">{topic.title}</h3>
               <p className="text-sm text-gray-400 mb-4">{topic.description}</p>
               <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
-                <span>
-                  <Clock className="w-4 h-4 inline" /> {topic.estimatedHours}h
-                </span>
+                <span><Clock className="w-4 h-4 inline" /> {topic.estimatedHours}h</span>
                 <span>{topic.domain}</span>
               </div>
               {topic.isEnrolled ? (
@@ -648,9 +592,7 @@ export default function LearningHub() {
         {topics.length === 0 && (
           <div className="text-center py-16">
             <div className="text-6xl mb-4">📚</div>
-            <h3 className="text-2xl font-bold text-white mb-2">
-              No topics found
-            </h3>
+            <h3 className="text-2xl font-bold text-white mb-2">No topics found</h3>
             <p className="text-gray-400">Try adjusting your filters</p>
           </div>
         )}

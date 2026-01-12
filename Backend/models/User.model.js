@@ -57,7 +57,7 @@ const userSchema = new mongoose.Schema({
   profile: {
     type: mongoose.Schema.Types.ObjectId,
     // required : true,
-    ref: "Profile",
+    ref: 'Profile',
   },
 
   // ========================================
@@ -166,4 +166,4 @@ userSchema.methods.generateAuthToken = function () {
   });
 };
 
-export default mongoose.models.User || mongoose.model("User", userSchema);
+export default mongoose.models.User || mongoose.model('User', userSchema);

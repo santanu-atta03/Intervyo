@@ -5,7 +5,7 @@
 
 import { Module, AIContentCache } from "../models/LearningHub.model.js";
 import OpenAI from "openai";
-import { Topic } from "../models/LearningHub.model.js";
+import { Topic } from '../models/LearningHub.model.js';
 
 let openai = null;
 
@@ -15,12 +15,12 @@ try {
       apiKey: process.env.GROQ_API_KEY,
       baseURL: "https://api.groq.com/openai/v1",
     });
-    console.log("✅ AI Content Generator enabled");
+    console.log('✅ AI Content Generator enabled');
   } else {
-    console.log("⚠️  AI Content Generator disabled (missing GROQ_API_KEY)");
+    console.log('⚠️  AI Content Generator disabled (missing GROQ_API_KEY)');
   }
 } catch (error) {
-  console.log("⚠️  AI Content Generator initialization failed:", error.message);
+  console.log('⚠️  AI Content Generator initialization failed:', error.message);
 }
 
 export { openai };
@@ -286,7 +286,7 @@ Make it practical, industry-relevant, and suitable for ${topic.difficulty.toLowe
         max_tokens: 1000,
       });
 
-      console.log("Message : ", message);
+      console.log("Message : ", message)
       const responseText = message.choices[0].message.content;
 
       // Extract JSON from response
@@ -606,12 +606,10 @@ Return as JSON:
 
     const message = await openai.chat.completions.create({
       model: "llama-3.3-70b-versatile",
-      messages: [
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
+      messages: [{
+        role: 'user',
+        content: prompt
+      }],
       temperature: 0.8,
       max_tokens: 1000,
     });

@@ -348,7 +348,8 @@ InterviewSchema.index({ userId: 1, status: 1 });
 InterviewSchema.index({ createdAt: -1 });
 InterviewSchema.index({ "performance.overallScore": -1 });
 
-const Interview =
-  mongoose.models.Interview || mongoose.model("Interview", InterviewSchema);
+const Interview = mongoose.models.Interview || mongoose.model("Interview", InterviewSchema);
 
 export default Interview;
+
+

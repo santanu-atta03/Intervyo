@@ -1,6 +1,6 @@
 // slices/resultsSlice.js
 
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   currentResults: null,
@@ -9,7 +9,7 @@ const initialState = {
 };
 
 const resultsSlice = createSlice({
-  name: "results",
+  name: 'results',
   initialState,
   reducers: {
     setResults(state, action) {
@@ -28,6 +28,5 @@ const resultsSlice = createSlice({
   },
 });
 
-export const { setResults, clearResults, setLoading, setError } =
-  resultsSlice.actions;
+export const { setResults, clearResults, setLoading, setError } = resultsSlice.actions;
 export default resultsSlice.reducer;

@@ -90,7 +90,7 @@ const interviewSlice = createSlice({
             ? Math.round(
                 (action.payload.performance.questionsAnswered /
                   action.payload.performance.totalQuestions) *
-                  100,
+                  100
               )
             : 0,
         };
@@ -107,7 +107,7 @@ const interviewSlice = createSlice({
     },
     updateAnswer(state, action) {
       const index = state.answers.findIndex(
-        (a) => a.questionId === action.payload.questionId,
+        (a) => a.questionId === action.payload.questionId
       );
       if (index !== -1) {
         state.answers[index] = { ...state.answers[index], ...action.payload };

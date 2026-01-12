@@ -51,18 +51,18 @@ const otpEmailTemplate = (otp) => {
   `;
 };
 
-// Send verification email before saving
-otpSchema.post("save", async function (doc) {
+// Send verification email after saving
+otpSchema.post('save', async function (doc) {
   try {
     await mailSender(
       doc.email,
-      "Email Verification - Intervyo",
-      otpEmailTemplate(doc.otp),
+      'Email Verification - Intervyo',
+      otpEmailTemplate(doc.otp)
     );
-    console.log("✅ OTP email sent successfully to:", doc.email);
+    console.log('✅ OTP email sent successfully to:', doc.email);
   } catch (error) {
-    console.error("❌ Error sending OTP email:", error);
+    console.error('❌ Error sending OTP email:', error);
   }
 });
 
-export default mongoose.model("OTP", otpSchema);
+export default mongoose.model('OTP', otpSchema);

@@ -31,7 +31,7 @@ import {
 
 const LiveMetrics = () => {
   const { interviewData, metrics, progress } = useSelector(
-    (state) => state.interview,
+    (state) => state.interview
   );
   const {
     transcript,
@@ -122,7 +122,7 @@ const LiveMetrics = () => {
   useEffect(() => {
     if (!browserSupportsSpeechRecognition) {
       toast.error(
-        "Browser does not support speech recognition. Please use Chrome.",
+        "Browser does not support speech recognition. Please use Chrome."
       );
     }
   }, [browserSupportsSpeechRecognition]);
