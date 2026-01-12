@@ -1,12 +1,12 @@
-import Interview from '../models/Interview.js';
-import InterviewSession from '../models/InterviewSession.js';
-import User from '../models/User.model.js';
+import Interview from "../models/Interview.js";
+import InterviewSession from "../models/InterviewSession.js";
+import User from "../models/User.model.js";
 import {
   generateInterviewQuestions,
   evaluateAnswer,
   generateNextQuestion,
-  generateOverallFeedback
-} from '../config/openai.js';
+  generateOverallFeedback,
+} from "../config/openai.js";
 
 // @desc    Generate initial questions
 // @route   POST /api/ai/generate-questions
@@ -19,26 +19,26 @@ export const generateQuestions = async (req, res) => {
     if (!interview) {
       return res.status(404).json({
         success: false,
-        message: 'Interview not found'
+        message: "Interview not found",
       });
     }
 
     const questions = await generateInterviewQuestions(
       interview.role,
       interview.difficulty,
-      interview.resumeText
+      interview.resumeText,
     );
 
     res.json({
       success: true,
-      data: questions
+      data: questions,
     });
   } catch (error) {
-    console.error('Generate questions error:', error);
+    console.error("Generate questions error:", error);
     res.status(500).json({
       success: false,
-      message: 'Error generating questions',
-      error: error.message
+      message: "Error generating questions",
+      error: error.message,
     });
   }
 };
@@ -48,22 +48,29 @@ export const generateQuestions = async (req, res) => {
 // @access  Private
 export const evaluateCandidateAnswer = async (req, res) => {
   try {
-    const { sessionId, question, answer, codeSubmitted, category, questionNumber } = req.body;
+    const {
+      sessionId,
+      question,
+      answer,
+      codeSubmitted,
+      category,
+      questionNumber,
+    } = req.body;
 
     if (!sessionId || !question || !answer) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide sessionId, question, and answer'
+        message: "Please provide sessionId, question, and answer",
       });
     }
 
-    const session = await InterviewSession.findById(sessionId)
-      .populate('interviewId');
+    const session =
+      await InterviewSession.findById(sessionId).populate("interviewId");
 
     if (!session) {
       return res.status(404).json({
         success: false,
-        message: 'Session not found'
+        message: "Session not found",
       });
     }
 
@@ -90,12 +97,12 @@ export const evaluateCandidateAnswer = async (req, res) => {
       userAnswer: answer,
       score: evaluation.score, // 0-10
       feedback: evaluation.review,
-      category: category || 'general',
+      category: category || "general",
       difficulty: session.interviewId.difficulty,
       strengths: evaluation.strength ? [evaluation.strength] : [],
       improvements: evaluation.improvement ? [evaluation.improvement] : [],
       codeSubmitted: codeSubmitted || null,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     // Add to session's question evaluations
@@ -103,22 +110,23 @@ export const evaluateCandidateAnswer = async (req, res) => {
 
     // Add to conversation history
     session.conversation.push({
-      role: 'user',
+      role: "user",
       content: answer,
-      type: 'answer',
-      timestamp: new Date()
+      type: "answer",
+      timestamp: new Date(),
     });
 
     session.conversation.push({
-      role: 'assistant',
+      role: "assistant",
       content: evaluation.review,
-      type: 'feedback',
-      timestamp: new Date()
+      type: "feedback",
+      timestamp: new Date(),
     });
 
     // Update stats
     session.stats.questionsAnswered = session.questionEvaluations.length;
-    session.stats.totalQuestions = session.stats.totalQuestions || session.questionEvaluations.length;
+    session.stats.totalQuestions =
+      session.stats.totalQuestions || session.questionEvaluations.length;
 
     await session.save();
 
@@ -129,10 +137,10 @@ export const evaluateCandidateAnswer = async (req, res) => {
           review: evaluation.review,
           score: evaluation.score,
           strength: evaluation.strength,
-          improvement: evaluation.improvement
+          improvement: evaluation.improvement,
         },
-        questionEvaluation: questionEval
-      }
+        questionEvaluation: questionEval,
+      },
     });
   } catch (error) {
     console.error('Evaluate answer error:', error);
@@ -149,8 +157,8 @@ export const evaluateCandidateAnswer = async (req, res) => {
 
     res.status(500).json({
       success: false,
-      message: 'Error evaluating answer',
-      error: error.message
+      message: "Error evaluating answer",
+      error: error.message,
     });
   }
 };
@@ -162,13 +170,13 @@ export const getNextQuestion = async (req, res) => {
   try {
     const { sessionId } = req.body;
 
-    const session = await InterviewSession.findById(sessionId)
-      .populate('interviewId');
+    const session =
+      await InterviewSession.findById(sessionId).populate("interviewId");
 
     if (!session) {
       return res.status(404).json({
         success: false,
-        message: 'Session not found'
+        message: "Session not found",
       });
     }
 
@@ -176,23 +184,22 @@ export const getNextQuestion = async (req, res) => {
     const nextQuestion = await generateNextQuestion(
       session.conversation,
       session.interviewId.role,
-      session.interviewId.difficulty
+      session.interviewId.difficulty,
     );
 
     res.json({
       success: true,
-      data: nextQuestion
+      data: nextQuestion,
     });
   } catch (error) {
-    console.error('Get next question error:', error);
+    console.error("Get next question error:", error);
     res.status(500).json({
       success: false,
-      message: 'Error generating next question',
-      error: error.message
+      message: "Error generating next question",
+      error: error.message,
     });
   }
 };
-
 
 export const updateUserStreakAndStats = async (userId) => {
   try {
@@ -213,7 +220,7 @@ export const updateUserStreakAndStats = async (userId) => {
     // Check if this is a new day
     if (!lastActivity || lastActivity.getTime() !== today.getTime()) {
       // Calculate days difference
-      const daysDiff = lastActivity 
+      const daysDiff = lastActivity
         ? Math.floor((today - lastActivity) / (1000 * 60 * 60 * 24))
         : 0;
 
@@ -241,7 +248,7 @@ export const updateUserStreakAndStats = async (userId) => {
 
     return user.stats;
   } catch (error) {
-    console.error('Error updating streak:', error);
+    console.error("Error updating streak:", error);
     return null;
   }
 };
@@ -389,9 +396,9 @@ const generateEnhancedFeedback = async (session) => {
 
     // Calculate overall score (0-100)
     const overallScore = Math.round(
-      (technicalScore * 10 * 0.4) + 
-      (communicationScore * 10 * 0.3) + 
-      (problemSolvingScore * 10 * 0.3)
+      technicalScore * 10 * 0.4 +
+        communicationScore * 10 * 0.3 +
+        problemSolvingScore * 10 * 0.3,
     );
 
     // Generate strengths (from high-scoring questions)
@@ -402,13 +409,13 @@ const generateEnhancedFeedback = async (session) => {
 
     // Generate key highlights
     const keyHighlights = evaluations
-      .filter(e => e.score >= 8)
+      .filter((e) => e.score >= 8)
       .slice(0, 3)
       .map(e => `Excellent response to: "${e.question.substring(0, 50)}..."`);
 
     // Generate areas of concern
     const areasOfConcern = evaluations
-      .filter(e => e.score < 5)
+      .filter((e) => e.score < 5)
       .slice(0, 3)
       .map(e => `Needs improvement: "${e.question.substring(0, 50)}..."`);
 
@@ -423,17 +430,18 @@ const generateEnhancedFeedback = async (session) => {
       summary,
       strengths: strengths.slice(0, 5),
       improvements: improvements.slice(0, 5),
-      keyHighlights: keyHighlights.length > 0 ? keyHighlights : ['Completed the interview'],
+      keyHighlights:
+        keyHighlights.length > 0 ? keyHighlights : ["Completed the interview"],
       areasOfConcern: areasOfConcern.length > 0 ? areasOfConcern : [],
       technicalAnalysis,
       behavioralAnalysis,
       overallScore,
       technicalScore,
       communicationScore,
-      problemSolvingScore
+      problemSolvingScore,
     };
   } catch (error) {
-    console.error('Error generating feedback:', error);
+    console.error("Error generating feedback:", error);
     return getDefaultFeedback();
   }
 };
@@ -441,25 +449,25 @@ const generateEnhancedFeedback = async (session) => {
 const calculateAverageScore = (questions) => {
   if (questions.length === 0) return 5;
   return Math.round(
-    questions.reduce((sum, q) => sum + (q.score || 0), 0) / questions.length
+    questions.reduce((sum, q) => sum + (q.score || 0), 0) / questions.length,
   );
 };
 
 const generateStrengths = (evaluations) => {
-  const highScoring = evaluations.filter(e => e.score >= 7);
+  const highScoring = evaluations.filter((e) => e.score >= 7);
   const strengths = [];
 
   // Group by category
-  const categories = ['technical', 'behavioral', 'coding', 'problem-solving'];
-  categories.forEach(cat => {
-    const catQuestions = highScoring.filter(e => e.category === cat);
+  const categories = ["technical", "behavioral", "coding", "problem-solving"];
+  categories.forEach((cat) => {
+    const catQuestions = highScoring.filter((e) => e.category === cat);
     if (catQuestions.length > 0) {
       strengths.push(`Strong performance in ${cat} questions`);
     }
   });
 
   // Add specific strengths from evaluations
-  highScoring.forEach(e => {
+  highScoring.forEach((e) => {
     if (e.strengths && e.strengths.length > 0) {
       strengths.push(...e.strengths);
     }
@@ -469,20 +477,20 @@ const generateStrengths = (evaluations) => {
 };
 
 const generateImprovements = (evaluations) => {
-  const lowScoring = evaluations.filter(e => e.score < 6);
+  const lowScoring = evaluations.filter((e) => e.score < 6);
   const improvements = [];
 
   // Group by category
-  const categories = ['technical', 'behavioral', 'coding', 'problem-solving'];
-  categories.forEach(cat => {
-    const catQuestions = lowScoring.filter(e => e.category === cat);
+  const categories = ["technical", "behavioral", "coding", "problem-solving"];
+  categories.forEach((cat) => {
+    const catQuestions = lowScoring.filter((e) => e.category === cat);
     if (catQuestions.length > 0) {
       improvements.push(`Focus on improving ${cat} skills`);
     }
   });
 
   // Add specific improvements from evaluations
-  lowScoring.forEach(e => {
+  lowScoring.forEach((e) => {
     if (e.improvements && e.improvements.length > 0) {
       improvements.push(...e.improvements);
     }
@@ -495,18 +503,22 @@ const generateTechnicalAnalysis = (technicalQuestions) => {
   const avgScore = calculateAverageScore(technicalQuestions);
 
   return {
-    coreConcepts: avgScore >= 7 
-      ? "Demonstrates solid understanding of core technical concepts"
-      : "Needs to strengthen fundamental technical knowledge",
-    problemSolvingApproach: avgScore >= 7
-      ? "Shows logical and structured approach to problem-solving"
-      : "Consider practicing more structured problem-solving techniques",
-    codeQuality: avgScore >= 7
-      ? "Writes clean and maintainable code"
-      : "Focus on code organization and best practices",
-    bestPractices: avgScore >= 7
-      ? "Follows industry best practices"
-      : "Study common design patterns and best practices"
+    coreConcepts:
+      avgScore >= 7
+        ? "Demonstrates solid understanding of core technical concepts"
+        : "Needs to strengthen fundamental technical knowledge",
+    problemSolvingApproach:
+      avgScore >= 7
+        ? "Shows logical and structured approach to problem-solving"
+        : "Consider practicing more structured problem-solving techniques",
+    codeQuality:
+      avgScore >= 7
+        ? "Writes clean and maintainable code"
+        : "Focus on code organization and best practices",
+    bestPractices:
+      avgScore >= 7
+        ? "Follows industry best practices"
+        : "Study common design patterns and best practices",
   };
 };
 
@@ -514,18 +526,22 @@ const generateBehavioralAnalysis = (behavioralQuestions) => {
   const avgScore = calculateAverageScore(behavioralQuestions);
 
   return {
-    communication: avgScore >= 7
-      ? "Communicates ideas clearly and effectively"
-      : "Work on articulating thoughts more clearly",
-    confidence: avgScore >= 7
-      ? "Demonstrates good confidence in responses"
-      : "Build confidence through more practice",
-    professionalism: avgScore >= 7
-      ? "Maintains professional demeanor throughout"
-      : "Focus on professional communication skills",
-    adaptability: avgScore >= 7
-      ? "Shows flexibility in approaching different scenarios"
-      : "Practice adapting to different question types"
+    communication:
+      avgScore >= 7
+        ? "Communicates ideas clearly and effectively"
+        : "Work on articulating thoughts more clearly",
+    confidence:
+      avgScore >= 7
+        ? "Demonstrates good confidence in responses"
+        : "Build confidence through more practice",
+    professionalism:
+      avgScore >= 7
+        ? "Maintains professional demeanor throughout"
+        : "Focus on professional communication skills",
+    adaptability:
+      avgScore >= 7
+        ? "Shows flexibility in approaching different scenarios"
+        : "Practice adapting to different question types",
   };
 };
 
@@ -533,40 +549,46 @@ const generateSummary = (overall, technical, communication, problemSolving) => {
   if (overall >= 80) {
     return `Excellent performance! You scored ${overall}/100, demonstrating strong capabilities across all areas. Your technical skills (${technical}/10) and problem-solving abilities (${problemSolving}/10) are particularly impressive.`;
   } else if (overall >= 60) {
-    return `Good job! You scored ${overall}/100, showing solid understanding in most areas. Focus on improving ${technical < 6 ? 'technical concepts' : communication < 6 ? 'communication clarity' : 'problem-solving approaches'} to reach the next level.`;
+    return `Good job! You scored ${overall}/100, showing solid understanding in most areas. Focus on improving ${technical < 6 ? "technical concepts" : communication < 6 ? "communication clarity" : "problem-solving approaches"} to reach the next level.`;
   } else {
-    return `Keep practicing! You scored ${overall}/100. Review the feedback carefully and work on ${technical < 6 ? 'technical fundamentals' : communication < 6 ? 'communication skills' : 'problem-solving strategies'}. Every interview is a learning opportunity!`;
+    return `Keep practicing! You scored ${overall}/100. Review the feedback carefully and work on ${technical < 6 ? "technical fundamentals" : communication < 6 ? "communication skills" : "problem-solving strategies"}. Every interview is a learning opportunity!`;
   }
 };
 
 const getDefaultFeedback = () => ({
   summary: "Interview completed. Continue practicing to improve your skills!",
   strengths: ["Completed the interview", "Showed determination"],
-  improvements: ["Practice more technical questions", "Work on communication clarity"],
+  improvements: [
+    "Practice more technical questions",
+    "Work on communication clarity",
+  ],
   keyHighlights: ["Participated actively"],
   areasOfConcern: [],
   technicalAnalysis: {
     coreConcepts: "Not enough data to analyze",
     problemSolvingApproach: "Not enough data to analyze",
     codeQuality: "Not enough data to analyze",
-    bestPractices: "Not enough data to analyze"
+    bestPractices: "Not enough data to analyze",
   },
   behavioralAnalysis: {
     communication: "Not enough data to analyze",
     confidence: "Not enough data to analyze",
     professionalism: "Not enough data to analyze",
-    adaptability: "Not enough data to analyze"
+    adaptability: "Not enough data to analyze",
   },
   overallScore: 50,
   technicalScore: 5,
   communicationScore: 5,
-  problemSolvingScore: 5
+  problemSolvingScore: 5,
 });
 
 // Certificate generation helper
 const generateCertificate = (session, feedback) => {
   const certificateId = `CERT-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
-  const verificationCode = Math.random().toString(36).substr(2, 12).toUpperCase();
+  const verificationCode = Math.random()
+    .toString(36)
+    .substr(2, 12)
+    .toUpperCase();
   const issuedAt = new Date();
   const validUntil = new Date();
   validUntil.setFullYear(validUntil.getFullYear() + 1); // Valid for 1 year
@@ -577,10 +599,17 @@ const generateCertificate = (session, feedback) => {
     validUntil,
     verificationCode,
     shareableLink: `${process.env.FRONTEND_URL}/certificates/${certificateId}`,
-    userName: session.userId.name || 'Candidate',
+    userName: session.userId.name || "Candidate",
     interviewType: session.interviewId.difficulty.toUpperCase(),
     domain: session.interviewId.role,
     score: feedback.overallScore,
-    grade: feedback.overallScore >= 90 ? 'A' : feedback.overallScore >= 80 ? 'B' : feedback.overallScore >= 70 ? 'C' : 'D'
+    grade:
+      feedback.overallScore >= 90
+        ? "A"
+        : feedback.overallScore >= 80
+          ? "B"
+          : feedback.overallScore >= 70
+            ? "C"
+            : "D",
   };
 };

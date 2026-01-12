@@ -3,11 +3,11 @@ import mongoose from 'mongoose';
 const companySchema = new mongoose.Schema({
   name: String,
   logo: String,
-  customQuestions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Question' }],
+  customQuestions: [{ type: mongoose.Schema.Types.ObjectId, ref: "Question" }],
   interviewProcess: {
     rounds: [String],
     avgDuration: Number,
-    tips: [String]
+    tips: [String],
   },
   subscriptionTier: String, // basic, premium
 

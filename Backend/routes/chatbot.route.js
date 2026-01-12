@@ -1,5 +1,5 @@
 // backend/routes/chatbot.routes.js
-import express from 'express';
+import express from "express";
 import {
   createConversation,
   getUserConversations,
@@ -7,9 +7,9 @@ import {
   sendMessage,
   deleteConversation,
   updateConversation,
-  clearMessages
-} from '../controllers/Chatbot.controller.js';
-import { authenticate } from '../middlewares/auth.js';
+  clearMessages,
+} from "../controllers/Chatbot.controller.js";
+import { authenticate } from "../middlewares/auth.js";
 
 const router = express.Router();
 
@@ -17,14 +17,14 @@ const router = express.Router();
 router.use(authenticate);
 
 // Conversation management
-router.post('/conversations', createConversation);
-router.get('/conversations', getUserConversations);
-router.get('/conversations/:sessionId', getConversation);
-router.patch('/conversations/:sessionId', updateConversation);
-router.delete('/conversations/:sessionId', deleteConversation);
-router.delete('/conversations/:sessionId/messages', clearMessages);
+router.post("/conversations", createConversation);
+router.get("/conversations", getUserConversations);
+router.get("/conversations/:sessionId", getConversation);
+router.patch("/conversations/:sessionId", updateConversation);
+router.delete("/conversations/:sessionId", deleteConversation);
+router.delete("/conversations/:sessionId/messages", clearMessages);
 
 // Message handling
-router.post('/conversations/:sessionId/messages', sendMessage);
+router.post("/conversations/:sessionId/messages", sendMessage);
 
 export default router;

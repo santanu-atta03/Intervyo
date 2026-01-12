@@ -1,23 +1,25 @@
-import express from 'express';
-import { authenticate } from '../middlewares/auth.js';
-import User from '../models/User.model.js';
-import Achievement, { predefinedAchievements } from '../models/Achievement.model.js';
+import express from "express";
+import { authenticate } from "../middlewares/auth.js";
+import User from "../models/User.model.js";
+import Achievement, {
+  predefinedAchievements,
+} from "../models/Achievement.model.js";
 
 const router = express.Router();
 
 // ============================================
 // INITIALIZE ACHIEVEMENTS (Run once)
 // ============================================
-router.post('/initialize', authenticate, async (req, res) => {
+router.post("/initialize", authenticate, async (req, res) => {
   try {
     // Check if achievements already exist
     const count = await Achievement.countDocuments();
-    
+
     if (count > 0) {
       return res.json({
         success: true,
-        message: 'Achievements already initialized',
-        count
+        message: "Achievements already initialized",
+        count,
       });
     }
 
@@ -26,15 +28,15 @@ router.post('/initialize', authenticate, async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Achievements initialized successfully',
-      count: achievements.length
+      message: "Achievements initialized successfully",
+      count: achievements.length,
     });
   } catch (error) {
-    console.error('Error initializing achievements:', error);
+    console.error("Error initializing achievements:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to initialize achievements',
-      error: error.message
+      message: "Failed to initialize achievements",
+      error: error.message,
     });
   }
 });
@@ -42,41 +44,44 @@ router.post('/initialize', authenticate, async (req, res) => {
 // ============================================
 // GET ALL ACHIEVEMENTS WITH USER PROGRESS
 // ============================================
-router.get('/all', authenticate, async (req, res) => {
+router.get("/all", authenticate, async (req, res) => {
   try {
     const userId = req.user.id;
 
     // Get all achievements
-    const achievements = await Achievement.find({ isActive: true })
-      .sort({ rarity: 1, xpReward: 1 });
+    const achievements = await Achievement.find({ isActive: true }).sort({
+      rarity: 1,
+      xpReward: 1,
+    });
 
     // Get user's earned achievements
     const user = await User.findById(userId)
-      .select('stats.earnedAchievements')
-      .populate('stats.earnedAchievements.achievementId');
+      .select("stats.earnedAchievements")
+      .populate("stats.earnedAchievements.achievementId");
 
-    const earnedAchievementIds = user?.stats?.earnedAchievements?.map(
-      ea => ea.achievementId._id.toString()
-    ) || [];
+    const earnedAchievementIds =
+      user?.stats?.earnedAchievements?.map((ea) =>
+        ea.achievementId._id.toString(),
+      ) || [];
 
     // Map achievements with earned status
-    const achievementsWithProgress = achievements.map(achievement => {
+    const achievementsWithProgress = achievements.map((achievement) => {
       const earned = earnedAchievementIds.includes(achievement._id.toString());
       const earnedData = user?.stats?.earnedAchievements?.find(
-        ea => ea.achievementId._id.toString() === achievement._id.toString()
+        (ea) => ea.achievementId._id.toString() === achievement._id.toString(),
       );
 
       return {
         ...achievement.toObject(),
         earned,
         earnedAt: earnedData?.earnedAt || null,
-        progress: earned ? 100 : 0 // Can be enhanced with actual progress tracking
+        progress: earned ? 100 : 0, // Can be enhanced with actual progress tracking
       };
     });
 
     // Group by category
     const grouped = achievementsWithProgress.reduce((acc, achievement) => {
-      const category = achievement.category || 'milestone';
+      const category = achievement.category || "milestone";
       if (!acc[category]) {
         acc[category] = [];
       }
@@ -90,15 +95,15 @@ router.get('/all', authenticate, async (req, res) => {
         all: achievementsWithProgress,
         grouped,
         totalAchievements: achievements.length,
-        earnedCount: earnedAchievementIds.length
-      }
+        earnedCount: earnedAchievementIds.length,
+      },
     });
   } catch (error) {
-    console.error('Error fetching achievements:', error);
+    console.error("Error fetching achievements:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch achievements',
-      error: error.message
+      message: "Failed to fetch achievements",
+      error: error.message,
     });
   }
 });
@@ -106,37 +111,38 @@ router.get('/all', authenticate, async (req, res) => {
 // ============================================
 // GET USER'S EARNED ACHIEVEMENTS
 // ============================================
-router.get('/earned', authenticate, async (req, res) => {
+router.get("/earned", authenticate, async (req, res) => {
   try {
     const userId = req.user.id;
 
     const user = await User.findById(userId)
-      .select('stats.earnedAchievements')
-      .populate('stats.earnedAchievements.achievementId');
+      .select("stats.earnedAchievements")
+      .populate("stats.earnedAchievements.achievementId");
 
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'User not found'
+        message: "User not found",
       });
     }
 
-    const earnedAchievements = user.stats.earnedAchievements?.map(ea => ({
-      ...ea.achievementId.toObject(),
-      earnedAt: ea.earnedAt
-    })) || [];
+    const earnedAchievements =
+      user.stats.earnedAchievements?.map((ea) => ({
+        ...ea.achievementId.toObject(),
+        earnedAt: ea.earnedAt,
+      })) || [];
 
     res.json({
       success: true,
       data: earnedAchievements,
-      count: earnedAchievements.length
+      count: earnedAchievements.length,
     });
   } catch (error) {
-    console.error('Error fetching earned achievements:', error);
+    console.error("Error fetching earned achievements:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch earned achievements',
-      error: error.message
+      message: "Failed to fetch earned achievements",
+      error: error.message,
     });
   }
 });
@@ -144,18 +150,18 @@ router.get('/earned', authenticate, async (req, res) => {
 // ============================================
 // CHECK AND AWARD ACHIEVEMENTS
 // ============================================
-router.post('/check', authenticate, async (req, res) => {
+router.post("/check", authenticate, async (req, res) => {
   try {
     const userId = req.user.id;
 
     const user = await User.findById(userId)
-      .select('stats')
-      .populate('stats.earnedAchievements.achievementId');
+      .select("stats")
+      .populate("stats.earnedAchievements.achievementId");
 
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'User not found'
+        message: "User not found",
       });
     }
 
@@ -163,9 +169,10 @@ router.post('/check', authenticate, async (req, res) => {
     const allAchievements = await Achievement.find({ isActive: true });
 
     // Get already earned achievement IDs
-    const earnedIds = user.stats.earnedAchievements?.map(
-      ea => ea.achievementId._id.toString()
-    ) || [];
+    const earnedIds =
+      user.stats.earnedAchievements?.map((ea) =>
+        ea.achievementId._id.toString(),
+      ) || [];
 
     // Check which achievements can be awarded
     const newAchievements = [];
@@ -180,17 +187,20 @@ router.post('/check', authenticate, async (req, res) => {
       let meetsRequirement = false;
 
       switch (achievement.criteria.type) {
-        case 'interviews_completed':
-          meetsRequirement = user.stats.totalInterviews >= achievement.criteria.threshold;
+        case "interviews_completed":
+          meetsRequirement =
+            user.stats.totalInterviews >= achievement.criteria.threshold;
           break;
-        case 'streak':
-          meetsRequirement = user.stats.streak >= achievement.criteria.threshold;
+        case "streak":
+          meetsRequirement =
+            user.stats.streak >= achievement.criteria.threshold;
           break;
-        case 'level':
+        case "level":
           meetsRequirement = user.stats.level >= achievement.criteria.threshold;
           break;
-        case 'xp':
-          meetsRequirement = user.stats.xpPoints >= achievement.criteria.threshold;
+        case "xp":
+          meetsRequirement =
+            user.stats.xpPoints >= achievement.criteria.threshold;
           break;
         // Add more criteria types as needed
       }
@@ -204,7 +214,7 @@ router.post('/check', authenticate, async (req, res) => {
         user.stats.earnedAchievements.push({
           achievementId: achievement._id,
           earnedAt: new Date(),
-          notified: false
+          notified: false,
         });
 
         // Award XP
@@ -212,7 +222,7 @@ router.post('/check', authenticate, async (req, res) => {
 
         newAchievements.push({
           ...achievement.toObject(),
-          earnedAt: new Date()
+          earnedAt: new Date(),
         });
       }
     }
@@ -225,15 +235,15 @@ router.post('/check', authenticate, async (req, res) => {
       success: true,
       data: {
         newAchievements,
-        totalXpEarned: newAchievements.reduce((sum, a) => sum + a.xpReward, 0)
-      }
+        totalXpEarned: newAchievements.reduce((sum, a) => sum + a.xpReward, 0),
+      },
     });
   } catch (error) {
-    console.error('Error checking achievements:', error);
+    console.error("Error checking achievements:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to check achievements',
-      error: error.message
+      message: "Failed to check achievements",
+      error: error.message,
     });
   }
 });
@@ -241,7 +251,7 @@ router.post('/check', authenticate, async (req, res) => {
 // ============================================
 // MARK ACHIEVEMENT AS NOTIFIED
 // ============================================
-router.post('/mark-notified/:achievementId', authenticate, async (req, res) => {
+router.post("/mark-notified/:achievementId", authenticate, async (req, res) => {
   try {
     const userId = req.user.id;
     const { achievementId } = req.params;
@@ -251,12 +261,12 @@ router.post('/mark-notified/:achievementId', authenticate, async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'User not found'
+        message: "User not found",
       });
     }
 
     const achievement = user.stats.earnedAchievements?.find(
-      ea => ea.achievementId.toString() === achievementId
+      (ea) => ea.achievementId.toString() === achievementId,
     );
 
     if (achievement) {
@@ -266,14 +276,14 @@ router.post('/mark-notified/:achievementId', authenticate, async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Achievement marked as notified'
+      message: "Achievement marked as notified",
     });
   } catch (error) {
-    console.error('Error marking achievement as notified:', error);
+    console.error("Error marking achievement as notified:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to mark achievement as notified',
-      error: error.message
+      message: "Failed to mark achievement as notified",
+      error: error.message,
     });
   }
 });
@@ -281,15 +291,17 @@ router.post('/mark-notified/:achievementId', authenticate, async (req, res) => {
 // ============================================
 // GET ACHIEVEMENT STATISTICS
 // ============================================
-router.get('/stats', authenticate, async (req, res) => {
+router.get("/stats", authenticate, async (req, res) => {
   try {
     const userId = req.user.id;
 
     const user = await User.findById(userId)
-      .select('stats.earnedAchievements')
-      .populate('stats.earnedAchievements.achievementId');
+      .select("stats.earnedAchievements")
+      .populate("stats.earnedAchievements.achievementId");
 
-    const totalAchievements = await Achievement.countDocuments({ isActive: true });
+    const totalAchievements = await Achievement.countDocuments({
+      isActive: true,
+    });
     const earnedCount = user?.stats?.earnedAchievements?.length || 0;
 
     // Calculate rarity distribution
@@ -297,10 +309,10 @@ router.get('/stats', authenticate, async (req, res) => {
       common: 0,
       rare: 0,
       epic: 0,
-      legendary: 0
+      legendary: 0,
     };
 
-    user?.stats?.earnedAchievements?.forEach(ea => {
+    user?.stats?.earnedAchievements?.forEach((ea) => {
       const rarity = ea.achievementId.rarity;
       rarityCount[rarity]++;
     });
@@ -310,16 +322,18 @@ router.get('/stats', authenticate, async (req, res) => {
       data: {
         totalAchievements,
         earnedCount,
-        completionPercentage: Math.round((earnedCount / totalAchievements) * 100),
-        rarityCount
-      }
+        completionPercentage: Math.round(
+          (earnedCount / totalAchievements) * 100,
+        ),
+        rarityCount,
+      },
     });
   } catch (error) {
-    console.error('Error fetching achievement stats:', error);
+    console.error("Error fetching achievement stats:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch achievement stats',
-      error: error.message
+      message: "Failed to fetch achievement stats",
+      error: error.message,
     });
   }
 });

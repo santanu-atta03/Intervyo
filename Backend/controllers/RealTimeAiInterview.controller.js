@@ -5,23 +5,26 @@ import groqService from "../services/groqService.js";
 import questionGenerator from "../services/questionGenerator.js";
 
 class RealTimeAiInterviewController {
-  
   // Start conversation with greeting
-async startConversation(req, res) {
-  try {
-    const { interviewId } = req.params;
-    const userId = req.user.id;
+  async startConversation(req, res) {
+    try {
+      const { interviewId } = req.params;
+      const userId = req.user.id;
 
-    const interview = await Interview.findOne({ _id: interviewId, userId });
-    if (!interview) {
-      return res.status(404).json({ success: false, message: 'Interview not found' });
-    }
+      const interview = await Interview.findOne({ _id: interviewId, userId });
+      if (!interview) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Interview not found" });
+      }
 
-    // Generate questions
-    const questions = await questionGenerator.generateQuestions(interview.config);
+      // Generate questions
+      const questions = await questionGenerator.generateQuestions(
+        interview.config,
+      );
 
-    // Generate AI greeting
-    const greetingPrompt = `You are an expert interviewer conducting a ${interview.config.interviewType} interview for ${interview.config.domain} - ${interview.config.subDomain} position at ${interview.config.targetCompany}.
+      // Generate AI greeting
+      const greetingPrompt = `You are an expert interviewer conducting a ${interview.config.interviewType} interview for ${interview.config.domain} - ${interview.config.subDomain} position at ${interview.config.targetCompany}.
 
 Start the interview naturally with:
 1. Warm greeting
@@ -39,58 +42,59 @@ Return ONLY valid JSON:
   "shouldSpeak": true
 }`;
 
-    const greeting = await groqService.generateJSON([
-      { role: 'user', content: greetingPrompt }
-    ]);
+      const greeting = await groqService.generateJSON([
+        { role: "user", content: greetingPrompt },
+      ]);
 
-    const updated = await Interview.findByIdAndUpdate(
-      interviewId,
-      {
-        $set: {
-          rounds: [{
-            roundNumber: 1,
-            roundType: interview.config.interviewType,
-            questions,
-            answers: [],
-            conversationHistory: [{
-              role: 'assistant',
-              content: greeting.message,
-              timestamp: new Date()
-            }]
-          }],
-          status: 'in-progress',
-          startTime: new Date(),
-          'performance.totalQuestions': questions.length
-        }
-      },
-      { new: true } // Return the updated document
-    );
+      const updated = await Interview.findByIdAndUpdate(
+        interviewId,
+        {
+          $set: {
+            rounds: [
+              {
+                roundNumber: 1,
+                roundType: interview.config.interviewType,
+                questions,
+                answers: [],
+                conversationHistory: [
+                  {
+                    role: "assistant",
+                    content: greeting.message,
+                    timestamp: new Date(),
+                  },
+                ],
+              },
+            ],
+            status: "in-progress",
+            startTime: new Date(),
+            "performance.totalQuestions": questions.length,
+          },
+        },
+        { new: true }, // Return the updated document
+      );
 
-    return res.json({
-      success: true,
-      data: {
-        interviewId: updated._id,
-        aiMessage: greeting.message,
-        shouldSpeak: true,
-        interviewStarted: true,
-        totalQuestions: questions.length,
-        currentQuestionIndex: 0,
-        showQuestion: false,
-        config: updated.config
-      }
-    });
-
-  } catch (error) {
-    console.error('Start conversation error:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to start interview',
-      error: error.message
-    });
+      return res.json({
+        success: true,
+        data: {
+          interviewId: updated._id,
+          aiMessage: greeting.message,
+          shouldSpeak: true,
+          interviewStarted: true,
+          totalQuestions: questions.length,
+          currentQuestionIndex: 0,
+          showQuestion: false,
+          config: updated.config,
+        },
+      });
+    } catch (error) {
+      console.error("Start conversation error:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Failed to start interview",
+        error: error.message,
+      });
+    }
   }
-}
-
-
 
   // Ask next question
   async askNextQuestion(req, res) {
@@ -100,7 +104,9 @@ Return ONLY valid JSON:
 
       const interview = await Interview.findOne({ _id: interviewId, userId });
       if (!interview) {
-        return res.status(404).json({ success: false, message: 'Interview not found' });
+        return res
+          .status(404)
+          .json({ success: false, message: "Interview not found" });
       }
 
       const round = interview.rounds[interview.rounds.length - 1];
@@ -108,10 +114,10 @@ Return ONLY valid JSON:
       const currentQuestion = round.questions[currentQuestionIndex];
 
       if (!currentQuestion) {
-        return res.status(404).json({ 
-          success: false, 
-          message: 'No more questions',
-          allQuestionsCompleted: true 
+        return res.status(404).json({
+          success: false,
+          message: "No more questions",
+          allQuestionsCompleted: true,
         });
       }
 
@@ -139,27 +145,25 @@ Return ONLY valid JSON:
   "message": "Your natural question introduction (2-3 sentences)",
   "shouldSpeak": true,
   "questionType": "${currentQuestion.type}",
-  "shouldShowQuestion": ${currentQuestion.type === 'coding' ? 'true' : 'false'}
+  "shouldShowQuestion": ${currentQuestion.type === "coding" ? "true" : "false"}
 }`;
 
-
-if (!round.conversationHistory) {
-  round.conversationHistory = [];
-}
-
+      if (!round.conversationHistory) {
+        round.conversationHistory = [];
+      }
 
       const aiIntro = await groqService.generateJSON([
-        { role: 'user', content: introPrompt }
+        { role: "user", content: introPrompt },
       ]);
 
       round.conversationHistory.push({
-        role: 'assistant',
+        role: "assistant",
         content: aiIntro.message,
         timestamp: new Date(),
-        metadata: { 
-          type: 'question_intro',
-          questionId: currentQuestion.questionId 
-        }
+        metadata: {
+          type: "question_intro",
+          questionId: currentQuestion.questionId,
+        },
       });
 
       await interview.save();
@@ -173,13 +177,18 @@ if (!round.conversationHistory) {
           questionType: currentQuestion.type,
           question: aiIntro.shouldShowQuestion ? currentQuestion : null,
           showQuestion: aiIntro.shouldShowQuestion,
-          totalQuestions: round.questions.length
-        }
+          totalQuestions: round.questions.length,
+        },
       });
-
     } catch (error) {
-      console.error('Ask question error:', error);
-      res.status(500).json({ success: false, message: 'Failed to ask question', error: error.message });
+      console.error("Ask question error:", error);
+      res
+        .status(500)
+        .json({
+          success: false,
+          message: "Failed to ask question",
+          error: error.message,
+        });
     }
   }
 
@@ -187,26 +196,36 @@ if (!round.conversationHistory) {
   async getRealTimeResponse(req, res) {
     try {
       const { interviewId } = req.params;
-      const { questionId, answer, conversationHistory, questionType } = req.body;
+      const { questionId, answer, conversationHistory, questionType } =
+        req.body;
       const userId = req.user.id;
 
       const interview = await Interview.findOne({ _id: interviewId, userId });
       if (!interview) {
-        return res.status(404).json({ success: false, message: 'Interview not found' });
+        return res
+          .status(404)
+          .json({ success: false, message: "Interview not found" });
       }
 
       const round = interview.rounds[interview.rounds.length - 1];
-      const currentQuestion = round.questions.find(q => q.questionId === questionId);
+      const currentQuestion = round.questions.find(
+        (q) => q.questionId === questionId,
+      );
 
       if (!currentQuestion) {
-        return res.status(404).json({ success: false, message: 'Question not found' });
+        return res
+          .status(404)
+          .json({ success: false, message: "Question not found" });
       }
 
       // Build conversation context
       const conversationContext = conversationHistory
         .slice(-6)
-        .map(msg => `${msg.role === 'user' ? 'Candidate' : 'Interviewer'}: ${msg.content}`)
-        .join('\n');
+        .map(
+          (msg) =>
+            `${msg.role === "user" ? "Candidate" : "Interviewer"}: ${msg.content}`,
+        )
+        .join("\n");
 
       // AI evaluates and responds
       const aiPrompt = `You are an expert ${questionType} interviewer conducting a live interview.
@@ -241,8 +260,11 @@ Respond with ONLY valid JSON:
 }`;
 
       const aiResponse = await groqService.generateJSON([
-        { role: 'system', content: 'You are a professional, encouraging interviewer.' },
-        { role: 'user', content: aiPrompt }
+        {
+          role: "system",
+          content: "You are a professional, encouraging interviewer.",
+        },
+        { role: "user", content: aiPrompt },
       ]);
 
       if (!round.conversationHistory) {
@@ -250,8 +272,12 @@ Respond with ONLY valid JSON:
       }
 
       round.conversationHistory.push(
-        { role: 'user', content: answer, timestamp: new Date() },
-        { role: 'assistant', content: aiResponse.response, timestamp: new Date() }
+        { role: "user", content: answer, timestamp: new Date() },
+        {
+          role: "assistant",
+          content: aiResponse.response,
+          timestamp: new Date(),
+        },
       );
 
       await interview.save();
@@ -264,13 +290,18 @@ Respond with ONLY valid JSON:
           needsFollowUp: aiResponse.needsFollowUp,
           evaluation: aiResponse.evaluation,
           suggestCodeEditor: aiResponse.suggestCodeEditor,
-          suggestDiagram: aiResponse.suggestDiagram
-        }
+          suggestDiagram: aiResponse.suggestDiagram,
+        },
       });
-
     } catch (error) {
-      console.error('Real-time response error:', error);
-      res.status(500).json({ success: false, message: 'Failed to get AI response', error: error.message });
+      console.error("Real-time response error:", error);
+      res
+        .status(500)
+        .json({
+          success: false,
+          message: "Failed to get AI response",
+          error: error.message,
+        });
     }
   }
 
@@ -283,14 +314,20 @@ Respond with ONLY valid JSON:
 
       const interview = await Interview.findOne({ _id: interviewId, userId });
       if (!interview) {
-        return res.status(404).json({ success: false, message: 'Interview not found' });
+        return res
+          .status(404)
+          .json({ success: false, message: "Interview not found" });
       }
 
       const round = interview.rounds[interview.rounds.length - 1];
-      const currentQuestion = round.questions.find(q => q.questionId === questionId);
+      const currentQuestion = round.questions.find(
+        (q) => q.questionId === questionId,
+      );
 
       if (!currentQuestion) {
-        return res.status(404).json({ success: false, message: 'Question not found' });
+        return res
+          .status(404)
+          .json({ success: false, message: "Question not found" });
       }
 
       const codeReviewPrompt = `You are a senior software engineer reviewing code in a live interview.
@@ -324,7 +361,7 @@ Return ONLY valid JSON:
 }`;
 
       const review = await groqService.generateJSON([
-        { role: 'user', content: codeReviewPrompt }
+        { role: "user", content: codeReviewPrompt },
       ]);
 
       if (!round.conversationHistory) {
@@ -332,29 +369,34 @@ Return ONLY valid JSON:
       }
 
       round.conversationHistory.push({
-        role: 'user',
+        role: "user",
         content: `[Code Submitted in ${language}]`,
         timestamp: new Date(),
-        metadata: { type: 'code', language, code }
+        metadata: { type: "code", language, code },
       });
 
       round.conversationHistory.push({
-        role: 'assistant',
+        role: "assistant",
         content: review.response,
         timestamp: new Date(),
-        metadata: { type: 'code_review', evaluation: review }
+        metadata: { type: "code_review", evaluation: review },
       });
 
       await interview.save();
 
       res.json({
         success: true,
-        data: review
+        data: review,
       });
-
     } catch (error) {
-      console.error('Code evaluation error:', error);
-      res.status(500).json({ success: false, message: 'Failed to evaluate code', error: error.message });
+      console.error("Code evaluation error:", error);
+      res
+        .status(500)
+        .json({
+          success: false,
+          message: "Failed to evaluate code",
+          error: error.message,
+        });
     }
   }
 
@@ -362,12 +404,15 @@ Return ONLY valid JSON:
   async submitAnswer(req, res) {
     try {
       const { interviewId } = req.params;
-      const { questionId, answer, timeTaken, hintsUsed, skipped, evaluation } = req.body;
+      const { questionId, answer, timeTaken, hintsUsed, skipped, evaluation } =
+        req.body;
       const userId = req.user.id;
 
       const interview = await Interview.findOne({ _id: interviewId, userId });
       if (!interview) {
-        return res.status(404).json({ success: false, message: 'Interview not found' });
+        return res
+          .status(404)
+          .json({ success: false, message: "Interview not found" });
       }
 
       const round = interview.rounds[interview.rounds.length - 1];
@@ -381,9 +426,9 @@ Return ONLY valid JSON:
         skipped: skipped || false,
         evaluation: evaluation || {
           score: 0,
-          feedback: 'Answer submitted'
+          feedback: "Answer submitted",
         },
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       // Update performance
@@ -393,17 +438,22 @@ Return ONLY valid JSON:
 
       res.json({
         success: true,
-        message: 'Answer submitted successfully',
+        message: "Answer submitted successfully",
         data: {
           questionsAnswered: round.answers.length,
           totalQuestions: round.questions.length,
-          isComplete: round.answers.length >= round.questions.length
-        }
+          isComplete: round.answers.length >= round.questions.length,
+        },
       });
-
     } catch (error) {
-      console.error('Submit answer error:', error);
-      res.status(500).json({ success: false, message: 'Failed to submit answer', error: error.message });
+      console.error("Submit answer error:", error);
+      res
+        .status(500)
+        .json({
+          success: false,
+          message: "Failed to submit answer",
+          error: error.message,
+        });
     }
   }
 }

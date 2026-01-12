@@ -25,38 +25,43 @@ export default {
     apiKey: process.env.GROQ_API_KEY,
     // Updated models (as of Oct 2024)
     models: {
-      primary: 'llama-3.3-70b-versatile',      // Latest & best
-      fast: 'llama-3.1-8b-instant',            // Fastest
-      fallback: 'mixtral-8x7b-32768'           // Backup option
+      primary: "llama-3.3-70b-versatile", // Latest & best
+      fast: "llama-3.1-8b-instant", // Fastest
+      fallback: "mixtral-8x7b-32768", // Backup option
     },
-    defaultModel: 'llama-3.3-70b-versatile',   // Use this by default
+    defaultModel: "llama-3.3-70b-versatile", // Use this by default
     temperature: 0.7,
-    maxTokens: 2000
+    maxTokens: 2000,
   },
   questionCounts: {
-    easy: { 
-      behavioral: 2, 
-      technical: 2, 
-      coding: 2, 
-      'system-design': 2 
+    easy: {
+      behavioral: 2,
+      technical: 2,
+      coding: 2,
+      "system-design": 2,
     },
-    medium: { 
-      behavioral: 2, 
-      technical: 2, 
-      coding: 2, 
-      'system-design': 2
+    medium: {
+      behavioral: 2,
+      technical: 2,
+      coding: 2,
+      "system-design": 2,
     },
-    hard: { 
-      behavioral: 7, 
-      technical: 12, 
-      coding: 7, 
-      'system-design': 5 
-    }
+    hard: {
+      behavioral: 7,
+      technical: 12,
+      coding: 7,
+      "system-design": 5,
+    },
   },
   evaluationCriteria: {
-    behavioral: ['clarity', 'structure', 'examples', 'relevance'],
-    technical: ['accuracy', 'depth', 'explanation', 'examples'],
-    coding: ['correctness', 'efficiency', 'readability', 'edge-cases'],
-    'system-design': ['scalability', 'components', 'trade-offs', 'justification']
-  }
+    behavioral: ["clarity", "structure", "examples", "relevance"],
+    technical: ["accuracy", "depth", "explanation", "examples"],
+    coding: ["correctness", "efficiency", "readability", "edge-cases"],
+    "system-design": [
+      "scalability",
+      "components",
+      "trade-offs",
+      "justification",
+    ],
+  },
 };

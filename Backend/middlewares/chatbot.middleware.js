@@ -1,6 +1,6 @@
 // backend/middlewares/chatbot.middleware.js
-import ChatbotConversation from '../models/Chatbot.model.js';
-import { RATE_LIMITS } from '../config/aiconfig.js';
+import ChatbotConversation from "../models/Chatbot.model.js";
+import { RATE_LIMITS } from "../config/aiconfig.js";
 
 // Rate limiting for chatbot messages
 export const chatbotRateLimit = async (req, res, next) => {
@@ -15,21 +15,21 @@ export const chatbotRateLimit = async (req, res, next) => {
       {
         $match: {
           userId,
-          'messages.timestamp': { $gte: oneHourAgo }
-        }
+          "messages.timestamp": { $gte: oneHourAgo },
+        },
       },
       {
-        $unwind: '$messages'
+        $unwind: "$messages",
       },
       {
         $match: {
-          'messages.role': 'user',
-          'messages.timestamp': { $gte: oneHourAgo }
-        }
+          "messages.role": "user",
+          "messages.timestamp": { $gte: oneHourAgo },
+        },
       },
       {
-        $count: 'total'
-      }
+        $count: "total",
+      },
     ]);
 
     const hourlyCount = hourlyMessages[0]?.total || 0;
@@ -37,8 +37,9 @@ export const chatbotRateLimit = async (req, res, next) => {
     if (hourlyCount >= RATE_LIMITS.maxMessagesPerHour) {
       return res.status(429).json({
         success: false,
-        message: 'Rate limit exceeded. Please wait before sending more messages.',
-        retryAfter: 3600 // seconds
+        message:
+          "Rate limit exceeded. Please wait before sending more messages.",
+        retryAfter: 3600, // seconds
       });
     }
 
@@ -47,21 +48,21 @@ export const chatbotRateLimit = async (req, res, next) => {
       {
         $match: {
           userId,
-          'messages.timestamp': { $gte: oneDayAgo }
-        }
+          "messages.timestamp": { $gte: oneDayAgo },
+        },
       },
       {
-        $unwind: '$messages'
+        $unwind: "$messages",
       },
       {
         $match: {
-          'messages.role': 'user',
-          'messages.timestamp': { $gte: oneDayAgo }
-        }
+          "messages.role": "user",
+          "messages.timestamp": { $gte: oneDayAgo },
+        },
       },
       {
-        $count: 'total'
-      }
+        $count: "total",
+      },
     ]);
 
     const dailyCount = dailyMessages[0]?.total || 0;
@@ -69,8 +70,8 @@ export const chatbotRateLimit = async (req, res, next) => {
     if (dailyCount >= RATE_LIMITS.maxMessagesPerDay) {
       return res.status(429).json({
         success: false,
-        message: 'Daily message limit reached. Please try again tomorrow.',
-        retryAfter: 86400 // seconds
+        message: "Daily message limit reached. Please try again tomorrow.",
+        retryAfter: 86400, // seconds
       });
     }
 
@@ -79,12 +80,12 @@ export const chatbotRateLimit = async (req, res, next) => {
       hourlyCount,
       dailyCount,
       hourlyLimit: RATE_LIMITS.maxMessagesPerHour,
-      dailyLimit: RATE_LIMITS.maxMessagesPerDay
+      dailyLimit: RATE_LIMITS.maxMessagesPerDay,
     };
 
     next();
   } catch (error) {
-    console.error('Rate limit check error:', error);
+    console.error("Rate limit check error:", error);
     next(); // Continue even if rate limit check fails
   }
 };
@@ -96,28 +97,28 @@ export const validateMessage = (req, res, next) => {
   if (!message) {
     return res.status(400).json({
       success: false,
-      message: 'Message is required'
+      message: "Message is required",
     });
   }
 
-  if (typeof message !== 'string') {
+  if (typeof message !== "string") {
     return res.status(400).json({
       success: false,
-      message: 'Message must be a string'
+      message: "Message must be a string",
     });
   }
 
   if (message.trim().length === 0) {
     return res.status(400).json({
       success: false,
-      message: 'Message cannot be empty'
+      message: "Message cannot be empty",
     });
   }
 
   if (message.length > 5000) {
     return res.status(400).json({
       success: false,
-      message: 'Message is too long (max 5000 characters)'
+      message: "Message is too long (max 5000 characters)",
     });
   }
 
@@ -127,21 +128,21 @@ export const validateMessage = (req, res, next) => {
 // Content moderation (basic implementation)
 export const moderateContent = (req, res, next) => {
   const { message } = req.body;
-  
+
   // List of prohibited patterns (expand as needed)
   const prohibitedPatterns = [
     /\b(spam|scam)\b/i,
     // Add more patterns as needed
   ];
 
-  const containsProhibited = prohibitedPatterns.some(pattern => 
-    pattern.test(message)
+  const containsProhibited = prohibitedPatterns.some((pattern) =>
+    pattern.test(message),
   );
 
   if (containsProhibited) {
     return res.status(400).json({
       success: false,
-      message: 'Message contains prohibited content'
+      message: "Message contains prohibited content",
     });
   }
 

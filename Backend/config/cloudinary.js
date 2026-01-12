@@ -1,7 +1,6 @@
-import { v2 as cloudinary } from 'cloudinary';
-import CloudinaryStorage from 'multer-storage-cloudinary';
-
-import multer from 'multer';
+import { v2 as cloudinary } from "cloudinary";
+import CloudinaryStorage from "multer-storage-cloudinary";
+import multer from "multer";
 
 // Configure Cloudinary
 cloudinary.config({
@@ -14,10 +13,10 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'intervyo/profiles',
-    allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+    folder: "intervyo/profiles",
+    allowed_formats: ["jpg", "jpeg", "png", "gif", "webp"],
     transformation: [
-      { width: 500, height: 500, crop: 'fill', gravity: 'face' }
+      { width: 500, height: 500, crop: "fill", gravity: "face" },
     ],
   },
 });
@@ -29,10 +28,10 @@ export const upload = multer({
     fileSize: 5 * 1024 * 1024, // 5MB limit
   },
   fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
+    if (file.mimetype.startsWith("image/")) {
       cb(null, true);
     } else {
-      cb(new Error('Only image files are allowed!'), false);
+      cb(new Error("Only image files are allowed!"), false);
     }
   },
 });
@@ -41,12 +40,12 @@ export const uploadToCloudinary = async (file, folder) => {
   try {
     const result = await cloudinary.uploader.upload(file.tempFilePath, {
       folder: folder,
-      resource_type: 'auto'
+      resource_type: "auto",
     });
     return result;
   } catch (error) {
-    console.error('Cloudinary upload error:', error);
-    throw new Error('File upload failed');
+    console.error("Cloudinary upload error:", error);
+    throw new Error("File upload failed");
   }
 };
 
@@ -54,10 +53,10 @@ export const uploadToCloudinary = async (file, folder) => {
 export const deleteFromCloudinary = async (imageUrl) => {
   try {
     // Extract public_id from URL
-    const publicId = imageUrl.split('/').slice(-2).join('/').split('.')[0];
+    const publicId = imageUrl.split("/").slice(-2).join("/").split(".")[0];
     await cloudinary.uploader.destroy(publicId);
   } catch (error) {
-    console.error('Error deleting from Cloudinary:', error);
+    console.error("Error deleting from Cloudinary:", error);
   }
 };
 

@@ -1,25 +1,25 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const conversationSchema = new mongoose.Schema({
   speaker: {
     type: String,
-    enum: ['ai', 'candidate'],
-    required: true
+    enum: ["ai", "candidate"],
+    required: true,
   },
   message: {
     type: String,
-    required: true
+    required: true,
   },
   timestamp: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
   audioUrl: String,
   type: {
     type: String,
-    enum: ['greeting', 'question', 'answer', 'feedback', 'closing'],
-    default: 'question'
-  }
+    enum: ["greeting", "question", "answer", "feedback", "closing"],
+    default: "question",
+  },
 });
 
 const codeSubmissionSchema = new mongoose.Schema({
@@ -29,12 +29,12 @@ const codeSubmissionSchema = new mongoose.Schema({
   language: String,
   submittedAt: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
   score: Number,
   feedback: String,
   testCasesPassed: Number,
-  totalTestCases: Number
+  totalTestCases: Number,
 });
 
 // const questionEvaluationSchema = new mongoose.Schema({
@@ -102,149 +102,161 @@ const codeSubmissionSchema = new mongoose.Schema({
 //   timestamps: true
 // });
 
-
 const questionEvaluationSchema = new mongoose.Schema({
   questionNumber: {
     type: Number,
-    required: true
+    required: true,
   },
   question: {
     type: String,
-    required: true
+    required: true,
   },
   expectedAnswer: String, // Optional: store what was expected
   userAnswer: {
     type: String,
-    default: ''
+    default: "",
   },
   score: {
     type: Number,
     min: 0,
     max: 10,
-    required: true
+    required: true,
   },
   feedback: {
     type: String,
-    required: true
+    required: true,
   },
   category: {
     type: String,
-    enum: ['technical', 'behavioral', 'coding', 'general', 'problem-solving'],
-    required: true
+    enum: ["technical", "behavioral", "coding", "general", "problem-solving"],
+    required: true,
   },
   difficulty: {
     type: String,
-    enum: ['easy', 'medium', 'hard']
+    enum: ["easy", "medium", "hard"],
   },
   timestamp: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
   // Additional fields for detailed analysis
   strengths: [String],
   improvements: [String],
   codeSubmitted: String, // For coding questions
-  timeSpent: Number // in seconds
+  timeSpent: Number, // in seconds
 });
 
-const interviewSessionSchema = new mongoose.Schema({
-  interviewId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Interview',
-    required: true
-  },
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
-  sessionStatus: {
-    type: String,
-    enum: ['active', 'completed', 'abandoned'],
-    default: 'active'
-  },
-  
-  // Conversation history
-  conversation: [{
-    role: {
+const interviewSessionSchema = new mongoose.Schema(
+  {
+    interviewId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Interview",
+      required: true,
+    },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    sessionStatus: {
       type: String,
-      enum: ['user', 'assistant', 'system']
+      enum: ["active", "completed", "abandoned"],
+      default: "active",
     },
-    content: String,
-    timestamp: {
-      type: Date,
-      default: Date.now
-    },
-    type: {
-      type: String,
-      enum: ['greeting', 'question', 'answer','code-review','closing', 'feedback', 'transition']
-    }
-  }],
-  
-  // CRITICAL: Store all question evaluations
-  questionEvaluations: [questionEvaluationSchema],
-  
-  // Overall scores (0-10 scale)
-  overallScore: {
-    type: Number,
-    min: 0,
-    max: 100,
-    default: 0
-  },
-  technicalScore: {
-    type: Number,
-    min: 0,
-    max: 10,
-    default: 0
-  },
-  communicationScore: {
-    type: Number,
-    min: 0,
-    max: 10,
-    default: 0
-  },
-  problemSolvingScore: {
-    type: Number,
-    min: 0,
-    max: 10,
-    default: 0
-  },
-  
-  // Detailed feedback structure
-  feedback: {
-    summary: String,
-    strengths: [String],
-    improvements: [String],
-    keyHighlights: [String],
-    areasOfConcern: [String],
-    
-    // Technical analysis
-    technicalAnalysis: {
-      coreConcepts: String,
-      problemSolvingApproach: String,
-      codeQuality: String,
-      bestPractices: String
-    },
-    
-    // Behavioral analysis
-    behavioralAnalysis: {
-      communication: String,
-      confidence: String,
-      professionalism: String,
-      adaptability: String
-    }
-  },
-  
-  // Statistics
-  stats: {
-    totalQuestions: { type: Number, default: 0 },
-    questionsAnswered: { type: Number, default: 0 },
-    questionsSkipped: { type: Number, default: 0 },
-    averageResponseTime: { type: Number, default: 0 },
-    totalTimeSpent: { type: Number, default: 0 }
-  }
-}, {
-  timestamps: true
-});
 
-export default mongoose.model('InterviewSession', interviewSessionSchema);
+    // Conversation history
+    conversation: [
+      {
+        role: {
+          type: String,
+          enum: ["user", "assistant", "system"],
+        },
+        content: String,
+        timestamp: {
+          type: Date,
+          default: Date.now,
+        },
+        type: {
+          type: String,
+          enum: [
+            "greeting",
+            "question",
+            "answer",
+            "code-review",
+            "closing",
+            "feedback",
+            "transition",
+          ],
+        },
+      },
+    ],
+
+    // CRITICAL: Store all question evaluations
+    questionEvaluations: [questionEvaluationSchema],
+
+    // Overall scores (0-10 scale)
+    overallScore: {
+      type: Number,
+      min: 0,
+      max: 100,
+      default: 0,
+    },
+    technicalScore: {
+      type: Number,
+      min: 0,
+      max: 10,
+      default: 0,
+    },
+    communicationScore: {
+      type: Number,
+      min: 0,
+      max: 10,
+      default: 0,
+    },
+    problemSolvingScore: {
+      type: Number,
+      min: 0,
+      max: 10,
+      default: 0,
+    },
+
+    // Detailed feedback structure
+    feedback: {
+      summary: String,
+      strengths: [String],
+      improvements: [String],
+      keyHighlights: [String],
+      areasOfConcern: [String],
+
+      // Technical analysis
+      technicalAnalysis: {
+        coreConcepts: String,
+        problemSolvingApproach: String,
+        codeQuality: String,
+        bestPractices: String,
+      },
+
+      // Behavioral analysis
+      behavioralAnalysis: {
+        communication: String,
+        confidence: String,
+        professionalism: String,
+        adaptability: String,
+      },
+    },
+
+    // Statistics
+    stats: {
+      totalQuestions: { type: Number, default: 0 },
+      questionsAnswered: { type: Number, default: 0 },
+      questionsSkipped: { type: Number, default: 0 },
+      averageResponseTime: { type: Number, default: 0 },
+      totalTimeSpent: { type: Number, default: 0 },
+    },
+  },
+  {
+    timestamps: true,
+  },
+);
+
+export default mongoose.model("InterviewSession", interviewSessionSchema);
