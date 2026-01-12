@@ -56,7 +56,7 @@ const userSchema = new mongoose.Schema({
   // Reference to Profile model
   profile: {
     type: mongoose.Schema.Types.ObjectId,
-    required : true,
+    // required : true,
     ref: 'Profile',
   },
   
@@ -165,3 +165,4 @@ userSchema.methods.generateAuthToken = function() {
 };
 
 export default mongoose.models.User || mongoose.model('User', userSchema);
+

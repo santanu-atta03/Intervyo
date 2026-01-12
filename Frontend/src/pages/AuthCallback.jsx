@@ -1,42 +1,40 @@
-// frontend/src/pages/AuthCallback.jsx
 import { useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
+const API_URL_LOGIN = 'https://intervyo.onrender.com';
 export default function AuthCallback() {
   const navigate = useNavigate();
-  const location = useLocation();
 
   useEffect(() => {
-    // Extract token from URL
-    const params = new URLSearchParams(location.search);
+    const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
-    console.log("token : ",token)
-    if (token) {
-      // Save token
-      localStorage.setItem('token', token);
-      
-      // Fetch user data
-      fetch('https://intervyo.onrender.com/api/auth/me', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) {
-            localStorage.setItem('user', JSON.stringify(data.user));
-            navigate('/dashboard');
-          } else {
-            navigate('/login?error=auth_failed');
-          }
-        })
-        .catch(() => {
-          navigate('/login?error=auth_failed');
-        });
-    } else {
-      navigate('/login?error=no_token');
+
+    if (!token) {
+      navigate('/login?error=missing_token');
+      return;
     }
-  }, [location, navigate]);
+
+    // Store token
+    localStorage.setItem('token', token);
+
+    // Fetch user using Bearer token
+    fetch(`${API_URL_LOGIN}/api/auth/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error('Unauthorized');
+        return res.json();
+      })
+      .then((data) => {
+        localStorage.setItem('user', JSON.stringify(data.user));
+        navigate('/dashboard');
+      })
+      .catch(() => {
+        navigate('/login?error=auth_failed');
+      });
+  }, [navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center">

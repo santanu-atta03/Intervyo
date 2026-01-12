@@ -1,5 +1,6 @@
 // frontend/src/App.jsx
 import { Routes, Route } from 'react-router-dom';
+
 import Login from './pages/Login';
 import Register from './pages/Register';
 import AuthCallback from './pages/AuthCallback';
@@ -12,72 +13,146 @@ import DomainSelection from './pages/DomainSelection';
 import InterviewRoom from './components/AiInterview/InterviewRoom';
 import Results from './pages/Results';
 import Settings from './components/Dashboard/Settings';
-import toast from 'react-hot-toast'
 import InterviewWrapper from './components/Interview/InterviewWrapper';
 import Leaderboard from './pages/Leaderboard';
 import ReviewHistory from './components/Dashboard/ReviewHistory';
 import LearningHub from './components/Dashboard/LearningHub';
-import LearningPlatform from './components/Dashboard/LearningHub';
 import BlogPlatform from './components/Blogs/BlogPlatform';
 import Achievements from './components/Dashboard/Achievements';
-import AIChatbot from './components/Chatbot/AiChatBot';
+import VoiceflowChatbot from './components/Chatbot/VoiceflowChatbot';
+import NotFound from './pages/NotFound';
+import FAQ from './pages/FAQ';
+import Analytics from './pages/Analytics';
+import AdvancedFeaturesDashboard from './pages/AdvancedFeaturesDashboard';
+import ScrollToTop from './components/shared/ScrollToTop';
+import Footer from './components/shared/Footer';
+import TermsAndConditions from './pages/Terms';
+import PrivacyPolicy from './pages/Privacy';
+import AboutUs from './pages/AboutUs';
+import ContactUs from './pages/ContactUs';
 
 function App() {
   return (
     <>
+      <ScrollToTop />
+
       <Routes>
-        <Route path='/' element = {<Landing />} />
+        <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path='/verify-email' element={<VerifyEmail />} />
-        <Route path="/domain-selection" element={<DomainSelection />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
-        
-        <Route 
-          path="/dashboard" 
+        <Route path="/faq" element={<FAQ />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsAndConditions />} />
+        <Route path="/about" element={<AboutUs />} />
+        <Route path="/contact" element={<ContactUs />} />
+
+        <Route path="/domain-selection" element={<DomainSelection />} />
+        <Route path="/leaderboard" element={<Leaderboard />} />
+        <Route path="/blog" element={<BlogPlatform />} />
+
+        <Route
+          path="/dashboard"
           element={
             <ProtectedRoute>
               <Dashboard />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route path="/leaderboard" element={<Leaderboard />} />
-        <Route path="/history" element={<ReviewHistory />} />
-        <Route path="/resources" element={<LearningHub />} />
-        <Route path='settings' element={<Settings />} />
-        <Route path="/blog" element={<BlogPlatform />} />
-        <Route path='/achievements' element={<Achievements />} />
-        <Route 
-        path="/interview-setup" 
-        element={
-          <ProtectedRoute>
-            <InterviewSetup />
-          </ProtectedRoute>
-        } 
-      />
-      
-      {/* UPDATED: Use InterviewWrapper instead of InterviewRoom directly */}
-      <Route 
-        path="/interview/:interviewId" 
-        element={
-          <ProtectedRoute>
-            <InterviewWrapper  />
-          </ProtectedRoute>
-        } 
-      />
-      <Route path="/interview-room/:interviewId" element={<InterviewRoom />} />
-      
-      <Route 
-        path="/results/:interviewId" 
-        element={
-          <ProtectedRoute>
-            <Results />
-          </ProtectedRoute>
-        } 
-      />
+
+        <Route
+          path="/analytics"
+          element={
+            <ProtectedRoute>
+              <Analytics />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/advanced-features"
+          element={
+            <ProtectedRoute>
+              <AdvancedFeaturesDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/history"
+          element={
+            <ProtectedRoute>
+              <ReviewHistory />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/resources"
+          element={
+            <ProtectedRoute>
+              <LearningHub />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Settings />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/achievements"
+          element={
+            <ProtectedRoute>
+              <Achievements />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/interview-setup"
+          element={
+            <ProtectedRoute>
+              <InterviewSetup />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/interview/:interviewId"
+          element={
+            <ProtectedRoute>
+              <InterviewWrapper />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/interview-room/:interviewId"
+          element={<InterviewRoom />}
+        />
+
+        <Route
+          path="/results/:interviewId"
+          element={
+            <ProtectedRoute>
+              <Results />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* 404 – must be last */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
 
-      <AIChatbot defaultContext="general" />
+      <VoiceflowChatbot />
+      <Footer />
     </>
   );
 }

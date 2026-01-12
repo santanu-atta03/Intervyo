@@ -12,38 +12,73 @@ import learningHubRoutes from './routes/learningHub.routes.js';
 import aiRoutes from './routes/aiRoutes.js';
 import dashboardRoutes from './routes/Dashboard.route.js';
 import leaderboardRoutes from './routes/Leaderboard.routes.js';
+import companyRecommendationRoutes from './routes/companyRecommendation.routes.js';
+import calendarRoutes from './routes/calendar.routes.js';
+import questionDatabaseRoutes from './routes/questionDatabase.routes.js';
+import buddyMatchRoutes from './routes/buddyMatch.routes.js';
 import interviewSocket from './sockets/InterviewSocket.js';
 import achievementRoutes from './routes/achievement.routes.js';
 import chatbotRoutes from './routes/chatbot.route.js';
 import notificationRoutes from './routes/notification.route.js';
 import blogRoutes from './routes/blog.routes.js';
 import profileRoutes from './routes/Profile.route.js'
+import emotionRoutes from './routes/emotion.routes.js';
+import analyticsRoutes from './routes/analytics.route.js';
+import newsletterRoutes from './routes/newsletter.routes.js';
+import contactRoutes from './routes/contact.routes.js';
 import { dbConnect } from './config/db.js';
 import { apiLimiter } from './middlewares/rateLimiter.js';
 import errorHandler from './middlewares/error.middleware.js';
 import fileUpload from 'express-fileupload'
 import http from 'http'
 import { Server } from 'socket.io';
+import cookieParser from 'cookie-parser';
+
+
 dotenv.config();
 
 const app = express();
 
 const server = http.createServer(app);
+const socketOrigins = [
+  'https://intervyo.xyz',
+  'https://www.intervyo.xyz',
+  'https://intervyo-sage.vercel.app'
+];
+
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || 'https://intervyo-sage.vercel.app',
+    origin: socketOrigins,
     methods: ['GET', 'POST'],
-    credentials: true
+    credentials: true,
   }
 });
+
+app.use(cookieParser());
 app.use(helmet());
 // ========================================
 // MIDDLEWARE
 // ========================================
+const allowedOrigins = [
+  'https://intervyo.xyz',
+  'https://www.intervyo.xyz',
+  'https://intervyo-sage.vercel.app'
+];
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'https://intervyo-sage.vercel.app',
+  origin: function (origin, callback) {
+    // allow server-to-server & Postman
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
 }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(apiLimiter);
@@ -61,9 +96,10 @@ app.use(passport.initialize());
 interviewSocket(io);
 dbConnect();
 
+app.use('/api/contact', contactRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/interviews', interviewRoutes);
-app.use('/api/ai',aiRoutes)
+app.use('/api/ai', aiRoutes)
 app.use('/api/profile', profileRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
@@ -72,6 +108,15 @@ app.use('/api', blogRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/achievements', achievementRoutes);
 app.use('/api/chatbot', chatbotRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/newsletter', newsletterRoutes);
+app.use('/api/recommendations', companyRecommendationRoutes);
+app.use('/api/calendar', calendarRoutes);
+app.use('/api/questions', questionDatabaseRoutes);
+app.use('/api/buddy', buddyMatchRoutes);
+
+// Emotion metrics routes
+app.use('/api/interviews', emotionRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

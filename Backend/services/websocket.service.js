@@ -11,7 +11,7 @@ class WebSocketService {
   initialize(server) {
     this.io = socketIO(server, {
       cors: {
-        origin: process.env.CLIENT_URL || 'http://localhost:3000',
+        origin: process.env.CLIENT_URL || 'https://intervyo-sage.vercel.app',
         methods: ['GET', 'POST']
       }
     });

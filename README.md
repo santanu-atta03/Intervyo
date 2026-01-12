@@ -1,143 +1,205 @@
-🎯 Intervyo – AI-Powered Interview Platform
+<h1 align="center">Intervyo – AI-Powered Interview Simulation Platform</h1>
 
-Intervyo is an AI-driven interview preparation and evaluation platform designed to simulate real-world technical and HR interviews. It helps candidates practice interviews, receive structured feedback, and improve their performance using AI analysis instead of vague human opinions.
-This is not another “chat with AI” toy. The goal is realism, accountability, and measurable improvement.
+Intervyo is an AI-driven interview preparation and evaluation platform designed to simulate real-world technical and HR interviews.  
+It helps candidates practice interviews, receive structured, criteria-based feedback, and improve performance through AI analysis instead of vague human opinions.
 
-🚀 Why Intervyo Exists
+This is not a generic “chat with AI” project.  
+Intervyo is built for realism, accountability, and measurable improvement.
 
-  Most interview prep platforms fail for three reasons:
-    They ask generic questions
-    They give fluffy feedback
-    They don’t simulate actual interview pressure
-  Intervyo fixes that by:
-    Running structured interviews
-    Evaluating responses against defined criteria
-    Giving actionable feedback (not motivational nonsense)
+---
 
-🧠 Core Features
-🎤 AI Interview Simulation
+## 🎯 Why Intervyo Exists
 
-  Technical, behavioral, and mixed interview modes
-  Timed questions to simulate real interview pressure
-  Adaptive follow-up questions based on candidate responses
+Most interview preparation platforms fail because they:
 
-📊 Smart Evaluation & Feedback
-  
-  Communication clarity analysis
-  Technical correctness scoring
-  Confidence & structure assessment
-  Strengths, weaknesses, and improvement suggestions
+- Ask generic questions  
+- Give fluffy, non-actionable feedback  
+- Do not simulate real interview pressure  
 
-📁 Interview History & Progress Tracking
+Intervyo fixes this by:
 
-  Store past interviews
-  Compare performance over time
-  Identify recurring weaknesses
+- Running structured interviews  
+- Evaluating responses against defined criteria  
+- Giving actionable feedback, not motivational nonsense  
 
-🔐 Secure User System
+If it doesn’t help you perform better in a real interview, it doesn’t belong here.
 
-  Authentication & authorization
-  Private interview data
-  Secure API handling
+---
 
-🛠 Tech Stack
+## 🧠 Core Features
 
-  Frontend
-  React
-  Tailwind CSS
-  Responsive UI (desktop + mobile)
-  
-  Backend
-  Node.js
-  Express.js
-  MongoDB
-  REST APIs
-  AI Layer
-  LLM-based interview logic
-  Prompt-engineered evaluation criteria
+### 🎤 AI Interview Simulation
+- Technical, behavioral, and mixed interview modes  
+- Timed questions to simulate real interview pressure  
+- Adaptive follow-up questions based on candidate responses  
 
-Structured scoring system (not random text output)
+### 📊 Smart Evaluation & Feedback
+- Communication clarity analysis  
+- Technical correctness scoring  
+- Confidence & structure assessment  
+- Strengths, weaknesses, and improvement suggestions  
 
-🧩 System Architecture (High Level)
-User → Frontend (React)
-     → Backend (Express API)
-     → AI Evaluation Engine
-     → Database (MongoDB)
-     → Feedback & Analytics
+### 📁 Interview History & Progress Tracking
+- Store past interviews  
+- Compare performance over time  
+- Identify recurring weaknesses  
 
+### 🔐 Secure User System
+- Authentication & authorization  
+- Private interview data  
+- Secure API handling  
+
+---
+
+## 🚀 Advanced Multi-Company Features (NEW)
+
+### 🤖 Smart Company Recommendation Engine
+- AI-powered analysis of your interview performance
+- Personalized company recommendations based on skill level
+- Success probability calculation for each company
+- Gap analysis with improvement suggestions
+- **Route:** `/advanced-features` or `/api/recommendations`
+
+### 📅 Company Interview Calendar Integration
+- Track upcoming interview dates with countdown timers
+- Automatically generated preparation milestones
+- Daily practice recommendations based on days remaining
+- Progress tracking and readiness score
+- **Route:** `/api/calendar`
+
+### 💎 Real Interview Question Database
+- Crowdsourced real interview questions from actual interviews
+- Voting system (upvote/downvote) for question quality
+- Question verification workflow
+- Frequency tracking (how often questions are asked)
+- Search and filter by company, difficulty, type
+- Trending questions feature
+- **Route:** `/api/questions`
+
+### 🤝 Interview Buddy Matching
+- Find compatible study partners preparing for same companies
+- Compatibility algorithm based on target companies and skill level
+- 1-on-1 buddy connections with mock interview scheduling
+- Study group creation and management
+- **Route:** `/api/buddy`
+
+### 📊 Company-Specific Success Metrics
+- Enhanced company profiles with hiring bar benchmarks
+- Success thresholds for each interview type
+- Difficulty ratings and acceptance rates
+- Historical performance statistics
+
+---
+
+## 🛠 Tech Stack
+
+### 🎨 Frontend
+- React  
+- Tailwind CSS  
+- Responsive UI (desktop + mobile)
+
+### ⚙️ Backend
+- Node.js  
+- Express.js  
+- MongoDB  
+- REST APIs  
+
+### 🤖 AI Layer
+- LLM-based interview logic  
+- Prompt-engineered evaluation criteria  
+- Structured scoring system (not random text output)
+
+---
+
+## 🧩 System Architecture (High Level)
+
+User  
+→ Frontend (React)  
+→ Backend (Express API)  
+→ AI Evaluation Engine  
+→ Database (MongoDB)  
+→ Feedback & Analytics  
 
 Simple, scalable, and not overengineered.
 
-⚙️ Installation & Setup
-Prerequisites
+---
 
-Node.js (v18+ recommended)
+## ⚙️ Installation & Setup
 
-MongoDB
+### 📦 Prerequisites
+- Node.js (v18+ recommended)
+- MongoDB
+- Git
 
-Git
+---
 
-Clone the Repository
-git clone https://github.com/your-username/intervyo.git
+### 📥 Clone the Repository
+git clone https://github.com/santanu-atta03/Intervyo  
 cd intervyo
 
-Backend Setup
-cd backend
-npm install
+---
+
+### 🔧 Backend Setup
+cd backend  
+npm install  
+npm run dev  
+
+---
+
+### 💻 Frontend Setup
+cd frontend  
+npm install  
 npm run dev
 
-Frontend Setup
-cd frontend
-npm install
-npm start
+---
 
+### 🔑 Environment Variables
 
-Create a .env file in the backend directory:
+Create a `.env` file in the backend directory:
 
-PORT=5000
-MONGO_URI=your_mongodb_connection_string
-AI_API_KEY=your_ai_api_key
+PORT=5000  
+MONGO_URI=your_mongodb_connection_string  
+AI_API_KEY=your_ai_api_key  
 
-📌 Current Status
+---
 
-✅ Core interview flow implemented
+## 🚦 Current Status
 
-✅ AI-based evaluation logic working
+- Core interview flow implemented  
+- AI-based evaluation logic working  
+- User authentication  
+- Advanced analytics (in progress)  
+- Multi-role interview templates (planned)
 
-✅ User authentication
+---
 
-🚧 Advanced analytics (in progress)
+## 🎯 Use Cases
 
-🚧 Multi-role interview templates (planned)
+- Students preparing for placements  
+- Developers preparing for technical interviews  
+- Self-assessment before real interviews  
+- Mock interview practice without human bias  
 
-🧪 Use Cases
+---
 
-Students preparing for placements
+## 🧠 Design Philosophy
 
-Developers preparing for technical interviews
+- Realism over gimmicks  
+- Feedback over praise  
+- Skill improvement over vanity metrics  
 
-Self-assessment before real interviews
+This platform is built to expose weaknesses, not hide them.
 
-Mock interview practice without human bias
+---
 
-🧠 Design Philosophy
+## 🤝 Contributing
 
-Realism over gimmicks
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.  
+Low-effort, spam, or cosmetic-only contributions will be closed.
 
-Feedback over praise
+---
 
-Skill improvement over vanity metrics
+## 📜 Code of Conduct
 
-If it doesn’t help you perform better in an actual interview, it doesn’t belong here.
-
-🤝 Contributing
-
-Contributions are welcome if they:
-
-Improve realism
-
-Improve evaluation accuracy
-
-Improve UX without bloating the system
-
-Open a PR with a clear explanation. Low-effort changes will be rejected.
+This project follows the Contributor Covenant Code of Conduct.  
+Please read CODE_OF_CONDUCT.md before contributing.
