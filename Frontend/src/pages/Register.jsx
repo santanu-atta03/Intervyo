@@ -5,15 +5,14 @@ import { setSignupData } from '../slices/authSlice';
 import { sendOtp } from '../services/operations/authAPI';
 
 const PASSWORD_REQUIREMENTS = [
-  { id: "length", label: "8+ Characters", test: (p) => p.length >= 8 },
-  { id: "uppercase", label: "Upper Case", test: (p) => /[A-Z]/.test(p) },
-  { id: "number", label: "Number", test: (p) => /[0-9]/.test(p) },
-  { id: "special", label: "Special Char", test: (p) => /[#?!@$%^&*-]/.test(p) },
+  { id: 'length', label: '8+ Characters', test: (p) => p.length >= 8 },
+  { id: 'uppercase', label: 'Upper Case', test: (p) => /[A-Z]/.test(p) },
+  { id: 'number', label: 'Number', test: (p) => /[0-9]/.test(p) },
+  { id: 'special', label: 'Special Char', test: (p) => /[#?!@$%^&*-]/.test(p) },
 ];
 
 // 2. Define getStrength here so it's available to the component
-const getStrength = (password) =>
-  PASSWORD_REQUIREMENTS.filter((req) => req.test(password)).length;
+const getStrength = (password) => PASSWORD_REQUIREMENTS.filter(req => req.test(password)).length;
 
 export default function Register() {
   const [step, setStep] = useState(1);
@@ -25,16 +24,13 @@ export default function Register() {
     domain: '',
     experience: ''
   });
-
+  
   // 3. MOVE THESE INSIDE THE COMPONENT
   // This allows them to "react" to changes in formData
   const currentStrength = getStrength(formData.password);
   const isPasswordValid = currentStrength === 4;
-  const isMatching =
-    formData.password === formData.confirmPassword &&
-    formData.confirmPassword !== "";
-  const isFormFilled =
-    formData.name.trim() !== "" && formData.email.trim() !== "";
+  const isMatching = formData.password === formData.confirmPassword && formData.confirmPassword !== '';
+  const isFormFilled = formData.name.trim() !== '' && formData.email.trim() !== '';
 
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
@@ -247,9 +243,7 @@ export default function Register() {
             <button
               onClick={handleNextStep}
               // Only enable if Loading is false AND password is strong AND passwords match AND fields are filled
-              disabled={
-                loading || !isPasswordValid || !isMatching || !isFormFilled
-              }
+              disabled={loading || !isPasswordValid || !isMatching || !isFormFilled}
               className="relative w-full overflow-hidden rounded-lg bg-emerald-500 py-3 font-semibold text-black
               transition-all duration-300
               hover:scale-[1.02] hover:shadow-[0_0_25px_rgba(16,185,129,0.8)]
