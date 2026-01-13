@@ -3,11 +3,13 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { MongoMemoryServer } from "mongodb-memory-server";
 
+dotenv.config();
+
 let mongoServer = null;
 
 export const dbConnect = async () => {
   try {
-    const mongoURI = process.env.MONGODB_URI;
+    const mongoURI = process.env.MONGODB_URL || process.env.MONGODB_URI;
 
     // Try to connect to real MongoDB if URI is provided and not default
     if (mongoURI && mongoURI !== "mongodb://localhost:27017/intervyo") {
@@ -36,7 +38,11 @@ export const dbConnect = async () => {
       console.log("📝 Note: Data will be lost when server restarts");
       console.log("💡 Tip: Add a real MongoDB URI to .env to persist data");
     } catch (memError) {
-      console.error("❌ Failed to start in-memory database:", memError);
+      console.error('❌ Failed to start in-memory database:', memError);
+      // In test environment, we might catch this at the runner level
+      if (process.env.NODE_ENV !== 'test') {
+        process.exit(1);
+      }
       throw memError;
     }
   }

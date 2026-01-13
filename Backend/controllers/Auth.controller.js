@@ -253,62 +253,6 @@ export const register = async (req, res) => {
   }
 };
 
-// Login
-// export const login = async (req, res) => {
-//   try {
-//     const { email, password } = req.body;
-
-//     if (!email || !password) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Email and password are required",
-//       });
-//     }
-
-//     const user = await User.findOne({ email }).populate('profile');
-//     if (!user) {
-//       return res.status(401).json({
-//         success: false,
-//         message: "Invalid email or password",
-//       });
-//     }
-
-//     if (user.authProvider !== "local") {
-//       return res.status(400).json({
-//         success: false,
-//         message: `Please login with ${user.authProvider}`,
-//       });
-//     }
-
-//     if (await bcrypt.compare(password, user.password)) {
-//       const token = user.generateAuthToken();
-
-//       const userResponse = await User.findById(user._id)
-//         .select('-password -resetPasswordToken -resetPasswordExpire')
-//         .populate('profile');
-
-//       res.json({
-//         success: true,
-//         message: "Login successful",
-//         token,
-//         user: userResponse,
-//       });
-//     } else {
-//       return res.status(401).json({
-//         success: false,
-//         message: "Password incorrect",
-//       });
-//     }
-//   } catch (error) {
-//     console.error("Login Error:", error);
-//     res.status(500).json({
-//       success: false,
-//       message: "Login failed",
-//       error: error.message,
-//     });
-//   }
-// };]
-
 // controllers/Auth.controller.js - login function
 export const login = async (req, res) => {
   try {
@@ -405,36 +349,9 @@ export const getCurrentUser = async (req, res) => {
   }
 };
 
-// export const getCurrentUser = async (req, res) => {
-//   try {
-//     res.set('Cache-Control', 'no-store'); // <-- ADD THIS
-//     const token = req.cookies.token;
-
-//     if (!token) {
-//       return res.status(401).json({ success: false, message: "No token provided" });
-//     }
-
-//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-//     const user = await User.findById(decoded.id)
-//       .select("-password -resetPasswordToken -resetPasswordExpire")
-//       .populate({ path: 'profile', select: '-__v' });
-
-//     if (!user) {
-//       return res.status(404).json({ success: false, message: "User not found" });
-//     }
-
-//     console.log('Current user fetched:', JSON.stringify(user, null, 2));
-
-//     res.json({ success: true, user });
-//   } catch (error) {
-//     console.error("Get current user error:", error);
-//     res.status(401).json({ success: false, message: "Invalid token", error: error.message });
-//   }
-// };
-
 // Logout
 export const logout = (req, res) => {
+  res.clearCookie("token");
   res.json({
     success: true,
     message: "Logged out successfully",

@@ -25,7 +25,7 @@ export const authenticate = async (req, res, next) => {
 
 export const protect = async (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
+    let token;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({ message: "Authentication required" });
@@ -58,25 +58,26 @@ export const protect = async (req, res, next) => {
 //       token = req.cookies.token;
 //     }
 
-//     if (!token) {
-//       return res.status(401).json({
-//         success: false,
-//         message: 'Authentication required. Please login.',
-//       });
-//     }
+    // Get user from token and attach to request
+    req.user = await User.findById(decoded.id).select("-password");
 
-//     // Verify token
-//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "User not found. Please login again.",
+      });
+    }
 
-//     // Get user from token and attach to request
-//     req.user = await User.findById(decoded.id).select('-password');
+    next();
+  } catch (error) {
+    console.error("Auth middleware error:", error);
 
-//     if (!req.user) {
-//       return res.status(401).json({
-//         success: false,
-//         message: 'User not found. Please login again.',
-//       });
-//     }
+    if (error.name === "JsonWebTokenError") {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid token. Please login again.",
+      });
+    }
 
 //     next();
 //   } catch (error) {
