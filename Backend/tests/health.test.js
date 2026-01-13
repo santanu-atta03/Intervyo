@@ -8,6 +8,38 @@ jest.unstable_mockModule("../config/db.js", () => ({
   dbConnect: jest.fn(() => console.log("Mock DB connected")),
 }));
 
+// Mock auth to avoid importing the real middleware with syntax issues
+jest.unstable_mockModule("../middlewares/auth.js", () => ({
+  authenticate: (req, res, next) => {
+    req.user = { id: "user1" };
+    next();
+  },
+  protect: (req, res, next) => {
+    req.user = { id: "user1" };
+    next();
+  },
+}));
+
+// Mock Passport config to avoid real OAuth strategy setup
+jest.unstable_mockModule("../config/Passport.js", () => ({
+  default: {
+    initialize: () => (req, res, next) => next(),
+  },
+}));
+
+// Mock email config to bypass Resend
+jest.unstable_mockModule("../config/email.js", () => ({
+  mailSender: jest.fn(async () => ({ id: "mock-email" })),
+}));
+
+// Mock cloudinary upload middleware (used in various routes)
+jest.unstable_mockModule("../config/cloudinary.js", () => ({
+  uploadToCloudinary: jest.fn(async () => ({ secure_url: "https://cdn.example.com/x.png" })),
+  deleteFromCloudinary: jest.fn(async () => {}),
+  upload: { single: () => (req, res, next) => next() },
+  default: {},
+}));
+
 // Import app after mocking
 const { app, server } = await import("../index.js");
 
