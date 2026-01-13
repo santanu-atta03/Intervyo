@@ -67,7 +67,6 @@ export default function DomainSelection() {
       return;
     }
 
-    // Get stored OTP from signupData
     const { name, email, password, otp, profilePicture } = signupData;
 
     const profile = {
@@ -82,43 +81,21 @@ export default function DomainSelection() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Animated Background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-        <div className="absolute top-40 right-10 w-72 h-72 bg-yellow-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+    <div className="relative min-h-screen overflow-hidden bg-black text-white">
+      {/* 🔳 TILE GRID BACKGROUND - Matches Register UI */}
+      <div className="absolute inset-0 grid grid-cols-[repeat(auto-fill,minmax(60px,1fr))] grid-rows-[repeat(auto-fill,minmax(60px,1fr))] pointer-events-auto">
+        {Array.from({ length: 800 }).map((_, i) => (
+          <div
+            key={i}
+            className="border border-white/5 transition-colors duration-150 ease-out hover:bg-[#10b981]"
+          />
+        ))}
       </div>
 
-      <style>{`
-        @keyframes blob {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(30px, -50px) scale(1.1); }
-          66% { transform: translate(-20px, 20px) scale(0.9); }
-        }
-        .animate-blob {
-          animation: blob 7s infinite;
-        }
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
-        @keyframes slideInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .slide-in-up {
-          animation: slideInUp 0.5s ease-out forwards;
-        }
-      `}</style>
+      {/* Glow effect layer */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div className="w-[450px] h-[450px] rounded-full bg-emerald-500 blur-[100px] opacity-20" />
+      </div>
 
       <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 w-full max-w-md relative z-10">
         {/* Progress Bar */}
@@ -135,25 +112,24 @@ export default function DomainSelection() {
               style={{ width: "100%" }}
             ></div>
           </div>
-        </div>
 
-        <div className="slide-in-up">
-          <div className="text-center mb-6">
-            <div className="inline-block p-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mb-3">
+          <div className="text-center mb-8">
+            <div className="inline-block p-3 bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full mb-3 shadow-lg shadow-emerald-500/20">
               <span className="text-4xl">🎯</span>
             </div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
               Choose Your Domain
             </h1>
-            <p className="text-gray-600">What do you want to master?</p>
+            <p className="text-gray-400 mt-2">Personalize your prep experience</p>
           </div>
 
           {errors.domain && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+            <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-2 rounded-lg mb-4 text-xs text-center animate-pulse">
               {errors.domain}
             </div>
           )}
 
+          {/* Domain Selection Grid */}
           <div className="grid grid-cols-2 gap-3 mb-6">
             {domains.map((domain) => (
               <button
@@ -162,20 +138,23 @@ export default function DomainSelection() {
                   setFormData({ ...formData, domain: domain.id });
                   setErrors({ ...errors, domain: "" });
                 }}
-                className={`p-4 rounded-xl border-2 transition transform hover:scale-105 ${
+                className={`group p-4 rounded-xl border transition-all duration-300 transform active:scale-95 ${
                   formData.domain === domain.id
                     ? `bg-gradient-to-br ${domain.color} text-white border-transparent shadow-lg`
                     : "bg-white border-gray-200 hover:border-purple-300"
                 }`}
               >
-                <div className="text-3xl mb-2">{domain.icon}</div>
-                <div className="font-semibold text-sm">{domain.name}</div>
+                <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">{domain.icon}</div>
+                <div className={`font-semibold text-sm ${formData.domain === domain.id ? 'text-white' : 'text-gray-300'}`}>
+                  {domain.name}
+                </div>
               </button>
             ))}
           </div>
 
-          <div className="mb-6">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+          {/* Experience Select */}
+          <div className="mb-8">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
               Years of Experience (Optional)
             </label>
             <select
@@ -197,7 +176,7 @@ export default function DomainSelection() {
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            className="group relative w-full overflow-hidden rounded-xl bg-emerald-500 py-4 font-bold text-black transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(16,185,129,0.6)] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
