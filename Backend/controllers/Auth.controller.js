@@ -59,6 +59,65 @@ export const sendOTP = async (req, res) => {
   }
 };
 
+// Resend OTP
+export const resendOtp = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required",
+      });
+    }
+
+    // Find existing OTP for this email
+    const existingOTP = await OTP.findOne({ email });
+
+    if (!existingOTP) {
+      return res.status(400).json({
+        success: false,
+        message: "No OTP request found for this email. Please request a new OTP.",
+      });
+    }
+
+    // Generate new 6-digit OTP
+    let otp = otpGenerator.generate(6, {
+      upperCaseAlphabets: false,
+      lowerCaseAlphabets: false,
+      specialChars: false,
+    });
+
+    // Ensure OTP uniqueness
+    let duplicateOTP = await OTP.findOne({ otp });
+    while (duplicateOTP) {
+      otp = otpGenerator.generate(6, {
+        upperCaseAlphabets: false,
+        lowerCaseAlphabets: false,
+        specialChars: false,
+      });
+      duplicateOTP = await OTP.findOne({ otp });
+    }
+
+    // Update existing OTP document with new OTP and reset expiry
+    existingOTP.otp = otp;
+    existingOTP.createdAt = Date.now();
+    await existingOTP.save(); // Triggers post-save hook to send email
+
+    res.status(200).json({
+      success: true,
+      message: "OTP resent successfully to your email",
+    });
+  } catch (error) {
+    console.error("Resend OTP Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to resend OTP",
+      error: error.message,
+    });
+  }
+};
+
 // Register with OTP verification and auto profile creation
 // export const register = async (req, res) => {
 //   try {

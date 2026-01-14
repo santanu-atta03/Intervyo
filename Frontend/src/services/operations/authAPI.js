@@ -32,6 +32,32 @@ export function sendOtp(email, navigate) {
   };
 }
 
+// Resend OTP
+export function resendOtp(email) {
+  return async (dispatch) => {
+    const toastId = toast.loading("Resending OTP...");
+    dispatch(setLoading(true));
+
+    try {
+      const response = await apiConnector("POST", `${SEND_OTP_API}/resend`, {
+        email,
+      });
+
+      if (!response.data.success) {
+        throw new Error(response.data.message);
+      }
+
+      toast.success("OTP resent to your email");
+    } catch (error) {
+      console.error("Resend OTP Error:", error);
+      toast.error(error.response?.data?.message || "Failed to resend OTP");
+    } finally {
+      dispatch(setLoading(false));
+      toast.dismiss(toastId);
+    }
+  };
+}
+
 // Register
 export function signup(
   name,
