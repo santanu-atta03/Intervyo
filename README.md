@@ -89,6 +89,14 @@ If it doesn’t help you perform better in a real interview, it doesn’t belong
 - Difficulty ratings and acceptance rates
 - Historical performance statistics
 
+### 🎤 Speech Practice Lab (Frontend)
+- Real-time speech-to-text using Web Speech API
+- Live metrics: words, WPM, average sentence length, filler words
+- Coaching tips for pace and clarity
+- Save sessions locally for quick review (no backend required)
+- **Route:** `/practice-lab`
+- Requires microphone permission in the browser (Chrome recommended)
+
 ---
 
 ## 🛠 Tech Stack

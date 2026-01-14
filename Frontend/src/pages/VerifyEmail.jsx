@@ -91,12 +91,17 @@ export default function VerifyEmail() {
               ></div>
             </div>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div
-              className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-500"
-              style={{ width: "66%" }}
-            ></div>
-          </div>
+
+          <h1 className="text-3xl font-bold text-white mb-2">
+            Verify Email
+          </h1>
+          <p className="text-gray-400 mb-6">
+            Enter the 6-digit code sent to
+            <br />
+            <span className="font-semibold text-emerald-400">
+              {signupData?.email}
+            </span>
+          </p>
 
           {/* OTP Input Fields */}
           <div className="flex justify-center gap-2 mb-8">
@@ -112,24 +117,13 @@ export default function VerifyEmail() {
               />
             ))}
           </div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">
-            Verify Email
-          </h1>
-          <p className="text-gray-600">
-            Enter the 6-digit code sent to
-            <br />
-            <span className="font-semibold text-purple-600">
-              {signupData?.email}
-            </span>
-          </p>
-        </div>
 
           <button
             onClick={handleVerify}
             disabled={loading || otp.join('').length !== 6}
             className="relative w-full overflow-hidden rounded-lg bg-emerald-500 py-3 font-semibold text-black
               transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_25px_rgba(16,185,129,0.8)]
-              active:scale-95 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
+              active:scale-95 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed mb-4"
           >
             <span className="relative z-10">Verify & Continue</span>
             <span className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-emerald-600 opacity-0 hover:opacity-100 transition-opacity" />
@@ -137,25 +131,11 @@ export default function VerifyEmail() {
 
           <button
             onClick={() => navigate('/register')}
-            className="w-full mt-6 text-gray-400 font-medium hover:text-emerald-400 transition-colors flex items-center justify-center gap-2"
+            className="w-full text-gray-400 font-medium hover:text-emerald-400 transition-colors flex items-center justify-center gap-2"
           >
             ← Back to Registration
           </button>
         </div>
-
-        <button
-          onClick={handleVerify}
-          className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition transform hover:scale-105 shadow-lg mb-4"
-        >
-          Verify & Continue
-        </button>
-
-        <button
-          onClick={() => navigate("/register")}
-          className="w-full text-purple-600 font-semibold hover:text-purple-700 transition"
-        >
-          ← Back to Registration
-        </button>
       </div>
     </div>
   );
