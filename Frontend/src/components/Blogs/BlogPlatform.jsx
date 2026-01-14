@@ -74,18 +74,12 @@ export default function BlogPlatform() {
         setTotalPages(data.pagination.pages);
       }
     } catch (error) {
-      console.error("Error fetching blogs:", error);
+      console.error('API Error:', error);
+      setBlogs(SEED_ARTICLES); // Fallback if API is blocked (CORS)
     } finally {
       setLoading(false);
     }
-  } catch (error) {
-    console.error('API Error:', error);
-    setBlogs(SEED_ARTICLES); // Fallback if API is blocked (CORS)
-  } finally {
-    // Add a slight delay for a smooth "Wow" transition from skeleton to content
-    setTimeout(() => setLoading(false), 800); 
-  }
-};
+  };
 
   const fetchFeaturedBlogs = async () => {
     try {
@@ -373,36 +367,13 @@ function BlogList({
                           : "bg-[#0f1419] text-gray-400 hover:bg-[#8b5cf6]/20 hover:text-[#8b5cf6]"
                       }`}
                     >
-                      <X className="w-3 h-3" /> Reset all filters
+                      {tag.name}
                     </button>
-                  )}
+                  ))}
                 </div>
-
-                {/* Tags section follows below... */}
               </div>
-                            {/* In the Blog Grid section of BlogList */}
-              
-                            {/* Popular Tags */}
-                            <div className="flex flex-wrap gap-2">
-                {/* Standard "All" button */}
-                
-
-                {/* Dynamic tags from your data */}
-                {popularTags.map(tag => (
-                  <button
-                    key={tag.name}
-                    onClick={() => setSelectedTag(tag.name)}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
-                      selectedTag === tag.name 
-                      ? 'bg-orange-500 border-orange-500 text-white' 
-                      : 'bg-[#0d1117] border-gray-800 text-gray-400 hover:border-gray-600'
-                    }`}
-                  >
-                    {tag.name}
-                  </button>
-                ))}
-              </div>
-            ) : (
+            </div>
+          ) : (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                   {blogs.map((blog) => (

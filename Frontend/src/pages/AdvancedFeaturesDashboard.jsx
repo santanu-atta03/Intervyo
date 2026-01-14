@@ -91,6 +91,23 @@ export default function AdvancedFeaturesDashboard() {
           </div>
         </div>
 
+        {/* Speech Practice Lab CTA */}
+        <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <MessageSquare className="w-6 h-6 text-pink-400" />
+              <h2 className="text-2xl font-bold text-white">Speech Practice Lab</h2>
+            </div>
+            <p className="text-white/70">Practice interview answers with live transcript, WPM, and filler-word coaching — right in your browser.</p>
+          </div>
+          <button
+            onClick={() => navigate('/practice-lab')}
+            className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:shadow-lg transition-all"
+          >
+            Try It Now
+          </button>
+        </div>
+
         {/* Company Recommendations */}
         <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20">
           <div className="flex items-center justify-between mb-6">
