@@ -154,7 +154,7 @@ export default function VerifyEmail() {
             </span>
           </p>
         </div>
-
+        <div>
           {/* Resend OTP Button */}
           <div className="text-center mb-6">
             <button

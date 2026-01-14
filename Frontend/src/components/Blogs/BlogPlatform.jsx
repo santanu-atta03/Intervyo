@@ -74,7 +74,7 @@ export default function BlogPlatform() {
         setTotalPages(data.pagination.pages);
       }
     } catch (error) {
-      console.error('API Error:', error);
+      console.error("API Error:", error);
       setBlogs(SEED_ARTICLES); // Fallback if API is blocked (CORS)
     } finally {
       setLoading(false);
@@ -91,20 +91,26 @@ export default function BlogPlatform() {
     }
   };
   // Ensure this useMemo is inside your BlogPlatform function
-const displayBlogs = useMemo(() => {
-  // Use API blogs if available, otherwise fall back to SEED_ARTICLES
-  let list = blogs.length > 0 ? blogs : SEED_ARTICLES;
+  const displayBlogs = useMemo(() => {
+    // Use API blogs if available, otherwise fall back to SEED_ARTICLES
+    let list = blogs.length > 0 ? blogs : SEED_ARTICLES;
 
-  // Real-time filtering logic
-  return list.filter(blog => {
-    const titleMatch = blog.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const excerptMatch = blog.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
-    const tagMatch = blog.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    // Show if search matches title, excerpt, OR tags
-    return titleMatch || excerptMatch || tagMatch;
-  });
-}, [blogs, searchQuery]);
+    // Real-time filtering logic
+    return list.filter((blog) => {
+      const titleMatch = blog.title
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+      const excerptMatch = blog.excerpt
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+      const tagMatch = blog.tags.some((tag) =>
+        tag.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+
+      // Show if search matches title, excerpt, OR tags
+      return titleMatch || excerptMatch || tagMatch;
+    });
+  }, [blogs, searchQuery]);
   const fetchPopularTags = async () => {
     try {
       const response = await fetch(`${API_URL}/blogs/tags`);
@@ -369,7 +375,7 @@ function BlogList({
                     >
                       <X className="w-3 h-3" /> Reset all filters
                     </button>
-                  )}
+                  ))}
                 </div>
 
                 {selectedTag && (
@@ -406,57 +412,55 @@ function BlogList({
                 </div>
               </div>
             </div>
-          ) : (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                  {blogs.map((blog) => (
-                    <BlogCard key={blog._id} blog={blog} onView={onViewBlog} />
-                  ))}
+            ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                {blogs.map((blog) => (
+                  <BlogCard key={blog._id} blog={blog} onView={onViewBlog} />
+                ))}
+              </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                    className="px-4 py-2 bg-[#1a1f2e] hover:bg-[#8b5cf6]/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white text-sm font-medium transition-all border border-gray-800"
+                  >
+                    Previous
+                  </button>
+
+                  {[...Array(Math.min(5, totalPages))].map((_, idx) => {
+                    const pageNum = idx + 1;
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={`w-10 h-10 rounded-lg font-semibold text-sm transition-all ${
+                          currentPage === pageNum
+                            ? "bg-[#8b5cf6] text-white"
+                            : "bg-[#1a1f2e] text-gray-400 hover:bg-[#8b5cf6]/20 border border-gray-800"
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+
+                  <button
+                    onClick={() =>
+                      setCurrentPage(Math.min(totalPages, currentPage + 1))
+                    }
+                    disabled={currentPage === totalPages}
+                    className="px-4 py-2 bg-[#1a1f2e] hover:bg-[#8b5cf6]/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white text-sm font-medium transition-all border border-gray-800"
+                  >
+                    Next
+                  </button>
                 </div>
-
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="flex items-center justify-center gap-2">
-                    <button
-                      onClick={() =>
-                        setCurrentPage(Math.max(1, currentPage - 1))
-                      }
-                      disabled={currentPage === 1}
-                      className="px-4 py-2 bg-[#1a1f2e] hover:bg-[#8b5cf6]/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white text-sm font-medium transition-all border border-gray-800"
-                    >
-                      Previous
-                    </button>
-
-                    {[...Array(Math.min(5, totalPages))].map((_, idx) => {
-                      const pageNum = idx + 1;
-                      return (
-                        <button
-                          key={pageNum}
-                          onClick={() => setCurrentPage(pageNum)}
-                          className={`w-10 h-10 rounded-lg font-semibold text-sm transition-all ${
-                            currentPage === pageNum
-                              ? "bg-[#8b5cf6] text-white"
-                              : "bg-[#1a1f2e] text-gray-400 hover:bg-[#8b5cf6]/20 border border-gray-800"
-                          }`}
-                        >
-                          {pageNum}
-                        </button>
-                      );
-                    })}
-
-                    <button
-                      onClick={() =>
-                        setCurrentPage(Math.min(totalPages, currentPage + 1))
-                      }
-                      disabled={currentPage === totalPages}
-                      className="px-4 py-2 bg-[#1a1f2e] hover:bg-[#8b5cf6]/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white text-sm font-medium transition-all border border-gray-800"
-                    >
-                      Next
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
+              )}
+            </>
+            
           </div>
         </div>
       </div>
@@ -498,15 +502,13 @@ function BlogCard({ blog, onView }) {
           </div>
         </div>
       </div>
-
+      <div>
         <h3 className="text-lg font-bold text-white mb-2 line-clamp-2 group-hover:text-[#8b5cf6] transition-colors">
           {blog.title}
         </h3>
-
         <p className="text-gray-400 text-sm mb-4 line-clamp-2">
           {blog.excerpt}
         </p>
-
         <div className="flex flex-wrap gap-2 mb-4">
           {blog.tags.slice(0, 3).map((tag) => (
             <span
@@ -517,7 +519,6 @@ function BlogCard({ blog, onView }) {
             </span>
           ))}
         </div>
-
         <div className="flex items-center justify-between text-gray-500 text-sm">
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1.5">
@@ -537,13 +538,18 @@ function BlogCard({ blog, onView }) {
             <Clock className="w-4 h-4" />
             {blog.readTime} min
           </span>
-        ))}
+        </div>
+        
       </div>
 
       <div className="flex items-center justify-between pt-4 border-t border-gray-800/50">
         <div className="flex gap-4 text-gray-400">
-          <span className="flex items-center gap-1.5"><Heart className="w-4 h-4 hover:text-red-500" /> {blog.likesCount}</span>
-          <span className="flex items-center gap-1.5"><MessageCircle className="w-4 h-4" /> {blog.commentsCount || 0}</span>
+          <span className="flex items-center gap-1.5">
+            <Heart className="w-4 h-4 hover:text-red-500" /> {blog.likesCount}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <MessageCircle className="w-4 h-4" /> {blog.commentsCount || 0}
+          </span>
         </div>
         <button className="p-2 rounded-xl bg-gray-800/50 text-orange-500 hover:bg-orange-500 hover:text-white transition-all">
           <ArrowLeft className="w-4 h-4 rotate-180" />
