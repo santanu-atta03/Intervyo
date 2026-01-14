@@ -1,4 +1,4 @@
-import { getAnalytics } from "../controllers/analyticsController.js";
+import { getAnalytics } from "../controllers/Analytics.controller.js";
 // ... your other imports and middleware
 router.get("/analytics", protect, getAnalytics);
 

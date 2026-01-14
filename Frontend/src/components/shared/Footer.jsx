@@ -183,6 +183,24 @@ export default function Footer() {
             </p>
           </div>
         </div>
+
+        {/* Dotted text at bottom */}
+          <div className="flex justify-center overflow-hidden">
+            <div
+              className="text-5xl md:text-[80px] lg:text-[120px] xl:text-[160px] font-bold whitespace-nowrap select-none"
+              style={{
+                color: "transparent",
+                background:
+                  "radial-gradient(circle, rgba(16, 185, 129, 0.15) 2px, transparent 2px)",
+                backgroundSize: "6px 6px",
+                WebkitBackgroundClip: "text",
+                backgroundClip: "text",
+                letterSpacing: "0.05em",
+              }}
+            >
+              INTERVYO
+            </div>
+          </div>
       </div>
     </footer>
   );
