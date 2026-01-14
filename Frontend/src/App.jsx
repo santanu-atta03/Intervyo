@@ -30,6 +30,7 @@ import TermsAndConditions from './pages/Terms';
 import PrivacyPolicy from './pages/Privacy';
 import AboutUs from './pages/AboutUs';
 import ContactUs from './pages/ContactUs';
+import PracticeLab from './pages/PracticeLab';
 
 function App() {
   return (
@@ -75,6 +76,15 @@ function App() {
           element={
             <ProtectedRoute>
               <AdvancedFeaturesDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/practice-lab"
+          element={
+            <ProtectedRoute>
+              <PracticeLab />
             </ProtectedRoute>
           }
         />

@@ -91,6 +91,23 @@ export default function AdvancedFeaturesDashboard() {
           </div>
         </div>
 
+        {/* Speech Practice Lab CTA */}
+        <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <MessageSquare className="w-6 h-6 text-pink-400" />
+              <h2 className="text-2xl font-bold text-white">Speech Practice Lab</h2>
+            </div>
+            <p className="text-white/70">Practice interview answers with live transcript, WPM, and filler-word coaching — right in your browser.</p>
+          </div>
+          <button
+            onClick={() => navigate('/practice-lab')}
+            className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:shadow-lg transition-all"
+          >
+            Try It Now
+          </button>
+        </div>
+
         {/* Company Recommendations */}
         <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20">
           <div className="flex items-center justify-between mb-6">
@@ -267,56 +284,6 @@ export default function AdvancedFeaturesDashboard() {
                             {q.upvotes?.length || 0} upvotes
                           </span>
                         </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-white/60 text-sm">
-                <p>No trending questions yet</p>
-              </div>
-            )}
-          </div>
-
-          {/* Buddy Matching */}
-          <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <Users className="w-6 h-6 text-green-400" />
-                <h2 className="text-xl font-bold text-white">
-                  Find Study Buddies
-                </h2>
-              </div>
-              <button
-                onClick={() => navigate("/buddies")}
-                className="text-green-400 hover:text-green-300 flex items-center gap-2 text-sm"
-              >
-                Explore <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-
-            {buddies.length > 0 ? (
-              <div className="space-y-3">
-                {buddies.slice(0, 3).map((buddy) => (
-                  <div
-                    key={buddy.userId}
-                    className="bg-white/5 rounded-lg p-4 border border-white/10"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-white font-semibold">
-                          {buddy.user?.firstName} {buddy.user?.lastName}
-                        </p>
-                        <p className="text-xs text-white/60">
-                          {buddy.commonCompanies?.join(", ")}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-lg font-bold text-green-400">
-                          {buddy.matchScore}%
-                        </div>
-                        <div className="text-xs text-white/60">Match</div>
                       </div>
                     </div>
                   </div>

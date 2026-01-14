@@ -74,18 +74,12 @@ export default function BlogPlatform() {
         setTotalPages(data.pagination.pages);
       }
     } catch (error) {
-      console.error("Error fetching blogs:", error);
+      console.error('API Error:', error);
+      setBlogs(SEED_ARTICLES); // Fallback if API is blocked (CORS)
     } finally {
       setLoading(false);
     }
-  } catch (error) {
-    console.error('API Error:', error);
-    setBlogs(SEED_ARTICLES); // Fallback if API is blocked (CORS)
-  } finally {
-    // Add a slight delay for a smooth "Wow" transition from skeleton to content
-    setTimeout(() => setLoading(false), 800); 
-  }
-};
+  };
 
   const fetchFeaturedBlogs = async () => {
     try {
@@ -378,31 +372,41 @@ function BlogList({
                   )}
                 </div>
 
-                {/* Tags section follows below... */}
-              </div>
-                            {/* In the Blog Grid section of BlogList */}
-              
-                            {/* Popular Tags */}
-                            <div className="flex flex-wrap gap-2">
-                {/* Standard "All" button */}
-                
-
-                {/* Dynamic tags from your data */}
-                {popularTags.map(tag => (
+                {selectedTag && (
                   <button
-                    key={tag.name}
-                    onClick={() => setSelectedTag(tag.name)}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
-                      selectedTag === tag.name 
-                      ? 'bg-orange-500 border-orange-500 text-white' 
-                      : 'bg-[#0d1117] border-gray-800 text-gray-400 hover:border-gray-600'
-                    }`}
+                    onClick={() => setSelectedTag("")}
+                    className="w-full px-3 py-2 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm flex items-center justify-center gap-2 hover:bg-red-500/20 transition-all"
                   >
-                    {tag.name}
+                    <X className="w-4 h-4" />
+                    Clear Filter
                   </button>
-                ))}
+                )}
               </div>
-            ) : (
+
+              {/* Popular Tags */}
+              <div className="bg-[#1a1f2e] rounded-xl border border-gray-800 p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <Tag className="w-4 h-4 text-[#d946ef]" />
+                  <h3 className="font-bold text-white">Popular Tags</h3>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {popularTags.slice(0, 15).map((tag) => (
+                    <button
+                      key={tag.name}
+                      onClick={() => setSelectedTag(tag.name)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                        selectedTag === tag.name
+                          ? "bg-[#8b5cf6] text-white"
+                          : "bg-[#0f1419] text-gray-400 hover:bg-[#8b5cf6]/20 hover:text-[#8b5cf6]"
+                      }`}
+                    >
+                      {tag.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                   {blogs.map((blog) => (

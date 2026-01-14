@@ -7,4 +7,6 @@ export default {
   clearMocks: true,
   resetMocks: true,
   restoreMocks: true,
+  // Avoid cross-file ESM mock interference
+  maxWorkers: 1,
 };
