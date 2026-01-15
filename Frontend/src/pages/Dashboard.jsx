@@ -42,7 +42,7 @@ import {
   deleteNotification,
   clearReadNotifications,
 } from "../services/operations/notificationAPI";
-import {logo} from "../assets/intervyologo.jpg"
+import logo from "../assets/intervyologo.jpg"
 
 export default function Dashboard() {
   const dispatch = useDispatch();
