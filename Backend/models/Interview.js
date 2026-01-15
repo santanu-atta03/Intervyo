@@ -88,4 +88,4 @@ const interviewSchema = new mongoose.Schema(
   },
 );
 
-export default mongoose.model("Interview", interviewSchema);
+export default mongoose.models.Interview || mongoose.model("Interview",interviewSchema);

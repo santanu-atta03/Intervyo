@@ -42,6 +42,7 @@ import {
   deleteNotification,
   clearReadNotifications,
 } from "../services/operations/notificationAPI";
+import {logo} from "../assets/intervyologo.jpg"
 
 export default function Dashboard() {
   const dispatch = useDispatch();
@@ -458,9 +459,7 @@ export default function Dashboard() {
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="relative">
                 <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/30">
-                  <span className="text-white font-bold text-lg sm:text-xl">
-                    AI
-                  </span>
+                  <img src={logo} alt="logo" />
                 </div>
                 <div className="absolute -top-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-green-400 rounded-full border-2 border-gray-900 animate-pulse"></div>
               </div>
