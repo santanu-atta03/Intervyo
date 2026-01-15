@@ -1,11 +1,14 @@
-import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { setSignupData } from '../slices/authSlice';
-import { toast } from 'react-hot-toast';
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { setSignupData } from "../slices/authSlice";
+import { resendOtp } from "../services/operations/authAPI";
+import { toast } from "react-hot-toast";
 
 export default function VerifyEmail() {
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [countdown, setCountdown] = useState(0);
+  const [isResendDisabled, setIsResendDisabled] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { signupData, loading } = useSelector((state) => state.auth);
@@ -23,7 +26,7 @@ export default function VerifyEmail() {
   };
 
   const handleKeyDown = (e, index) => {
-    if (e.key === 'Backspace' && !otp[index] && e.target.previousSibling) {
+    if (e.key === "Backspace" && !otp[index] && e.target.previousSibling) {
       e.target.previousSibling.focus();
     }
   };
@@ -31,13 +34,13 @@ export default function VerifyEmail() {
   const handleVerify = () => {
     const otpValue = otp.join('');
     if (otpValue.length !== 6) {
-      toast.error('Please enter complete OTP');
+      toast.error("Please enter complete OTP");
       return;
     }
 
     if (!signupData) {
-      toast.error('Please complete registration form first');
-      navigate('/register');
+      toast.error("Please complete registration form first");
+      navigate("/register");
       return;
     }
 

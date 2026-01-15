@@ -470,7 +470,7 @@ function ModuleContent({ content }) {
 
 // Module Content Page Component
 function ModuleContentPage({ moduleId, onBack, onNextModule, onPrevModule }) {
-  const {token} = useSelector((state) => state.auth)
+  const { token } = useSelector((state) => state.auth);
   const [module, setModule] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -494,7 +494,7 @@ function ModuleContentPage({ moduleId, onBack, onNextModule, onPrevModule }) {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (!response.ok) {
@@ -503,7 +503,7 @@ function ModuleContentPage({ moduleId, onBack, onNextModule, onPrevModule }) {
       }
 
       const data = await response.json();
-      console.log("Module data : ",data);
+      console.log("Module data : ", data);
       setModule(data.data);
     } catch (err) {
       console.error("Error fetching module:", err);
@@ -527,7 +527,7 @@ function ModuleContentPage({ moduleId, onBack, onNextModule, onPrevModule }) {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ timeSpent: Math.max(timeSpent, 1) }),
-        }
+        },
       );
 
       if (response.ok) {
@@ -541,7 +541,7 @@ function ModuleContentPage({ moduleId, onBack, onNextModule, onPrevModule }) {
       }
     } catch (err) {
       console.error("Error marking complete:", err);
-      customToast.error("Failed to mark complete. Please try again.")
+      customToast.error("Failed to mark complete. Please try again.");
     } finally {
       setCompleting(false);
     }
@@ -560,7 +560,7 @@ function ModuleContentPage({ moduleId, onBack, onNextModule, onPrevModule }) {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ content: note }),
-        }
+        },
       );
 
       if (response.ok) {
@@ -573,168 +573,167 @@ function ModuleContentPage({ moduleId, onBack, onNextModule, onPrevModule }) {
     }
   };
 
-
   const handleShareCourse = async (topic) => {
-  const shareData = {
-    title: topic.title,
-    text: `Check out this course: ${topic.title} - ${topic.description}`,
-    url: `${window.location.origin}/learning-hub/topics/${topic._id}`
+    const shareData = {
+      title: topic.title,
+      text: `Check out this course: ${topic.title} - ${topic.description}`,
+      url: `${window.location.origin}/learning-hub/topics/${topic._id}`,
+    };
+
+    try {
+      // Check if Web Share API is supported
+      if (navigator.share) {
+        await navigator.share(shareData);
+        customToast.success("Course shared successfully!");
+      } else {
+        // Fallback: Copy to clipboard
+        await navigator.clipboard.writeText(shareData.url);
+        customToast.success("Course link copied to clipboard!");
+      }
+    } catch (error) {
+      if (error.name !== "AbortError") {
+        console.error("Error sharing:", error);
+        customToast.error("Failed to share course");
+      }
+    }
   };
 
-  try {
-    // Check if Web Share API is supported
-    if (navigator.share) {
-      await navigator.share(shareData);
-      customToast.success('Course shared successfully!');
-    } else {
-      // Fallback: Copy to clipboard
-      await navigator.clipboard.writeText(shareData.url);
-      customToast.success('Course link copied to clipboard!');
-    }
-  } catch (error) {
-    if (error.name !== 'AbortError') {
-      console.error('Error sharing:', error);
-      customToast.error('Failed to share course');
-    }
-  }
-};
-
   const handleDownloadResources = async (topic, modules, token) => {
-  try {
-    customToast.info('Preparing resources for download...');
+    try {
+      customToast.info("Preparing resources for download...");
 
-    // Create markdown content with all modules
-    let markdownContent = `# ${topic.title}\n\n`;
-    markdownContent += `**Description:** ${topic.description}\n\n`;
-    markdownContent += `**Domain:** ${topic.domain}\n`;
-    markdownContent += `**Difficulty:** ${topic.difficulty}\n`;
-    markdownContent += `**Estimated Hours:** ${topic.estimatedHours}h\n\n`;
-    
-    if (topic.prerequisites && topic.prerequisites.length > 0) {
-      markdownContent += `## Prerequisites\n`;
-      topic.prerequisites.forEach(prereq => {
-        markdownContent += `- ${prereq}\n`;
-      });
-      markdownContent += '\n';
-    }
+      // Create markdown content with all modules
+      let markdownContent = `# ${topic.title}\n\n`;
+      markdownContent += `**Description:** ${topic.description}\n\n`;
+      markdownContent += `**Domain:** ${topic.domain}\n`;
+      markdownContent += `**Difficulty:** ${topic.difficulty}\n`;
+      markdownContent += `**Estimated Hours:** ${topic.estimatedHours}h\n\n`;
 
-    markdownContent += `---\n\n`;
-    markdownContent += `## Course Modules\n\n`;
-
-    // Fetch and add each module's content
-    for (const module of modules) {
-      markdownContent += `### ${module.title}\n\n`;
-      markdownContent += `**Duration:** ${module.estimatedMinutes} minutes\n`;
-      markdownContent += `**Type:** ${module.contentType}\n\n`;
-      
-      try {
-        // Fetch module content
-        const response = await fetch(
-          `https://intervyo.onrender.com/api/learning-hub/modules/${module._id}`,
-          {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }
-          }
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          const content = data.data.content;
-          
-          if (typeof content === 'object' && content.content) {
-            markdownContent += content.content + '\n\n';
-          } else if (typeof content === 'string') {
-            markdownContent += content + '\n\n';
-          }
-        }
-      } catch (err) {
-        console.error(`Error fetching module ${module.title}:`, err);
-        markdownContent += `_Content not available_\n\n`;
+      if (topic.prerequisites && topic.prerequisites.length > 0) {
+        markdownContent += `## Prerequisites\n`;
+        topic.prerequisites.forEach((prereq) => {
+          markdownContent += `- ${prereq}\n`;
+        });
+        markdownContent += "\n";
       }
 
       markdownContent += `---\n\n`;
+      markdownContent += `## Course Modules\n\n`;
+
+      // Fetch and add each module's content
+      for (const module of modules) {
+        markdownContent += `### ${module.title}\n\n`;
+        markdownContent += `**Duration:** ${module.estimatedMinutes} minutes\n`;
+        markdownContent += `**Type:** ${module.contentType}\n\n`;
+
+        try {
+          // Fetch module content
+          const response = await fetch(
+            `https://intervyo.onrender.com/api/learning-hub/modules/${module._id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            },
+          );
+
+          if (response.ok) {
+            const data = await response.json();
+            const content = data.data.content;
+
+            if (typeof content === "object" && content.content) {
+              markdownContent += content.content + "\n\n";
+            } else if (typeof content === "string") {
+              markdownContent += content + "\n\n";
+            }
+          }
+        } catch (err) {
+          console.error(`Error fetching module ${module.title}:`, err);
+          markdownContent += `_Content not available_\n\n`;
+        }
+
+        markdownContent += `---\n\n`;
+      }
+
+      // Add footer
+      markdownContent += `\n\n---\n`;
+      markdownContent += `Generated on: ${new Date().toLocaleDateString()}\n`;
+      markdownContent += `Course URL: ${window.location.origin}/learning-hub/topics/${topic._id}\n`;
+
+      // Create blob and download
+      const blob = new Blob([markdownContent], { type: "text/markdown" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${topic.title.replace(/[^a-z0-9]/gi, "_")}_course_notes.md`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      customToast.success("Resources downloaded successfully!");
+    } catch (error) {
+      console.error("Error downloading resources:", error);
+      customToast.error("Failed to download resources");
     }
-
-    // Add footer
-    markdownContent += `\n\n---\n`;
-    markdownContent += `Generated on: ${new Date().toLocaleDateString()}\n`;
-    markdownContent += `Course URL: ${window.location.origin}/learning-hub/topics/${topic._id}\n`;
-
-    // Create blob and download
-    const blob = new Blob([markdownContent], { type: 'text/markdown' });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${topic.title.replace(/[^a-z0-9]/gi, '_')}_course_notes.md`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-
-    customToast.success('Resources downloaded successfully!');
-  } catch (error) {
-    console.error('Error downloading resources:', error);
-    customToast.error('Failed to download resources');
-  }
-};
-
-const handleDownloadModule = (module, content) => {
-  try {
-    let markdownContent = `# ${module.title}\n\n`;
-    markdownContent += `**Duration:** ${module.estimatedMinutes} minutes\n`;
-    markdownContent += `**Type:** ${module.contentType}\n\n`;
-    markdownContent += `---\n\n`;
-
-    if (typeof content === 'object' && content.content) {
-      markdownContent += content.content;
-    } else if (typeof content === 'string') {
-      markdownContent += content;
-    }
-
-    markdownContent += `\n\n---\n`;
-    markdownContent += `Downloaded on: ${new Date().toLocaleDateString()}\n`;
-
-    const blob = new Blob([markdownContent], { type: 'text/markdown' });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${module.title.replace(/[^a-z0-9]/gi, '_')}.md`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-
-    customToast.success('Module downloaded successfully!');
-  } catch (error) {
-    console.error('Error downloading module:', error);
-    customToast.error('Failed to download module');
-  }
-};
-
- const handleShareModule = async (module, topicId) => {
-  const shareData = {
-    title: module.title,
-    text: `Check out this module: ${module.title}`,
-    url: `${window.location.origin}/learning-hub/topics/${topicId}/modules/${module._id}`
   };
 
-  try {
-    if (navigator.share) {
-      await navigator.share(shareData);
-      customToast.success('Module shared successfully!');
-    } else {
-      await navigator.clipboard.writeText(shareData.url);
-      customToast.success('Module link copied to clipboard!');
+  const handleDownloadModule = (module, content) => {
+    try {
+      let markdownContent = `# ${module.title}\n\n`;
+      markdownContent += `**Duration:** ${module.estimatedMinutes} minutes\n`;
+      markdownContent += `**Type:** ${module.contentType}\n\n`;
+      markdownContent += `---\n\n`;
+
+      if (typeof content === "object" && content.content) {
+        markdownContent += content.content;
+      } else if (typeof content === "string") {
+        markdownContent += content;
+      }
+
+      markdownContent += `\n\n---\n`;
+      markdownContent += `Downloaded on: ${new Date().toLocaleDateString()}\n`;
+
+      const blob = new Blob([markdownContent], { type: "text/markdown" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${module.title.replace(/[^a-z0-9]/gi, "_")}.md`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      customToast.success("Module downloaded successfully!");
+    } catch (error) {
+      console.error("Error downloading module:", error);
+      customToast.error("Failed to download module");
     }
-  } catch (error) {
-    if (error.name !== 'AbortError') {
-      console.error('Error sharing:', error);
-      customToast.error('Failed to share module');
+  };
+
+  const handleShareModule = async (module, topicId) => {
+    const shareData = {
+      title: module.title,
+      text: `Check out this module: ${module.title}`,
+      url: `${window.location.origin}/learning-hub/topics/${topicId}/modules/${module._id}`,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+        customToast.success("Module shared successfully!");
+      } else {
+        await navigator.clipboard.writeText(shareData.url);
+        customToast.success("Module link copied to clipboard!");
+      }
+    } catch (error) {
+      if (error.name !== "AbortError") {
+        console.error("Error sharing:", error);
+        customToast.error("Failed to share module");
+      }
     }
-  }
-};
+  };
 
   if (loading) {
     return (
@@ -939,11 +938,17 @@ const handleDownloadModule = (module, content) => {
                   <Bookmark className="w-4 h-4" />
                   Bookmark
                 </button>
-                <button onClick={() => handleShareModule(module, module.topicId._id)} className="w-full bg-gray-700/50 hover:bg-gray-700 text-white py-2.5 rounded-lg transition flex items-center justify-center gap-2 text-sm">
+                <button
+                  onClick={() => handleShareModule(module, module.topicId._id)}
+                  className="w-full bg-gray-700/50 hover:bg-gray-700 text-white py-2.5 rounded-lg transition flex items-center justify-center gap-2 text-sm"
+                >
                   <Share2 className="w-4 h-4" />
                   Share
                 </button>
-                <button onClick={() => handleDownloadModule(module, content)} className="w-full bg-gray-700/50 hover:bg-gray-700 text-white py-2.5 rounded-lg transition flex items-center justify-center gap-2 text-sm">
+                <button
+                  onClick={() => handleDownloadModule(module, content)}
+                  className="w-full bg-gray-700/50 hover:bg-gray-700 text-white py-2.5 rounded-lg transition flex items-center justify-center gap-2 text-sm"
+                >
                   <Download className="w-5 h-5" />
                   Download
                 </button>

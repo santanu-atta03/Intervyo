@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules NODE_ENV=test jest",
     "seed:topics": "node scripts/seedTopics.js"
   },
   "keywords": [],
@@ -52,6 +53,9 @@
     "uuid": "^13.0.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "cross-env": "^10.1.0",
+    "jest": "^30.2.0",
+    "nodemon": "^3.1.10",
+    "supertest": "^7.1.4"
   }
 }

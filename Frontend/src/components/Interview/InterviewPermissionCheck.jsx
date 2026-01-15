@@ -23,8 +23,7 @@ export default function InterviewPermissionCheck({ onPermissionsGranted }) {
 
     // Speech recognition support
     const speechSupport =
-      "webkitSpeechRecognition" in window ||
-      "SpeechRecognition" in window;
+      "webkitSpeechRecognition" in window || "SpeechRecognition" in window;
 
     if (!speechSupport) {
       setError("Speech recognition not supported. Please use Chrome browser.");
@@ -58,7 +57,7 @@ export default function InterviewPermissionCheck({ onPermissionsGranted }) {
       setError(
         err.name === "NotAllowedError"
           ? "Camera/Microphone access denied. Please allow permissions and try again."
-          : "Failed to access media devices. Please check your browser settings."
+          : "Failed to access media devices. Please check your browser settings.",
       );
     }
 

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { blogService } from '../services/blog.service';
+import { useState, useEffect } from "react";
+import { blogService } from "../services/blog.service";
 
 export function useBlogs(filters = {}) {
   const [blogs, setBlogs] = useState([]);
@@ -73,7 +73,7 @@ export function useTags() {
           setTags(data.tags);
         }
       } catch (err) {
-        console.error('Error fetching tags:', err);
+        console.error("Error fetching tags:", err);
       } finally {
         setLoading(false);
       }

@@ -20,9 +20,7 @@ export default function QuestionTransition({ question }) {
         visible ? "opacity-100" : "opacity-0"
       }`}
     >
-      <h2 className="text-lg font-medium leading-relaxed">
-        {question}
-      </h2>
+      <h2 className="text-lg font-medium leading-relaxed">{question}</h2>
     </div>
   );
 }

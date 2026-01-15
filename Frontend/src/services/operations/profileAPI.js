@@ -25,7 +25,7 @@ export function getUserProfile(token) {
       const response = await apiConnector("GET", GET_PROFILE_API, null, {
         Authorization: `Bearer ${token}`,
       });
-      console.log("User from api : ",response)
+      console.log("User from api : ", response);
       if (!response.data.success) {
         throw new Error(response.data.message);
       }
@@ -47,7 +47,7 @@ export function updatePersonalInfo(token, personalData) {
   return async (dispatch) => {
     const toastId = toast.loading("Updating personal information...");
     dispatch(setLoading(true));
-    
+
     try {
       const response = await apiConnector(
         "PUT",
@@ -56,7 +56,7 @@ export function updatePersonalInfo(token, personalData) {
         {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
-        }
+        },
       );
 
       if (!response.data.success) {
@@ -68,7 +68,9 @@ export function updatePersonalInfo(token, personalData) {
       return { success: true };
     } catch (error) {
       console.error("UPDATE_PERSONAL_INFO_API ERROR:", error);
-      const errorMessage = error?.response?.data?.message || "Could not update personal information";
+      const errorMessage =
+        error?.response?.data?.message ||
+        "Could not update personal information";
       toast.error(errorMessage);
       return { success: false, message: errorMessage };
     } finally {
@@ -83,7 +85,7 @@ export function updateProfessionalInfo(token, professionalData) {
   return async (dispatch) => {
     const toastId = toast.loading("Updating professional information...");
     dispatch(setLoading(true));
-    
+
     try {
       const response = await apiConnector(
         "PUT",
@@ -92,7 +94,7 @@ export function updateProfessionalInfo(token, professionalData) {
         {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
-        }
+        },
       );
 
       if (!response.data.success) {
@@ -104,7 +106,9 @@ export function updateProfessionalInfo(token, professionalData) {
       return { success: true };
     } catch (error) {
       console.error("UPDATE_PROFESSIONAL_INFO_API ERROR:", error);
-      const errorMessage = error?.response?.data?.message || "Could not update professional information";
+      const errorMessage =
+        error?.response?.data?.message ||
+        "Could not update professional information";
       toast.error(errorMessage);
       return { success: false, message: errorMessage };
     } finally {
@@ -119,7 +123,7 @@ export function updateEducation(token, education) {
   return async (dispatch) => {
     const toastId = toast.loading("Updating education...");
     dispatch(setLoading(true));
-    
+
     try {
       const response = await apiConnector(
         "PUT",
@@ -128,7 +132,7 @@ export function updateEducation(token, education) {
         {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
-        }
+        },
       );
 
       if (!response.data.success) {
@@ -140,7 +144,8 @@ export function updateEducation(token, education) {
       return { success: true };
     } catch (error) {
       console.error("UPDATE_EDUCATION_API ERROR:", error);
-      const errorMessage = error?.response?.data?.message || "Could not update education";
+      const errorMessage =
+        error?.response?.data?.message || "Could not update education";
       toast.error(errorMessage);
       return { success: false, message: errorMessage };
     } finally {
@@ -155,7 +160,7 @@ export function updateCertificates(token, certificates) {
   return async (dispatch) => {
     const toastId = toast.loading("Updating certificates...");
     dispatch(setLoading(true));
-    
+
     try {
       const response = await apiConnector(
         "PUT",
@@ -164,7 +169,7 @@ export function updateCertificates(token, certificates) {
         {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
-        }
+        },
       );
 
       if (!response.data.success) {
@@ -176,7 +181,8 @@ export function updateCertificates(token, certificates) {
       return { success: true };
     } catch (error) {
       console.error("UPDATE_CERTIFICATES_API ERROR:", error);
-      const errorMessage = error?.response?.data?.message || "Could not update certificates";
+      const errorMessage =
+        error?.response?.data?.message || "Could not update certificates";
       toast.error(errorMessage);
       return { success: false, message: errorMessage };
     } finally {
@@ -191,7 +197,7 @@ export function updateAchievements(token, achievements) {
   return async (dispatch) => {
     const toastId = toast.loading("Updating achievements...");
     dispatch(setLoading(true));
-    
+
     try {
       const response = await apiConnector(
         "PUT",
@@ -200,7 +206,7 @@ export function updateAchievements(token, achievements) {
         {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
-        }
+        },
       );
 
       if (!response.data.success) {
@@ -212,7 +218,8 @@ export function updateAchievements(token, achievements) {
       return { success: true };
     } catch (error) {
       console.error("UPDATE_ACHIEVEMENTS_API ERROR:", error);
-      const errorMessage = error?.response?.data?.message || "Could not update achievements";
+      const errorMessage =
+        error?.response?.data?.message || "Could not update achievements";
       toast.error(errorMessage);
       return { success: false, message: errorMessage };
     } finally {
@@ -227,7 +234,7 @@ export function updateProfile(token, profileData) {
   return async (dispatch) => {
     const toastId = toast.loading("Updating profile...");
     dispatch(setLoading(true));
-    
+
     try {
       const response = await apiConnector(
         "PUT",
@@ -236,7 +243,7 @@ export function updateProfile(token, profileData) {
         {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
-        }
+        },
       );
 
       if (!response.data.success) {
@@ -248,7 +255,8 @@ export function updateProfile(token, profileData) {
       return { success: true };
     } catch (error) {
       console.error("UPDATE_PROFILE_API ERROR:", error);
-      const errorMessage = error?.response?.data?.message || "Could not update profile";
+      const errorMessage =
+        error?.response?.data?.message || "Could not update profile";
       toast.error(errorMessage);
       return { success: false, message: errorMessage };
     } finally {
@@ -262,7 +270,7 @@ export function updateProfile(token, profileData) {
 export function uploadProfilePicture(token, file) {
   return async (dispatch) => {
     const toastId = toast.loading("Uploading profile picture...");
-    
+
     try {
       const formData = new FormData();
       formData.append("profilePicture", file);
@@ -274,7 +282,7 @@ export function uploadProfilePicture(token, file) {
         {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
-        }
+        },
       );
 
       if (!response.data.success) {
@@ -287,7 +295,7 @@ export function uploadProfilePicture(token, file) {
     } catch (error) {
       console.error("UPLOAD_PROFILE_PICTURE_API ERROR:", error);
       toast.error(
-        error?.response?.data?.message || "Could not upload profile picture"
+        error?.response?.data?.message || "Could not upload profile picture",
       );
       return { success: false };
     } finally {
@@ -307,7 +315,7 @@ export function deleteProfilePicture(token) {
         null,
         {
           Authorization: `Bearer ${token}`,
-        }
+        },
       );
 
       if (!response.data.success) {
@@ -320,7 +328,7 @@ export function deleteProfilePicture(token) {
     } catch (error) {
       console.error("DELETE_PROFILE_PICTURE_API ERROR:", error);
       toast.error(
-        error?.response?.data?.message || "Could not delete profile picture"
+        error?.response?.data?.message || "Could not delete profile picture",
       );
       return { success: false };
     } finally {

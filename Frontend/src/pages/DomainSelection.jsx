@@ -1,16 +1,16 @@
-import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { signup } from '../services/operations/authAPI';
-import { toast } from 'react-hot-toast';
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { signup } from "../services/operations/authAPI";
+import { toast } from "react-hot-toast";
 
 export default function DomainSelection() {
   const [formData, setFormData] = useState({
-    domain: '',
-    experience: ''
+    domain: "",
+    experience: "",
   });
   const [errors, setErrors] = useState({});
-  
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading, signupData } = useSelector((state) => state.auth);
@@ -26,22 +26,22 @@ export default function DomainSelection() {
 
   const handleSubmit = () => {
     if (!formData.domain) {
-      setErrors({ domain: 'Please select a domain' });
-      toast.error('Please select a domain');
+      setErrors({ domain: "Please select a domain" });
+      toast.error("Please select a domain");
       return;
     }
 
     if (!signupData) {
-      toast.error('Session expired. Please register again.');
-      navigate('/register');
+      toast.error("Session expired. Please register again.");
+      navigate("/register");
       return;
     }
 
     const { name, email, password, otp, profilePicture } = signupData;
-    
+
     const profile = {
       domain: formData.domain,
-      experience: parseInt(formData.experience) || 0
+      experience: parseInt(formData.experience) || 0,
     };
 
     dispatch(signup(name, email, password, otp, profilePicture, profile, navigate));
@@ -104,7 +104,7 @@ export default function DomainSelection() {
                 key={domain.id}
                 onClick={() => {
                   setFormData({ ...formData, domain: domain.id });
-                  setErrors({ ...errors, domain: '' });
+                  setErrors({ ...errors, domain: "" });
                 }}
                 className={`group p-4 rounded-xl border transition-all duration-300 transform active:scale-95 ${
                   formData.domain === domain.id

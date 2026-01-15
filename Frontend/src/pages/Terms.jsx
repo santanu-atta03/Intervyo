@@ -4,7 +4,6 @@ export default function TermsAndConditions() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-purple-900 to-slate-900 text-white px-4 py-24">
       <div className="max-w-5xl mx-auto bg-white/5 backdrop-blur-lg rounded-3xl p-6 md:p-12 border border-white/10">
-
         <h1 className="text-3xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
           Terms & Conditions
         </h1>
@@ -60,10 +59,18 @@ export default function TermsAndConditions() {
             4. User Accounts & Responsibilities
           </h2>
           <ul className="list-disc list-inside space-y-2 text-gray-300">
-            <li>You are responsible for maintaining the confidentiality of your account credentials.</li>
-            <li>You are responsible for all activities conducted under your account.</li>
+            <li>
+              You are responsible for maintaining the confidentiality of your
+              account credentials.
+            </li>
+            <li>
+              You are responsible for all activities conducted under your
+              account.
+            </li>
             <li>You agree to provide accurate and up-to-date information.</li>
-            <li>You must notify us immediately of any unauthorized account use.</li>
+            <li>
+              You must notify us immediately of any unauthorized account use.
+            </li>
           </ul>
         </section>
 
@@ -81,7 +88,9 @@ export default function TermsAndConditions() {
             <li>Uploading malicious, harmful, or illegal content</li>
             <li>Impersonating another individual or organization</li>
             <li>Attempting to disrupt platform security or infrastructure</li>
-            <li>Using the platform for cheating, fraud, or misrepresentation</li>
+            <li>
+              Using the platform for cheating, fraud, or misrepresentation
+            </li>
           </ul>
         </section>
 
@@ -111,7 +120,9 @@ export default function TermsAndConditions() {
           <ul className="list-disc list-inside space-y-2 text-gray-300">
             <li>Fees are billed as displayed at the time of purchase</li>
             <li>Subscriptions may renew automatically unless cancelled</li>
-            <li>Payments are generally non-refundable unless stated otherwise</li>
+            <li>
+              Payments are generally non-refundable unless stated otherwise
+            </li>
           </ul>
         </section>
 
@@ -214,7 +225,6 @@ export default function TermsAndConditions() {
         <p className="text-xs text-gray-400 mt-12">
           Last updated: 7 January 2026
         </p>
-
       </div>
     </div>
   );

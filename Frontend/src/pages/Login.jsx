@@ -13,17 +13,17 @@ const PASSWORD_REQUIREMENTS = [
 
 const getStrength = (password) => PASSWORD_REQUIREMENTS.filter(req => req.test(password)).length;
 export default function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false); // Added state for password visibility
   const passwordInputRef = useRef(null);
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
-      document.getElementById('password-input')?.focus();
+      document.getElementById("password-input")?.focus();
     }
   };
 
@@ -32,16 +32,16 @@ export default function Login() {
 
   const handleEmailLogin = (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     dispatch(login(email, password, navigate));
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = 'https://intervyo.onrender.com/api/auth/google';
+    window.location.href = "https://intervyo.onrender.com/api/auth/google";
   };
 
   const handleGitHubLogin = () => {
-    window.location.href = 'https://intervyo.onrender.com/api/auth/github';
+    window.location.href = "https://intervyo.onrender.com/api/auth/github";
   };
 
   return (
@@ -168,7 +168,7 @@ export default function Login() {
               active:scale-95 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
             >
               <span className="relative z-10">
-                {loading ? 'Signing in...' : 'Sign In'}
+                {loading ? "Signing in..." : "Sign In"}
               </span>
               <span className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-emerald-600 opacity-0 hover:opacity-100 transition-opacity" />
             </button>
@@ -201,8 +201,11 @@ export default function Login() {
           </div>
 
           <p className="text-center mt-6 text-gray-400">
-            Don&apos;t have an account?{' '}
-            <a href="/register" className="text-emerald-400 font-semibold hover:underline">
+            Don&apos;t have an account?{" "}
+            <a
+              href="/register"
+              className="text-emerald-400 font-semibold hover:underline"
+            >
               Sign up
             </a>
           </p>

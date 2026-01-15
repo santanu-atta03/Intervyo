@@ -10,10 +10,30 @@ import { useSelector } from "react-redux";
 import io from "socket.io-client";
 import Editor from "@monaco-editor/react";
 import {
-  Code2, X, Play, Clock, Mic, MicOff, Video, VideoOff,
-  Phone, Send, ChevronDown, Maximize2, Minimize2, AlertCircle,
-  CheckCircle, TrendingUp, Award, Zap, Target, Brain, MessageSquare,
-  FileCode, Activity, BarChart3
+  Code2,
+  X,
+  Play,
+  Clock,
+  Mic,
+  MicOff,
+  Video,
+  VideoOff,
+  Phone,
+  Send,
+  ChevronDown,
+  Maximize2,
+  Minimize2,
+  AlertCircle,
+  CheckCircle,
+  TrendingUp,
+  Award,
+  Zap,
+  Target,
+  Brain,
+  MessageSquare,
+  FileCode,
+  Activity,
+  BarChart3,
 } from "lucide-react";
 import {
   getInterviewById,
@@ -35,11 +55,13 @@ const InterviewRoom = () => {
 
   // ========== INTERVIEW STATE ==========
   const [interviewStarted, setInterviewStarted] = useState(false);
-  const [sessionStatus, setSessionStatus] = useState('ready'); // ready, active, completed
+  const [sessionStatus, setSessionStatus] = useState("ready"); // ready, active, completed
   const [currentQuestion, setCurrentQuestion] = useState(null);
-  const [currentMessage, setCurrentMessage] = useState("Welcome! Loading interview...");
+  const [currentMessage, setCurrentMessage] = useState(
+    "Welcome! Loading interview...",
+  );
   const [conversationHistory, setConversationHistory] = useState([]);
-  
+
   // ========== PERFORMANCE STATE ==========
   const [performanceMetrics, setPerformanceMetrics] = useState({
     averageScore: 0,
@@ -49,7 +71,7 @@ const InterviewRoom = () => {
     currentStreak: 0,
     questionsAnswered: 0,
     perfectAnswers: 0,
-    totalQuestions: 0
+    totalQuestions: 0,
   });
 
   // ========== TIMER STATE ==========
@@ -92,7 +114,7 @@ const InterviewRoom = () => {
     { value: "python", label: "Python", icon: "PY" },
     { value: "java", label: "Java", icon: "☕" },
     { value: "cpp", label: "C++", icon: "C++" },
-    { value: "typescript", label: "TypeScript", icon: "TS" }
+    { value: "typescript", label: "TypeScript", icon: "TS" },
   ];
 
   const SOCKET_URL = "https://intervyo.onrender.com";
@@ -109,7 +131,7 @@ const InterviewRoom = () => {
   const initializeInterview = async () => {
     try {
       console.log("🎬 Initializing interview:", interviewId);
-      
+
       // Load interview data
       const interviewData = await getInterviewById(interviewId, token);
       setInterview(interviewData);
@@ -120,30 +142,36 @@ const InterviewRoom = () => {
 
       // Calculate total questions
       const totalQuestions = Math.floor(interviewData.duration / 2.5); // ~2.5 min per question
-      setPerformanceMetrics(prev => ({ ...prev, totalQuestions }));
+      setPerformanceMetrics((prev) => ({ ...prev, totalQuestions }));
 
       // Check if interview already started
       if (interviewData.status === "in-progress") {
         const sessionData = await getInterviewSession(interviewId, token);
         setSession(sessionData);
         setInterviewStarted(true);
-        setSessionStatus('active');
-        
+        setSessionStatus("active");
+
         console.log("✅ Session loaded:", sessionData);
-        
+
         // Restore conversation history
         if (sessionData.conversation && sessionData.conversation.length > 0) {
           setConversationHistory(sessionData.conversation);
-          const lastMessage = sessionData.conversation[sessionData.conversation.length - 1];
+          const lastMessage =
+            sessionData.conversation[sessionData.conversation.length - 1];
           setCurrentMessage(lastMessage.content || "Interview in progress...");
         }
-        
+
         // Restore metrics
-        if (sessionData.questionEvaluations && sessionData.questionEvaluations.length > 0) {
+        if (
+          sessionData.questionEvaluations &&
+          sessionData.questionEvaluations.length > 0
+        ) {
           updateMetricsFromEvaluations(sessionData.questionEvaluations);
         }
       } else {
-        setCurrentMessage("Ready to start? Click the button below when you're prepared.");
+        setCurrentMessage(
+          "Ready to start? Click the button below when you're prepared.",
+        );
       }
 
       setLoading(false);
@@ -156,15 +184,15 @@ const InterviewRoom = () => {
 
   const cleanup = () => {
     console.log("🧹 Cleaning up...");
-    
+
     // Stop timer
     if (timerRef.current) clearInterval(timerRef.current);
-    
+
     // Stop media
     if (stream) {
       stream.getTracks().forEach((track) => track.stop());
     }
-    
+
     // Stop speech recognition
     shouldRestartRecognition.current = false;
     if (recognitionRef.current) {
@@ -172,12 +200,12 @@ const InterviewRoom = () => {
         recognitionRef.current.abort();
       } catch (e) {}
     }
-    
+
     // Disconnect socket
     if (socket) {
       socket.disconnect();
     }
-    
+
     // Stop audio
     if (currentAudioRef.current) {
       currentAudioRef.current.pause();
@@ -199,16 +227,16 @@ const InterviewRoom = () => {
       try {
         localStream = await navigator.mediaDevices.getUserMedia({
           video: { width: { ideal: 1280 }, height: { ideal: 720 } },
-          audio: { echoCancellation: true, noiseSuppression: true }
+          audio: { echoCancellation: true, noiseSuppression: true },
         });
 
         if (!mounted) {
-          localStream.getTracks().forEach(t => t.stop());
+          localStream.getTracks().forEach((t) => t.stop());
           return;
         }
 
         setStream(localStream);
-        
+
         setTimeout(() => {
           if (videoRef.current && localStream && mounted) {
             videoRef.current.srcObject = localStream;
@@ -224,7 +252,7 @@ const InterviewRoom = () => {
     setupMedia();
     return () => {
       mounted = false;
-      if (localStream) localStream.getTracks().forEach(t => t.stop());
+      if (localStream) localStream.getTracks().forEach((t) => t.stop());
     };
   }, []);
 
@@ -233,7 +261,7 @@ const InterviewRoom = () => {
   // ============================================
 
   useEffect(() => {
-    if (sessionStatus === 'active' && !isPaused && timeRemaining > 0) {
+    if (sessionStatus === "active" && !isPaused && timeRemaining > 0) {
       timerRef.current = setInterval(() => {
         setTimeRemaining((prev) => {
           if (prev <= 1) {
@@ -253,7 +281,7 @@ const InterviewRoom = () => {
   const formatTime = useCallback((seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   }, []);
 
   const getTimeColor = useCallback(() => {
@@ -418,7 +446,7 @@ const InterviewRoom = () => {
         addNotification(`+${data.xpEarned} XP Earned! 🎯`, "success");
       }
       if (data.newBadges && data.newBadges.length > 0) {
-        data.newBadges.forEach(badge => {
+        data.newBadges.forEach((badge) => {
           addNotification(`🏆 Badge Unlocked: ${badge.name}`, "success");
         });
       }
@@ -427,7 +455,10 @@ const InterviewRoom = () => {
     newSocket.on("interview-ended", () => {
       console.log("🏁 Interview ended");
       cleanup();
-      addNotification("Interview completed! Redirecting to results...", "success");
+      addNotification(
+        "Interview completed! Redirecting to results...",
+        "success",
+      );
       setTimeout(() => {
         navigate(`/results/${interviewId}`);
       }, 2000);
@@ -493,7 +524,7 @@ const InterviewRoom = () => {
         requiresCode: data.requiresCode,
         questionIndex: data.questionIndex,
       });
-      
+
       questionStartTimeRef.current = Date.now();
       setUserTranscript("");
       transcriptAccumulatorRef.current = "";
@@ -568,12 +599,12 @@ const InterviewRoom = () => {
     try {
       setLoading(true);
       console.log("🎬 Starting interview...");
-      
+
       const result = await startInterview(interviewId, setLoading, token);
       setSession(result.session);
       setInterviewStarted(true);
-      setSessionStatus('active');
-      
+      setSessionStatus("active");
+
       console.log("✅ Interview started:", result);
       addNotification("Interview started! Good luck! 🎯", "success");
     } catch (error) {
@@ -610,10 +641,14 @@ const InterviewRoom = () => {
   }, []);
 
   const handleSubmitAnswer = useCallback(() => {
-    const answer = transcriptAccumulatorRef.current.trim() || userTranscript.trim();
+    const answer =
+      transcriptAccumulatorRef.current.trim() || userTranscript.trim();
 
     if (!answer || answer.length < 5) {
-      addNotification("Please provide a longer answer (at least 5 characters)", "error");
+      addNotification(
+        "Please provide a longer answer (at least 5 characters)",
+        "error",
+      );
       return;
     }
 
@@ -654,7 +689,9 @@ const InterviewRoom = () => {
   }, [socket, session, currentQuestion, userTranscript, stopListening]);
 
   const handleRunCode = useCallback(() => {
-    setCodeOutput("✓ Code compiled successfully\n\nTest cases:\n• Test 1: Passed ✓\n• Test 2: Passed ✓\n• Test 3: Passed ✓");
+    setCodeOutput(
+      "✓ Code compiled successfully\n\nTest cases:\n• Test 1: Passed ✓\n• Test 2: Passed ✓\n• Test 3: Passed ✓",
+    );
     addNotification("Code executed successfully! ✓", "success");
   }, []);
 
@@ -741,8 +778,12 @@ const InterviewRoom = () => {
     const totalScore = evaluations.reduce((sum, e) => sum + (e.score || 0), 0);
     const avgScore = totalScore / evaluations.length;
 
-    const technicalEvals = evaluations.filter((e) => e.category === "technical");
-    const behavioralEvals = evaluations.filter((e) => e.category === "behavioral");
+    const technicalEvals = evaluations.filter(
+      (e) => e.category === "technical",
+    );
+    const behavioralEvals = evaluations.filter(
+      (e) => e.category === "behavioral",
+    );
     const codingEvals = evaluations.filter((e) => e.category === "coding");
 
     const calculateAvg = (evals) => {
@@ -765,7 +806,7 @@ const InterviewRoom = () => {
       currentStreak: streak,
       questionsAnswered: evaluations.length,
       perfectAnswers: evaluations.filter((e) => e.score === 10).length,
-      totalQuestions: performanceMetrics.totalQuestions
+      totalQuestions: performanceMetrics.totalQuestions,
     });
   };
 
@@ -780,7 +821,9 @@ const InterviewRoom = () => {
           <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
             <Brain className="w-10 h-10 text-white" />
           </div>
-          <div className="text-white text-2xl mb-4 font-bold">Loading Interview...</div>
+          <div className="text-white text-2xl mb-4 font-bold">
+            Loading Interview...
+          </div>
           <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
         </div>
       </div>
@@ -799,24 +842,33 @@ const InterviewRoom = () => {
           {/* Left Section */}
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full ${
-                socketConnected && sessionStatus === 'active' ? 'bg-green-500 animate-pulse' : 'bg-gray-500'
-              }`} />
-              <span className="text-white font-semibold">{interview?.role || "Interview"}</span>
+              <div
+                className={`w-2 h-2 rounded-full ${
+                  socketConnected && sessionStatus === "active"
+                    ? "bg-green-500 animate-pulse"
+                    : "bg-gray-500"
+                }`}
+              />
+              <span className="text-white font-semibold">
+                {interview?.role || "Interview"}
+              </span>
             </div>
             <div className="px-2 py-1 bg-orange-500/20 text-orange-400 text-xs rounded-md border border-orange-500/30">
               {interview?.difficulty?.toUpperCase() || "MEDIUM"}
             </div>
             <div className="text-gray-400 text-sm flex items-center gap-1">
               <Target className="w-3 h-3" />
-              {performanceMetrics.questionsAnswered}/{performanceMetrics.totalQuestions} questions
+              {performanceMetrics.questionsAnswered}/
+              {performanceMetrics.totalQuestions} questions
             </div>
           </div>
 
           {/* Center - Timer */}
-          {sessionStatus === 'active' && (
+          {sessionStatus === "active" && (
             <div className="flex items-center gap-3">
-              <div className={`flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-800/50 border border-gray-700 ${getTimeColor()}`}>
+              <div
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-800/50 border border-gray-700 ${getTimeColor()}`}
+              >
                 <Clock className="w-5 h-5" />
                 <span className="text-2xl font-mono font-bold">
                   {formatTime(timeRemaining)}
@@ -826,7 +878,7 @@ const InterviewRoom = () => {
                 onClick={() => setIsPaused(!isPaused)}
                 className="px-3 py-2 bg-yellow-500/20 text-yellow-400 rounded-lg text-xs hover:bg-yellow-500/30 transition-colors"
               >
-                {isPaused ? '▶ Resume' : '⏸ Pause'}
+                {isPaused ? "▶ Resume" : "⏸ Pause"}
               </button>
             </div>
           )}
@@ -840,7 +892,7 @@ const InterviewRoom = () => {
               <BarChart3 className="w-4 h-4" />
               Stats
             </button>
-            {sessionStatus === 'active' && (
+            {sessionStatus === "active" && (
               <button
                 onClick={handleEndInterview}
                 className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition-colors text-sm"
@@ -867,7 +919,9 @@ const InterviewRoom = () => {
           {!isVideoOn && (
             <div className="w-full h-full flex items-center justify-center bg-gray-900">
               <div className="w-32 h-32 bg-gray-800 rounded-full flex items-center justify-center">
-                <span className="text-5xl">{interview?.role?.charAt(0) || "U"}</span>
+                <span className="text-5xl">
+                  {interview?.role?.charAt(0) || "U"}
+                </span>
               </div>
             </div>
           )}
@@ -879,16 +933,18 @@ const InterviewRoom = () => {
             <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-3">
               <Brain className="w-10 h-10 text-white" />
             </div>
-            <div className="text-white font-semibold text-lg">AI Interviewer</div>
+            <div className="text-white font-semibold text-lg">
+              AI Interviewer
+            </div>
             {aiSpeaking && (
               <div className="flex items-center gap-1 mt-3">
                 {[...Array(4)].map((_, i) => (
                   <div
                     key={i}
                     className="w-1 bg-white rounded-full animate-pulse"
-                    style={{ 
+                    style={{
                       height: `${12 + Math.random() * 12}px`,
-                      animationDelay: `${i * 0.1}s`
+                      animationDelay: `${i * 0.1}s`,
                     }}
                   />
                 ))}
@@ -912,21 +968,26 @@ const InterviewRoom = () => {
         </div>
 
         {/* Performance Stats Panel */}
-        {showStats && sessionStatus === 'active' && (
+        {showStats && sessionStatus === "active" && (
           <div className="absolute top-4 left-4 bg-gray-900/95 backdrop-blur-md rounded-2xl p-6 border border-gray-700 shadow-2xl w-80 z-30">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-white font-bold flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-blue-400" />
                 Performance
               </h3>
-              <button onClick={() => setShowStats(false)} className="text-gray-400 hover:text-white">
+              <button
+                onClick={() => setShowStats(false)}
+                className="text-gray-400 hover:text-white"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-gray-400 text-sm">Average Score</span>
-                <span className="text-white font-bold">{performanceMetrics.averageScore}/10</span>
+                <span className="text-white font-bold">
+                  {performanceMetrics.averageScore}/10
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-gray-400 text-sm">Current Streak</span>
@@ -965,7 +1026,7 @@ const InterviewRoom = () => {
         )}
 
         {/* Message Display */}
-        {currentMessage && sessionStatus === 'active' && !showCodeEditor && (
+        {currentMessage && sessionStatus === "active" && !showCodeEditor && (
           <div className="absolute bottom-32 left-6 right-6 max-w-4xl mx-auto">
             <div className="bg-gray-900/95 backdrop-blur-md rounded-2xl p-6 border border-gray-700 shadow-2xl">
               <div className="flex items-start gap-4">
@@ -973,8 +1034,12 @@ const InterviewRoom = () => {
                   <MessageSquare className="w-5 h-5 text-white" />
                 </div>
                 <div className="flex-1">
-                  <div className="text-sm text-gray-400 mb-1">AI Interviewer</div>
-                  <p className="text-white text-lg leading-relaxed">{currentMessage}</p>
+                  <div className="text-sm text-gray-400 mb-1">
+                    AI Interviewer
+                  </div>
+                  <p className="text-white text-lg leading-relaxed">
+                    {currentMessage}
+                  </p>
                 </div>
               </div>
             </div>
@@ -989,7 +1054,9 @@ const InterviewRoom = () => {
                 <Mic className="w-4 h-4 animate-pulse" />
                 Your Answer (Live):
               </div>
-              <p className="text-white text-lg leading-relaxed">{userTranscript}</p>
+              <p className="text-white text-lg leading-relaxed">
+                {userTranscript}
+              </p>
               <div className="mt-3 text-blue-200 text-sm">
                 💡 Click "Submit Answer" when done or keep speaking...
               </div>
@@ -999,7 +1066,9 @@ const InterviewRoom = () => {
 
         {/* Code Editor Overlay */}
         {showCodeEditor && currentQuestion && (
-          <div className={`absolute ${isCodeFullscreen ? 'inset-0' : 'inset-4'} bg-gray-950/98 backdrop-blur-sm flex items-center justify-center z-50 transition-all`}>
+          <div
+            className={`absolute ${isCodeFullscreen ? "inset-0" : "inset-4"} bg-gray-950/98 backdrop-blur-sm flex items-center justify-center z-50 transition-all`}
+          >
             <div className="bg-gray-900 rounded-2xl w-full h-full flex flex-col border border-gray-700 shadow-2xl">
               {/* Code Editor Header */}
               <div className="px-6 py-4 border-b border-gray-700 flex items-center justify-between bg-gray-800/50">
@@ -1008,8 +1077,12 @@ const InterviewRoom = () => {
                     <FileCode className="w-6 h-6 text-blue-400" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white">Coding Challenge</h3>
-                    <p className="text-sm text-gray-400">Question {currentQuestion.questionIndex + 1}</p>
+                    <h3 className="text-lg font-bold text-white">
+                      Coding Challenge
+                    </h3>
+                    <p className="text-sm text-gray-400">
+                      Question {currentQuestion.questionIndex + 1}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -1017,7 +1090,11 @@ const InterviewRoom = () => {
                     onClick={() => setIsCodeFullscreen(!isCodeFullscreen)}
                     className="p-2 text-gray-400 hover:text-white transition-colors"
                   >
-                    {isCodeFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
+                    {isCodeFullscreen ? (
+                      <Minimize2 className="w-5 h-5" />
+                    ) : (
+                      <Maximize2 className="w-5 h-5" />
+                    )}
                   </button>
                   <button
                     onClick={() => setShowCodeEditor(false)}
@@ -1037,10 +1114,14 @@ const InterviewRoom = () => {
                     Problem
                   </h4>
                   <div className="bg-gray-900/50 rounded-xl p-4 border border-gray-700 mb-6">
-                    <p className="text-gray-300 leading-relaxed">{currentQuestion.message}</p>
+                    <p className="text-gray-300 leading-relaxed">
+                      {currentQuestion.message}
+                    </p>
                   </div>
 
-                  <h4 className="text-white font-semibold mb-3">Instructions</h4>
+                  <h4 className="text-white font-semibold mb-3">
+                    Instructions
+                  </h4>
                   <ul className="space-y-2 text-gray-400 text-sm">
                     <li className="flex items-start gap-2">
                       <span className="text-blue-400 mt-1">•</span>
@@ -1066,7 +1147,9 @@ const InterviewRoom = () => {
                           value={codeLanguage}
                           onChange={(e) => {
                             setCodeLanguage(e.target.value);
-                            const langData = languages.find((l) => l.value === e.target.value);
+                            const langData = languages.find(
+                              (l) => l.value === e.target.value,
+                            );
                             setCode(langData?.default || "");
                           }}
                           className="appearance-none bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 pr-10 text-white focus:outline-none focus:border-blue-500 cursor-pointer"
@@ -1097,16 +1180,16 @@ const InterviewRoom = () => {
                       height="100%"
                       language={codeLanguage}
                       value={code}
-                      onChange={(value) => setCode(value || '')}
+                      onChange={(value) => setCode(value || "")}
                       theme="vs-dark"
                       options={{
                         minimap: { enabled: false },
                         fontSize: 14,
-                        lineNumbers: 'on',
+                        lineNumbers: "on",
                         scrollBeyondLastLine: false,
                         automaticLayout: true,
                         tabSize: 2,
-                        wordWrap: 'on',
+                        wordWrap: "on",
                       }}
                     />
                   </div>
@@ -1115,7 +1198,9 @@ const InterviewRoom = () => {
                     <div className="border-t border-gray-700 bg-gray-800/50 p-4 max-h-40 overflow-y-auto">
                       <div className="flex items-center gap-2 mb-2">
                         <CheckCircle className="w-4 h-4 text-green-400" />
-                        <span className="text-white font-semibold text-sm">Output</span>
+                        <span className="text-white font-semibold text-sm">
+                          Output
+                        </span>
                       </div>
                       <pre className="bg-gray-900 rounded-lg p-4 font-mono text-sm text-green-400 whitespace-pre-wrap">
                         {codeOutput}
@@ -1154,28 +1239,44 @@ const InterviewRoom = () => {
         )}
 
         {/* Start Interview Overlay */}
-        {sessionStatus === 'ready' && !interviewStarted && (
+        {sessionStatus === "ready" && !interviewStarted && (
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-40">
             <div className="bg-gray-900/95 backdrop-blur-md rounded-2xl p-12 border border-gray-700 shadow-2xl max-w-2xl text-center">
               <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Brain className="w-10 h-10 text-white" />
               </div>
-              <h2 className="text-3xl font-bold text-white mb-4">Ready to Start?</h2>
+              <h2 className="text-3xl font-bold text-white mb-4">
+                Ready to Start?
+              </h2>
               <p className="text-gray-400 mb-6 text-lg">
-                This interview will last <span className="text-white font-bold">{interview?.duration} minutes</span> with approximately <span className="text-white font-bold">{performanceMetrics.totalQuestions} questions</span>.
+                This interview will last{" "}
+                <span className="text-white font-bold">
+                  {interview?.duration} minutes
+                </span>{" "}
+                with approximately{" "}
+                <span className="text-white font-bold">
+                  {performanceMetrics.totalQuestions} questions
+                </span>
+                .
               </p>
               <div className="grid grid-cols-3 gap-4 mb-8">
                 <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
                   <div className="text-2xl mb-2">🎯</div>
-                  <div className="text-white font-semibold">{interview?.role}</div>
+                  <div className="text-white font-semibold">
+                    {interview?.role}
+                  </div>
                 </div>
                 <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
                   <div className="text-2xl mb-2">📊</div>
-                  <div className="text-white font-semibold">{interview?.difficulty}</div>
+                  <div className="text-white font-semibold">
+                    {interview?.difficulty}
+                  </div>
                 </div>
                 <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
                   <div className="text-2xl mb-2">⏱️</div>
-                  <div className="text-white font-semibold">{interview?.duration} min</div>
+                  <div className="text-white font-semibold">
+                    {interview?.duration} min
+                  </div>
                 </div>
               </div>
               <button
@@ -1183,14 +1284,14 @@ const InterviewRoom = () => {
                 disabled={loading}
                 className="px-12 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all text-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Starting...' : 'Start Interview'}
+                {loading ? "Starting..." : "Start Interview"}
               </button>
             </div>
           </div>
         )}
 
         {/* Control Bar */}
-        {sessionStatus === 'active' && !showCodeEditor && (
+        {sessionStatus === "active" && !showCodeEditor && (
           <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-40">
             <div className="bg-gray-900/95 backdrop-blur-md rounded-2xl px-6 py-4 flex items-center gap-4 border border-gray-700 shadow-2xl">
               <button
@@ -1201,9 +1302,19 @@ const InterviewRoom = () => {
                     ? "bg-gray-700 hover:bg-gray-600 text-white"
                     : "bg-red-500 hover:bg-red-600 text-white"
                 } ${isListening ? "opacity-50 cursor-not-allowed" : ""}`}
-                title={isListening ? "Cannot toggle while listening" : isAudioOn ? "Mute" : "Unmute"}
+                title={
+                  isListening
+                    ? "Cannot toggle while listening"
+                    : isAudioOn
+                      ? "Mute"
+                      : "Unmute"
+                }
               >
-                {isAudioOn ? <Mic className="w-6 h-6" /> : <MicOff className="w-6 h-6" />}
+                {isAudioOn ? (
+                  <Mic className="w-6 h-6" />
+                ) : (
+                  <MicOff className="w-6 h-6" />
+                )}
               </button>
 
               <button
@@ -1214,7 +1325,11 @@ const InterviewRoom = () => {
                     : "bg-red-500 hover:bg-red-600 text-white"
                 }`}
               >
-                {isVideoOn ? <Video className="w-6 h-6" /> : <VideoOff className="w-6 h-6" />}
+                {isVideoOn ? (
+                  <Video className="w-6 h-6" />
+                ) : (
+                  <VideoOff className="w-6 h-6" />
+                )}
               </button>
 
               {!aiSpeaking && currentQuestion && !isListening && (
@@ -1239,7 +1354,9 @@ const InterviewRoom = () => {
 
                   <button
                     onClick={handleSubmitAnswer}
-                    disabled={!userTranscript.trim() || userTranscript.trim().length < 5}
+                    disabled={
+                      !userTranscript.trim() || userTranscript.trim().length < 5
+                    }
                     className="px-8 py-3 bg-green-500 hover:bg-green-600 rounded-xl font-semibold text-white transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Send className="w-5 h-5" />
@@ -1273,17 +1390,17 @@ const InterviewRoom = () => {
           <div
             key={notif.id}
             className={`px-6 py-3 rounded-xl shadow-2xl backdrop-blur-md border animate-slide-in-right ${
-              notif.type === 'success'
-                ? 'bg-green-500/20 border-green-500/50 text-green-400'
-                : notif.type === 'error'
-                ? 'bg-red-500/20 border-red-500/50 text-red-400'
-                : 'bg-blue-500/20 border-blue-500/50 text-blue-400'
+              notif.type === "success"
+                ? "bg-green-500/20 border-green-500/50 text-green-400"
+                : notif.type === "error"
+                  ? "bg-red-500/20 border-red-500/50 text-red-400"
+                  : "bg-blue-500/20 border-blue-500/50 text-blue-400"
             }`}
           >
             <div className="flex items-center gap-2">
-              {notif.type === 'success' && <CheckCircle className="w-5 h-5" />}
-              {notif.type === 'error' && <AlertCircle className="w-5 h-5" />}
-              {notif.type === 'info' && <Activity className="w-5 h-5" />}
+              {notif.type === "success" && <CheckCircle className="w-5 h-5" />}
+              {notif.type === "error" && <AlertCircle className="w-5 h-5" />}
+              {notif.type === "info" && <Activity className="w-5 h-5" />}
               <span className="font-semibold">{notif.message}</span>
             </div>
           </div>

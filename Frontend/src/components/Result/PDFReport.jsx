@@ -1,15 +1,15 @@
 // File: src/components/Results/PDFReport.jsx
-import React from 'react';
+import React from "react";
 
 const PDFReport = ({ session, feedback, interview }) => {
   const generatePDF = () => {
-    const printWindow = window.open('', '', 'height=800,width=1000');
-    
+    const printWindow = window.open("", "", "height=800,width=1000");
+
     const htmlContent = `
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Interview Report - ${interview?.role || 'Position'}</title>
+          <title>Interview Report - ${interview?.role || "Position"}</title>
           <style>
             * {
               margin: 0;
@@ -287,7 +287,7 @@ const PDFReport = ({ session, feedback, interview }) => {
             <!-- Header -->
             <div class="header">
               <h1>🎓 Interview Performance Report</h1>
-              <p>${interview?.role || 'Position'} • ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+              <p>${interview?.role || "Position"} • ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}</p>
             </div>
             
             <!-- Overall Score -->
@@ -297,9 +297,15 @@ const PDFReport = ({ session, feedback, interview }) => {
               </div>
               <div class="score-label">Overall Score (out of 100)</div>
               <div class="performance">
-                ${feedback?.overallScore >= 80 ? '🌟 Excellent' : 
-                  feedback?.overallScore >= 60 ? '👍 Good' : 
-                  feedback?.overallScore >= 40 ? '📈 Average' : '💪 Needs Improvement'}
+                ${
+                  feedback?.overallScore >= 80
+                    ? "🌟 Excellent"
+                    : feedback?.overallScore >= 60
+                      ? "👍 Good"
+                      : feedback?.overallScore >= 40
+                        ? "📈 Average"
+                        : "💪 Needs Improvement"
+                }
               </div>
             </div>
             
@@ -312,7 +318,7 @@ const PDFReport = ({ session, feedback, interview }) => {
                   Overall Summary
                 </div>
                 <div class="summary">
-                  ${feedback?.summary || 'Great job completing the interview! You demonstrated strong communication skills and technical knowledge.'}
+                  ${feedback?.summary || "Great job completing the interview! You demonstrated strong communication skills and technical knowledge."}
                 </div>
               </div>
               
@@ -356,12 +362,22 @@ const PDFReport = ({ session, feedback, interview }) => {
                   <span>💪</span>
                   Key Strengths
                 </div>
-                ${(feedback?.strengths || ['Strong technical knowledge', 'Clear communication', 'Good problem-solving']).map(strength => `
+                ${(
+                  feedback?.strengths || [
+                    "Strong technical knowledge",
+                    "Clear communication",
+                    "Good problem-solving",
+                  ]
+                )
+                  .map(
+                    (strength) => `
                   <div class="list-item strength">
                     <div class="list-icon">✓</div>
                     <div class="list-text">${strength}</div>
                   </div>
-                `).join('')}
+                `,
+                  )
+                  .join("")}
               </div>
               
               <!-- Improvements -->
@@ -370,22 +386,37 @@ const PDFReport = ({ session, feedback, interview }) => {
                   <span>📈</span>
                   Areas for Improvement
                 </div>
-                ${(feedback?.improvements || ['Practice coding', 'More detailed explanations', 'Review fundamentals']).map(improvement => `
+                ${(
+                  feedback?.improvements || [
+                    "Practice coding",
+                    "More detailed explanations",
+                    "Review fundamentals",
+                  ]
+                )
+                  .map(
+                    (improvement) => `
                   <div class="list-item improvement">
                     <div class="list-icon">→</div>
                     <div class="list-text">${improvement}</div>
                   </div>
-                `).join('')}
+                `,
+                  )
+                  .join("")}
               </div>
               
               <!-- Questions Analysis -->
-              ${session?.questionEvaluations && session.questionEvaluations.length > 0 ? `
+              ${
+                session?.questionEvaluations &&
+                session.questionEvaluations.length > 0
+                  ? `
                 <div class="section">
                   <div class="section-title">
                     <span>❓</span>
                     Question-by-Question Analysis
                   </div>
-                  ${session.questionEvaluations.map((evalua, index) => `
+                  ${session.questionEvaluations
+                    .map(
+                      (evalua, index) => `
                     <div class="question-card">
                       <div class="question-header">
                         <div>
@@ -400,9 +431,13 @@ const PDFReport = ({ session, feedback, interview }) => {
                         <strong>Feedback:</strong> ${evalua.feedback}
                       </div>
                     </div>
-                  `).join('')}
+                  `,
+                    )
+                    .join("")}
                 </div>
-              ` : ''}
+              `
+                  : ""
+              }
             </div>
             
             <!-- Footer -->
@@ -417,10 +452,10 @@ const PDFReport = ({ session, feedback, interview }) => {
         </body>
       </html>
     `;
-    
+
     printWindow.document.write(htmlContent);
     printWindow.document.close();
-    
+
     // Wait for content to load then trigger print
     setTimeout(() => {
       printWindow.focus();

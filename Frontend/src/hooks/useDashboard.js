@@ -3,11 +3,11 @@
 // File: src/hooks/useDashboard.js
 // ============================================
 
-import { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import axios from 'axios';
+import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
+import axios from "axios";
 
-const API_URL = 'https://intervyo.onrender.com/api';
+const API_URL = "https://intervyo.onrender.com/api";
 
 export const useDashboard = () => {
   const { user } = useSelector((state) => state.profile);
@@ -17,7 +17,7 @@ export const useDashboard = () => {
     stats: null,
     recentInterviews: [],
     learningProgress: [],
-    badges: []
+    badges: [],
   });
 
   useEffect(() => {
@@ -31,74 +31,75 @@ export const useDashboard = () => {
       setLoading(true);
       setError(null);
 
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const config = {
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       };
 
       // Fetch all dashboard data in parallel
-      const [statsRes, interviewsRes, progressRes, badgesRes] = await Promise.all([
-        axios.get(`${API_URL}/dashboard/stats`, config),
-        axios.get(`${API_URL}/dashboard/interviews/recent?limit=5`, config),
-        axios.get(`${API_URL}/dashboard/learning-progress`, config),
-        axios.get(`${API_URL}/dashboard/badges`, config)
-      ]);
+      const [statsRes, interviewsRes, progressRes, badgesRes] =
+        await Promise.all([
+          axios.get(`${API_URL}/dashboard/stats`, config),
+          axios.get(`${API_URL}/dashboard/interviews/recent?limit=5`, config),
+          axios.get(`${API_URL}/dashboard/learning-progress`, config),
+          axios.get(`${API_URL}/dashboard/badges`, config),
+        ]);
 
       setDashboardData({
         stats: statsRes.data.data,
         recentInterviews: interviewsRes.data.data || [],
         learningProgress: progressRes.data.data || [],
-        badges: badgesRes.data.data || []
+        badges: badgesRes.data.data || [],
       });
 
       setLoading(false);
     } catch (err) {
-      console.error('Error fetching dashboard data:', err);
-      setError(err.response?.data?.message || 'Failed to load dashboard');
+      console.error("Error fetching dashboard data:", err);
+      setError(err.response?.data?.message || "Failed to load dashboard");
       setLoading(false);
     }
   };
 
   const updateStreak = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const response = await axios.post(
         `${API_URL}/dashboard/update-streak`,
         {},
         {
           headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        }
+            Authorization: `Bearer ${token}`,
+          },
+        },
       );
       return response.data;
     } catch (err) {
-      console.error('Error updating streak:', err);
+      console.error("Error updating streak:", err);
       return null;
     }
   };
 
   const awardXP = async (xpAmount, reason) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const response = await axios.post(
         `${API_URL}/dashboard/award-xp`,
         { xpAmount, reason },
         {
           headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        }
+            Authorization: `Bearer ${token}`,
+          },
+        },
       );
-      
+
       // Refresh stats after awarding XP
       await fetchDashboardData();
-      
+
       return response.data;
     } catch (err) {
-      console.error('Error awarding XP:', err);
+      console.error("Error awarding XP:", err);
       return null;
     }
   };
@@ -113,7 +114,7 @@ export const useDashboard = () => {
     dashboardData,
     updateStreak,
     awardXP,
-    refreshData
+    refreshData,
   };
 };
 
