@@ -62,7 +62,7 @@ export default function Footer() {
             <ul className="space-y-2 md:space-y-3 text-sm md:text-base">
               <li>
                 <a
-                  href="#"
+                  href="/register"
                   className="hover:text-emerald-400 transition-colors"
                 >
                   Mock Interviews
@@ -70,7 +70,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="#"
+                  href="/register"
                   className="hover:text-emerald-400 transition-colors"
                 >
                   AI Feedback
@@ -78,7 +78,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="#"
+                  href="/register"
                   className="hover:text-emerald-400 transition-colors"
                 >
                   Role Prep
@@ -106,7 +106,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="#"
+                  href="/register"
                   className="hover:text-emerald-400 transition-colors"
                 >
                   Careers
