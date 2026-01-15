@@ -1,6 +1,6 @@
-import { getAnalytics } from "../controllers/Analytics.controller.js";
+import { getUserAnalytics } from "../controllers/Analytics.controller.js";
 // ... your other imports and middleware
-router.get("/analytics", protect, getAnalytics);
+router.get("/analytics", protect, getUserAnalytics);
 
 import express from "express";
 const router = express.Router();
