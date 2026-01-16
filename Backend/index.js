@@ -159,8 +159,10 @@ app.get("/api/health", async (req, res) => {
 // ========================================
 // ERROR HANDLER
 // ========================================
+import logger from "./utils/logger.js";
+
 app.use((err, req, res, next) => {
-  console.error("Error:", err);
+  logger.error("Server Error:", err);
   res.status(err.status || 500).json({
     success: false,
     message: err.message || "Internal Server Error",
@@ -174,7 +176,7 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5000;
 if (process.env.NODE_ENV !== "test") {
   server.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
+    logger.success(`Server running on port ${PORT}`);
   });
 }
 
@@ -182,38 +184,34 @@ if (process.env.NODE_ENV !== "test") {
 // GRACEFUL SHUTDOWN
 // ========================================
 const gracefulShutdown = async (signal) => {
-  console.log(`\n${signal} received. Starting graceful shutdown...`);
-
+  logger.warn(`${signal} received. Starting graceful shutdown...`);
+  
   try {
     // Close server to stop accepting new connections
     server.close(() => {
-      console.log('HTTP server closed');
+      logger.info('HTTP server closed');
     });
 
     // Close database connection
     await mongoose.connection.close(false);
-    console.log('MongoDB connection closed');
+    logger.info('MongoDB connection closed');
 
     process.exit(0);
   } catch (error) {
-    console.error('Error during graceful shutdown:', error);
-    process.exit(1);
-  }
-};
-
+    logger.error('Error during graceful shutdown:', error);
 // Listen for termination signals
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (error) => {
-  console.error('Uncaught Exception:', error);
+  logger.error('Uncaught Exception:', error);
   gracefulShutdown('uncaughtException');
 });
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  logger.error('Unhandled Rejection:', { reason, promise });
   gracefulShutdown('unhandledRejection');
 });
 

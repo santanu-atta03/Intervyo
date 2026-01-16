@@ -363,7 +363,7 @@ export const login = async (req, res) => {
     delete userResponse.resetPasswordToken;
     delete userResponse.resetPasswordExpire;
 
-    console.log("User on login:", JSON.stringify(userResponse, null, 2));
+    logger.debug("User logged in:", { userId: userResponse._id, email: userResponse.email });
 
     res.json({
       success: true,
