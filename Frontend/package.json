@@ -22,7 +22,7 @@
     "copy-to-clipboard": "^3.3.3",
     "elevenlabs-js": "^1.2.6",
     "face-api.js": "^0.22.2",
-    "framer-motion": "^12.23.22",
+    "framer-motion": "^12.26.2",
     "gsap": "^3.13.0",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.545.0",

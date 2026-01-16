@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -42,7 +42,7 @@ import {
   deleteNotification,
   clearReadNotifications,
 } from "../services/operations/notificationAPI";
-import logo from "../assets/intervyologo.jpg"
+import logo from "../assets/intervyologo.png"
 
 export default function Dashboard() {
   const dispatch = useDispatch();
@@ -56,6 +56,7 @@ export default function Dashboard() {
     setNotifications,
     setUnreadCount,
   } = useNotifications();
+  const profileMenuRef = useRef(null);
 
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -436,6 +437,27 @@ export default function Dashboard() {
     });
   };
 
+  useEffect(() => {
+  if (!showProfileMenu) return;
+
+  function handleClickOutside(event) {
+    if (
+      profileMenuRef.current &&
+      !profileMenuRef.current.contains(event.target)
+    ) {
+      setShowProfileMenu(false);
+    }
+  }
+
+  document.addEventListener("mousedown", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, [showProfileMenu]);
+
+
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
@@ -568,9 +590,12 @@ export default function Dashboard() {
                 Blog
               </Link>
 
-              <div className="relative">
+              <div ref={profileMenuRef} className="relative">
                 <button
-                  onClick={() => setShowProfileMenu(!showProfileMenu)}
+                  onClick={(e) => {
+    e.stopPropagation(); // ⛔ prevents immediate close
+    setShowProfileMenu((prev) => !prev);
+  }}
                   className="flex items-center gap-2 sm:gap-3 hover:bg-gray-800/50 px-2 sm:px-3 py-2 rounded-xl transition group"
                 >
                   <div className="relative">

@@ -3,6 +3,14 @@
 @tailwind utilities;
 
 
+/* Hide scrollbar but keep scrolling */
+::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+}
+
+
+
 /* Toast Animations */
 @keyframes slide-in-right {
   0% {

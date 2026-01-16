@@ -13,7 +13,7 @@ import {
   getUserProfile,
 } from "../../services/operations/profileAPI";
 import { setLoading } from "../../slices/authSlice";
-
+import logo from "../../assets/logo.png"
 export default function Settings() {
   const fileInputRef = useRef(null);
   const { user } = useSelector((state) => state.profile);
@@ -26,6 +26,7 @@ export default function Settings() {
   const [userData, setUserData] = useState("");
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  console.log("Profile : ",user)
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -506,9 +507,7 @@ export default function Settings() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center cursor-pointer">
-                <span className="text-white font-bold text-xl">AI</span>
-              </div>
+              <img src={logo} alt="logo" />
               <span className="text-xl font-bold text-gray-800">Intervyo</span>
             </div>
 
@@ -526,7 +525,7 @@ export default function Settings() {
                   className="flex items-center gap-3 hover:bg-gray-100 p-2 rounded-lg transition"
                 >
                   <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
-                    {user?.name?.charAt(0)}
+                   {user?.profilePicture} || {user?.name?.charAt(0)}
                   </div>
                 </button>
 

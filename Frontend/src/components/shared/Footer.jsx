@@ -86,7 +86,7 @@ export default function Footer() {
             </h4>
             <ul className="space-y-3">
               <li>
-                <a href="#" className="text-gray-400 hover:text-emerald-400 transition-colors text-sm">
+                <a href="/interview-setup" className="text-gray-400 hover:text-emerald-400 transition-colors text-sm">
                   Mock Interviews
                 </a>
               </li>
@@ -101,7 +101,7 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-400 hover:text-emerald-400 transition-colors text-sm">
+                <a href="/resources" className="text-gray-400 hover:text-emerald-400 transition-colors text-sm">
                   Study Plans
                 </a>
               </li>
@@ -122,6 +122,11 @@ export default function Footer() {
               <li>
                 <Link to="/blog" className="text-gray-400 hover:text-emerald-400 transition-colors text-sm">
                   Blog
+                </Link>
+              </li>
+              <li>
+                <Link to="/career" className="text-gray-400 hover:text-emerald-400 transition-colors text-sm">
+                  Careers
                 </Link>
               </li>
               <li>

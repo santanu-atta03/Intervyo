@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { motion, useInView, useAnimation } from "framer-motion";
 import {
   Target,
   Eye,
@@ -9,7 +10,6 @@ import {
   Sparkles,
   Shield,
   Zap,
-  Globe,
   Mail,
   Linkedin,
   Github,
@@ -18,18 +18,75 @@ import {
   ArrowRight,
   MessageSquare,
   BarChart,
+  Globe,
+  Lightbulb,
+  Star,
 } from "lucide-react";
 import { useState } from "react";
+import Lenis from "@studio-freight/lenis";
 
 export default function AboutUs() {
   const navigate = useNavigate();
   const { token } = useSelector((state) => state.auth);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const lenisRef = useRef(null);
+  const [contributors, setContributors] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
+  
+    // Initialize Lenis smooth scroll
+    useEffect(() => {
+      const lenis = new Lenis({
+        duration: 1.2,
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        orientation: "vertical",
+        gestureOrientation: "vertical",
+        smoothWheel: true,
+        wheelMultiplier: 1,
+        smoothTouch: false,
+        touchMultiplier: 2,
+        infinite: false,
+      });
+  
+      lenisRef.current = lenis;
+  
+      function raf(time) {
+        lenis.raf(time);
+        requestAnimationFrame(raf);
+      }
+  
+      requestAnimationFrame(raf);
+  
+      return () => {
+        lenis.destroy();
+      };
+    }, []);
 
   const closeMobileMenu = () => {
     setMobileMenuOpen(false);
   };
-
+  const itemVariants = {
+    hidden: { y: 0, opacity: 1 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 24,
+      },
+    },
+  };
+   const containerVariants = {
+    hidden: { opacity: 1 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.05,
+        delayChildren: 0,
+      },
+    },
+  };
   const teamMembers = [
     {
       name: "Santanu Atta",
@@ -39,6 +96,39 @@ export default function AboutUs() {
       github: "https://github.com/santanu-atta03",
     },
   ];
+  const AnimatedSection = ({ children, className = "" }) => {
+    return (
+      <motion.div
+        className={className}
+        initial="visible"
+        animate="visible"
+        variants={containerVariants}
+      >
+        {children}
+      </motion.div>
+    );
+  };
+
+
+  React.useEffect(() => {
+    const fetchContributors = async () => {
+      try {
+        const response = await fetch('https://api.github.com/repos/santanu-atta03/Intervyo/contributors');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setContributors(data);
+      } catch (err) {
+        setError(err.message);
+        console.error('Error fetching contributors:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchContributors();
+  }, []);
 
   const coreValues = [
     {
@@ -66,6 +156,37 @@ export default function AboutUs() {
         "Building features that truly matter and help our users succeed in their careers.",
     },
   ];
+  const team = {
+    creator: {
+      name: "Santanu Atta",
+      role: "Full-Stack Developer & Creator",
+      description: "Passionate developer dedicated to transforming public transportation through innovative technology solutions.",
+      github: "https://github.com/santanu-atta03",
+      email: "intervyo@team.gmail.com",
+      avatar: "https://github.com/santanu-atta03.png",
+      skills: ["React", "Node.js", "MongoDB", "Express.js"],
+    },
+    values: [
+      {
+        name: "Innovation",
+        role: "Core Principle",
+        description: "Continuously pushing boundaries with cutting-edge technology solutions",
+        icon: Lightbulb,
+      },
+      {
+        name: "Reliability",
+        role: "Foundation",
+        description: "Building robust systems that users can depend on every day",
+        icon: Shield,
+      },
+      {
+        name: "User-Centric",
+        role: "Design Philosophy", 
+        description: "Every feature designed with user experience and accessibility in mind",
+        icon: Heart,
+      },
+    ],
+  };
 
   return (
     <div className="bg-white text-gray-900">
@@ -411,17 +532,17 @@ export default function AboutUs() {
             {coreValues.map((value, index) => (
               <div
                 key={index}
-                className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 hover:shadow-lg hover:border-emerald-200 transition-all group"
+                className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 hover:shadow-lg hover:border-emerald-200 hover:text-white transition-all group hover:scale-110 duration-500"
               >
-                <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-emerald-500 transition-all">
+                <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-emerald-500 group-hover:text-white transition-all group-hover:scale-110">
                   <span className="text-emerald-500 group-hover:text-white transition-all">
                     {value.icon}
                   </span>
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">
+                <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-white">
                   {value.title}
                 </h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
+                <p className="text-gray-600 text-sm leading-relaxed group-hover:text-white">
                   {value.description}
                 </p>
               </div>
@@ -502,7 +623,7 @@ export default function AboutUs() {
             </p>
           </div>
 
-          <div className="flex justify-center">
+          {/* <div className="flex justify-center">
             {teamMembers.map((member, index) => (
               <div
                 key={index}
@@ -542,7 +663,183 @@ export default function AboutUs() {
                 </div>
               </div>
             ))}
+          </div> */}
+          {/* Creator Section */}
+        <AnimatedSection
+          className={`rounded-3xl shadow-2xl p-8 md:p-12 mb-12 border backdrop-blur-sm parallax-element bg-gray-900 border-gray-700/50
+              `}
+        >
+          <div className="text-center mb-8">
+            <motion.div
+              className="flex justify-center mb-6"
+              whileHover={{ scale: 1.1 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
+              <motion.div
+                className={`relative p-2 rounded-2xl bg-blue-500/20`}
+                animate={{
+                  boxShadow: [
+                    "0 0 20px rgba(59, 130, 246, 0.3)",
+                    "0 0 40px rgba(59, 130, 246, 0.6)",
+                    "0 0 20px rgba(59, 130, 246, 0.3)",
+                  ],
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <img
+                  src={team.creator.avatar}
+                  alt={team.creator.name}
+                  className="w-32 h-32 rounded-xl object-cover"
+                  onError={(e) => {
+                    e.target.src = `https://ui-avatars.com/api/?name=${team.creator.name}&background=3b82f6&color=ffffff&size=128`;
+                  }}
+                />
+                <motion.div
+                  className="absolute -top-2 -right-2"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                >
+                  <Star className="w-8 h-8 text-yellow-500 fill-yellow-500" />
+                </motion.div>
+              </motion.div>
+            </motion.div>
+
+            <motion.h2
+              className={`text-4xl font-bold mb-4 text-white`}
+              variants={itemVariants}
+            >
+              Meet the <span className="text-emerald-500">Creator</span>
+            </motion.h2>
+
+            <motion.div
+              className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
+              variants={itemVariants}
+            >
+              <h3 className="text-2xl font-bold mb-2 text-emerald-500">{team.creator.name}</h3>
+              <p className="text-lg font-semibold text-emerald-500">{team.creator.role}</p>
+            </motion.div>
+
+            <motion.p
+              className={`text-lg leading-relaxed mt-4 max-w-2xl mx-auto text-gray-300`}
+              variants={itemVariants}
+            >
+              {team.creator.description}
+            </motion.p>
+
+            <motion.div
+              className="flex justify-center gap-4 mt-6"
+              variants={itemVariants}
+            >
+              <motion.a
+                href={team.creator.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`p-3 rounded-xl transition-all duration-300 bg-gray-700 hover:bg-gray-600 text-white"
+                    `}
+                whileHover={{ scale: 1.1, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Github className="w-6 h-6" />
+              </motion.a>
+              <motion.a
+                href={`mailto:${team.creator.email}`}
+                className={`p-3 rounded-xl transition-all duration-300 bg-blue-600 hover:bg-blue-500 text-white"
+                    `}
+                whileHover={{ scale: 1.1, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Mail className="w-6 h-6" />
+              </motion.a>
+            </motion.div>
+
+            <motion.div
+              className="mt-6"
+              variants={itemVariants}
+            >
+              <p className={`text-sm text-gray-400 mb-3`}>
+                Tech Stack Expertise:
+              </p>
+              <div className="flex flex-wrap justify-center gap-2">
+                {team.creator.skills.map((skill, idx) => (
+                  <motion.span
+                    key={idx}
+                    className={`px-3 py-1 rounded-full text-sm font-medium bg-blue-500/20 text-blue-400 border border-blue-500/30"
+                        `}
+                    whileHover={{ scale: 1.05 }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.1 }}
+                  >
+                    {skill}
+                  </motion.span>
+                ))}
+              </div>
+            </motion.div>
           </div>
+        </AnimatedSection>
+          {/* Contributors Section */}
+        <div
+          className={`rounded-3xl shadow-2xl p-8 md:p-12 mb-12 border backdrop-blur-sm bg-gray-950 border-gray-700/50`}
+        >
+          <div className="flex items-center gap-4 mb-6">
+            <div
+              className={`p-3 rounded-2xl bg-purple-500/20`}
+            >
+              <Github
+                className={`w-8 h-8 text-purple-400`}
+              />
+            </div>
+            <h2
+              className={`text-3xl font-bold text-white`}
+            >
+              Project Contributors
+            </h2>
+          </div>
+          
+          {loading ? (
+            <div className="flex justify-center items-center py-8">
+              <div className={`text-lg text-gray-400`}>
+                Loading contributors...
+              </div>
+            </div>
+          ) : error ? (
+            <div className={`text-center p-6 rounded-xl bg-red-900/30`}>
+              <p className={`ext-red-400`}>
+                Error loading contributors: {error}
+              </p>
+              <p className={`text-gray-400`}>
+                Visit our <a href="https://github.com/santanu-atta03/Intervyo" target="_blank" rel="noopener noreferrer" className="underline">GitHub repository</a> to see contributors.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {contributors.map((contributor) => (
+                <a
+                  key={contributor.id}
+                  href={contributor.html_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`block group p-4 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg hover:bg-gray-700/50 border border-gray-700/50`}
+                  title={`${contributor.login} (${contributor.contributions} contributions)`}
+                >
+                  <div className="flex flex-col items-center">
+                    <img
+                      src={contributor.avatar_url}
+                      alt={contributor.login}
+                      className="w-16 h-16 rounded-full mb-3 object-cover border-2 border-transparent group-hover:border-purple-500 transition-colors duration-300"
+                    />
+                    <h3 className={`font-semibold text-center truncate w-full text-white`}>
+                      {contributor.login}
+                    </h3>
+                    <p className={`text-sm mt-1 text-gray-400`}>
+                      {contributor.contributions} contributions
+                    </p>
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
 
           <p className="text-gray-500 text-center mt-12 max-w-2xl mx-auto">
             We're a growing team of passionate developers, designers, and AI

@@ -20,7 +20,7 @@ export const getNotifications = async (token, params = {}) => {
       null,
       { Authorization: `Bearer ${token}` },
     );
-
+    console.log("Res : ",response)
     toast.dismiss(toastId);
 
     if (!response?.data?.success) {
