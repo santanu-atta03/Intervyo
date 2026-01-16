@@ -96,7 +96,6 @@ app.use(passport.initialize());
 // ========================================
 // DATABASE CONNECTION
 // ========================================
-// interviewSocket(io); // Check if this is needed twice or if upstream removed one
 interviewSocket(io);
 dbConnect();
 
@@ -122,9 +121,35 @@ app.use('/api/buddy', buddyMatchRoutes);
 // Emotion metrics routes
 app.use("/api/interviews", emotionRoutes);
 
-// Health check
-app.get("/api/health", (req, res) => {
-  res.json({ status: "Server is running!" });
+// Health check with service status
+app.get("/api/health", async (req, res) => {
+  const health = {
+    status: "ok",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || "development",
+    services: {
+      database: "unknown",
+      server: "ok"
+    }
+  };
+
+  try {
+    // Check database connection
+    const dbState = mongoose.connection.readyState;
+    health.services.database = dbState === 1 ? "connected" : "disconnected";
+    
+    if (dbState !== 1) {
+      health.status = "degraded";
+      return res.status(503).json(health);
+    }
+    
+    res.json(health);
+  } catch (error) {
+    health.status = "error";
+    health.error = error.message;
+    res.status(503).json(health);
+  }
 });
 
 // ========================================
@@ -148,5 +173,44 @@ if (process.env.NODE_ENV !== "test") {
     console.log(`🚀 Server running on port ${PORT}`);
   });
 }
+
+// ========================================
+// GRACEFUL SHUTDOWN
+// ========================================
+const gracefulShutdown = async (signal) => {
+  console.log(`\n${signal} received. Starting graceful shutdown...`);
+  
+  try {
+    // Close server to stop accepting new connections
+    server.close(() => {
+      console.log('HTTP server closed');
+    });
+
+    // Close database connection
+    await mongoose.connection.close(false);
+    console.log('MongoDB connection closed');
+
+    process.exit(0);
+  } catch (error) {
+    console.error('Error during graceful shutdown:', error);
+    process.exit(1);
+  }
+};
+
+// Listen for termination signals
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  gracefulShutdown('uncaughtException');
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  gracefulShutdown('unhandledRejection');
+});
 
 export { app, server };
