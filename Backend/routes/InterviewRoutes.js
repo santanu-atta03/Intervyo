@@ -1,9 +1,6 @@
-import { getUserAnalytics } from "../controllers/Analytics.controller.js";
-// ... your other imports and middleware
-router.get("/analytics", protect, getUserAnalytics);
-
 import express from "express";
-const router = express.Router();
+import { authenticate, protect } from "../middlewares/auth.js";
+import { getUserAnalytics } from "../controllers/Analytics.controller.js";
 import {
   createInterview,
   getUserInterviews,
@@ -13,11 +10,11 @@ import {
   endInterview,
   deleteInterview,
 } from "../controllers/InterviewController.js";
-// const { protect } = require('../middleware/auth');
-import { authenticate } from "../middlewares/auth.js";
 
-// All routes require authentication
-// router.use(protect);
+const router = express.Router();
+
+// ... your other imports and middleware
+router.get("/analytics", protect, getUserAnalytics);
 
 // Interview CRUD
 router.post("/create", authenticate, createInterview);

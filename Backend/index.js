@@ -26,6 +26,7 @@ import emotionRoutes from "./routes/emotion.routes.js";
 import analyticsRoutes from "./routes/analytics.route.js";
 import newsletterRoutes from "./routes/newsletter.routes.js";
 import contactRoutes from './routes/contact.routes.js';
+import careerRoutes from './routes/career.routes.js';
 import { dbConnect } from "./config/db.js";
 import { apiLimiter } from "./middlewares/rateLimiter.js";
 import errorHandler from "./middlewares/error.middleware.js";
@@ -63,6 +64,8 @@ const allowedOrigins = [
   "https://intervyo.xyz",
   "https://www.intervyo.xyz",
   "https://intervyo-sage.vercel.app",
+  "http://localhost:5173",
+  "http://localhost:5174",
 ];
 
 app.use(
@@ -118,6 +121,7 @@ app.use('/api/recommendations', companyRecommendationRoutes);
 app.use('/api/calendar', calendarRoutes);
 app.use('/api/questions', questionDatabaseRoutes);
 app.use('/api/buddy', buddyMatchRoutes);
+app.use('/api/career', careerRoutes);
 
 // Emotion metrics routes
 app.use("/api/interviews", emotionRoutes);
@@ -139,12 +143,12 @@ app.get("/api/health", async (req, res) => {
     // Check database connection
     const dbState = mongoose.connection.readyState;
     health.services.database = dbState === 1 ? "connected" : "disconnected";
-    
+
     if (dbState !== 1) {
       health.status = "degraded";
       return res.status(503).json(health);
     }
-    
+
     res.json(health);
   } catch (error) {
     health.status = "error";
@@ -180,7 +184,7 @@ if (process.env.NODE_ENV !== "test") {
 // ========================================
 const gracefulShutdown = async (signal) => {
   console.log(`\n${signal} received. Starting graceful shutdown...`);
-  
+
   try {
     // Close server to stop accepting new connections
     server.close(() => {
