@@ -41,7 +41,10 @@ const BodyLanguageCoach = ({ videoRef, isVideoOn }) => {
         faceapi.matchDimensions(canvas, displaySize);
 
         const intervalId = setInterval(async () => {
-            if (video.paused || video.ended) return;
+            if (video.paused || video.ended) {
+                clearInterval(intervalId);
+                return;
+            }
 
             // Detect
             const detections = await faceapi.detectAllFaces(
