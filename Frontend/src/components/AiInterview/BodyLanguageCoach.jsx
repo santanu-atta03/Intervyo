@@ -7,10 +7,6 @@ const BodyLanguageCoach = ({ videoRef, isVideoOn }) => {
   const [score, setScore] = useState(100);
   const [alert, setAlert] = useState(null); // { type: 'eye' | 'posture', message: string }
   
-  // Scoring parameters
-  const POSTURE_THRESHOLD_Y = 0.6; // lower means higher on screen (0 is top). If > 0.6, maybe slouching? adjusted later
-  const TILT_THRESHOLD = 0.2; // roughly 15-20 degrees
-  
   // Load Models
   useEffect(() => {
     const loadModels = async () => {
