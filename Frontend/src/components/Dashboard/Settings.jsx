@@ -13,7 +13,7 @@ import {
   getUserProfile,
 } from "../../services/operations/profileAPI";
 import { setLoading } from "../../slices/authSlice";
-import logo from "../../assets/logo.png"
+import logo from "../../assets/intervyologo.png"
 export default function Settings() {
   const fileInputRef = useRef(null);
   const { user } = useSelector((state) => state.profile);
