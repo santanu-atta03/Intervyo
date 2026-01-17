@@ -27,6 +27,7 @@ import analyticsRoutes from "./routes/analytics.route.js";
 import newsletterRoutes from "./routes/newsletter.routes.js";
 import contactRoutes from './routes/contact.routes.js';
 import careerRoutes from './routes/career.routes.js';
+import replayRoutes from './routes/replay.routes.js';
 import { dbConnect } from "./config/db.js";
 import { apiLimiter } from "./middlewares/rateLimiter.js";
 import errorHandler from "./middlewares/error.middleware.js";
@@ -122,6 +123,7 @@ app.use('/api/calendar', calendarRoutes);
 app.use('/api/questions', questionDatabaseRoutes);
 app.use('/api/buddy', buddyMatchRoutes);
 app.use('/api/career', careerRoutes);
+app.use('/api/replay', replayRoutes);
 
 // Emotion metrics routes
 app.use("/api/interviews", emotionRoutes);

@@ -97,6 +97,18 @@ If it doesn’t help you perform better in a real interview, it doesn’t belong
 - **Route:** `/practice-lab`
 - Requires microphone permission in the browser (Chrome recommended)
 
+### 🎬 Interview Replay System (NEW)
+- **Full Playback**: Review completed interviews with complete conversation history
+- **Timestamped Notes**: Add personal notes at any point with categorization (improvement, strength, mistake, learning)
+- **Smart Bookmarks**: Quick-jump to important moments in the interview
+- **Resume Functionality**: Pick up where you left off during review sessions
+- **Global Search**: Search across all notes and bookmarks from all interviews
+- **View Analytics**: Track how often you review each interview and total watch time
+- **Secure Sharing**: Generate share links to get feedback from mentors or study buddies
+- **Self-Reflection**: Identify patterns and track improvement over time
+- **Route:** `/api/replay`
+- Perfect for: Post-interview analysis, mentor feedback, peer review, progress tracking
+
 ---
 
 ## 🛠 Tech Stack
