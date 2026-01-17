@@ -32,12 +32,14 @@ If it doesn’t help you perform better in a real interview, it doesn’t belong
 - Technical, behavioral, and mixed interview modes  
 - Timed questions to simulate real interview pressure  
 - Adaptive follow-up questions based on candidate responses  
+- **New:** Real-time Body Language Coach (Eye contact & Posture tracking) 👁️
 
 ### 📊 Smart Evaluation & Feedback
 - Communication clarity analysis  
 - Technical correctness scoring  
 - Confidence & structure assessment  
 - Strengths, weaknesses, and improvement suggestions  
+- Live Confidence HUD during interviews 💯
 
 ### 📁 Interview History & Progress Tracking
 - Store past interviews  
