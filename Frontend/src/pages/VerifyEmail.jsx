@@ -13,16 +13,6 @@ export default function VerifyEmail() {
   const navigate = useNavigate();
   const { signupData, loading } = useSelector((state) => state.auth);
 
-  // Countdown timer effect
-  useEffect(() => {
-    if (countdown > 0) {
-      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-      return () => clearTimeout(timer);
-    } else if (countdown === 0 && isResendDisabled) {
-      setIsResendDisabled(false);
-    }
-  }, [countdown, isResendDisabled]);
-
   const handleChange = (element, index) => {
     if (isNaN(element.value)) return;
     const newOtp = [...otp];
@@ -42,8 +32,7 @@ export default function VerifyEmail() {
   };
 
   const handleVerify = () => {
-    const otpValue = otp.join("");
-
+    const otpValue = otp.join('');
     if (otpValue.length !== 6) {
       toast.error("Please enter complete OTP");
       return;
@@ -55,29 +44,9 @@ export default function VerifyEmail() {
       return;
     }
 
-    // Store OTP in signupData
-    dispatch(
-      setSignupData({
-        ...signupData,
-        otp: otpValue,
-      }),
-    );
-
-    toast.success("Email verified! Choose your domain");
-    // Navigate to domain selection
-    navigate("/domain-selection");
-  };
-
-  const handleResendOtp = () => {
-    if (!signupData?.email) {
-      toast.error("Email not found");
-      return;
-    }
-
-    setIsResendDisabled(true);
-    setCountdown(30);
-
-    dispatch(resendOtp(signupData.email));
+    dispatch(setSignupData({ ...signupData, otp: otpValue }));
+    toast.success('Email verified! Choose your domain');
+    navigate('/domain-selection');
   };
 
   return (
@@ -117,17 +86,18 @@ export default function VerifyEmail() {
             </div>
           </div>
 
-          {/* Heading and Description */}
-          <h1 className="text-3xl font-bold text-white mb-2">
-            Verify Email
-          </h1>
-          <p className="text-gray-400 mb-8">
-            Enter the 6-digit code sent to
-            <br />
-            <span className="font-semibold text-emerald-400">
-              {signupData?.email}
-            </span>
-          </p>
+          <div className="text-center mb-8">
+            <div className="inline-block p-3 bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full mb-4 shadow-[0_0_20px_rgba(16,185,129,0.4)]">
+              <span className="text-4xl">📧</span>
+            </div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+              Verify Email
+            </h1>
+            <p className="text-gray-400 mt-2">
+              Enter the 6-digit code sent to<br />
+              <span className="font-semibold text-emerald-400">{signupData?.email || 'your email'}</span>
+            </p>
+          </div>
 
           {/* OTP Input Fields */}
           <div className="flex justify-center gap-2 mb-8">
@@ -143,63 +113,25 @@ export default function VerifyEmail() {
               />
             ))}
           </div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">
-            Verify Email
-          </h1>
-          <p className="text-gray-600">
-            Enter the 6-digit code sent to
-            <br />
-            <span className="font-semibold text-purple-600">
-              {signupData?.email}
-            </span>
-          </p>
-        </div>
-        <div>
-          {/* Resend OTP Button */}
-          <div className="text-center mb-6">
-            <button
-              onClick={handleResendOtp}
-              disabled={isResendDisabled}
-              className="text-sm font-semibold text-emerald-500 hover:text-emerald-400 disabled:text-gray-600 disabled:cursor-not-allowed transition-colors"
-            >
-              {isResendDisabled ? `Resend OTP in ${countdown}s` : "Didn't receive OTP? Resend"}
-            </button>
-          </div>
 
-          {/* Verify Button */}
           <button
             onClick={handleVerify}
             disabled={loading || otp.join('').length !== 6}
             className="relative w-full overflow-hidden rounded-lg bg-emerald-500 py-3 font-semibold text-black
               transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_25px_rgba(16,185,129,0.8)]
-              active:scale-95 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed mb-4"
+              active:scale-95 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
           >
             <span className="relative z-10">Verify & Continue</span>
             <span className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-emerald-600 opacity-0 hover:opacity-100 transition-opacity" />
           </button>
 
-          {/* Back to Registration */}
           <button
             onClick={() => navigate('/register')}
-            className="w-full text-gray-400 font-medium hover:text-emerald-400 transition-colors flex items-center justify-center gap-2"
+            className="w-full mt-6 text-gray-400 font-medium hover:text-emerald-400 transition-colors flex items-center justify-center gap-2"
           >
             ← Back to Registration
           </button>
         </div>
-
-        <button
-          onClick={handleVerify}
-          className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition transform hover:scale-105 shadow-lg mb-4"
-        >
-          Verify & Continue
-        </button>
-
-        <button
-          onClick={() => navigate("/register")}
-          className="w-full text-purple-600 font-semibold hover:text-purple-700 transition"
-        >
-          ← Back to Registration
-        </button>
       </div>
     </div>
   );

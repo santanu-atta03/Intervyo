@@ -15,6 +15,8 @@ const PASSWORD_REQUIREMENTS = [
 const getStrength = (password) =>
   PASSWORD_REQUIREMENTS.filter((req) => req.test(password)).length;
 
+
+
 export default function Register() {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -30,11 +32,8 @@ export default function Register() {
   // This allows them to "react" to changes in formData
   const currentStrength = getStrength(formData.password);
   const isPasswordValid = currentStrength === 4;
-  const isMatching =
-    formData.password === formData.confirmPassword &&
-    formData.confirmPassword !== "";
-  const isFormFilled =
-    formData.name.trim() !== "" && formData.email.trim() !== "";
+  const isMatching = formData.password === formData.confirmPassword && formData.confirmPassword !== '';
+  const isFormFilled = formData.name.trim() !== '' && formData.email.trim() !== '';
 
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
@@ -89,13 +88,11 @@ export default function Register() {
 
   const validateStep1 = () => {
     const newErrors = {};
-    if (!formData.name.trim()) newErrors.name = "Name is required";
-    if (!formData.email.trim()) newErrors.email = "Email is required";
-    else if (!/\S+@\S+\.\S+/.test(formData.email))
-      newErrors.email = "Email is invalid";
-    if (!formData.password) newErrors.password = "Password is required";
-    else if (formData.password.length < 6)
-      newErrors.password = "Password must be 6+ characters";
+    if (!formData.name.trim()) newErrors.name = 'Name is required';
+    if (!formData.email.trim()) newErrors.email = 'Email is required';
+    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email is invalid';
+    if (!formData.password) newErrors.password = 'Password is required';
+    else if (formData.password.length < 8) newErrors.password = 'Password must be 6+ characters';
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
     }
@@ -228,75 +225,66 @@ export default function Register() {
                 )}
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Password
-                </label>
+              {/* --- PASSWORD FIELD --- */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-300">Password</label>
                 <div className="relative">
                   <input
-                    type={showPassword ? "text" : "password"}
+                    type={showPassword ? 'text' : 'password'}
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
-                    className={`w-full px-4 py-3 rounded-lg bg-zinc-900 border ${errors.password ? "border-red-500/50" : "border-zinc-700"} text-white placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 outline-none transition`}
-                    placeholder="••••••••"
+                    className="w-full px-4 py-3 rounded-lg bg-zinc-900 border border-zinc-700 text-white focus:ring-2 focus:ring-emerald-500 outline-none"
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white focus:outline-none transition"
-                    aria-label={
-                      showPassword ? "Hide password" : "Show password"
-                    }
-                  >
-                    {showPassword ? "👁️" : "👁️‍🗨️"}
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">
+                    {showPassword ? '👁️' : '👁️‍🗨️'}
                   </button>
                 </div>
-                {errors.password && (
-                  <p className="text-red-400 text-sm mt-1">{errors.password}</p>
+
+                {/* Strength Bars & Checklist */}
+                {formData.password.length > 0 && (
+                  <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="flex gap-1 h-1 my-3">
+                      {[1, 2, 3, 4].map((i) => (
+                        <div key={i} className={`h-full flex-1 rounded-full transition-all duration-500 ${getStrength(formData.password) >= i ? (getStrength(formData.password) <= 2 ? 'bg-red-500' : getStrength(formData.password) === 3 ? 'bg-yellow-500' : 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]') : 'bg-zinc-800'}`} />
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 p-3 bg-zinc-900/50 rounded-lg border border-white/5">
+                      {PASSWORD_REQUIREMENTS.map((req) => (
+                        <div key={req.id} className="flex items-center gap-2">
+                          <div className={`w-3 h-3 rounded-full ${req.test(formData.password) ? 'bg-emerald-500' : 'bg-zinc-700'} transition-colors`} />
+                          <span className={`text-[10px] uppercase tracking-tighter ${req.test(formData.password) ? 'text-emerald-400' : 'text-zinc-500'}`}>{req.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Confirm Password
-                </label>
+              {/* --- CONFIRM PASSWORD FIELD --- */}
+              <div className="space-y-2 mt-4">
+                <label className="text-sm font-medium text-gray-300">Confirm Password</label>
                 <div className="relative">
                   <input
-                    type={showConfirmPassword ? "text" : "password"}
+                    type={showConfirmPassword ? 'text' : 'password'}
                     name="confirmPassword"
                     value={formData.confirmPassword}
                     onChange={handleChange}
-                    className={`w-full px-4 py-3 rounded-lg bg-zinc-900 border ${errors.confirmPassword ? "border-red-500/50" : "border-zinc-700"} text-white placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 outline-none transition`}
-                    placeholder="••••••••"
+                    className={`w-full px-4 py-3 rounded-lg bg-zinc-900 border ${formData.confirmPassword && (formData.password === formData.confirmPassword ? 'border-emerald-500/50' : 'border-red-500/50')} text-white outline-none`}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white focus:outline-none transition"
-                    aria-label={
-                      showConfirmPassword
-                        ? "Hide confirm password"
-                        : "Show confirm password"
-                    }
-                  >
-                    {showConfirmPassword ? "👁️" : "👁️‍🗨️"}
-                  </button>
+                  {formData.confirmPassword && (
+                    <span className={`absolute right-10 top-1/2 -translate-y-1/2 text-[10px] font-bold uppercase ${formData.password === formData.confirmPassword ? 'text-emerald-500' : 'text-red-500'}`}>
+                      {formData.password === formData.confirmPassword ? 'Matched' : 'Mismatch'}
+                    </span>
+                  )}
                 </div>
-                {errors.confirmPassword && (
-                  <p className="text-red-400 text-sm mt-1">
-                    {errors.confirmPassword}
-                  </p>
-                )}
               </div>
             </div>
 
             <button
               onClick={handleNextStep}
               // Only enable if Loading is false AND password is strong AND passwords match AND fields are filled
-              disabled={
-                loading || !isPasswordValid || !isMatching || !isFormFilled
-              }
+              disabled={loading || !isPasswordValid || !isMatching || !isFormFilled}
               className="relative w-full overflow-hidden rounded-lg bg-emerald-500 py-3 font-semibold text-black
               transition-all duration-300
               hover:scale-[1.02] hover:shadow-[0_0_25px_rgba(16,185,129,0.8)]

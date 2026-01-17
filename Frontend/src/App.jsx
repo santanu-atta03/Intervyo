@@ -31,6 +31,7 @@ import PrivacyPolicy from './pages/Privacy';
 import AboutUs from './pages/AboutUs';
 import ContactUs from './pages/ContactUs';
 import PracticeLab from './pages/PracticeLab';
+import Career from './pages/Career';
 
 function App() {
   return (
@@ -48,6 +49,7 @@ function App() {
         <Route path="/terms" element={<TermsAndConditions />} />
         <Route path="/about" element={<AboutUs />} />
         <Route path="/contact" element={<ContactUs />} />
+        <Route path="/career" element={<Career />} />
 
         <Route path="/domain-selection" element={<DomainSelection />} />
         <Route path="/leaderboard" element={<Leaderboard />} />

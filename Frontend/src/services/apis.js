@@ -40,3 +40,10 @@ export const interviewEndpoints = {
   START_CONVERSATION_API:
     BASE_URL + "/interview/:interviewId/start-conversation",
 };
+
+export const careerEndpoints = {
+  GET_JOBS_API: `${BASE_URL}/career/jobs`,
+  GET_JOB_API: `${BASE_URL}/career/jobs/:id`,
+  GET_RESOURCES_API: `${BASE_URL}/career/resources`,
+  GET_FEATURED_API: `${BASE_URL}/career/featured`,
+};
