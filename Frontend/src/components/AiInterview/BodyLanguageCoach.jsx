@@ -35,7 +35,8 @@ const BodyLanguageCoach = ({ videoRef, isVideoOn }) => {
     const handlePlay = () => {
         if(!canvasRef.current) return;
         const canvas = canvasRef.current;
-        const displaySize = { width: video.videoWidth, height: video.videoHeight };
+        // Use offsetWidth/Height to match the actual displayed size of the video element
+        const displaySize = { width: video.offsetWidth, height: video.offsetHeight };
         
         // Match canvas dimensions to video
         faceapi.matchDimensions(canvas, displaySize);
@@ -61,7 +62,7 @@ const BodyLanguageCoach = ({ videoRef, isVideoOn }) => {
 
             // Draw Sci-Fi Overlay
             faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
-            
+             
             if (resizedDetections.length > 0) {
                 const landmarks = resizedDetections[0].landmarks;
                 const nose = landmarks.getNose()[3]; // Tip of nose
@@ -72,9 +73,9 @@ const BodyLanguageCoach = ({ videoRef, isVideoOn }) => {
                 // Analysis Logic
                 analyzePosture(nose, jaw, displaySize);
                 analyzeEyeContact(landmarks, displaySize);
-            } else {
-                // No face detected - potentially looking away completely or out of frame
-                // Maybe warn?
+                
+                // Recovery: If no alerts, slowly recover score
+                setScore(prev => Math.min(100, prev + 0.1));
             }
 
         }, 100); // Check every 100ms

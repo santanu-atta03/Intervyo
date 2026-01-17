@@ -914,7 +914,7 @@ const InterviewRoom = () => {
             autoPlay
             muted
             playsInline
-            className="w-full h-full object-contain"
+            className="w-full h-full object-cover"
             style={{ opacity: isVideoOn ? 1 : 0 }}
           />
           <BodyLanguageCoach videoRef={videoRef} isVideoOn={isVideoOn} />
