@@ -1,5 +1,5 @@
-const BASE_URL = "http://localhost:5000/api";
-// const BASE_URL = 'https://intervyo.onrender.com/api';
+// const BASE_URL = "http://localhost:5000/api";
+const BASE_URL = 'https://intervyo.onrender.com/api';
 
 export const authEndpoints = {
   SEND_OTP_API: `${BASE_URL}/auth/send-otp`,
