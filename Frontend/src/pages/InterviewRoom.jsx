@@ -33,7 +33,7 @@ import {
   Type,
 } from "lucide-react";
 
-const REACT_APP_BASE_URL = "https://intervyo.onrender.com";
+const REACT_APP_BASE_URL = import.meta.env.VITE_BASE_URL || "https://intervyo.onrender.com";
 
 export default function InterviewRoom() {
   const navigate = useNavigate();

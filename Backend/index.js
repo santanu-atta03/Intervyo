@@ -181,7 +181,7 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5000;
 if (process.env.NODE_ENV !== "test") {
   server.listen(PORT, () => {
-    logger.success(`Server running on port ${PORT}`);
+    logger.info(`Server running on port ${PORT}`);
   });
 }
 
@@ -204,6 +204,8 @@ const gracefulShutdown = async (signal) => {
     process.exit(0);
   } catch (error) {
     logger.error('Error during graceful shutdown:', error);
+  }
+};
 // Listen for termination signals
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));
