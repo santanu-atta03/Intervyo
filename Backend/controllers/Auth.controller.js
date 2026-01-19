@@ -262,7 +262,7 @@ export const register = async (req, res) => {
 
     // Step 2: Create profile and assign user
     const profile = await Profile.create({
-      user: user._id, // ✅ This is the key fix
+      user: user._id, 
       phone: null,
       gender: null,
       age: null,
@@ -281,7 +281,7 @@ export const register = async (req, res) => {
 
     // Step 3: Save user with profile reference
     user.profile = profile._id;
-    await user.save(); // ✅ Save after assigning profile
+    await user.save(); 
 
     // Generate token
     const token = user.generateAuthToken();
@@ -294,7 +294,7 @@ export const register = async (req, res) => {
       .select("-password -resetPasswordToken -resetPasswordExpire")
       .populate("profile")
       .exec();
-    // console.log("Completed user : ",completeUser)
+    
 
     res.status(201).json({
       success: true,
@@ -326,7 +326,8 @@ export const login = async (req, res) => {
 
     // Find user and populate profile
     const user = await User.findOne({ email })
-      .select("+password") // Include password for comparison
+      .select("+password") 
+      
       .populate({
         path: "profile",
         select: "-__v",
