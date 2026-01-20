@@ -392,80 +392,91 @@ export default function LandingPage() {
           </div>
 
           {/* Trust Badge */}
-          <div className="mt-16">
-            <p className="text-gray-900 mb-8 text-center">
-              <span className="bg-yellow-400 px-2 py-1">
-                Trusted by <strong>5,000+</strong> job seekers preparing for
-                their dream roles
-              </span>
-            </p>
-            <div className="grid grid-cols-2 md:grid-cols-4 border border-gray-700 max-w-7xl mx-auto">
-              <div className="flex flex-col items-center justify-center p-8 border-r border-b border-gray-700 hover:bg-white/5 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
-                <span className="text-2xl font-bold text-white mb-2">
-                  TechCorp
-                </span>
-                <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                  Learn More →
-                </span>
-              </div>
-              <div className="flex flex-col items-center justify-center p-8 border-r border-b border-gray-700 hover:bg-white/5 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
-                <span className="text-2xl font-bold text-white mb-2">
-                  Innovate Inc
-                </span>
-                <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                  Learn More →
-                </span>
-              </div>
-              <div className="flex flex-col items-center justify-center p-8 border-r border-b border-gray-700 hover:bg-white/5 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
-                <span className="text-2xl font-bold text-white mb-2">
-                  DevStudio
-                </span>
-                <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                  Learn More →
-                </span>
-              </div>
-              <div className="flex flex-col items-center justify-center p-8 border-b border-gray-700 hover:bg-white/5 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
-                <span className="text-2xl font-bold text-white mb-2">
-                  CodeAcademy
-                </span>
-                <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                  Learn More →
-                </span>
-              </div>
-              <div className="flex flex-col items-center justify-center p-8 border-r border-gray-700 hover:bg-white/5 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
-                <span className="text-2xl font-bold text-white mb-2">
-                  StartupHub
-                </span>
-                <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                  Learn More →
-                </span>
-              </div>
-              <div className="flex flex-col items-center justify-center p-8 border-r border-gray-700 hover:bg-white/5 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
-                <span className="text-2xl font-bold text-white mb-2">
-                  CareerBoost
-                </span>
-                <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                  Learn More →
-                </span>
-              </div>
-              <div className="flex flex-col items-center justify-center p-8 border-r border-gray-700 hover:bg-white/5 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
-                <span className="text-2xl font-bold text-white mb-2">
-                  HireRight
-                </span>
-                <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                  Learn More →
-                </span>
-              </div>
-              <div className="flex flex-col items-center justify-center p-8 hover:bg-white/5 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
-                <span className="text-2xl font-bold text-white mb-2">
-                  SkillBoost
-                </span>
-                <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                  Learn More →
-                </span>
-              </div>
-            </div>
-          </div>
+       
+<div className="mt-16 px-4"> 
+  <p className="text-gray-900 mb-8 text-center">
+    <span className="bg-yellow-400 px-2 py-1 inline-block leading-relaxed max-w-full">
+      Trusted by <strong>5,000+</strong> job seekers preparing for
+      their dream roles
+    </span>
+  </p>
+
+  <div className="w-full overflow-x-auto pb-4 scrollbar-hide">
+    <div className="grid grid-cols-2 md:grid-cols-4 border border-gray-700 max-w-7xl mx-auto min-w-[600px] md:min-w-0 bg-gray-900">
+      <div className="flex flex-col items-center justify-center p-8 border-r border-b border-gray-700 hover:bg-white/5 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
+        <span className="text-2xl font-bold text-white mb-2 text-center">
+          TechCorp
+        </span>
+        <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+          Learn More →
+        </span>
+      </div>
+      
+      <div className="flex flex-col items-center justify-center p-8 border-r border-b border-gray-700 hover:bg-white/5 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
+        <span className="text-2xl font-bold text-white mb-2 text-center">
+          Innovate Inc
+        </span>
+        <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+          Learn More →
+        </span>
+      </div>
+
+      <div className="flex flex-col items-center justify-center p-8 border-r border-b border-gray-700 hover:bg-white/5 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
+        <span className="text-2xl font-bold text-white mb-2 text-center">
+          DevStudio
+        </span>
+        <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+          Learn More →
+        </span>
+      </div>
+
+      <div className="flex flex-col items-center justify-center p-8 border-b border-gray-700 hover:bg-white/5 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
+        <span className="text-2xl font-bold text-white mb-2 text-center">
+          CodeAcademy
+        </span>
+        <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+          Learn More →
+        </span>
+      </div>
+
+      <div className="flex flex-col items-center justify-center p-8 border-r border-gray-700 hover:bg-white/5 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
+        <span className="text-2xl font-bold text-white mb-2 text-center">
+          StartupHub
+        </span>
+        <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+          Learn More →
+        </span>
+      </div>
+
+      <div className="flex flex-col items-center justify-center p-8 border-r border-gray-700 hover:bg-white/5 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
+        <span className="text-2xl font-bold text-white mb-2 text-center">
+          CareerBoost
+        </span>
+        <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+          Learn More →
+        </span>
+      </div>
+
+      <div className="flex flex-col items-center justify-center p-8 border-r border-gray-700 hover:bg-white/5 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
+        <span className="text-2xl font-bold text-white mb-2 text-center">
+          HireRight
+        </span>
+        <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+          Learn More →
+        </span>
+      </div>
+
+      <div className="flex flex-col items-center justify-center p-8 hover:bg-white/5 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
+        <span className="text-2xl font-bold text-white mb-2 text-center">
+          SkillBoost
+        </span>
+        <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+          Learn More →
+        </span>
+      </div>
+    </div>
+  </div>
+ </div>
         </div>
       </section>
 
