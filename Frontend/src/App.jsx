@@ -32,6 +32,7 @@ import AboutUs from './pages/AboutUs';
 import ContactUs from './pages/ContactUs';
 import PracticeLab from './pages/PracticeLab';
 import Career from './pages/Career';
+import PricingPage from './pages/PricingPage';
 
 function App() {
   return (
@@ -50,6 +51,7 @@ function App() {
         <Route path="/about" element={<AboutUs />} />
         <Route path="/contact" element={<ContactUs />} />
         <Route path="/career" element={<Career />} />
+        <Route path="/pricing" element={<PricingPage />} />
 
         <Route path="/domain-selection" element={<DomainSelection />} />
         <Route path="/leaderboard" element={<Leaderboard />} />

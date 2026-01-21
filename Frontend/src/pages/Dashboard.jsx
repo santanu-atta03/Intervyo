@@ -480,7 +480,7 @@ export default function Dashboard() {
           <div className="flex justify-between items-center h-16 sm:h-20">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="relative">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 rounded-lg sm:rounded-xl flex items-center justify-center ">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center ">
                   <img src={logo} alt="logo" />
                 </div>
 

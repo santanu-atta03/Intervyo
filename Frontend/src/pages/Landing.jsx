@@ -180,7 +180,7 @@ export default function LandingPage() {
                 How it Works
               </a>
               <a
-                href="#pricing"
+                href="/pricing"
                 onClick={(e) => scrollToSection(e, "#pricing")}
                 className="block text-gray-600 hover:text-gray-900 font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
               >
