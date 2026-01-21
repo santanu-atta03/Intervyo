@@ -382,7 +382,7 @@ export const submitAnswer = async (interviewId, answerData, token) => {
   try {
     const response = await apiConnector(
       "POST",
-      `${process.env.REACT_APP_BASE_URL}/api/interview/${interviewId}/submit-answer`,
+      `${BASE_URL}/api/interview/${interviewId}/submit-answer`,
       answerData,
       {
         Authorization: `Bearer ${token}`,

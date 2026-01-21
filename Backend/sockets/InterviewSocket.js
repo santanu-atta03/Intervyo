@@ -1088,9 +1088,10 @@ import {
 // ============================================
 // ACTIVE SESSIONS TRACKING
 // ============================================
-const activeSessions = new Map();
-const questionTimers = new Map();
-const performanceCache = new Map();
+const activeSessions = new Map(); // sessionId -> session data
+const questionTimers = new Map(); // sessionId -> timer
+const performanceCache = new Map(); // sessionId -> performance stats
+const socketToSession = new Map(); // socket.id -> sessionId
 
 // ============================================
 // QUESTION GENERATION STRATEGY
@@ -1409,6 +1410,14 @@ async function completeInterview(socket, session, interview, io) {
     // Cleanup
     activeSessions.delete(session._id.toString());
     performanceCache.delete(session._id.toString());
+    
+    // Remove socket-to-session mapping
+    for (const [socketId, sessionId] of socketToSession.entries()) {
+      if (sessionId === session._id.toString()) {
+        socketToSession.delete(socketId);
+        break;
+      }
+    }
 
     setTimeout(() => {
       socket.emit("interview-ended", {
@@ -1596,6 +1605,9 @@ export default (io) => {
             coding: 0,
           },
         });
+        
+        // Track socket to session mapping for cleanup
+        socketToSession.set(socket.id, sessionId);
 
         const greetingMsg = `Hello! Welcome to your ${interview.role} interview${interview.targetCompany ? ` for ${interview.targetCompany}` : ""}. I'm your AI interviewer. This is a ${interview.difficulty} level interview that will last approximately ${interview.duration} minutes with around ${plan.totalQuestions} questions. Let's have a great conversation! Are you ready to begin?`;
 
@@ -1886,6 +1898,25 @@ export default (io) => {
     // =====================================
     socket.on("disconnect", () => {
       console.log("❌ Client disconnected:", socket.id);
+      
+      // Find and clean up session associated with this socket
+      const sessionId = socketToSession.get(socket.id);
+      
+      if (sessionId) {
+        // Clear any pending timers
+        const timer = questionTimers.get(sessionId);
+        if (timer) {
+          clearTimeout(timer);
+          questionTimers.delete(sessionId);
+        }
+        
+        // Remove session data from memory
+        activeSessions.delete(sessionId);
+        performanceCache.delete(sessionId);
+        socketToSession.delete(socket.id);
+        
+        console.log(`✅ Cleaned up session ${sessionId} for disconnected client`);
+      }
     });
   });
 };

@@ -1,27 +1,23 @@
 import { apiConnector } from "../apiConnector";
 import { toast } from "react-hot-toast";
 
-const BASE_URL = import.meta.env.REACT_APP_BASE_URL;
+const BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:5000";
 
 // Get all notifications
 export const getNotifications = async (token, params = {}) => {
-  const toastId = toast.loading("Loading notifications...");
-
   try {
     if (!token) {
-      throw new Error("No authentication token found");
+      return { data: { data: [], unreadCount: 0, count: 0, success: false } };
     }
 
     const { limit = 20, skip = 0, unreadOnly = false } = params;
 
     const response = await apiConnector(
       "GET",
-      `${BASE_URL}/notifications?limit=${limit}&skip=${skip}&unreadOnly=${unreadOnly}`,
+      `${BASE_URL}/api/notifications?limit=${limit}&skip=${skip}&unreadOnly=${unreadOnly}`,
       null,
       { Authorization: `Bearer ${token}` },
     );
-    console.log("Res : ",response)
-    toast.dismiss(toastId);
 
     if (!response?.data?.success) {
       throw new Error(
@@ -31,12 +27,17 @@ export const getNotifications = async (token, params = {}) => {
 
     return response;
   } catch (error) {
-    toast.dismiss(toastId);
+    // Silently fail for auth errors (user not logged in)
+    if (error?.response?.status === 401) {
+      return { data: { data: [], unreadCount: 0, count: 0, success: false } };
+    }
+    
     const message =
       error?.response?.data?.message ||
       error.message ||
       "Failed to fetch notifications";
-    toast.error(message);
+    
+    console.error("Error fetching notifications:", error);
     throw new Error(message);
   }
 };
@@ -44,9 +45,13 @@ export const getNotifications = async (token, params = {}) => {
 // Get unread count
 export const getUnreadCount = async (token) => {
   try {
+    if (!token) {
+      return 0;
+    }
+
     const response = await apiConnector(
       "GET",
-      `${BASE_URL}/notifications/unread-count`,
+      `${BASE_URL}/api/notifications/unread-count`,
       null,
       {
         Authorization: `Bearer ${token}`,
@@ -59,7 +64,7 @@ export const getUnreadCount = async (token) => {
 
     return response.data.count;
   } catch (error) {
-    console.error("Error fetching unread count:", error);
+    // Silently return 0 for any errors
     return 0;
   }
 };

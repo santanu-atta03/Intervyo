@@ -1,0 +1,77 @@
+# Production-like Compose stack (optional)
+#
+# This file is intentionally separate from `docker-compose.yml` so that:
+# - The default `docker compose up` remains a dev-first workflow (hot reload).
+# - Contributors can opt into a "closer to prod" stack for parity checks.
+#
+# Usage:
+#   docker compose -f docker-compose.prod.yml up --build
+#
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - intervyo-net
+
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+      target: prod
+      args:
+        NODE_VERSION: "20"
+    init: true
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./Backend/.env.example
+    environment:
+      MONGODB_URI: mongodb://mongo:27017/intervyo
+      CLIENT_URL: http://localhost:8080
+      FRONTEND_URL: http://localhost:8080
+      NODE_ENV: production
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5000/api/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - intervyo-net
+
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+      target: prod
+      args:
+        NODE_VERSION: "20"
+    restart: unless-stopped
+    ports:
+      # Vite preview server (serves the production build output)
+      - "8080:4173"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - intervyo-net
+
+networks:
+  intervyo-net:
+    driver: bridge
+
+volumes:
+  mongo-data:

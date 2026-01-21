@@ -32,12 +32,14 @@ If it doesn’t help you perform better in a real interview, it doesn’t belong
 - Technical, behavioral, and mixed interview modes  
 - Timed questions to simulate real interview pressure  
 - Adaptive follow-up questions based on candidate responses  
+- **New:** Real-time Body Language Coach (Eye contact & Posture tracking) 👁️
 
 ### 📊 Smart Evaluation & Feedback
 - Communication clarity analysis  
 - Technical correctness scoring  
 - Confidence & structure assessment  
 - Strengths, weaknesses, and improvement suggestions  
+- Live Confidence HUD during interviews 💯
 
 ### 📁 Interview History & Progress Tracking
 - Store past interviews  
@@ -96,6 +98,30 @@ If it doesn’t help you perform better in a real interview, it doesn’t belong
 - Save sessions locally for quick review (no backend required)
 - **Route:** `/practice-lab`
 - Requires microphone permission in the browser (Chrome recommended)
+
+### 🎬 Interview Replay System (NEW)
+- **Full Playback**: Review completed interviews with complete conversation history
+- **Timestamped Notes**: Add personal notes at any point with categorization (improvement, strength, mistake, learning)
+- **Smart Bookmarks**: Quick-jump to important moments in the interview
+- **Resume Functionality**: Pick up where you left off during review sessions
+- **Global Search**: Search across all notes and bookmarks from all interviews
+- **View Analytics**: Track how often you review each interview and total watch time
+- **Secure Sharing**: Generate share links to get feedback from mentors or study buddies
+- **Self-Reflection**: Identify patterns and track improvement over time
+- **Route:** `/api/replay`
+- Perfect for: Post-interview analysis, mentor feedback, peer review, progress tracking
+
+### 🎯 AI-Powered Weakness Predictor & Attack Plan (NEW - OUT OF BOX!)
+- **Predictive Intelligence**: Analyzes your last 20 interviews to predict where you'll fail BEFORE your next interview
+- **Personalized Attack Plans**: 3-phase improvement strategy (Emergency Fixes → Strengthen Core → Polish & Perfect)
+- **Micro-Challenges**: 15 bite-sized, actionable tasks targeting your specific weaknesses (30-90 min each)
+- **Success Probability**: Get real probability scores for easy/medium/hard interviews and specific companies
+- **Real-Time Progress Tracking**: Improvement score, completion percentage, trend analysis (improving/declining/stable)
+- **AI Insights**: Hidden strengths, blind spots, quick wins, peer comparison, long-term goals
+- **Weakness Categories**: Tracks 10 areas (technical-depth, system-design, coding-efficiency, communication-clarity, etc.)
+- **Severity Levels**: Critical (urgent), High (significant), Medium (polish needed), Low (strengths)
+- **Route:** `/api/attack-plan`
+- Unique value: **Proactive vs Reactive** - Know your failure points before they happen, not after
 
 ---
 
@@ -170,6 +196,29 @@ MONGO_URI=your_mongodb_connection_string
 AI_API_KEY=your_ai_api_key  
 
 ---
+
+## Docker (Optional)
+
+This setup is for local development only and does not change the default workflows.
+
+1) Create any needed backend env values (optional). The Docker Compose config uses
+`Backend/.env.example` by default and overrides the MongoDB host.
+
+2) Start the stack:
+```
+docker compose up --build
+```
+
+Frontend: http://localhost:5173  
+Backend: http://localhost:5000  
+
+If you want to point the frontend to a different API URL, set
+`VITE_API_BASE_URL` before building.
+
+---
+
+For a deeper walkthrough and rationale, see `docker_guide.md`.
+
 
 ## 🚦 Current Status
 

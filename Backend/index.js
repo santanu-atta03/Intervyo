@@ -27,6 +27,8 @@ import analyticsRoutes from "./routes/analytics.route.js";
 import newsletterRoutes from "./routes/newsletter.routes.js";
 import contactRoutes from './routes/contact.routes.js';
 import careerRoutes from './routes/career.routes.js';
+import replayRoutes from './routes/replay.routes.js';
+import attackPlanRoutes from './routes/attackPlan.routes.js';
 import { dbConnect } from "./config/db.js";
 import { apiLimiter } from "./middlewares/rateLimiter.js";
 import errorHandler from "./middlewares/error.middleware.js";
@@ -122,6 +124,8 @@ app.use('/api/calendar', calendarRoutes);
 app.use('/api/questions', questionDatabaseRoutes);
 app.use('/api/buddy', buddyMatchRoutes);
 app.use('/api/career', careerRoutes);
+app.use('/api/replay', replayRoutes);
+app.use('/api/attack-plan', attackPlanRoutes);
 
 // Emotion metrics routes
 app.use("/api/interviews", emotionRoutes);
@@ -160,8 +164,10 @@ app.get("/api/health", async (req, res) => {
 // ========================================
 // ERROR HANDLER
 // ========================================
+import logger from "./utils/logger.js";
+
 app.use((err, req, res, next) => {
-  console.error("Error:", err);
+  logger.error("Server Error:", err);
   res.status(err.status || 500).json({
     success: false,
     message: err.message || "Internal Server Error",
@@ -175,7 +181,7 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5000;
 if (process.env.NODE_ENV !== "test") {
   server.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
+    logger.info(`Server running on port ${PORT}`);
   });
 }
 
@@ -183,38 +189,36 @@ if (process.env.NODE_ENV !== "test") {
 // GRACEFUL SHUTDOWN
 // ========================================
 const gracefulShutdown = async (signal) => {
-  console.log(`\n${signal} received. Starting graceful shutdown...`);
-
+  logger.warn(`${signal} received. Starting graceful shutdown...`);
+  
   try {
     // Close server to stop accepting new connections
     server.close(() => {
-      console.log('HTTP server closed');
+      logger.info('HTTP server closed');
     });
 
     // Close database connection
     await mongoose.connection.close(false);
-    console.log('MongoDB connection closed');
+    logger.info('MongoDB connection closed');
 
     process.exit(0);
   } catch (error) {
-    console.error('Error during graceful shutdown:', error);
-    process.exit(1);
+    logger.error('Error during graceful shutdown:', error);
   }
 };
-
 // Listen for termination signals
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (error) => {
-  console.error('Uncaught Exception:', error);
+  logger.error('Uncaught Exception:', error);
   gracefulShutdown('uncaughtException');
 });
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  logger.error('Unhandled Rejection:', { reason, promise });
   gracefulShutdown('unhandledRejection');
 });
 

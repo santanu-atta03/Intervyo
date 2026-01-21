@@ -18,22 +18,25 @@ export const useNotifications = () => {
 };
 
 export const NotificationProvider = ({ children }) => {
-  const { token } = useSelector((state) => state.auth);
+  const { token, user } = useSelector((state) => state.auth);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
 
+  // Check if user is actually authenticated
+  const isAuthenticated = token && user;
+
   // Fetch notifications
   const fetchNotifications = async (params = {}) => {
-    if (!token) return;
+    if (!isAuthenticated) return;
 
     try {
       setLoading(true);
       const data = await getNotifications(token, params);
-      setNotifications(data.data || []);
-      setUnreadCount(data.unreadCount || 0);
+      setNotifications(data.data?.data || []);
+      setUnreadCount(data.data?.unreadCount || 0);
     } catch (error) {
-      console.error("Error fetching notifications:", error);
+      // Silently handle errors - they're already logged in the API
     } finally {
       setLoading(false);
     }
@@ -41,39 +44,40 @@ export const NotificationProvider = ({ children }) => {
 
   // Fetch unread count
   const fetchUnreadCount = async () => {
-    if (!token) return;
+    if (!isAuthenticated) return;
 
     try {
       const count = await getUnreadCount(token);
       setUnreadCount(count);
     } catch (error) {
-      console.error("Error fetching unread count:", error);
+      // Silently handle errors
     }
   };
 
   // Refresh notifications
   const refreshNotifications = () => {
+    if (!isAuthenticated) return;
     fetchNotifications();
     fetchUnreadCount();
   };
 
   // Initial fetch
   useEffect(() => {
-    if (token) {
+    if (isAuthenticated) {
       fetchNotifications();
     }
-  }, [token]);
+  }, [isAuthenticated]);
 
   // Poll for new notifications every 30 seconds
   useEffect(() => {
-    if (!token) return;
+    if (!isAuthenticated) return;
 
     const interval = setInterval(() => {
       fetchUnreadCount();
     }, 30000); // 30 seconds
 
     return () => clearInterval(interval);
-  }, [token]);
+  }, [isAuthenticated]);
 
   const value = {
     notifications,

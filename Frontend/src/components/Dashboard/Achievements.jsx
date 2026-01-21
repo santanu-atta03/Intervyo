@@ -43,7 +43,7 @@ export default function Achievements() {
     try {
       setLoading(true);
       const response = await fetch(
-        `${import.meta.env.REACT_APP_BASE_URL}/achievements/all`,
+        `${import.meta.env.VITE_BASE_URL}/api/achievements/all`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -67,7 +67,7 @@ export default function Achievements() {
   const fetchStats = async () => {
     try {
       const response = await fetch(
-        `${import.meta.env.REACT_APP_BASE_URL}/achievements/stats`,
+        `${import.meta.env.VITE_BASE_URL}/api/achievements/stats`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

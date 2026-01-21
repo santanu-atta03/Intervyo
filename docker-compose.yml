@@ -1,0 +1,108 @@
+services:
+  # MongoDB container for local dev.
+  # Uses a named volume for persistence across restarts.
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    # MongoDB can take a few seconds to accept connections; a healthcheck makes
+    # service startup more predictable for dependent containers.
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    ports:
+      # Expose MongoDB to the host for debugging with local tools.
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - intervyo-net
+
+  backend:
+    # Backend API service (Node.js + Express).
+    # Runs in dev mode with hot reload via bind-mounted source.
+    image: node:20-bookworm
+    init: true
+    working_dir: /app
+    command: ["npm", "run", "dev"]
+    ports:
+      # API served at http://localhost:5000
+      - "5000:5000"
+    env_file:
+      # Load defaults while keeping secrets out of the image.
+      - ./Backend/.env.example
+    environment:
+      # Container-to-container networking uses the service name "mongo".
+      MONGODB_URI: mongodb://mongo:27017/intervyo
+      # Public frontend URL used by the backend (HTTP/API).
+      CLIENT_URL: http://localhost:5173
+      # Keep this in sync with CLIENT_URL; Socket.IO CORS should allow this origin.
+      FRONTEND_URL: http://localhost:5173
+      # Optional: used by the backend to configure Socket.IO allowed origins.
+      # Backend/index.js should read this (e.g. process.env.SOCKET_IO_ORIGINS)
+      # instead of hardcoding origins, so WebSocket CORS matches the dev frontend URL.
+      SOCKET_IO_ORIGINS: http://localhost:5173
+    volumes:
+      # Source bind mount for live reload.
+      - ./Backend:/app
+      # Keep node_modules inside Docker to avoid host OS conflicts.
+      - backend-node-modules:/app/node_modules
+    healthcheck:
+      # Use Node itself (no curl dependency) to hit the built-in health endpoint.
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5000/api/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - intervyo-net
+
+  frontend:
+    # Vite dev server for the React frontend.
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+      target: dev
+      args:
+        NODE_VERSION: "20"
+    init: true
+    ports:
+      # Frontend served at http://localhost:5173
+      - "5173:5173"
+    environment:
+      # Reliable file watching across Docker Desktop file shares.
+      CHOKIDAR_USEPOLLING: "true"
+      # Allows the frontend to talk to the local backend.
+      VITE_API_BASE_URL: http://localhost:5000/api
+    volumes:
+      # Source bind mount for fast iteration.
+      - ./Frontend:/app
+      # Keep node_modules inside Docker to avoid host OS conflicts.
+      - frontend-node-modules:/app/node_modules
+    healthcheck:
+      # Vite responds on "/" once the dev server is ready.
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5173', (r) => process.exit(r.statusCode >= 200 && r.statusCode < 500 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - intervyo-net
+
+networks:
+  # Single explicit network keeps service discovery clear and makes future
+  # additions (Redis, Mailhog, etc.) straightforward.
+  intervyo-net:
+    driver: bridge
+
+volumes:
+  # Named volume for MongoDB data persistence.
+  mongo-data:
+  # Named volumes for node_modules keep installs fast and OS-agnostic.
+  backend-node-modules:
+  frontend-node-modules:

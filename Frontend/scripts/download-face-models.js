@@ -6,7 +6,8 @@ const BASE = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
 const MODELS = [
   'face_expression_model',
   'face_landmark_68_model',
-  'face_recognition_model'
+  'face_recognition_model',
+  'tiny_face_detector_model'
 ];
 
 const outDir = path.resolve(process.cwd(), 'public', 'models');

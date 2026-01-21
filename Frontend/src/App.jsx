@@ -33,6 +33,7 @@ import ContactUs from './pages/ContactUs';
 import PracticeLab from './pages/PracticeLab';
 import Career from './pages/Career';
 import PricingPage from './pages/PricingPage';
+import QuizPage from './pages/QuizPage';
 
 function App() {
   return (
@@ -160,6 +161,8 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route path="/quiz" element={<QuizPage />} />
 
         {/* 404 – must be last */}
         <Route path="*" element={<NotFound />} />

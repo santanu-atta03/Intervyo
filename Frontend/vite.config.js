@@ -16,5 +16,14 @@ export default defineConfig({
     //     '/contact'
     //   ]
     // })
-  ]
+  ],
+  resolve: {
+    alias: {
+      fs: false,
+      path: false,
+    }
+  },
+  optimizeDeps: {
+    exclude: ['face-api.js']
+  }
 })

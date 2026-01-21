@@ -1,10 +1,16 @@
 // frontend/src/components/Chatbot/VoiceflowChatbot.jsx
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 const VoiceflowChatbot = () => {
+  const scriptLoadedRef = useRef(false);
+
   useEffect(() => {
+    // Prevent duplicate loading in React StrictMode
+    if (scriptLoadedRef.current) return;
+    
     // Check if the Voiceflow script is already loaded
     if (!window.voiceflow) {
+      scriptLoadedRef.current = true;
       const script = document.createElement("script");
       script.type = "text/javascript";
 
@@ -31,9 +37,14 @@ const VoiceflowChatbot = () => {
 
       // Clean up the script when component unmounts
       return () => {
-        document.body.removeChild(script);
+        try {
+          document.body.removeChild(script);
+        } catch (e) {
+          // Script may already be removed
+        }
       };
     } else {
+      scriptLoadedRef.current = true;
       // If already loaded, initialize the chat
       if (window.voiceflow?.chat) {
         window.voiceflow.chat.load({

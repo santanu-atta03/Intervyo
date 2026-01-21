@@ -40,6 +40,7 @@ import {
   getInterviewSession,
   startInterview,
 } from "../../services/operations/aiInterviewApi";
+import BodyLanguageCoach from "./BodyLanguageCoach";
 
 const InterviewRoom = () => {
   const { interviewId } = useParams();
@@ -916,6 +917,7 @@ const InterviewRoom = () => {
             className="w-full h-full object-cover"
             style={{ opacity: isVideoOn ? 1 : 0 }}
           />
+          <BodyLanguageCoach videoRef={videoRef} isVideoOn={isVideoOn} />
           {!isVideoOn && (
             <div className="w-full h-full flex items-center justify-center bg-gray-900">
               <div className="w-32 h-32 bg-gray-800 rounded-full flex items-center justify-center">
