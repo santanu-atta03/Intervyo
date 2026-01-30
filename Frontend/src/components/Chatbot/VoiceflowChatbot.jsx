@@ -51,6 +51,7 @@ const VoiceflowChatbot = () => {
           verify: { projectID: "695f3fcb847e07b5c98aefe7" },
           url: "https://general-runtime.voiceflow.com",
           versionID: "production",
+          
           voice: {
             url: "https://runtime-api.voiceflow.com",
           },
@@ -61,5 +62,6 @@ const VoiceflowChatbot = () => {
 
   return null; // Voiceflow handles its own UI
 };
+
 
 export default VoiceflowChatbot;

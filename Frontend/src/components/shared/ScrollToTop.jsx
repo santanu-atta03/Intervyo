@@ -37,7 +37,7 @@ const ScrollToTop = () => {
     width: "50px",
     height: "50px",
     borderRadius: "50%",
-    backgroundColor: isHovered ? "#0056b3" : "#007bff",
+    backgroundColor: isHovered ? "#059669" : "#10b981",
     color: "white",
     border: "none",
     cursor: "pointer",

@@ -330,7 +330,7 @@ const AIChatbot = ({ defaultContext = "general" }) => {
             className="chatbot-messages"
             ref={messagesContainerRef}
             onScroll={handleMessagesScroll}
-          >
+          > 
             {messages.length === 0 ? (
               <div className="chatbot-welcome">
                 <h2>👋 Welcome to AI Assistant!</h2>

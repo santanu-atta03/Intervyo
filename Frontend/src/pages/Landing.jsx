@@ -73,10 +73,21 @@ export default function LandingPage() {
   return (
     <div className="bg-white text-gray-900">
       {/* Navbar */}
-      <nav className="fixed top-6 left-1/2 transform -translate-x-1/2 w-[95%] max-w-7xl bg-white/95 backdrop-blur-md rounded-full shadow-lg z-50 border border-gray-200">
+      <nav className="
+fixed top-6 left-1/2 -translate-x-1/2
+w-[95%] max-w-7xl
+bg-white/10
+backdrop-blur-xl
+rounded-full
+border border-white/20
+z-50
+text-white
+">
+
+
         <div className="px-4 md:px-8 py-4 flex items-center justify-between">
           <Link to="/" className="text-xl md:text-2xl font-bold">
-            <span className="text-gray-900">Interv</span>
+            <span className="text-white-800">Interv</span>
             <span className="text-emerald-500">yo</span>
           </Link>
 
@@ -85,40 +96,44 @@ export default function LandingPage() {
             <a
               href="#features"
               onClick={(e) => scrollToSection(e, "#features")}
-              className="text-gray-600 hover:text-gray-900 font-medium transition-colors cursor-pointer"
+              className="text-gray-500 hover:text-emerald-400 font-medium transition-colors cursor-pointer"
             >
               Features
             </a>
             <a
               href="/about"
-              className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
+              className="text-gray-500 hover:text-emerald-400 font-medium transition-colors"
+
+
             >
               About
             </a>
             <a
               href="#how-it-works"
               onClick={(e) => scrollToSection(e, "#how-it-works")}
-              className="text-gray-600 hover:text-gray-900 font-medium transition-colors cursor-pointer"
+              className="text-gray-500 hover:text-emerald-400 font-medium transition-colors"
+
+
             >
               How it Works
             </a>
             <a
               href="#pricing"
               onClick={(e) => scrollToSection(e, "#pricing")}
-              className="text-gray-600 hover:text-gray-900 font-medium transition-colors cursor-pointer"
+              className="text-gray-500 hover:text-emerald-400 font-medium transition-colors cursor-pointer"
             >
               Pricing
             </a>
             <a
               href="#faq"
               onClick={(e) => scrollToSection(e, "#faq")}
-              className="text-gray-600 hover:text-gray-900 font-medium transition-colors cursor-pointer"
+              className="text-gray-500 hover:text-emerald-400 font-medium transition-colors cursor-pointer"
             >
               FAQ
             </a>
             <Link
               to="/contact"
-              className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
+              className="text-gray-500 hover:text-emerald-400 font-medium transition-colors"
             >
               Contact
             </Link>
