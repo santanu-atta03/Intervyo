@@ -1,13 +1,11 @@
 import { useState, useEffect } from "react";
 import { FaArrowUp } from "react-icons/fa";
-import { useLocation } from "react-router-dom";
 
 // ScrollToTopButton component
 const ScrollToTop = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
-  const { pathname } = useLocation();
 
   const handleScroll = () => {
     const scrollTop = window.scrollY;
@@ -25,21 +23,10 @@ const ScrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Scroll listener
   useEffect(() => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  // 🔥 Route change → scroll to top
-  useEffect(() => {
-  // Scroll to top on route change
-  window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-
-  // Reset progress & visibility for new page
-  setScrollProgress(0);
-  setIsVisible(false);
-}, [pathname]);
 
   const isComplete = scrollProgress >= 99.5;
 

@@ -35,11 +35,13 @@ import Career from './pages/Career';
 import PricingPage from './pages/PricingPage';
 import QuizPage from './pages/QuizPage';
 import CookiePolicy from './pages/CookiePolicy';
+import ScrollToTopOnRouteChange from "./components/shared/ScrollToTopOnRouteChange";
 
 function App() {
   return (
     <>
       <ScrollToTop />
+      <ScrollToTopOnRouteChange />
 
       <Routes>
         <Route path="/" element={<Landing />} />
