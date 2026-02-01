@@ -24,7 +24,7 @@ import NotFound from './pages/NotFound';
 import FAQ from './pages/FAQ';
 import Analytics from './pages/Analytics';
 import AdvancedFeaturesDashboard from './pages/AdvancedFeaturesDashboard';
-import ScrollToTop from './components/shared/ScrollToTop';
+import ScrollToTop from './components/shared/ScrollToTopButton';
 import Footer from './components/shared/Footer';
 import TermsAndConditions from './pages/Terms';
 import PrivacyPolicy from './pages/Privacy';
@@ -35,11 +35,13 @@ import Career from './pages/Career';
 import PricingPage from './pages/PricingPage';
 import QuizPage from './pages/QuizPage';
 import CookiePolicy from './pages/CookiePolicy';
+import ScrollToTopOnRouteChange from "./components/shared/ScrollToTopOnRouteChange";
 
 function App() {
   return (
     <>
       <ScrollToTop />
+      <ScrollToTopOnRouteChange />
 
       <Routes>
         <Route path="/" element={<Landing />} />
