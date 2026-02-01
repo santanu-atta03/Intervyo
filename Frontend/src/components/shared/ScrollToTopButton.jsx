@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import { FaArrowUp } from "react-icons/fa";
 import { useLocation } from "react-router-dom";
 
+// ScrollToTopButton component
 const ScrollToTop = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
-
   const { pathname } = useLocation();
 
   const handleScroll = () => {
