@@ -205,7 +205,21 @@ npm install
 npm run dev  
 
 ---
+### ⚠️ React Version Compatibility Note
 
+This project currently uses **React 19**.
+
+Some dependencies do not yet officially support React 19.  
+As a result, running `npm install` may fail with an `ERESOLVE` peer dependency error.
+
+#### Temporary Workaround
+
+Until full React 19 support is available across dependencies, install frontend packages using:
+
+```bash
+npm install --legacy-peer-deps
+
+---
 ### 💻 Frontend Setup
 cd frontend  
 npm install  
