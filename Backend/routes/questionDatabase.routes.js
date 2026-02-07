@@ -1,6 +1,7 @@
 import express from "express";
 const router = express.Router();
 import { protect } from "../middlewares/auth.js";
+import { isAdmin } from "../middlewares/admin.middleware.js";
 import {
   submit,
   vote,
@@ -42,6 +43,6 @@ router.post("/:questionId/vote", vote);
 router.post("/:questionId/report", report);
 
 // POST /api/questions/:questionId/verify - Verify question (admin only)
-router.post("/:questionId/verify", verify);
+router.post("/:questionId/verify", isAdmin, verify);
 
 export default router;
