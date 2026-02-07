@@ -1,5 +1,6 @@
 // frontend/src/App.jsx
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
+//FIX
 
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -38,6 +39,12 @@ import CookiePolicy from './pages/CookiePolicy';
 import ScrollToTopOnRouteChange from "./components/shared/ScrollToTopOnRouteChange";
 
 function App() {
+  const location = useLocation();
+
+  // Hide footer on auth pages
+  const hideFooterRoutes = ["/login", "/register"];
+  const hideFooter = hideFooterRoutes.includes(location.pathname);
+
   return (
     <>
       <ScrollToTop />
@@ -167,12 +174,14 @@ function App() {
 
         <Route path="/quiz" element={<QuizPage />} />
 
-        {/* 404 – must be last */}
+        {/* 404 */}
         <Route path="*" element={<NotFound />} />
       </Routes>
 
       <VoiceflowChatbot />
-      <Footer />
+
+      {/* ✅ Footer rendered conditionally */}
+      {!hideFooter && <Footer />}
     </>
   );
 }
