@@ -3,29 +3,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ChevronRight,
-  Trophy,
   Target,
   Zap,
   TrendingUp,
-  Award,
-  Star,
-  Calendar,
-  Clock,
   BarChart3,
-  BookOpen,
-  Code,
-  MessageSquare,
-  Brain,
-  Menu,
-  X,
-  Bell,
-  Settings,
-  LogOut,
-  Sparkles,
   Flame,
-  Crown,
+  Sparkles,
+  Trophy,
 } from "lucide-react";
-import { logout } from "../services/operations/authAPI";
 import { getAllInterviews } from "../services/operations/aiInterviewApi";
 import { getUserProfile } from "../services/operations/profileAPI";
 import { LightningLoader } from "../components/Loader/Loader";
@@ -35,32 +20,15 @@ import { ThemeContext } from "../components/shared/ThemeContext";
 import AchievementModal from "../components/Dashboard/AchievementModal";
 import { achievementService } from "../services/operations/achievementsAPI";
 import { getLearningProgress } from "../services/operations/learningHubAPI";
-import { useNotifications } from "../components/shared/NotificationContext";
-import {
-  markNotificationAsRead,
-  markAllNotificationsAsRead,
-  deleteNotification,
-  clearReadNotifications,
-} from "../services/operations/notificationAPI";
-import logo from "../assets/intervyologo.png"
+import Navbar from "../components/shared/Navbar";
 
 export default function Dashboard() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.profile);
   const { token } = useSelector((state) => state.auth);
-  const {
-    notifications,
-    unreadCount,
-    refreshNotifications,
-    setNotifications,
-    setUnreadCount,
-  } = useNotifications();
-  const profileMenuRef = useRef(null);
 
-  const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [scrollY, setScrollY] = useState(0);
+
   const [hoveredCard, setHoveredCard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isHovering, setIsHovering] = useState(false);
@@ -74,7 +42,7 @@ export default function Dashboard() {
   const [newAchievements, setNewAchievements] = useState([]);
   const [currentAchievementIndex, setCurrentAchievementIndex] = useState(0);
   const [showAchievementModal, setShowAchievementModal] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
 
   // Check for new achievements
   useEffect(() => {
@@ -101,90 +69,6 @@ export default function Dashboard() {
     }
   }, [loading, token]);
 
-  const handleNotificationClick = async (notification) => {
-    try {
-      if (!notification.isRead) {
-        await markNotificationAsRead(notification._id, token);
-
-        setNotifications((prev) =>
-          prev.map((n) =>
-            n._id === notification._id ? { ...n, isRead: true } : n,
-          ),
-        );
-        setUnreadCount((prev) => Math.max(0, prev - 1));
-      }
-
-      if (notification.link) {
-        setShowNotifications(false);
-        navigate(notification.link);
-      }
-    } catch (error) {
-      console.error("Error handling notification click:", error);
-    }
-  };
-
-  const handleMarkAllAsRead = async () => {
-    try {
-      await markAllNotificationsAsRead(token);
-
-      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-      setUnreadCount(0);
-    } catch (error) {
-      console.error("Error marking all as read:", error);
-    }
-  };
-
-  const handleDeleteNotification = async (e, notificationId) => {
-    e.stopPropagation();
-
-    try {
-      await deleteNotification(notificationId, token);
-
-      const deletedNotification = notifications.find(
-        (n) => n._id === notificationId,
-      );
-      setNotifications((prev) => prev.filter((n) => n._id !== notificationId));
-
-      if (deletedNotification && !deletedNotification.isRead) {
-        setUnreadCount((prev) => Math.max(0, prev - 1));
-      }
-    } catch (error) {
-      console.error("Error deleting notification:", error);
-    }
-  };
-
-  const handleClearRead = async () => {
-    try {
-      await clearReadNotifications(token);
-
-      setNotifications((prev) => prev.filter((n) => !n.isRead));
-    } catch (error) {
-      console.error("Error clearing read notifications:", error);
-    }
-  };
-
-  const formatTimeAgo = (date) => {
-    const seconds = Math.floor((new Date() - new Date(date)) / 1000);
-
-    if (seconds < 60) return "Just now";
-    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
-    if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
-    return new Date(date).toLocaleDateString();
-  };
-
-  const getNotificationColor = (type) => {
-    const colors = {
-      achievement: "from-purple-500 to-pink-500",
-      streak: "from-orange-500 to-red-500",
-      level_up: "from-yellow-500 to-orange-500",
-      resource: "from-blue-500 to-cyan-500",
-      badge: "from-yellow-400 to-orange-500",
-      subscription: "from-purple-600 to-pink-600",
-      interview: "from-emerald-500 to-green-500",
-    };
-    return colors[type] || "from-gray-500 to-gray-600";
-  };
 
   const handleAchievementModalClose = async () => {
     if (
@@ -277,11 +161,7 @@ export default function Dashboard() {
     }
   }, [user?.stats]);
 
-  useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+
 
   // Calculate level progress
   const levelProgress = user?.stats
@@ -437,24 +317,7 @@ export default function Dashboard() {
     });
   };
 
-  useEffect(() => {
-  if (!showProfileMenu) return;
 
-  function handleClickOutside(event) {
-    if (
-      profileMenuRef.current &&
-      !profileMenuRef.current.contains(event.target)
-    ) {
-      setShowProfileMenu(false);
-    }
-  }
-
-  document.addEventListener("mousedown", handleClickOutside);
-
-  return () => {
-    document.removeEventListener("mousedown", handleClickOutside);
-  };
-}, [showProfileMenu]);
 
 
 
@@ -469,270 +332,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       {/* Navigation Bar */}
-      <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrollY > 20
-            ? "bg-gray-900/95 backdrop-blur-xl shadow-lg shadow-black/20"
-            : "bg-transparent"
-        }`}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16 sm:h-20">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="relative">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center ">
-                  <img src={logo} alt="logo" />
-                </div>
-
-              </div>
-              <div>
-                <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                  Intervyo
-                </span>
-                <div className="text-xs text-gray-500 font-medium hidden sm:block">
-                  AI-Powered Practice
-                </div>
-              </div>
-            </div>
-
-            {/* Mobile Menu Button */}
-            <button
-              className="sm:hidden p-2 rounded-lg hover:bg-gray-800/50 transition"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
-              <div className="w-6 h-6 flex flex-col justify-center gap-1">
-                <div
-                  className={`h-0.5 bg-white transition-all duration-300 ${isMobileMenuOpen ? "rotate-45 translate-y-1.5" : ""}`}
-                ></div>
-                <div
-                  className={`h-0.5 bg-white transition-all duration-300 ${isMobileMenuOpen ? "opacity-0" : ""}`}
-                ></div>
-                <div
-                  className={`h-0.5 bg-white transition-all duration-300 ${isMobileMenuOpen ? "-rotate-45 -translate-y-1.5" : ""}`}
-                ></div>
-              </div>
-            </button>
-
-            <div className="hidden sm:flex items-center gap-3">
-              <div className="relative">
-                <button
-                  onClick={() => setShowNotifications(!showNotifications)}
-                  className="relative p-3 hover:bg-gray-800/50 rounded-xl transition group"
-                >
-                  <Bell className="w-5 h-5 text-gray-400 group-hover:text-white transition" />
-                  {unreadCount > 0 && (
-                    <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-                  )}
-                </button>
-
-                {showNotifications && (
-                  <div className="absolute right-0 mt-2 w-80 bg-gray-800/95 backdrop-blur-xl rounded-xl shadow-2xl border border-gray-700/50 py-2 max-h-96 overflow-y-auto z-50">
-                    <div className="px-4 py-3 border-b border-gray-700/50 flex justify-between items-center">
-                      <h3 className="text-white font-semibold">
-                        Notifications
-                      </h3>
-                      {unreadCount > 0 && (
-                        <button
-                          onClick={handleMarkAllAsRead}
-                          className="text-xs text-purple-400 hover:text-purple-300"
-                        >
-                          Mark all read
-                        </button>
-                      )}
-                    </div>
-                    {notifications.length > 0 ? (
-                      notifications.map((notif) => (
-                        <div
-                          key={notif._id}
-                          onClick={() => handleNotificationClick(notif)}
-                          className={`px-4 py-3 hover:bg-gray-700/50 transition cursor-pointer border-l-4 ${
-                            !notif.isRead
-                              ? "border-l-purple-500 bg-gray-800/50"
-                              : "border-l-transparent"
-                          }`}
-                        >
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <p className="text-sm text-gray-300">
-                                {notif.message}
-                              </p>
-                              <p className="text-xs text-gray-500 mt-1">
-                                {formatTimeAgo(notif.createdAt)}
-                              </p>
-                            </div>
-                            <button
-                              onClick={(e) =>
-                                handleDeleteNotification(e, notif._id)
-                              }
-                              className="ml-2 text-gray-500 hover:text-red-400 transition"
-                            >
-                              ×
-                            </button>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="px-4 py-8 text-center">
-                        <Bell className="w-8 h-8 text-gray-600 mx-auto mb-2" />
-                        <p className="text-gray-400 text-sm">
-                          No notifications yet
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              <Link
-                to={"/blog"}
-                className="p-3 text-white hover:bg-gray-800/50 rounded-xl transition font-medium"
-              >
-                Blog
-              </Link>
-
-              <div ref={profileMenuRef} className="relative">
-                <button
-                  onClick={(e) => {
-    e.stopPropagation(); // ⛔ prevents immediate close
-    setShowProfileMenu((prev) => !prev);
-  }}
-                  className="flex items-center gap-2 sm:gap-3 hover:bg-gray-800/50 px-2 sm:px-3 py-2 rounded-xl transition group"
-                >
-                  <div className="relative">
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold shadow-lg overflow-hidden">
-                      {user?.profilePicture ? (
-                        <img
-                          src={user.profilePicture}
-                          className="w-full h-full object-cover"
-                          alt="Profile"
-                        />
-                      ) : (
-                        user?.name?.charAt(0) || "U"
-                      )}
-                    </div>
-                    <div className="absolute -bottom-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center border-2 border-gray-900">
-                      <Crown className="w-2 h-2 text-white" />
-                    </div>
-                  </div>
-                  <div className="text-left hidden sm:block">
-                    <div className="text-sm font-semibold text-white">
-                      {user?.name || "User"}
-                    </div>
-                    <div className="text-xs text-purple-400 font-medium flex items-center gap-1">
-                      <Crown className="w-3 h-3" />
-                      {user?.subscription?.plan?.toUpperCase() || "FREE"}
-                    </div>
-                  </div>
-                  <ChevronRight
-                    className={`w-4 h-4 text-gray-400 transition-transform hidden sm:block ${showProfileMenu ? "rotate-90" : ""}`}
-                  />
-                </button>
-
-                {showProfileMenu && (
-                  <div className="absolute right-0 mt-2 w-48 sm:w-56 bg-gray-800/95 backdrop-blur-xl rounded-xl shadow-2xl border border-gray-700/50 py-2 overflow-hidden z-50">
-                    <div className="px-4 py-3 border-b border-gray-700/50">
-                      <div className="text-sm font-semibold text-white">
-                        {user?.name || "User"}
-                      </div>
-                      <div className="text-xs text-gray-400 truncate">
-                        {user?.email || "email@example.com"}
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => {
-                        navigate("/settings");
-                        setShowProfileMenu(false);
-                      }}
-                      className="flex items-center gap-3 px-4 py-3 text-sm text-gray-300 hover:bg-gray-700/50 transition group w-full text-left"
-                    >
-                      <Settings className="w-4 h-4 group-hover:text-purple-400" />
-                      Profile Settings
-                    </button>
-                    <button
-                      onClick={() => {
-                        navigate("/subscription");
-                        setShowProfileMenu(false);
-                      }}
-                      className="flex items-center gap-3 px-4 py-3 text-sm text-gray-300 hover:bg-gray-700/50 transition group w-full text-left"
-                    >
-                      <Crown className="w-4 h-4 group-hover:text-yellow-400" />
-                      Subscription
-                    </button>
-                    <hr className="my-2 border-gray-700/50" />
-                    <button
-                      onClick={() => dispatch(logout(navigate))}
-                      className="flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 transition group w-full text-left"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <div className="sm:hidden bg-gray-900/95 backdrop-blur-xl shadow-lg border-t border-gray-700/50">
-            <div className="px-4 py-3 space-y-2">
-              {/* Mobile Notifications */}
-              <div className="relative">
-                <button
-                  onClick={() => setShowNotifications(!showNotifications)}
-                  className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800/50 rounded-xl transition w-full text-left"
-                >
-                  <Bell className="w-5 h-5" />
-                  Notifications
-                  {unreadCount > 0 && (
-                    <span className="ml-auto w-6 h-6 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                      {unreadCount}
-                    </span>
-                  )}
-                </button>
-              </div>
-
-              <Link
-                to="/blog"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800/50 rounded-xl transition"
-              >
-                <MessageSquare className="w-5 h-5" />
-                Blog
-              </Link>
-
-              <Link
-                to="/settings"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800/50 rounded-xl transition"
-              >
-                <Settings className="w-5 h-5" />
-                Profile Settings
-              </Link>
-
-              <Link
-                to="/subscription"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800/50 rounded-xl transition"
-              >
-                <Crown className="w-5 h-5" />
-                Subscription
-              </Link>
-
-              <hr className="my-2 border-gray-700/50" />
-
-              <button
-                onClick={() => dispatch(logout(navigate))}
-                className="flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-xl transition w-full text-left"
-              >
-                <LogOut className="w-5 h-5" />
-                Logout
-              </button>
-            </div>
-          </div>
-        )}
-      </nav>
+      <Navbar variant="dashboard" />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 pt-24 sm:pt-28 pb-8 sm:pb-16">
