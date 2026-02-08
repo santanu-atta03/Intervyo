@@ -125,5 +125,23 @@
     grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
   }
 }
+.back-to-top {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  background: #1f2937;
+  color: #fff;
+  padding: 0.8rem;
+  border-radius: 50%;
+  font-size: 1.4rem;
+  border: none;
+  cursor: pointer;
+  z-index: 999;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+.back-to-top:hover {
+  opacity: 1;
+}
 
 
