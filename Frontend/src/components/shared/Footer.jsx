@@ -2,6 +2,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { TelegramIcon } from "@hugeicons/core-free-icons";
 import { Twitter, Linkedin, Github, Youtube, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
+import ThemeToggle from "../ThemeToggle";
 
 export default function Footer() {
   return (
@@ -180,9 +181,12 @@ export default function Footer() {
         {/* Bottom section */}
         <div className="border-t border-white/5 pt-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-gray-500">
-              © 2026 Intervyo. All rights reserved.
-            </p>
+            <div className="flex items-center gap-4">
+              <p className="text-sm text-gray-500">
+                © 2026 Intervyo. All rights reserved.
+              </p>
+              <ThemeToggle className="!p-1.5 !bg-zinc-900 !border-white/10" />
+            </div>
             <p className="text-sm text-gray-500">
               Built with <span className="text-red-500">♥</span> for aspiring developers
             </p>
