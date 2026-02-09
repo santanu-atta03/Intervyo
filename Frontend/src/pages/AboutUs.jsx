@@ -23,6 +23,7 @@ import {
   Star,
 } from "lucide-react";
 import { useState } from "react";
+import ThemeToggle from "../components/ThemeToggle";
 import Lenis from "@studio-freight/lenis";
 
 export default function AboutUs() {
@@ -33,34 +34,34 @@ export default function AboutUs() {
   const [contributors, setContributors] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
-  
-    // Initialize Lenis smooth scroll
-    useEffect(() => {
-      const lenis = new Lenis({
-        duration: 1.2,
-        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-        orientation: "vertical",
-        gestureOrientation: "vertical",
-        smoothWheel: true,
-        wheelMultiplier: 1,
-        smoothTouch: false,
-        touchMultiplier: 2,
-        infinite: false,
-      });
-  
-      lenisRef.current = lenis;
-  
-      function raf(time) {
-        lenis.raf(time);
-        requestAnimationFrame(raf);
-      }
-  
+
+  // Initialize Lenis smooth scroll
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: "vertical",
+      gestureOrientation: "vertical",
+      smoothWheel: true,
+      wheelMultiplier: 1,
+      smoothTouch: false,
+      touchMultiplier: 2,
+      infinite: false,
+    });
+
+    lenisRef.current = lenis;
+
+    function raf(time) {
+      lenis.raf(time);
       requestAnimationFrame(raf);
-  
-      return () => {
-        lenis.destroy();
-      };
-    }, []);
+    }
+
+    requestAnimationFrame(raf);
+
+    return () => {
+      lenis.destroy();
+    };
+  }, []);
 
   const closeMobileMenu = () => {
     setMobileMenuOpen(false);
@@ -77,7 +78,7 @@ export default function AboutUs() {
       },
     },
   };
-   const containerVariants = {
+  const containerVariants = {
     hidden: { opacity: 1 },
     visible: {
       opacity: 1,
@@ -181,7 +182,7 @@ export default function AboutUs() {
       },
       {
         name: "User-Centric",
-        role: "Design Philosophy", 
+        role: "Design Philosophy",
         description: "Every feature designed with user experience and accessibility in mind",
         icon: Heart,
       },
@@ -189,12 +190,12 @@ export default function AboutUs() {
   };
 
   return (
-    <div className="bg-white text-gray-900">
+    <div className="bg-skin-primary text-skin-primary transition-colors duration-300">
       {/* Navbar */}
-      <nav className="fixed top-6 left-1/2 transform -translate-x-1/2 w-[95%] max-w-7xl bg-white/95 backdrop-blur-md rounded-full shadow-lg z-50 border border-gray-200">
+      <nav className="fixed top-6 left-1/2 transform -translate-x-1/2 w-[95%] max-w-7xl bg-skin-primary/95 backdrop-blur-md rounded-full shadow-lg z-50 border border-skin-primary">
         <div className="px-4 md:px-8 py-4 flex items-center justify-between">
           <Link to="/" className="text-xl md:text-2xl font-bold">
-            <span className="text-gray-900">Interv</span>
+            <span className="text-skin-primary">Interv</span>
             <span className="text-emerald-500">yo</span>
           </Link>
 
@@ -202,7 +203,7 @@ export default function AboutUs() {
           <div className="hidden lg:flex items-center gap-8">
             <a
               href="/#features"
-              className="text-gray-600 hover:text-gray-900 font-medium transition-colors cursor-pointer"
+              className="text-gray-600 hover:text-skin-primary font-medium transition-colors cursor-pointer"
             >
               Features
             </a>
@@ -214,25 +215,25 @@ export default function AboutUs() {
             </Link>
             <a
               href="/#how-it-works"
-              className="text-gray-600 hover:text-gray-900 font-medium transition-colors cursor-pointer"
+              className="text-gray-600 hover:text-skin-primary font-medium transition-colors cursor-pointer"
             >
               How it Works
             </a>
             <a
               href="/#pricing"
-              className="text-gray-600 hover:text-gray-900 font-medium transition-colors cursor-pointer"
+              className="text-gray-600 hover:text-skin-primary font-medium transition-colors cursor-pointer"
             >
               Pricing
             </a>
             <a
               href="/#faq"
-              className="text-gray-600 hover:text-gray-900 font-medium transition-colors cursor-pointer"
+              className="text-gray-600 hover:text-skin-primary font-medium transition-colors cursor-pointer"
             >
               FAQ
             </a>
             <Link
               to="/contact"
-              className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
+              className="text-gray-600 hover:text-skin-primary font-medium transition-colors"
             >
               Contact
             </Link>
@@ -240,6 +241,7 @@ export default function AboutUs() {
 
           {/* Desktop Buttons */}
           <div className="hidden lg:flex items-center gap-4">
+            <ThemeToggle />
             {token ? (
               <button
                 onClick={() => navigate("/dashboard")}
@@ -268,7 +270,7 @@ export default function AboutUs() {
           {/* Mobile Hamburger Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden p-2 text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            className="lg:hidden p-2 text-skin-primary hover:bg-gray-100 rounded-lg transition-colors"
             aria-label="Toggle menu"
           >
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -281,28 +283,28 @@ export default function AboutUs() {
             <div className="p-6 space-y-4">
               <a
                 href="/#features"
-                className="block text-gray-600 hover:text-gray-900 font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors"
+                className="block text-gray-600 hover:text-skin-primary font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors"
                 onClick={closeMobileMenu}
               >
                 Features
               </a>
               <a
                 href="/#how-it-works"
-                className="block text-gray-600 hover:text-gray-900 font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors"
+                className="block text-gray-600 hover:text-skin-primary font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors"
                 onClick={closeMobileMenu}
               >
                 How it Works
               </a>
               <a
                 href="/#pricing"
-                className="block text-gray-600 hover:text-gray-900 font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors"
+                className="block text-gray-600 hover:text-skin-primary font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors"
                 onClick={closeMobileMenu}
               >
                 Pricing
               </a>
               <a
                 href="/#faq"
-                className="block text-gray-600 hover:text-gray-900 font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors"
+                className="block text-gray-600 hover:text-skin-primary font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors"
                 onClick={closeMobileMenu}
               >
                 FAQ
@@ -310,7 +312,7 @@ export default function AboutUs() {
               <Link
                 to="/contact"
                 onClick={closeMobileMenu}
-                className="block text-gray-600 hover:text-gray-900 font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors"
+                className="block text-gray-600 hover:text-skin-primary font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 Contact
               </Link>
@@ -321,6 +323,11 @@ export default function AboutUs() {
               >
                 About
               </Link>
+
+              <div className="flex items-center justify-between py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors">
+                <span className="text-gray-600 font-medium">Theme</span>
+                <ThemeToggle />
+              </div>
 
               <div className="pt-4 border-t border-gray-200 space-y-3">
                 {token ? (
@@ -358,7 +365,7 @@ export default function AboutUs() {
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-6 relative overflow-hidden bg-gray-950">
+      <section className="pt-32 pb-20 px-6 relative overflow-hidden bg-skin-secondary transition-colors duration-300">
         {/* Grid Background Pattern */}
         <div
           className="absolute inset-0"
@@ -385,7 +392,7 @@ export default function AboutUs() {
             About Us
           </div>
 
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight text-white">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight text-skin-primary">
             Empowering Careers with
             <br />
             <span className="text-emerald-500">AI-Powered</span> Interview Prep
@@ -414,14 +421,14 @@ export default function AboutUs() {
       </section>
 
       {/* Who We Are Section */}
-      <section className="py-20 px-6 bg-gray-100">
+      <section className="py-20 px-6 bg-skin-secondary transition-colors duration-300">
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <div className="inline-block bg-emerald-100 text-emerald-600 px-4 py-2 rounded-full mb-6 font-semibold text-sm">
                 Who We Are
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gray-900">
+              <h2 className="text-3xl md:text-4xl font-bold mb-6 text-skin-primary">
                 Building the Future of
                 <br />
                 <span className="text-emerald-500">Interview Preparation</span>
@@ -520,7 +527,7 @@ export default function AboutUs() {
             <div className="inline-block bg-emerald-100 text-emerald-600 px-4 py-2 rounded-full mb-4 font-semibold text-sm">
               Our Values
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-skin-primary">
               What We <span className="text-emerald-500">Stand For</span>
             </h2>
             <p className="text-xl text-gray-600">
@@ -539,7 +546,7 @@ export default function AboutUs() {
                     {value.icon}
                   </span>
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-white">
+                <h3 className="text-lg font-bold text-skin-primary mb-2 group-hover:text-white">
                   {value.title}
                 </h3>
                 <p className="text-gray-600 text-sm leading-relaxed group-hover:text-white">
@@ -558,7 +565,7 @@ export default function AboutUs() {
             <div className="inline-block bg-emerald-100 text-emerald-600 px-4 py-2 rounded-full mb-4 font-semibold text-sm">
               Features
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-skin-primary">
               What We <span className="text-emerald-500">Offer</span>
             </h2>
             <p className="text-xl text-gray-600">
@@ -580,9 +587,9 @@ export default function AboutUs() {
 
             <div className="bg-yellow-300 rounded-3xl p-8 hover:shadow-xl transition-all border-4 border-gray-900">
               <div className="w-12 h-12 bg-yellow-400 rounded-xl flex items-center justify-center mb-4">
-                <Zap className="w-6 h-6 text-gray-900" />
+                <Zap className="w-6 h-6 text-skin-primary" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">
+              <h3 className="text-xl font-bold text-skin-primary mb-3">
                 Instant Feedback
               </h3>
               <p className="text-gray-700 leading-relaxed">
@@ -665,181 +672,181 @@ export default function AboutUs() {
             ))}
           </div> */}
           {/* Creator Section */}
-        <AnimatedSection
-          className={`rounded-3xl shadow-2xl p-8 md:p-12 mb-12 border backdrop-blur-sm parallax-element bg-gray-900 border-gray-700/50
+          <AnimatedSection
+            className={`rounded-3xl shadow-2xl p-8 md:p-12 mb-12 border backdrop-blur-sm parallax-element bg-gray-900 border-gray-700/50
               `}
-        >
-          <div className="text-center mb-8">
-            <motion.div
-              className="flex justify-center mb-6"
-              whileHover={{ scale: 1.1 }}
-              transition={{ type: "spring", stiffness: 300 }}
-            >
+          >
+            <div className="text-center mb-8">
               <motion.div
-                className={`relative p-2 rounded-2xl bg-blue-500/20`}
-                animate={{
-                  boxShadow: [
-                    "0 0 20px rgba(59, 130, 246, 0.3)",
-                    "0 0 40px rgba(59, 130, 246, 0.6)",
-                    "0 0 20px rgba(59, 130, 246, 0.3)",
-                  ],
-                }}
-                transition={{ duration: 2, repeat: Infinity }}
+                className="flex justify-center mb-6"
+                whileHover={{ scale: 1.1 }}
+                transition={{ type: "spring", stiffness: 300 }}
               >
-                <img
-                  src={team.creator.avatar}
-                  alt={team.creator.name}
-                  className="w-32 h-32 rounded-xl object-cover"
-                  onError={(e) => {
-                    e.target.src = `https://ui-avatars.com/api/?name=${team.creator.name}&background=3b82f6&color=ffffff&size=128`;
-                  }}
-                />
                 <motion.div
-                  className="absolute -top-2 -right-2"
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                  className={`relative p-2 rounded-2xl bg-blue-500/20`}
+                  animate={{
+                    boxShadow: [
+                      "0 0 20px rgba(59, 130, 246, 0.3)",
+                      "0 0 40px rgba(59, 130, 246, 0.6)",
+                      "0 0 20px rgba(59, 130, 246, 0.3)",
+                    ],
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
                 >
-                  <Star className="w-8 h-8 text-yellow-500 fill-yellow-500" />
+                  <img
+                    src={team.creator.avatar}
+                    alt={team.creator.name}
+                    className="w-32 h-32 rounded-xl object-cover"
+                    onError={(e) => {
+                      e.target.src = `https://ui-avatars.com/api/?name=${team.creator.name}&background=3b82f6&color=ffffff&size=128`;
+                    }}
+                  />
+                  <motion.div
+                    className="absolute -top-2 -right-2"
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                  >
+                    <Star className="w-8 h-8 text-yellow-500 fill-yellow-500" />
+                  </motion.div>
                 </motion.div>
               </motion.div>
-            </motion.div>
 
-            <motion.h2
-              className={`text-4xl font-bold mb-4 text-white`}
-              variants={itemVariants}
-            >
-              Meet the <span className="text-emerald-500">Creator</span>
-            </motion.h2>
-
-            <motion.div
-              className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
-              variants={itemVariants}
-            >
-              <h3 className="text-2xl font-bold mb-2 text-emerald-500">{team.creator.name}</h3>
-              <p className="text-lg font-semibold text-emerald-500">{team.creator.role}</p>
-            </motion.div>
-
-            <motion.p
-              className={`text-lg leading-relaxed mt-4 max-w-2xl mx-auto text-gray-300`}
-              variants={itemVariants}
-            >
-              {team.creator.description}
-            </motion.p>
-
-            <motion.div
-              className="flex justify-center gap-4 mt-6"
-              variants={itemVariants}
-            >
-              <motion.a
-                href={team.creator.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`p-3 rounded-xl transition-all duration-300 bg-gray-700 hover:bg-gray-600 text-white"
-                    `}
-                whileHover={{ scale: 1.1, y: -2 }}
-                whileTap={{ scale: 0.95 }}
+              <motion.h2
+                className={`text-4xl font-bold mb-4 text-white`}
+                variants={itemVariants}
               >
-                <Github className="w-6 h-6" />
-              </motion.a>
-              <motion.a
-                href={`mailto:${team.creator.email}`}
-                className={`p-3 rounded-xl transition-all duration-300 bg-blue-600 hover:bg-blue-500 text-white"
-                    `}
-                whileHover={{ scale: 1.1, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Mail className="w-6 h-6" />
-              </motion.a>
-            </motion.div>
+                Meet the <span className="text-emerald-500">Creator</span>
+              </motion.h2>
 
-            <motion.div
-              className="mt-6"
-              variants={itemVariants}
-            >
-              <p className={`text-sm text-gray-400 mb-3`}>
-                Tech Stack Expertise:
-              </p>
-              <div className="flex flex-wrap justify-center gap-2">
-                {team.creator.skills.map((skill, idx) => (
-                  <motion.span
-                    key={idx}
-                    className={`px-3 py-1 rounded-full text-sm font-medium bg-blue-500/20 text-blue-400 border border-blue-500/30"
-                        `}
-                    whileHover={{ scale: 1.05 }}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.1 }}
-                  >
-                    {skill}
-                  </motion.span>
-                ))}
-              </div>
-            </motion.div>
-          </div>
-        </AnimatedSection>
-          {/* Contributors Section */}
-        <div
-          className={`rounded-3xl shadow-2xl p-8 md:p-12 mb-12 border backdrop-blur-sm bg-gray-950 border-gray-700/50`}
-        >
-          <div className="flex items-center gap-4 mb-6">
-            <div
-              className={`p-3 rounded-2xl bg-purple-500/20`}
-            >
-              <Github
-                className={`w-8 h-8 text-purple-400`}
-              />
-            </div>
-            <h2
-              className={`text-3xl font-bold text-white`}
-            >
-              Project Contributors
-            </h2>
-          </div>
-          
-          {loading ? (
-            <div className="flex justify-center items-center py-8">
-              <div className={`text-lg text-gray-400`}>
-                Loading contributors...
-              </div>
-            </div>
-          ) : error ? (
-            <div className={`text-center p-6 rounded-xl bg-red-900/30`}>
-              <p className={`ext-red-400`}>
-                Error loading contributors: {error}
-              </p>
-              <p className={`text-gray-400`}>
-                Visit our <a href="https://github.com/santanu-atta03/Intervyo" target="_blank" rel="noopener noreferrer" className="underline">GitHub repository</a> to see contributors.
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {contributors.map((contributor) => (
-                <a
-                  key={contributor.id}
-                  href={contributor.html_url}
+              <motion.div
+                className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
+                variants={itemVariants}
+              >
+                <h3 className="text-2xl font-bold mb-2 text-emerald-500">{team.creator.name}</h3>
+                <p className="text-lg font-semibold text-emerald-500">{team.creator.role}</p>
+              </motion.div>
+
+              <motion.p
+                className={`text-lg leading-relaxed mt-4 max-w-2xl mx-auto text-gray-300`}
+                variants={itemVariants}
+              >
+                {team.creator.description}
+              </motion.p>
+
+              <motion.div
+                className="flex justify-center gap-4 mt-6"
+                variants={itemVariants}
+              >
+                <motion.a
+                  href={team.creator.github}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`block group p-4 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg hover:bg-gray-700/50 border border-gray-700/50`}
-                  title={`${contributor.login} (${contributor.contributions} contributions)`}
+                  className={`p-3 rounded-xl transition-all duration-300 bg-gray-700 hover:bg-gray-600 text-white"
+                    `}
+                  whileHover={{ scale: 1.1, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  <div className="flex flex-col items-center">
-                    <img
-                      src={contributor.avatar_url}
-                      alt={contributor.login}
-                      className="w-16 h-16 rounded-full mb-3 object-cover border-2 border-transparent group-hover:border-purple-500 transition-colors duration-300"
-                    />
-                    <h3 className={`font-semibold text-center truncate w-full text-white`}>
-                      {contributor.login}
-                    </h3>
-                    <p className={`text-sm mt-1 text-gray-400`}>
-                      {contributor.contributions} contributions
-                    </p>
-                  </div>
-                </a>
-              ))}
+                  <Github className="w-6 h-6" />
+                </motion.a>
+                <motion.a
+                  href={`mailto:${team.creator.email}`}
+                  className={`p-3 rounded-xl transition-all duration-300 bg-blue-600 hover:bg-blue-500 text-white"
+                    `}
+                  whileHover={{ scale: 1.1, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Mail className="w-6 h-6" />
+                </motion.a>
+              </motion.div>
+
+              <motion.div
+                className="mt-6"
+                variants={itemVariants}
+              >
+                <p className={`text-sm text-gray-400 mb-3`}>
+                  Tech Stack Expertise:
+                </p>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {team.creator.skills.map((skill, idx) => (
+                    <motion.span
+                      key={idx}
+                      className={`px-3 py-1 rounded-full text-sm font-medium bg-blue-500/20 text-blue-400 border border-blue-500/30"
+                        `}
+                      whileHover={{ scale: 1.05 }}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.1 }}
+                    >
+                      {skill}
+                    </motion.span>
+                  ))}
+                </div>
+              </motion.div>
             </div>
-          )}
-        </div>
+          </AnimatedSection>
+          {/* Contributors Section */}
+          <div
+            className={`rounded-3xl shadow-2xl p-8 md:p-12 mb-12 border backdrop-blur-sm bg-gray-950 border-gray-700/50`}
+          >
+            <div className="flex items-center gap-4 mb-6">
+              <div
+                className={`p-3 rounded-2xl bg-purple-500/20`}
+              >
+                <Github
+                  className={`w-8 h-8 text-purple-400`}
+                />
+              </div>
+              <h2
+                className={`text-3xl font-bold text-white`}
+              >
+                Project Contributors
+              </h2>
+            </div>
+
+            {loading ? (
+              <div className="flex justify-center items-center py-8">
+                <div className={`text-lg text-gray-400`}>
+                  Loading contributors...
+                </div>
+              </div>
+            ) : error ? (
+              <div className={`text-center p-6 rounded-xl bg-red-900/30`}>
+                <p className={`ext-red-400`}>
+                  Error loading contributors: {error}
+                </p>
+                <p className={`text-gray-400`}>
+                  Visit our <a href="https://github.com/santanu-atta03/Intervyo" target="_blank" rel="noopener noreferrer" className="underline">GitHub repository</a> to see contributors.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {contributors.map((contributor) => (
+                  <a
+                    key={contributor.id}
+                    href={contributor.html_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`block group p-4 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg hover:bg-gray-700/50 border border-gray-700/50`}
+                    title={`${contributor.login} (${contributor.contributions} contributions)`}
+                  >
+                    <div className="flex flex-col items-center">
+                      <img
+                        src={contributor.avatar_url}
+                        alt={contributor.login}
+                        className="w-16 h-16 rounded-full mb-3 object-cover border-2 border-transparent group-hover:border-purple-500 transition-colors duration-300"
+                      />
+                      <h3 className={`font-semibold text-center truncate w-full text-white`}>
+                        {contributor.login}
+                      </h3>
+                      <p className={`text-sm mt-1 text-gray-400`}>
+                        {contributor.contributions} contributions
+                      </p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
 
           <p className="text-gray-500 text-center mt-12 max-w-2xl mx-auto">
             We're a growing team of passionate developers, designers, and AI

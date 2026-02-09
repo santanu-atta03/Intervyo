@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode : "class",
+  darkMode: ['selector', '[data-theme="dark"]'],
   content: [
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
@@ -8,28 +8,49 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-          800: '#075985',
-          900: '#0c4a6e',
+          50: 'var(--primary-color)',
+          100: 'var(--primary-color)',
+          200: 'var(--primary-color)',
+          300: 'var(--primary-color)',
+          400: 'var(--primary-color)',
+          500: 'var(--primary-color)',
+          600: 'var(--primary-hover)',
+          700: 'var(--primary-hover)',
+          800: 'var(--primary-hover)',
+          900: 'var(--primary-hover)',
         },
         dark: {
-          50: '#f8fafc',
-          100: '#f1f5f9',
-          200: '#e2e8f0',
-          300: '#cbd5e1',
-          400: '#94a3b8',
-          500: '#64748b',
-          600: '#475569',
-          700: '#334155',
-          800: '#1e293b',
-          900: '#0f172a',
+          50: 'var(--bg-primary)',
+          100: 'var(--bg-primary)',
+          200: 'var(--bg-secondary)',
+          300: 'var(--bg-tertiary)',
+          400: 'var(--text-tertiary)',
+          500: 'var(--text-secondary)',
+          600: 'var(--text-secondary)',
+          700: 'var(--bg-tertiary)',
+          800: 'var(--bg-secondary)',
+          900: 'var(--bg-primary)',
+        }
+      },
+      backgroundColor: {
+        skin: {
+          primary: 'var(--bg-primary)',
+          secondary: 'var(--bg-secondary)',
+          tertiary: 'var(--bg-tertiary)',
+        }
+      },
+      textColor: {
+        skin: {
+          primary: 'var(--text-primary)',
+          secondary: 'var(--text-secondary)',
+          tertiary: 'var(--text-tertiary)',
+          inverted: 'var(--text-inverse)',
+        }
+      },
+      borderColor: {
+        skin: {
+          primary: 'var(--border-primary)',
+          secondary: 'var(--border-secondary)',
         }
       },
       fontFamily: {

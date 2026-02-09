@@ -31,6 +31,7 @@ import { getUserProfile } from "../services/operations/profileAPI";
 import { LightningLoader } from "../components/Loader/Loader";
 import ContributionGraph from "../components/Dashboard/ContributionGraph";
 import TextType from "../components/shared/TextType";
+import ThemeToggle from "../components/ThemeToggle";
 import { ThemeContext } from "../components/shared/ThemeContext";
 import AchievementModal from "../components/Dashboard/AchievementModal";
 import { achievementService } from "../services/operations/achievementsAPI";
@@ -438,23 +439,23 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-  if (!showProfileMenu) return;
+    if (!showProfileMenu) return;
 
-  function handleClickOutside(event) {
-    if (
-      profileMenuRef.current &&
-      !profileMenuRef.current.contains(event.target)
-    ) {
-      setShowProfileMenu(false);
+    function handleClickOutside(event) {
+      if (
+        profileMenuRef.current &&
+        !profileMenuRef.current.contains(event.target)
+      ) {
+        setShowProfileMenu(false);
+      }
     }
-  }
 
-  document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
 
-  return () => {
-    document.removeEventListener("mousedown", handleClickOutside);
-  };
-}, [showProfileMenu]);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showProfileMenu]);
 
 
 
@@ -467,14 +468,13 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-skin-primary via-skin-secondary to-skin-primary text-skin-primary">
       {/* Navigation Bar */}
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrollY > 20
-            ? "bg-gray-900/95 backdrop-blur-xl shadow-lg shadow-black/20"
-            : "bg-transparent"
-        }`}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrollY > 20
+          ? "bg-skin-primary/95 backdrop-blur-xl shadow-lg shadow-black/5"
+          : "bg-transparent"
+          }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16 sm:h-20">
@@ -514,6 +514,7 @@ export default function Dashboard() {
             </button>
 
             <div className="hidden sm:flex items-center gap-3">
+              <ThemeToggle />
               <div className="relative">
                 <button
                   onClick={() => setShowNotifications(!showNotifications)}
@@ -545,11 +546,10 @@ export default function Dashboard() {
                         <div
                           key={notif._id}
                           onClick={() => handleNotificationClick(notif)}
-                          className={`px-4 py-3 hover:bg-gray-700/50 transition cursor-pointer border-l-4 ${
-                            !notif.isRead
-                              ? "border-l-purple-500 bg-gray-800/50"
-                              : "border-l-transparent"
-                          }`}
+                          className={`px-4 py-3 hover:bg-gray-700/50 transition cursor-pointer border-l-4 ${!notif.isRead
+                            ? "border-l-purple-500 bg-gray-800/50"
+                            : "border-l-transparent"
+                            }`}
                         >
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
@@ -593,9 +593,9 @@ export default function Dashboard() {
               <div ref={profileMenuRef} className="relative">
                 <button
                   onClick={(e) => {
-    e.stopPropagation(); // ⛔ prevents immediate close
-    setShowProfileMenu((prev) => !prev);
-  }}
+                    e.stopPropagation(); // ⛔ prevents immediate close
+                    setShowProfileMenu((prev) => !prev);
+                  }}
                   className="flex items-center gap-2 sm:gap-3 hover:bg-gray-800/50 px-2 sm:px-3 py-2 rounded-xl transition group"
                 >
                   <div className="relative">
@@ -677,6 +677,12 @@ export default function Dashboard() {
         {isMobileMenuOpen && (
           <div className="sm:hidden bg-gray-900/95 backdrop-blur-xl shadow-lg border-t border-gray-700/50">
             <div className="px-4 py-3 space-y-2">
+              {/* Theme Toggle Mobile */}
+              <div className="flex items-center justify-between px-4 py-3 text-gray-300 hover:bg-gray-800/50 rounded-xl transition">
+                <span>Theme</span>
+                <ThemeToggle />
+              </div>
+
               {/* Mobile Notifications */}
               <div className="relative">
                 <button

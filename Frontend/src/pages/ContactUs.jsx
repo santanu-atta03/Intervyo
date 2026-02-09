@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Menu, X, Mail, Phone, MapPin, Send } from "lucide-react";
 import { submitContactForm } from "../services/operations/contactAPI";
+import ThemeToggle from "../components/ThemeToggle";
 import Lenis from "@studio-freight/lenis";
 export default function ContactUs() {
   const navigate = useNavigate();
@@ -69,12 +70,12 @@ export default function ContactUs() {
   };
 
   return (
-    <div className="bg-white text-gray-900 min-h-screen flex flex-col">
+    <div className="bg-skin-primary text-skin-primary min-h-screen flex flex-col transition-colors duration-300">
       {/* Navbar - Copied from Landing.jsx but slightly modified for links */}
-      <nav className="fixed top-6 left-1/2 transform -translate-x-1/2 w-[95%] max-w-7xl bg-white/95 backdrop-blur-md rounded-full shadow-lg z-50 border border-gray-200">
+      <nav className="fixed top-6 left-1/2 transform -translate-x-1/2 w-[95%] max-w-7xl bg-skin-primary/95 backdrop-blur-md rounded-full shadow-lg z-50 border border-skin-primary">
         <div className="px-4 md:px-8 py-4 flex items-center justify-between">
           <Link to="/" className="text-xl md:text-2xl font-bold">
-            <span className="text-gray-900">Interv</span>
+            <span className="text-skin-primary">Interv</span>
             <span className="text-emerald-500">yo</span>
           </Link>
 
@@ -82,43 +83,44 @@ export default function ContactUs() {
             {/* Use Link to Home with hash if possible, or just redirect to home sections */}
             <Link
               to="/#features"
-              className="text-gray-600 hover:text-gray-900 font-medium transition-colors cursor-pointer"
+              className="text-gray-600 hover:text-skin-primary font-medium transition-colors cursor-pointer"
             >
               Features
             </Link>
             <Link
               to="/about"
-              className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
+              className="text-gray-600 hover:text-skin-primary font-medium transition-colors"
             >
               About
             </Link>
             <Link
               to="/#how-it-works"
-              className="text-gray-600 hover:text-gray-900 font-medium transition-colors cursor-pointer"
+              className="text-gray-600 hover:text-skin-primary font-medium transition-colors cursor-pointer"
             >
               How it Works
             </Link>
             <Link
               to="/#pricing"
-              className="text-gray-600 hover:text-gray-900 font-medium transition-colors cursor-pointer"
+              className="text-gray-600 hover:text-skin-primary font-medium transition-colors cursor-pointer"
             >
               Pricing
             </Link>
             <Link
               to="/#faq"
-              className="text-gray-600 hover:text-gray-900 font-medium transition-colors cursor-pointer"
+              className="text-gray-600 hover:text-skin-primary font-medium transition-colors cursor-pointer"
             >
               FAQ
             </Link>
             <Link
               to="/contact"
-              className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
+              className="text-gray-600 hover:text-skin-primary font-medium transition-colors"
             >
               Contact
             </Link>
           </div>
 
           <div className="hidden lg:flex items-center gap-4">
+            <ThemeToggle />
             {token ? (
               <button
                 onClick={() => navigate("/dashboard")}
@@ -146,7 +148,7 @@ export default function ContactUs() {
 
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden p-2 text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            className="lg:hidden p-2 text-skin-primary hover:bg-gray-100 rounded-lg transition-colors"
           >
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -158,17 +160,21 @@ export default function ContactUs() {
               <Link
                 to="/"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block text-gray-600 hover:text-gray-900 font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors"
+                className="block text-gray-600 hover:text-skin-primary font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 Home
               </Link>
               <Link
                 to="/about"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block text-gray-600 hover:text-gray-900 font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors"
+                className="block text-gray-600 hover:text-skin-primary font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 About
               </Link>
+              <div className="flex items-center justify-between py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors">
+                <span className="text-gray-600 font-medium">Theme</span>
+                <ThemeToggle />
+              </div>
               <div className="pt-4 border-t border-gray-200 space-y-3">
                 {token ? (
                   <button
@@ -203,7 +209,7 @@ export default function ContactUs() {
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-40 pb-20 px-6 relative overflow-hidden bg-gray-950 text-white">
+      <section className="pt-40 pb-20 px-6 relative overflow-hidden bg-skin-secondary text-skin-primary transition-colors duration-300">
         <div
           className="absolute inset-0"
           style={{
@@ -234,7 +240,7 @@ export default function ContactUs() {
       </section>
 
       {/* Contact Form Section */}
-      <section className="py-20 px-6 bg-white relative">
+      <section className="py-20 px-6 bg-skin-primary relative transition-colors duration-300">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-12">
           {/* Contact Info */}
           <div className="md:w-1/3 space-y-8">
@@ -268,7 +274,7 @@ export default function ContactUs() {
           </div>
 
           {/* Form */}
-          <div className="md:w-2/3 bg-gray-50 p-8 rounded-2xl shadow-sm border border-gray-100">
+          <div className="md:w-2/3 bg-skin-secondary p-8 rounded-2xl shadow-sm border border-skin-primary transition-colors duration-300">
             <form onSubmit={handleOnSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
@@ -282,7 +288,7 @@ export default function ContactUs() {
                     value={name}
                     onChange={handleOnChange}
                     placeholder="John Doe"
-                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all"
+                    className="w-full px-4 py-3 rounded-lg bg-skin-primary border border-skin-primary focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all"
                   />
                 </div>
                 <div className="space-y-2">
@@ -296,7 +302,7 @@ export default function ContactUs() {
                     value={email}
                     onChange={handleOnChange}
                     placeholder="john@example.com"
-                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all"
+                    className="w-full px-4 py-3 rounded-lg bg-skin-primary border border-skin-primary focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all"
                   />
                 </div>
               </div>
@@ -312,7 +318,7 @@ export default function ContactUs() {
                   value={subject}
                   onChange={handleOnChange}
                   placeholder="How can we help?"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all"
+                  className="w-full px-4 py-3 rounded-lg bg-skin-primary border border-skin-primary focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all"
                 />
               </div>
 
