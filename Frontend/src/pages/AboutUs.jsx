@@ -421,59 +421,125 @@ export default function AboutUs() {
       </section>
 
       {/* Who We Are Section */}
-      <section className="py-20 px-6 bg-skin-secondary transition-colors duration-300">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <div className="inline-block bg-emerald-100 text-emerald-600 px-4 py-2 rounded-full mb-6 font-semibold text-sm">
-                Who We Are
+
+<section className="py-20 px-6 bg-skin-secondary transition-colors duration-300 relative overflow-hidden">
+  {/* Background glow */}
+  <div className="absolute -top-40 -left-40 w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl" />
+  <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-cyan-400/10 rounded-full blur-3xl" />
+
+  <div className="max-w-6xl mx-auto relative z-10">
+    <motion.div
+      className="grid md:grid-cols-2 gap-12 items-center"
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-80px" }}
+      variants={{
+        hidden: { opacity: 0 },
+        visible: {
+          opacity: 1,
+          transition: { staggerChildren: 0.15 }
+        }
+      }}
+    >
+      {/* LEFT CONTENT */}
+      <motion.div
+        variants={{
+          hidden: { opacity: 0, y: 40 },
+          visible: { opacity: 1, y: 0 }
+        }}
+        transition={{ duration: 0.7, ease: "easeOut" }}
+      >
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          className="inline-block bg-gradient-to-r from-emerald-500/15 to-cyan-500/15 text-emerald-600 px-4 py-2 rounded-full mb-6 font-semibold text-sm border border-emerald-400/30"
+        >
+          Who We Are
+        </motion.div>
+
+        <h2 className="text-3xl md:text-4xl font-bold mb-6 text-skin-primary leading-tight">
+          <motion.span
+            whileHover={{
+              scale: 1.05,
+              textShadow: "0 0 30px rgba(16,185,129,0.6)"
+            }}
+            className="inline-block bg-gradient-to-r from-violet-500 via-emerald-500 to-cyan-400 bg-clip-text text-transparent cursor-pointer"
+          >
+            Building the Future
+          </motion.span>
+          <br />
+          <span className="text-emerald-500">Interview Preparation</span>
+        </h2>
+
+        <motion.p
+          className="text-lg text-gray-600 mb-6 leading-relaxed"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
+          viewport={{ once: true }}
+        >
+          <span className="text-emerald-500 font-semibold">Intervyo</span>{" "}
+          is an AI-powered interview preparation platform designed to help tech
+          professionals and job seekers excel in real interviews.
+        </motion.p>
+
+        <motion.p
+          className="text-lg text-gray-600 leading-relaxed"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35, duration: 0.6 }}
+          viewport={{ once: true }}
+        >
+          We blend cutting-edge AI with proven interview techniques to deliver
+          realistic, personalized mock interview experiences.
+        </motion.p>
+      </motion.div>
+
+      {/* RIGHT STATS GRID */}
+      <motion.div
+        className="grid grid-cols-2 gap-4"
+        variants={{
+          hidden: { opacity: 0, y: 40 },
+          visible: { opacity: 1, y: 0 }
+        }}
+        transition={{ duration: 0.7, ease: "easeOut" }}
+      >
+        {[
+          { value: "5K+", label: "Active Users", glow: "emerald" },
+          { value: "50+", label: "Tech Roles", glow: "cyan" },
+          { value: "87%", label: "Success Rate", glow: "violet" },
+          { value: "24/7", label: "AI Support", glow: "emerald" }
+        ].map((item, i) => (
+          <motion.div
+            key={i}
+            whileHover={{
+              y: -10,
+              scale: 1.05,
+              boxShadow:
+                item.glow === "emerald"
+                  ? "0 20px 40px rgba(16,185,129,0.35)"
+                  : item.glow === "cyan"
+                  ? "0 20px 40px rgba(34,211,238,0.35)"
+                  : "0 20px 40px rgba(139,92,246,0.35)"
+            }}
+            transition={{ type: "spring", stiffness: 200, damping: 15 }}
+            className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 cursor-pointer relative overflow-hidden group"
+          >
+            {/* Glow overlay */}
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-white/40 to-transparent" />
+
+            <div className="relative z-10">
+              <div className="text-4xl font-bold text-emerald-500 mb-2">
+                {item.value}
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-6 text-skin-primary">
-                Building the Future of
-                <br />
-                <span className="text-emerald-500">Interview Preparation</span>
-              </h2>
-              <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-                <span className="text-emerald-500 font-semibold">Intervyo</span>{" "}
-                is an innovative AI-powered interview preparation platform
-                designed to help tech professionals and job seekers excel in
-                their interviews.
-              </p>
-              <p className="text-lg text-gray-600 leading-relaxed">
-                We combine cutting-edge artificial intelligence with proven
-                interview techniques to deliver personalized, realistic mock
-                interview experiences that prepare you for success.
-              </p>
+              <p className="text-gray-600 font-medium">{item.label}</p>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 hover:shadow-lg transition-all">
-                <div className="text-4xl font-bold text-emerald-500 mb-2">
-                  5K+
-                </div>
-                <p className="text-gray-600">Active Users</p>
-              </div>
-              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 hover:shadow-lg transition-all">
-                <div className="text-4xl font-bold text-emerald-500 mb-2">
-                  50+
-                </div>
-                <p className="text-gray-600">Tech Roles</p>
-              </div>
-              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 hover:shadow-lg transition-all">
-                <div className="text-4xl font-bold text-emerald-500 mb-2">
-                  87%
-                </div>
-                <p className="text-gray-600">Success Rate</p>
-              </div>
-              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 hover:shadow-lg transition-all">
-                <div className="text-4xl font-bold text-emerald-500 mb-2">
-                  24/7
-                </div>
-                <p className="text-gray-600">AI Support</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+          </motion.div>
+        ))}
+      </motion.div>
+    </motion.div>
+  </div>
+</section>
+
 
       {/* Mission & Vision Section */}
       <section className="py-20 px-6 bg-gray-950">
@@ -559,60 +625,135 @@ export default function AboutUs() {
       </section>
 
       {/* What We Offer Section */}
-      <section className="py-20 px-6 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <div className="inline-block bg-emerald-100 text-emerald-600 px-4 py-2 rounded-full mb-4 font-semibold text-sm">
-              Features
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">
-              What We Offer
-            </h2>
-            <p className="text-xl text-gray-600">
-              Everything you need to ace your interviews
-            </p>
-          </div>
+<section className="py-20 px-6 bg-white relative overflow-hidden">
+  {/* subtle background glow */}
+  <div className="absolute -top-32 -left-32 w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl" />
+  <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-purple-400/10 rounded-full blur-3xl" />
 
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="bg-emerald-600 rounded-3xl p-8 text-white hover:shadow-xl transition-all border-4 border-gray-900">
-              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4">
-                <MessageSquare className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-xl font-bold mb-3">AI Mock Interviews</h3>
-              <p className="text-emerald-100 leading-relaxed">
-                Practice with realistic, role-specific interview simulations
-                powered by advanced AI.
-              </p>
-            </div>
+  <div className="max-w-6xl mx-auto relative z-10">
+    {/* Heading */}
+    <motion.div
+      className="text-center mb-16"
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+      viewport={{ once: true }}
+    >
+      <motion.div
+        whileHover={{ scale: 1.05 }}
+        className="inline-block bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-emerald-600 px-4 py-2 rounded-full mb-4 font-semibold text-sm border border-emerald-400/30"
+      >
+        Features
+      </motion.div>
 
-            <div className="bg-yellow-300 rounded-3xl p-8 hover:shadow-xl transition-all border-4 border-gray-900">
-              <div className="w-12 h-12 bg-yellow-400 rounded-xl flex items-center justify-center mb-4">
-                <Zap className="w-6 h-6 text-gray-900" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">
-                Instant Feedback
-              </h3>
-              <p className="text-gray-700 leading-relaxed">
-                Receive detailed performance analysis and actionable improvement
-                suggestions.
-              </p>
-            </div>
+      <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">
+        What We Offer
+      </h2>
+      <p className="text-xl text-gray-600">
+        Everything you need to ace your interviews
+      </p>
+    </motion.div>
 
-            <div className="bg-purple-200 rounded-3xl p-8 hover:shadow-xl transition-all border-4 border-gray-900">
-              <div className="w-12 h-12 bg-purple-300 rounded-xl flex items-center justify-center mb-4">
-                <BarChart className="w-6 h-6 text-gray-900" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">
-                Progress Analytics
-              </h3>
-              <p className="text-gray-700 leading-relaxed">
-                Track your improvement over time with comprehensive dashboards
-                and insights.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+    {/* Cards */}
+    <motion.div
+      className="grid md:grid-cols-3 gap-6"
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true }}
+      variants={{
+        visible: {
+          transition: { staggerChildren: 0.15 }
+        }
+      }}
+    >
+      {/* Card 1 */}
+      <motion.div
+        variants={{
+          hidden: { opacity: 0, y: 40 },
+          visible: { opacity: 1, y: 0 }
+        }}
+        whileHover={{
+          y: -12,
+          scale: 1.05,
+          boxShadow: "0 25px 50px rgba(16,185,129,0.35)"
+        }}
+        transition={{ type: "spring", stiffness: 200, damping: 15 }}
+        className="bg-gradient-to-br from-emerald-500 to-teal-500 rounded-3xl p-8 text-white border-4 border-gray-900 cursor-pointer"
+      >
+        <motion.div
+          whileHover={{ rotate: -10, scale: 1.1 }}
+          className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4"
+        >
+          <MessageSquare className="w-6 h-6 text-white" />
+        </motion.div>
+        <h3 className="text-xl font-bold mb-3">AI Mock Interviews</h3>
+        <p className="text-emerald-100 leading-relaxed">
+          Practice with realistic, role-specific interview simulations powered
+          by advanced AI.
+        </p>
+      </motion.div>
+
+      {/* Card 2 */}
+      <motion.div
+        variants={{
+          hidden: { opacity: 0, y: 40 },
+          visible: { opacity: 1, y: 0 }
+        }}
+        whileHover={{
+          y: -12,
+          scale: 1.05,
+          boxShadow: "0 25px 50px rgba(251,191,36,0.45)"
+        }}
+        transition={{ type: "spring", stiffness: 200, damping: 15 }}
+        className="bg-gradient-to-br from-amber-300 to-yellow-300 rounded-3xl p-8 border-4 border-gray-900 cursor-pointer"
+      >
+        <motion.div
+          whileHover={{ rotate: 15, scale: 1.1 }}
+          className="w-12 h-12 bg-yellow-400 rounded-xl flex items-center justify-center mb-4"
+        >
+          <Zap className="w-6 h-6 text-gray-900" />
+        </motion.div>
+        <h3 className="text-xl font-bold text-gray-900 mb-3">
+          Instant Feedback
+        </h3>
+        <p className="text-gray-700 leading-relaxed">
+          Receive detailed performance analysis and actionable improvement
+          suggestions.
+        </p>
+      </motion.div>
+
+      {/* Card 3 */}
+      <motion.div
+        variants={{
+          hidden: { opacity: 0, y: 40 },
+          visible: { opacity: 1, y: 0 }
+        }}
+        whileHover={{
+          y: -12,
+          scale: 1.05,
+          boxShadow: "0 25px 50px rgba(139,92,246,0.4)"
+        }}
+        transition={{ type: "spring", stiffness: 200, damping: 15 }}
+        className="bg-gradient-to-br from-violet-200 to-purple-200 rounded-3xl p-8 border-4 border-gray-900 cursor-pointer"
+      >
+        <motion.div
+          whileHover={{ rotate: -12, scale: 1.1 }}
+          className="w-12 h-12 bg-purple-300 rounded-xl flex items-center justify-center mb-4"
+        >
+          <BarChart className="w-6 h-6 text-gray-900" />
+        </motion.div>
+        <h3 className="text-xl font-bold text-gray-900 mb-3">
+          Progress Analytics
+        </h3>
+        <p className="text-gray-700 leading-relaxed">
+          Track your improvement over time with comprehensive dashboards and
+          insights.
+        </p>
+      </motion.div>
+    </motion.div>
+  </div>
+</section>
+
 
       {/* Team Section */}
       <section className="py-20 px-6 bg-gray-950">
@@ -857,31 +998,100 @@ export default function AboutUs() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-6 bg-gradient-to-r from-emerald-600 to-emerald-500">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">
-            Ready to Ace Your Next Interview?
-          </h2>
-          <p className="text-xl text-emerald-100 mb-10">
-            Join thousands of job seekers who are already preparing smarter with
-            Intervyo.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button
-              onClick={() => navigate("/register")}
-              className="px-8 py-4 bg-white text-emerald-600 rounded-xl hover:bg-gray-100 font-semibold text-lg flex items-center gap-2 transition-all shadow-lg"
-            >
-              Get Started Free <ArrowRight className="w-5 h-5" />
-            </button>
-            <a
-              href="mailto:intervyo.team@example.com"
-              className="px-8 py-4 bg-emerald-700 text-white rounded-xl hover:bg-emerald-800 font-semibold text-lg flex items-center gap-2 transition-all"
-            >
-              <Mail className="w-5 h-5" /> Contact Us
-            </a>
-          </div>
-        </div>
-      </section>
+      <section className="relative py-20 px-6 overflow-hidden">
+  {/* Animated gradient background */}
+  <motion.div
+    className="absolute inset-0 bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-500"
+    animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
+    transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+    style={{ backgroundSize: "200% 200%" }}
+  />
+
+  {/* Soft glow */}
+  <div className="absolute -top-40 -left-40 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
+  <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
+
+  <motion.div
+    className="relative z-10 max-w-4xl mx-auto text-center"
+    initial={{ opacity: 0, y: 40 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.7, ease: "easeOut" }}
+    viewport={{ once: true }}
+  >
+    <motion.h2
+      className="text-3xl md:text-4xl font-bold mb-6 text-white"
+      whileHover={{ scale: 1.03 }}
+    >
+      Ready to Ace Your Next Interview?
+    </motion.h2>
+
+    <motion.p
+      className="text-xl text-emerald-100 mb-10"
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      transition={{ delay: 0.2 }}
+      viewport={{ once: true }}
+    >
+      Join thousands of job seekers who are already preparing smarter with
+      <span className="font-semibold text-white"> Intervyo</span>.
+    </motion.p>
+
+    <motion.div
+      className="flex flex-col sm:flex-row items-center justify-center gap-4"
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true }}
+      variants={{
+        visible: {
+          transition: { staggerChildren: 0.15 }
+        }
+      }}
+    >
+      {/* Primary CTA */}
+      <motion.button
+        variants={{
+          hidden: { opacity: 0, y: 20 },
+          visible: { opacity: 1, y: 0 }
+        }}
+        whileHover={{
+          scale: 1.08,
+          boxShadow: "0 25px 50px rgba(255,255,255,0.35)"
+        }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => navigate("/register")}
+        className="px-8 py-4 bg-white text-emerald-600 rounded-xl font-semibold text-lg flex items-center gap-2 shadow-lg"
+      >
+        Get Started Free
+        <motion.span
+          animate={{ x: [0, 6, 0] }}
+          transition={{ duration: 1.2, repeat: Infinity }}
+        >
+          <ArrowRight className="w-5 h-5" />
+        </motion.span>
+      </motion.button>
+
+      {/* Secondary CTA */}
+      <motion.a
+        variants={{
+          hidden: { opacity: 0, y: 20 },
+          visible: { opacity: 1, y: 0 }
+        }}
+        whileHover={{
+          scale: 1.05,
+          backgroundColor: "rgba(6,78,59,1)",
+          boxShadow: "0 20px 40px rgba(16,185,129,0.35)"
+        }}
+        whileTap={{ scale: 0.95 }}
+        href="mailto:intervyo.team@example.com"
+        className="px-8 py-4 bg-emerald-700 text-white rounded-xl font-semibold text-lg flex items-center gap-2"
+      >
+        <Mail className="w-5 h-5" />
+        Contact Us
+      </motion.a>
+    </motion.div>
+  </motion.div>
+</section>
+
 
       {/* Add CSS for sweep animation */}
       <style jsx>{`

@@ -176,7 +176,7 @@ export default function LandingPage() {
 
   return (
     <div className="bg-white text-sky-600">
-    <div className="bg-skin-primary text-skin-primary transition-colors duration-300">
+      <div className="bg-skin-primary text-skin-primary transition-colors duration-300">
       {/* Navbar */}
       <nav className="
 fixed top-6 left-1/2 -translate-x-1/2
@@ -369,7 +369,6 @@ text-skin-primary
 
       {/* Hero Section */}
       <section className="pt-32 pb-20 px-6 relative overflow-hidden bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950">
-      <section className="pt-32 pb-20 px-6 relative overflow-hidden bg-skin-secondary transition-colors duration-300">
         {/* Grid Background Pattern */}
         <div
           className="absolute inset-0"
@@ -430,37 +429,24 @@ text-skin-primary
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2 }}
           >
-          <div className="inline-flex items-center gap-2 bg-emerald-500/10 mb-6 border border-emerald-500/20">
-            <span className="font-medium"></span>
-          </div>
-
-          <motion.h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight text-skin-primary">
-            Ace Your Next Tech
-            <br />
-            Interview with{" "}
-            <motion.span 
-              className="bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent"
-              animate={{ backgroundPosition: ["0%", "100%", "0%"] }}
-              transition={{ duration: 3, repeat: Infinity }}
-              style={{ backgroundSize: "200% auto" }}
-            >
-              AI
-            </motion.span>
-            <br />
-            <span className="bg-gradient-to-r from-violet-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Coaching</span>
-          </motion.h1>
-
-          <motion.p 
-            className="text-xl text-gray-400 mb-10 max-w-3xl mx-auto"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
+          Ace Your Next Tech
+          <br />
+          Interview with{" "}
+          <motion.span 
+            className="bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent"
+            animate={{ backgroundPosition: ["0%", "100%", "0%"] }}
+            transition={{ duration: 3, repeat: Infinity }}
+            style={{ backgroundSize: "200% auto" }}
           >
-            Practice real-world interview scenarios, get role-specific
-            questions,
-            <br />
-            and receive instant, actionable feedback to boost your confidence.
-          </motion.p>
+            AI
+          </motion.span>
+          <br />
+          <span className="bg-gradient-to-r from-violet-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Coaching</span>
+        </motion.h1>
+        <motion.p>
+          <br />
+          and receive instant, actionable feedback to boost your confidence.
+        </motion.p>
 
           <motion.div 
             className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
@@ -473,7 +459,7 @@ text-skin-primary
               className="px-8 py-4  rounded-xl font-semibold text-lg flex items-center gap-2"
               variant="primary"
             >
-              Start Practicing Free <motion.span animate={{ x: [0, 5, 0] }} transition={{ duration: 1, repeat: Infinity }}> -> </motion.span>
+              Start Practicing Free <motion.span animate={{ x: [0, 5, 0] }} transition={{ duration: 1, repeat: Infinity }}>{'->'}</motion.span>
             </AnimatedButton>
             <AnimatedButton
               onClick={() => navigate("/dashboard")}
@@ -579,174 +565,53 @@ text-skin-primary
 
           {/* Trust Badge */}
           <div className="mt-16 px-4"> 
-  <p className="text-sky-600 mb-8 text-center">
-    <span className="bg-yellow-400 px-2 py-1 inline-block leading-relaxed max-w-full">
-      Trusted by <strong>5,000+</strong> job seekers preparing for
-      their dream roles
-    </span>
-  </p>
-
-  <div className="w-full overflow-x-auto pb-4 scrollbar-hide">
-    <div className="grid grid-cols-2 md:grid-cols-4 border border-gray-700 max-w-7xl mx-auto min-w-[600px] md:min-w-0 bg-gray-900">
-      <div className="flex flex-col items-center justify-center p-8 border-r border-b border-gray-700 hover:bg-gradient-to-br hover:from-cyan-500/10 hover:to-emerald-500/10 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
-        <span className="text-2xl font-bold text-white mb-2 text-center group-hover:text-cyan-400 transition-colors">
-          TechCorp
-        </span>
-        <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-cyan-300 transition-all flex items-center gap-1">
-          Learn More →
-        </span>
-      </div>
-      
-      <div className="flex flex-col items-center justify-center p-8 border-r border-b border-gray-700 hover:bg-gradient-to-br hover:from-violet-500/10 hover:to-purple-500/10 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
-        <span className="text-2xl font-bold text-white mb-2 text-center group-hover:text-violet-400 transition-colors">
-          Innovate Inc
-        </span>
-        <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-violet-300 transition-all flex items-center gap-1">
-          Learn More →
-        </span>
-      </div>
-
-      <div className="flex flex-col items-center justify-center p-8 border-r border-b border-gray-700 hover:bg-gradient-to-br hover:from-fuchsia-500/10 hover:to-pink-500/10 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
-        <span className="text-2xl font-bold text-white mb-2 text-center group-hover:text-fuchsia-400 transition-colors">
-          DevStudio
-        </span>
-        <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-fuchsia-300 transition-all flex items-center gap-1">
-          Learn More →
-        </span>
-      </div>
-
-      <div className="flex flex-col items-center justify-center p-8 border-b border-gray-700 hover:bg-gradient-to-br hover:from-amber-500/10 hover:to-orange-500/10 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
-        <span className="text-2xl font-bold text-white mb-2 text-center group-hover:text-amber-400 transition-colors">
-          CodeAcademy
-        </span>
-        <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-amber-300 transition-all flex items-center gap-1">
-          Learn More →
-        </span>
-      </div>
-
-      <div className="flex flex-col items-center justify-center p-8 border-r border-gray-700 hover:bg-gradient-to-br hover:from-rose-500/10 hover:to-red-500/10 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
-        <span className="text-2xl font-bold text-white mb-2 text-center group-hover:text-rose-400 transition-colors">
-          StartupHub
-        </span>
-        <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-rose-300 transition-all flex items-center gap-1">
-          Learn More →
-        </span>
-      </div>
-
-      <div className="flex flex-col items-center justify-center p-8 border-r border-gray-700 hover:bg-gradient-to-br hover:from-teal-500/10 hover:to-cyan-500/10 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
-        <span className="text-2xl font-bold text-white mb-2 text-center group-hover:text-teal-400 transition-colors">
-          CareerBoost
-        </span>
-        <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-teal-300 transition-all flex items-center gap-1">
-          Learn More →
-        </span>
-      </div>
-
-      <div className="flex flex-col items-center justify-center p-8 border-r border-gray-700 hover:bg-gradient-to-br hover:from-indigo-500/10 hover:to-blue-500/10 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
-        <span className="text-2xl font-bold text-white mb-2 text-center group-hover:text-indigo-400 transition-colors">
-          HireRight
-        </span>
-        <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-indigo-300 transition-all flex items-center gap-1">
-          Learn More →
-        </span>
-      </div>
-
-      <div className="flex flex-col items-center justify-center p-8 hover:bg-gradient-to-br hover:from-emerald-500/10 hover:to-green-500/10 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
-        <span className="text-2xl font-bold text-white mb-2 text-center group-hover:text-emerald-400 transition-colors">
-          SkillBoost
-        </span>
-        <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-emerald-300 transition-all flex items-center gap-1">
-          Learn More →
-        </span>
-      </div>
-
-          <div className="mt-16 px-4">
-            <p className="text-gray-900 mb-8 text-center">
+            <p className="text-sky-600 mb-8 text-center">
               <span className="bg-yellow-400 px-2 py-1 inline-block leading-relaxed max-w-full">
                 Trusted by <strong>5,000+</strong> job seekers preparing for
                 their dream roles
               </span>
             </p>
-
             <div className="w-full overflow-x-auto pb-4 scrollbar-hide">
               <div className="grid grid-cols-2 md:grid-cols-4 border border-gray-700 max-w-7xl mx-auto min-w-[600px] md:min-w-0 bg-gray-900">
-                <div className="flex flex-col items-center justify-center p-8 border-r border-b border-gray-700 hover:bg-white/5 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
-                  <span className="text-2xl font-bold text-white mb-2 text-center">
-                    TechCorp
-                  </span>
-                  <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                    Learn More →
-                  </span>
+                {/* Company grid items here, only once */}
+                <div className="flex flex-col items-center justify-center p-8 border-r border-b border-gray-700 hover:bg-gradient-to-br hover:from-cyan-500/10 hover:to-emerald-500/10 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
+                  <span className="text-2xl font-bold text-white mb-2 text-center group-hover:text-cyan-400 transition-colors">TechCorp</span>
+                  <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-cyan-300 transition-all flex items-center gap-1">Learn More →</span>
                 </div>
-
-                <div className="flex flex-col items-center justify-center p-8 border-r border-b border-gray-700 hover:bg-white/5 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
-                  <span className="text-2xl font-bold text-white mb-2 text-center">
-                    Innovate Inc
-                  </span>
-                  <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                    Learn More →
-                  </span>
+                <div className="flex flex-col items-center justify-center p-8 border-r border-b border-gray-700 hover:bg-gradient-to-br hover:from-violet-500/10 hover:to-purple-500/10 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
+                  <span className="text-2xl font-bold text-white mb-2 text-center group-hover:text-violet-400 transition-colors">Innovate Inc</span>
+                  <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-violet-300 transition-all flex items-center gap-1">Learn More →</span>
                 </div>
-
-                <div className="flex flex-col items-center justify-center p-8 border-r border-b border-gray-700 hover:bg-white/5 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
-                  <span className="text-2xl font-bold text-white mb-2 text-center">
-                    DevStudio
-                  </span>
-                  <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                    Learn More →
-                  </span>
+                <div className="flex flex-col items-center justify-center p-8 border-r border-b border-gray-700 hover:bg-gradient-to-br hover:from-fuchsia-500/10 hover:to-pink-500/10 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
+                  <span className="text-2xl font-bold text-white mb-2 text-center group-hover:text-fuchsia-400 transition-colors">DevStudio</span>
+                  <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-fuchsia-300 transition-all flex items-center gap-1">Learn More →</span>
                 </div>
-
-                <div className="flex flex-col items-center justify-center p-8 border-b border-gray-700 hover:bg-white/5 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
-                  <span className="text-2xl font-bold text-white mb-2 text-center">
-                    CodeAcademy
-                  </span>
-                  <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                    Learn More →
-                  </span>
+                <div className="flex flex-col items-center justify-center p-8 border-b border-gray-700 hover:bg-gradient-to-br hover:from-amber-500/10 hover:to-orange-500/10 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
+                  <span className="text-2xl font-bold text-white mb-2 text-center group-hover:text-amber-400 transition-colors">CodeAcademy</span>
+                  <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-amber-300 transition-all flex items-center gap-1">Learn More →</span>
                 </div>
-
-                <div className="flex flex-col items-center justify-center p-8 border-r border-gray-700 hover:bg-white/5 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
-                  <span className="text-2xl font-bold text-white mb-2 text-center">
-                    StartupHub
-                  </span>
-                  <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                    Learn More →
-                  </span>
+                <div className="flex flex-col items-center justify-center p-8 border-r border-gray-700 hover:bg-gradient-to-br hover:from-rose-500/10 hover:to-red-500/10 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
+                  <span className="text-2xl font-bold text-white mb-2 text-center group-hover:text-rose-400 transition-colors">StartupHub</span>
+                  <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-rose-300 transition-all flex items-center gap-1">Learn More →</span>
                 </div>
-
-                <div className="flex flex-col items-center justify-center p-8 border-r border-gray-700 hover:bg-white/5 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
-                  <span className="text-2xl font-bold text-white mb-2 text-center">
-                    CareerBoost
-                  </span>
-                  <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                    Learn More →
-                  </span>
+                <div className="flex flex-col items-center justify-center p-8 border-r border-gray-700 hover:bg-gradient-to-br hover:from-teal-500/10 hover:to-cyan-500/10 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
+                  <span className="text-2xl font-bold text-white mb-2 text-center group-hover:text-teal-400 transition-colors">CareerBoost</span>
+                  <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-teal-300 transition-all flex items-center gap-1">Learn More →</span>
                 </div>
-
-                <div className="flex flex-col items-center justify-center p-8 border-r border-gray-700 hover:bg-white/5 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
-                  <span className="text-2xl font-bold text-white mb-2 text-center">
-                    HireRight
-                  </span>
-                  <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                    Learn More →
-                  </span>
+                <div className="flex flex-col items-center justify-center p-8 border-r border-gray-700 hover:bg-gradient-to-br hover:from-indigo-500/10 hover:to-blue-500/10 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
+                  <span className="text-2xl font-bold text-white mb-2 text-center group-hover:text-indigo-400 transition-colors">HireRight</span>
+                  <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-indigo-300 transition-all flex items-center gap-1">Learn More →</span>
                 </div>
-
-                <div className="flex flex-col items-center justify-center p-8 hover:bg-white/5 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
-                  <span className="text-2xl font-bold text-white mb-2 text-center">
-                    SkillBoost
-                  </span>
-                  <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                    Learn More →
-                  </span>
+                <div className="flex flex-col items-center justify-center p-8 hover:bg-gradient-to-br hover:from-emerald-500/10 hover:to-green-500/10 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
+                  <span className="text-2xl font-bold text-white mb-2 text-center group-hover:text-emerald-400 transition-colors">SkillBoost</span>
+                  <span className="text-sm text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-emerald-300 transition-all flex items-center gap-1">Learn More →</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
       </section>
+      {/* ...existing code... */}
 
       {/* Features Section */}
       <section id="features" className="py-20 px-6 bg-gradient-to-b from-gray-100 via-white to-gray-100">
@@ -2231,6 +2096,9 @@ text-skin-primary
           </motion.div>
         </div>
       </section>
+      {/* Close bg-skin-primary wrapper */}
     </div>
+    {/* Close main wrapper */}
+  </div>
   );
 }
