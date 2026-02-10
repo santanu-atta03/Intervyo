@@ -434,7 +434,7 @@ text-skin-primary
             <span className="font-medium"></span>
           </div>
 
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight text-skin-primary">
+          <motion.h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight text-skin-primary">
             Ace Your Next Tech
             <br />
             Interview with{" "}
