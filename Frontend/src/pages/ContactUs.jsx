@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { Menu, X, Mail, Phone, MapPin, Send } from "lucide-react";
 import { submitContactForm } from "../services/operations/contactAPI";
 import Lenis from "@studio-freight/lenis";
+import logo from "../assets/intervyologo.png";
 export default function ContactUs() {
   const navigate = useNavigate();
   const { token } = useSelector((state) => state.auth);
