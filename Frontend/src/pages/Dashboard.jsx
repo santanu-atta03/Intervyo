@@ -24,6 +24,7 @@ import {
   Sparkles,
   Flame,
   Crown,
+  Video,
 } from "lucide-react";
 import { logout } from "../services/operations/authAPI";
 import { getAllInterviews } from "../services/operations/aiInterviewApi";
@@ -404,6 +405,13 @@ export default function Dashboard() {
       color: "from-emerald-500 to-green-500",
       description: "Analyze performance",
       action: () => navigate("/history"),
+    },
+    {
+      title: "Recordings",
+      icon: Video,
+      color: "from-purple-500 to-pink-500",
+      description: "Replay and download",
+      action: () => navigate("/recordings"),
     },
     {
       title: "Leaderboard",

@@ -41,6 +41,10 @@ import {
   startInterview,
 } from "../../services/operations/aiInterviewApi";
 import BodyLanguageCoach from "./BodyLanguageCoach";
+import {
+  saveClip,
+  downloadClip,
+} from "../../utils/recordingStore";
 
 const InterviewRoom = () => {
   const { interviewId } = useParams();
@@ -85,6 +89,15 @@ const InterviewRoom = () => {
   const [isVideoOn, setIsVideoOn] = useState(true);
   const [isAudioOn, setIsAudioOn] = useState(true);
   const videoRef = useRef(null);
+
+  // ========== RECORDING STATE ==========
+  const [cameraRecorder, setCameraRecorder] = useState(null);
+  const cameraChunksRef = useRef([]);
+  const [isCameraRecording, setIsCameraRecording] = useState(false);
+  const [screenRecorder, setScreenRecorder] = useState(null);
+  const screenChunksRef = useRef([]);
+  const [isScreenRecording, setIsScreenRecording] = useState(false);
+  const screenStreamRef = useRef(null);
 
   // ========== SPEECH STATE ==========
   const [isListening, setIsListening] = useState(false);
@@ -193,6 +206,10 @@ const InterviewRoom = () => {
     if (stream) {
       stream.getTracks().forEach((track) => track.stop());
     }
+    if (screenStreamRef.current) {
+      screenStreamRef.current.getTracks().forEach((t) => t.stop());
+      screenStreamRef.current = null;
+    }
 
     // Stop speech recognition
     shouldRestartRecognition.current = false;
@@ -201,6 +218,14 @@ const InterviewRoom = () => {
         recognitionRef.current.abort();
       } catch (e) {}
     }
+
+    // Stop any recorders
+    try {
+      cameraRecorder?.state !== "inactive" && cameraRecorder?.stop();
+    } catch (_) {}
+    try {
+      screenRecorder?.state !== "inactive" && screenRecorder?.stop();
+    } catch (_) {}
 
     // Disconnect socket
     if (socket) {
@@ -302,6 +327,149 @@ const InterviewRoom = () => {
       });
     }
   }, [socket, session, interviewId]);
+
+  // ============================================
+  // RECORDING HELPERS
+  // ============================================
+
+  const analyzeTranscript = useCallback((text) => {
+    if (!text) {
+      return { fillerCount: 0, fillerRate: 0, confidence: 70 };
+    }
+    const words = text
+      .toLowerCase()
+      .replace(/\s+/g, " ")
+      .trim()
+      .split(" ")
+      .filter(Boolean);
+    const fillerSet = new Set([
+      "um",
+      "uh",
+      "like",
+      "you know",
+      "so",
+      "actually",
+      "basically",
+      "literally",
+      "i mean",
+      "sort of",
+      "kind of",
+    ]);
+    let fillerCount = 0;
+    for (let i = 0; i < words.length; i++) {
+      if (fillerSet.has(words[i])) fillerCount++;
+      if (i < words.length - 1) {
+        const pair = `${words[i]} ${words[i + 1]}`;
+        if (fillerSet.has(pair)) {
+          fillerCount++;
+        }
+      }
+    }
+    const fillerRate = words.length ? fillerCount / words.length : 0;
+    const confidence = Math.max(0, Math.min(100, Math.round(95 - fillerRate * 200)));
+    return { fillerCount, fillerRate, confidence };
+  }, []);
+
+  const startCameraRecording = useCallback(
+    (questionIndex) => {
+      if (!stream || isCameraRecording) return;
+      try {
+        cameraChunksRef.current = [];
+        const mr = new MediaRecorder(stream, { mimeType: "video/webm" });
+        mr.ondataavailable = (e) => {
+          if (e.data && e.data.size > 0) cameraChunksRef.current.push(e.data);
+        };
+        mr.onstop = async () => {
+          const blob = new Blob(cameraChunksRef.current, { type: "video/webm" });
+          const transcript = transcriptAccumulatorRef.current || userTranscript || "";
+          const metrics = analyzeTranscript(transcript);
+          try {
+            await saveClip({
+              interviewId,
+              type: "camera",
+              questionIndex,
+              transcript,
+              metrics,
+              blob,
+              mimeType: "video/webm",
+            });
+            addNotification("Saved video answer locally", "success");
+          } catch (err) {
+            console.error("Save camera clip failed:", err);
+            addNotification("Failed to save recording", "error");
+          }
+          setIsCameraRecording(false);
+          setCameraRecorder(null);
+        };
+        mr.start();
+        setCameraRecorder(mr);
+        setIsCameraRecording(true);
+      } catch (e) {
+        console.error("Camera recording error:", e);
+        addNotification("Unable to start camera recording", "error");
+      }
+    },
+    [stream, isCameraRecording, interviewId, userTranscript, analyzeTranscript],
+  );
+
+  const stopCameraRecording = useCallback(() => {
+    try {
+      if (cameraRecorder && cameraRecorder.state !== "inactive") {
+        cameraRecorder.stop();
+      }
+    } catch (_) {}
+  }, [cameraRecorder]);
+
+  const toggleScreenRecording = useCallback(async () => {
+    if (isScreenRecording) {
+      try {
+        screenRecorder?.stop();
+      } catch (_) {}
+      return;
+    }
+    try {
+      screenChunksRef.current = [];
+      const displayStream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: true,
+      });
+      screenStreamRef.current = displayStream;
+      const mr = new MediaRecorder(displayStream, { mimeType: "video/webm" });
+      mr.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) screenChunksRef.current.push(e.data);
+      };
+      mr.onstop = async () => {
+        const blob = new Blob(screenChunksRef.current, { type: "video/webm" });
+        try {
+          await saveClip({
+            interviewId,
+            type: "screen",
+            questionIndex: currentQuestion?.questionIndex ?? null,
+            transcript: "",
+            metrics: null,
+            blob,
+          });
+          addNotification("Saved screen recording locally", "success");
+        } catch (err) {
+          console.error("Save screen clip failed:", err);
+          addNotification("Failed to save screen recording", "error");
+        }
+        setIsScreenRecording(false);
+        setScreenRecorder(null);
+        if (screenStreamRef.current) {
+          screenStreamRef.current.getTracks().forEach((t) => t.stop());
+          screenStreamRef.current = null;
+        }
+      };
+      mr.start();
+      setScreenRecorder(mr);
+      setIsScreenRecording(true);
+      addNotification("Screen recording started. Share the coding screen.", "info");
+    } catch (e) {
+      console.error("Screen recording error:", e);
+      addNotification("Unable to start screen recording", "error");
+    }
+  }, [isScreenRecording, interviewId, currentQuestion]);
 
   // ============================================
   // SPEECH RECOGNITION SETUP
@@ -627,11 +795,14 @@ const InterviewRoom = () => {
       shouldRestartRecognition.current = true;
       recognitionRef.current?.start();
       console.log("🎤 Started listening");
+      if (currentQuestion?.type === "behavioral") {
+        startCameraRecording(currentQuestion.questionIndex);
+      }
     } catch (error) {
       console.error("❌ Start listening error:", error);
       addNotification("Failed to start listening", "error");
     }
-  }, [currentQuestion, isListening, aiSpeaking, isAudioOn]);
+  }, [currentQuestion, isListening, aiSpeaking, isAudioOn, startCameraRecording]);
 
   const stopListening = useCallback(() => {
     shouldRestartRecognition.current = false;
@@ -660,6 +831,9 @@ const InterviewRoom = () => {
 
     console.log("📤 Submitting answer");
     stopListening();
+    if (isCameraRecording) {
+      stopCameraRecording();
+    }
 
     // Add to conversation history
     setConversationHistory((prev) => [
@@ -708,6 +882,11 @@ const InterviewRoom = () => {
     }
 
     console.log("📤 Submitting code");
+    if (isScreenRecording) {
+      try {
+        screenRecorder?.stop();
+      } catch (_) {}
+    }
 
     socket.emit("submit-code", {
       sessionId: session._id,
@@ -1089,6 +1268,13 @@ const InterviewRoom = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <button
+                    onClick={toggleScreenRecording}
+                    className={`px-3 py-2 rounded-lg border ${isScreenRecording ? "bg-red-600 border-red-500 text-white" : "bg-gray-800/50 border-gray-700 text-gray-300 hover:bg-gray-700/50"}`}
+                    title="Start/Stop screen recording"
+                  >
+                    {isScreenRecording ? "Stop Screen Rec •" : "Record Screen"}
+                  </button>
+                  <button
                     onClick={() => setIsCodeFullscreen(!isCodeFullscreen)}
                     className="p-2 text-gray-400 hover:text-white transition-colors"
                   >
@@ -1333,6 +1519,11 @@ const InterviewRoom = () => {
                   <VideoOff className="w-6 h-6" />
                 )}
               </button>
+              {isCameraRecording && (
+                <div className="px-3 py-1 rounded-full bg-red-600 text-white text-sm font-semibold">
+                  Recording •
+                </div>
+              )}
 
               {!aiSpeaking && currentQuestion && !isListening && (
                 <button

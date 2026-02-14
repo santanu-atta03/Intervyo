@@ -37,6 +37,8 @@ import PricingPage from './pages/PricingPage';
 import QuizPage from './pages/QuizPage';
 import CookiePolicy from './pages/CookiePolicy';
 import ScrollToTopOnRouteChange from "./components/shared/ScrollToTopOnRouteChange";
+import Recordings from './pages/Recordings';
+import Replay from './pages/Replay';
 
 function App() {
   const location = useLocation();
@@ -109,6 +111,22 @@ function App() {
           element={
             <ProtectedRoute>
               <ReviewHistory />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/recordings"
+          element={
+            <ProtectedRoute>
+              <Recordings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/recordings/:id"
+          element={
+            <ProtectedRoute>
+              <Replay />
             </ProtectedRoute>
           }
         />

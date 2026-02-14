@@ -417,6 +417,13 @@ export default function ReviewHistory() {
                     {/* Right Side - Actions */}
                     <div className="flex items-center gap-3">
                       <button
+                        onClick={() => navigate(`/recordings/${interview._id}`)}
+                        className="px-6 py-3 bg-gray-800 text-gray-200 rounded-xl border border-gray-700 hover:bg-gray-700 transition"
+                        title="Replay recordings for this interview"
+                      >
+                        Replay
+                      </button>
+                      <button
                         onClick={() => navigate(`/results/${interview._id}`)}
                         className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-purple-500/50 transition flex items-center gap-2 group"
                       >
