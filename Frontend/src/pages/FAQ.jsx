@@ -30,7 +30,7 @@ const faqs = [
   {
     question: "What companies do your questions prepare me for?",
     answer:
-      "Our question banks are designed to prepare you for interviews at top tech companies including FAANG (Facebook/Meta, Amazon, Apple, Netflix, Google), Microsoft, startups, and mid-size tech companies. The questions cover common patterns and topics asked across the industry."
+      "Our question banks are designed to prepare you for interviews at top tech companies including FAANG, Microsoft, startups, and mid-size tech companies. The questions cover common patterns and topics asked across the industry."
   }
 ];
 
@@ -49,24 +49,29 @@ export default function FAQ() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0f0f1a] via-[#13132a] to-[#0f0f1a] text-white px-6 pb-12">
+    <div className="min-h-screen bg-skin-primary text-skin-primary px-6 pb-12 transition-colors duration-300">
+      
       {/* Navbar */}
       <nav
         className={`fixed w-full z-50 transition-all duration-300 ${
-          scrollY > 50 ? "bg-slate-900/95 shadow-lg" : "bg-transparent"
+          scrollY > 50
+            ? "bg-skin-secondary shadow-lg"
+            : "bg-transparent"
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center text-white">
               <span className="font-bold">AI</span>
             </div>
-            <span className="text-xl font-bold">Intervyo</span>
+            <span className="text-xl font-bold text-skin-primary">
+              Intervyo
+            </span>
           </Link>
 
           <Link
             to="/"
-            className="px-4 py-2 bg-purple-600 rounded-lg hover:bg-purple-700 transition"
+            className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition"
           >
             Home
           </Link>
@@ -75,7 +80,7 @@ export default function FAQ() {
 
       {/* FAQ Section */}
       <div className="pt-24 max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold text-center mb-10">
+        <h1 className="text-4xl font-bold text-center mb-10 text-skin-primary">
           Frequently Asked Questions
         </h1>
 
@@ -83,16 +88,16 @@ export default function FAQ() {
           {faqs.map((faq, index) => (
             <div
               key={index}
-              className="bg-white rounded-2xl px-6 py-5 shadow-md"
+              className="bg-skin-secondary rounded-2xl px-6 py-5 border border-skin-primary shadow-sm transition-colors duration-300"
             >
               <button
                 onClick={() => toggleFAQ(index)}
                 className="w-full flex items-center justify-between text-left"
               >
-                <span className="text-[#0f172a] font-semibold text-lg">
+                <span className="text-skin-primary font-semibold text-lg">
                   {faq.question}
                 </span>
-                <span className="text-2xl font-bold text-cyan-500">
+                <span className="text-2xl font-bold text-primary-500">
                   {activeIndex === index ? "×" : "+"}
                 </span>
               </button>
@@ -102,7 +107,7 @@ export default function FAQ() {
                   activeIndex === index ? "max-h-40 mt-4" : "max-h-0"
                 }`}
               >
-                <p className="text-gray-600 leading-relaxed">
+                <p className="text-skin-secondary leading-relaxed">
                   {faq.answer}
                 </p>
               </div>
