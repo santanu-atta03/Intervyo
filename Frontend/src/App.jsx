@@ -34,8 +34,15 @@ import PracticeLab from './pages/PracticeLab';
 import Career from './pages/Career';
 import PricingPage from './pages/PricingPage';
 import QuizPage from './pages/QuizPage';
+import { useEffect } from 'react';
 
 function App() {
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js");
+    }
+  }, []);
+
   return (
     <>
       <ScrollToTop />
