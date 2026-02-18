@@ -1,0 +1,43 @@
+:root {
+  /* Light Theme */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb; /* gray-50 */
+  --bg-tertiary: #f3f4f6; /* gray-100 */
+  
+  --text-primary: #111827; /* gray-900 */
+  --text-secondary: #4b5563; /* gray-600 */
+  --text-tertiary: #9ca3af; /* gray-400 */
+  --text-inverse: #ffffff;
+
+  --border-primary: #e5e7eb; /* gray-200 */
+  --border-secondary: #d1d5db; /* gray-300 */
+
+  --primary-color: #0ea5e9; /* primary-500 */
+  --primary-hover: #0284c7; /* primary-600 */
+}
+
+[data-theme="dark"] {
+  /* Dark Theme */
+  --bg-primary: #0f172a; /* slate-900 / dark-900 */
+  --bg-secondary: #1e293b; /* slate-800 / dark-800 */
+  --bg-tertiary: #334155; /* slate-700 / dark-700 */
+
+  --text-primary: #f8fafc; /* gray-50 */
+  --text-secondary: #cbd5e1; /* gray-300 */
+  --text-tertiary: #94a3b8; /* gray-400 */
+  --text-inverse: #111827;
+
+  --border-primary: #334155; /* gray-700 */
+  --border-secondary: #475569; /* gray-600 */
+
+  /* Keep primary color same or slightly adjusted for dark mode contrast if needed */
+  --primary-color: #38bdf8; /* primary-400 - slightly lighter for dark mode */
+  --primary-hover: #0ea5e9; /* primary-500 */
+}
+
+/* Global Transitions */
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}

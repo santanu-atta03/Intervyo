@@ -6,6 +6,32 @@ It helps candidates practice interviews, receive structured, criteria-based feed
 This is not a generic “chat with AI” project.  
 Intervyo is built for realism, accountability, and measurable improvement.
 
+## 📚 Table of Contents
+
+- [Why Intervyo Exists](#why-intervyo-exists)
+- [Core Features](#core-features)
+	- [AI Interview Simulation](#ai-interview-simulation)
+	- [Smart Evaluation & Feedback](#smart-evaluation--feedback)
+	- [Interview History & Progress Tracking](#interview-history--progress-tracking)
+- [Advanced Multi-Company Features (NEW)](#advanced-multi-company-features-new)
+	- [Smart Company Recommendation Engine](#smart-company-recommendation-engine)
+	- [Company Interview Calendar Integration](#company-interview-calendar-integration)
+	- [Real Interview Question Database](#real-interview-question-database)
+- [Tech Stack](#tech-stack)
+- [System Architecture](#system-architecture-high-level)
+- [Installation & Setup](#installation--setup)
+	- [Prerequisites](#prerequisites)
+	- [Clone the Repository](#clone-the-repository)
+	- [Backend Setup](#backend-setup)
+	- [Frontend Setup](#frontend-setup)
+	- [Environment Variables](#environment-variables)
+- [Docker (Optional)](#docker-optional)
+- [Current Status](#current-status)
+- [Use Cases](#use-cases)
+- [Design Philosophy](#design-philosophy)
+- [Contributing](#contributing)
+- [Code of Conduct](#code-of-conduct)
+
 ---
 
 ## 🎯 Why Intervyo Exists
@@ -179,7 +205,21 @@ npm install
 npm run dev  
 
 ---
+### ⚠️ React Version Compatibility Note
 
+This project currently uses **React 19**.
+
+Some dependencies do not yet officially support React 19.  
+As a result, running `npm install` may fail with an `ERESOLVE` peer dependency error.
+
+#### Temporary Workaround
+
+Until full React 19 support is available across dependencies, install frontend packages using:
+
+```bash
+npm install --legacy-peer-deps
+
+---
 ### 💻 Frontend Setup
 cd frontend  
 npm install  

@@ -4,7 +4,7 @@ import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 
-export default function TermsAndConditions() {
+export default function PrivacyPolicy() {
   const token = useSelector((state) => state.auth.token);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -184,217 +184,136 @@ export default function TermsAndConditions() {
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-purple-900 to-slate-900 text-white px-4 py-24">
       <div className="max-w-5xl mx-auto bg-white/5 backdrop-blur-lg rounded-3xl p-6 md:p-12 border border-white/10">
         <h1 className="text-3xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-          Terms & Conditions
+          Cookie Policy
         </h1>
 
         <p className="text-gray-300 mb-8">
-          These Terms & Conditions ("Terms") govern your access to and use of{" "}
-          <span className="text-purple-400 font-semibold">Intervyo</span>, an
-          AI-powered interview preparation platform. By accessing or using the
-          platform, you agree to be legally bound by these Terms.
+          This Cookie Policy explains how{" "}
+          <span className="text-purple-400 font-semibold">Intervyo</span>
+          ("we", "our", or "us") uses cookies and similar technologies when you
+          visit or interact with our AI-powered interview preparation platform.
         </p>
 
         {/* 1 */}
         <section className="mb-10">
           <h2 className="text-2xl font-semibold mb-3 text-purple-300">
-            1. Acceptance of Terms
+            1. What Are Cookies?
           </h2>
           <p className="text-gray-300">
-            By creating an account, accessing, or using Intervyo, you confirm
-            that you have read, understood, and agreed to these Terms. If you do
-            not agree, you must discontinue use of the platform immediately.
+            Cookies are small text files stored on your device when you visit a
+            website. They help websites remember your preferences, maintain
+            sessions, and improve overall user experience.
           </p>
         </section>
 
         {/* 2 */}
         <section className="mb-10">
           <h2 className="text-2xl font-semibold mb-3 text-purple-300">
-            2. Description of Service
+            2. How We Use Cookies
           </h2>
-          <p className="text-gray-300">
-            Intervyo provides AI-powered mock interviews, analytics, feedback,
-            and learning tools designed to assist users in preparing for job
-            interviews. The platform is intended for educational and practice
-            purposes only.
+          <p className="text-gray-300 mb-4">
+            Intervyo uses cookies for the following purposes:
           </p>
+          <ul className="list-disc list-inside space-y-2 text-gray-300">
+            <li>Maintaining secure user sessions and authentication</li>
+            <li>Remembering user preferences and settings</li>
+            <li>Analyzing platform usage and performance</li>
+            <li>Improving features, reliability, and user experience</li>
+          </ul>
         </section>
 
         {/* 3 */}
         <section className="mb-10">
           <h2 className="text-2xl font-semibold mb-3 text-purple-300">
-            3. Eligibility
+            3. Types of Cookies We Use
           </h2>
-          <p className="text-gray-300">
-            You must be at least 13 years old to use Intervyo. If you are under
-            18, you confirm that you have permission from a parent or legal
-            guardian. By using the platform, you represent that you meet these
-            requirements.
-          </p>
+          <ul className="list-disc list-inside space-y-2 text-gray-300">
+            <li>
+              <span className="text-white font-medium">Essential Cookies:</span>{" "}
+              Required for core functionality such as login, security, and
+              session management.
+            </li>
+            <li>
+              <span className="text-white font-medium">
+                Performance Cookies:
+              </span>{" "}
+              Help us understand how users interact with the platform so we can
+              improve it.
+            </li>
+            <li>
+              <span className="text-white font-medium">Preference Cookies:</span>{" "}
+              Store your settings and preferences for a more personalized
+              experience.
+            </li>
+          </ul>
         </section>
 
         {/* 4 */}
         <section className="mb-10">
           <h2 className="text-2xl font-semibold mb-3 text-purple-300">
-            4. User Accounts & Responsibilities
+            4. Third-Party Cookies
           </h2>
-          <ul className="list-disc list-inside space-y-2 text-gray-300">
-            <li>
-              You are responsible for maintaining the confidentiality of your
-              account credentials.
-            </li>
-            <li>
-              You are responsible for all activities conducted under your
-              account.
-            </li>
-            <li>You agree to provide accurate and up-to-date information.</li>
-            <li>
-              You must notify us immediately of any unauthorized account use.
-            </li>
-          </ul>
+          <p className="text-gray-300 mb-4">
+            We may use trusted third-party services such as analytics or
+            performance monitoring tools that place cookies on your device.
+          </p>
+          <p className="text-gray-300">
+            These third parties are subject to their own privacy and cookie
+            policies, and we do not control their cookie usage.
+          </p>
         </section>
 
         {/* 5 */}
         <section className="mb-10">
           <h2 className="text-2xl font-semibold mb-3 text-purple-300">
-            5. Acceptable Use Policy
+            5. Managing Cookies
           </h2>
           <p className="text-gray-300 mb-4">
-            You agree not to misuse Intervyo. Prohibited activities include, but
-            are not limited to:
+            You can control or delete cookies at any time through your browser
+            settings. Most browsers allow you to:
           </p>
           <ul className="list-disc list-inside space-y-2 text-gray-300">
-            <li>Attempting to reverse-engineer or exploit AI models</li>
-            <li>Uploading malicious, harmful, or illegal content</li>
-            <li>Impersonating another individual or organization</li>
-            <li>Attempting to disrupt platform security or infrastructure</li>
-            <li>
-              Using the platform for cheating, fraud, or misrepresentation
-            </li>
+            <li>View stored cookies</li>
+            <li>Delete existing cookies</li>
+            <li>Block cookies from specific or all websites</li>
           </ul>
+          <p className="text-gray-300 mt-3">
+            Please note that disabling certain cookies may affect platform
+            functionality.
+          </p>
         </section>
 
         {/* 6 */}
         <section className="mb-10">
           <h2 className="text-2xl font-semibold mb-3 text-purple-300">
-            6. AI-Generated Content Disclaimer
+            6. Consent
           </h2>
           <p className="text-gray-300">
-            All interview feedback, analytics, and suggestions generated by
-            Intervyo are produced using artificial intelligence. These outputs
-            are informational only and should not be considered professional,
-            hiring, legal, or career advice. Intervyo does not guarantee job
-            offers, interview success, or employment outcomes.
+            By continuing to use Intervyo, you consent to the use of cookies as
+            described in this policy unless you disable them through your
+            browser settings.
           </p>
         </section>
 
         {/* 7 */}
         <section className="mb-10">
           <h2 className="text-2xl font-semibold mb-3 text-purple-300">
-            7. Subscriptions, Payments & Billing
+            7. Changes to This Cookie Policy
           </h2>
-          <p className="text-gray-300 mb-4">
-            Certain features may require a paid subscription. By purchasing a
-            plan, you agree to the following:
+          <p className="text-gray-300">
+            We may update this Cookie Policy from time to time. Any changes will
+            be posted on this page with an updated revision date.
           </p>
-          <ul className="list-disc list-inside space-y-2 text-gray-300">
-            <li>Fees are billed as displayed at the time of purchase</li>
-            <li>Subscriptions may renew automatically unless cancelled</li>
-            <li>
-              Payments are generally non-refundable unless stated otherwise
-            </li>
-          </ul>
         </section>
 
         {/* 8 */}
-        <section className="mb-10">
-          <h2 className="text-2xl font-semibold mb-3 text-purple-300">
-            8. Intellectual Property Rights
-          </h2>
-          <p className="text-gray-300">
-            All platform content, including but not limited to UI design, logos,
-            branding, AI models, text, graphics, and software, is the exclusive
-            property of Intervyo. You are granted a limited, non-transferable,
-            non-commercial license to use the platform.
-          </p>
-        </section>
-
-        {/* 9 */}
-        <section className="mb-10">
-          <h2 className="text-2xl font-semibold mb-3 text-purple-300">
-            9. User-Generated Content
-          </h2>
-          <p className="text-gray-300">
-            You retain ownership of content you submit. By using Intervyo, you
-            grant us a limited license to store, process, and analyze this
-            content solely for providing platform functionality.
-          </p>
-        </section>
-
-        {/* 10 */}
-        <section className="mb-10">
-          <h2 className="text-2xl font-semibold mb-3 text-purple-300">
-            10. Suspension & Termination
-          </h2>
-          <p className="text-gray-300">
-            We reserve the right to suspend or terminate accounts that violate
-            these Terms, misuse the platform, or pose security or legal risks,
-            without prior notice.
-          </p>
-        </section>
-
-        {/* 11 */}
-        <section className="mb-10">
-          <h2 className="text-2xl font-semibold mb-3 text-purple-300">
-            11. Limitation of Liability
-          </h2>
-          <p className="text-gray-300">
-            To the maximum extent permitted by law, Intervyo shall not be liable
-            for any indirect, incidental, or consequential damages arising from
-            your use of the platform, including loss of opportunities or data.
-          </p>
-        </section>
-
-        {/* 12 */}
-        <section className="mb-10">
-          <h2 className="text-2xl font-semibold mb-3 text-purple-300">
-            12. Indemnification
-          </h2>
-          <p className="text-gray-300">
-            You agree to indemnify and hold harmless Intervyo from any claims,
-            damages, or liabilities arising from your violation of these Terms
-            or misuse of the platform.
-          </p>
-        </section>
-
-        {/* 13 */}
-        <section className="mb-10">
-          <h2 className="text-2xl font-semibold mb-3 text-purple-300">
-            13. Modifications to the Terms
-          </h2>
-          <p className="text-gray-300">
-            We may update these Terms at any time. Continued use of Intervyo
-            after updates constitutes acceptance of the revised Terms.
-          </p>
-        </section>
-
-        {/* 14 */}
-        <section className="mb-10">
-          <h2 className="text-2xl font-semibold mb-3 text-purple-300">
-            14. Governing Law
-          </h2>
-          <p className="text-gray-300">
-            These Terms shall be governed and interpreted in accordance with
-            applicable local laws, without regard to conflict of law principles.
-          </p>
-        </section>
-
-        {/* 15 */}
         <section>
           <h2 className="text-2xl font-semibold mb-3 text-purple-300">
-            15. Contact Information
+            8. Contact Information
           </h2>
           <p className="text-gray-300">
-            If you have questions regarding these Terms, contact us at:
+            If you have any questions about our use of cookies, please contact
+            us at:
           </p>
           <p className="text-purple-400 font-medium mt-2">
             support@intervyo.ai
@@ -402,7 +321,7 @@ export default function TermsAndConditions() {
         </section>
 
         <p className="text-xs text-gray-400 mt-12">
-          Last updated: 7 January 2026
+          Last updated: 31 January 2026
         </p>
       </div>
     </div>

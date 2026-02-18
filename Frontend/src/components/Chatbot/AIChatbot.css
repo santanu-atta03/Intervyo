@@ -7,7 +7,8 @@
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background-color: #10b981;
+  background: linear-gradient(135deg, #059669 0%, #047a50 100%);
   color: white;
   border: none;
   cursor: pointer;
@@ -23,6 +24,7 @@
   transform: scale(1.1);
   box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
 }
+
 
 .chatbot-container {
   position: fixed;
@@ -55,6 +57,7 @@
 }
 
 .chatbot-header-left {
+  
   display: flex;
   align-items: center;
   gap: 12px;
@@ -231,6 +234,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  background-color: #10b981;
 }
 
 .chatbot-messages {
@@ -456,7 +460,6 @@
     bottom: 16px;
     right: 16px;
   }
-
   .chatbot-sidebar {
     width: 180px;
   }

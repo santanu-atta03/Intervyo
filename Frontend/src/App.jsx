@@ -45,7 +45,44 @@ function App() {
 
   return (
     <>
+      {/* 🔥 Smooth Scroll Behavior */}
+      <style>
+        {`
+          html {
+            scroll-behavior: smooth;
+          }
+
+          /* ===== Modern Glass Scrollbar ===== */
+          ::-webkit-scrollbar {
+            width: 10px;
+          }
+
+          ::-webkit-scrollbar-track {
+            background: transparent;
+          }
+
+          ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.35);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 2px solid rgba(255,255,255,0.2);
+          }
+
+          ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.6);
+          }
+
+          /* Firefox */
+          * {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.4) transparent;
+          }
+        `}
+      </style>
+
       <ScrollToTop />
+      <ScrollToTopOnRouteChange />
+      <Navbar />
 
       <Routes>
         <Route path="/" element={<Landing />} />
@@ -171,12 +208,12 @@ function App() {
 
         <Route path="/quiz" element={<QuizPage />} />
 
-        {/* 404 – must be last */}
         <Route path="*" element={<NotFound />} />
       </Routes>
 
       <VoiceflowChatbot />
-      <Footer />
+
+      {!hideFooter && <Footer />}
     </>
   );
 }
