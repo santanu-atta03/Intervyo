@@ -24,7 +24,6 @@ import NotFound from './pages/NotFound';
 import FAQ from './pages/FAQ';
 import Analytics from './pages/Analytics';
 import AdvancedFeaturesDashboard from './pages/AdvancedFeaturesDashboard';
-import ScrollToTop from './components/shared/ScrollToTop';
 import Footer from './components/shared/Footer';
 import TermsAndConditions from './pages/Terms';
 import PrivacyPolicy from './pages/Privacy';
@@ -35,6 +34,7 @@ import Career from './pages/Career';
 import PricingPage from './pages/PricingPage';
 import QuizPage from './pages/QuizPage';
 import { useEffect } from 'react';
+import ScrollToTop from './components/shared/ScrollToTopButton';
 
 function App() {
   useEffect(() => {
