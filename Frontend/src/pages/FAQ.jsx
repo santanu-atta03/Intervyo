@@ -10,27 +10,57 @@ const faqs = [
   {
     question: "Can I practice for specific tech roles?",
     answer:
-      "Yes! We have role-specific question banks for 50+ tech positions including Frontend, Backend, Full Stack, DevOps, Data Science, ML Engineer, Product Manager, and more. Each role has curated questions that match real interview scenarios.",
+      "Yes! We have role-specific question banks for 50+ tech positions including Frontend, Backend, Full Stack, DevOps, Data Science, ML Engineer, Product Manager, and more. Each role has curated questions that match real interview scenarios."
   },
   {
     question: "How fast will I see improvement?",
     answer:
-      "Most users see significant improvement within 1-2 weeks of consistent practice. Our analytics dashboard tracks your progress over time, showing improvements in clarity, technical depth, and structure scores. Practice 3-5 interviews per week for best results.",
+      "Most users see significant improvement within 1-2 weeks of consistent practice. Our analytics dashboard tracks your progress over time, showing improvements in clarity, technical depth, and structure scores. Practice 3-5 interviews per week for best results."
   },
   {
     question: "Is voice practice really necessary?",
     answer:
-      "Absolutely! Speaking your answers out loud helps you practice articulation, pacing, and confidence. Many candidates freeze during verbal interviews even when they know the answer. Our voice practice feature simulates real interview conditions so you're prepared.",
+      "Absolutely! Speaking your answers out loud helps you practice articulation, pacing, and confidence. Many candidates freeze during verbal interviews even when they know the answer. Our voice practice feature simulates real interview conditions so you're prepared."
   },
   {
     question: "Can I use this to prepare my team for interviews?",
     answer:
-      "Yes! Our Enterprise plan includes team management features, custom branding, and dedicated support. Perfect for bootcamps, training programs, and companies preparing candidates for technical interviews. Contact our sales team for custom solutions.",
+      "Yes! Our Enterprise plan includes team management features, custom branding, and dedicated support. Perfect for bootcamps, training programs, and companies preparing candidates for technical interviews. Contact our sales team for custom solutions."
   },
   {
     question: "What companies do your questions prepare me for?",
     answer:
       "Our question banks are designed to prepare you for interviews at top tech companies including FAANG, Microsoft, startups, and mid-size tech companies. The questions cover common patterns and topics asked across the industry."
+  },
+  {
+    question: "Can I retake an interview session?",
+    answer:
+      "Yes, you can retake interviews as many times as you want. Repeating sessions allows you to refine your answers, improve delivery, and compare performance across attempts using the analytics dashboard."
+  },
+  {
+    question: "Do I need a webcam and microphone to use Intervyo?",
+    answer:
+      "For the most realistic experience, we recommend using both a webcam and microphone. Voice input helps simulate real interview conditions. However, certain practice modes may still work without video input."
+  },
+  {
+    question: "How accurate is the AI scoring system?",
+    answer:
+      "The AI evaluates multiple parameters including structure, clarity, completeness, and technical depth. While it may not fully replace a human interviewer, it closely mirrors real-world technical interview evaluation patterns."
+  },
+  {
+    question: "Can I track my improvement over time?",
+    answer:
+      "Yes! The analytics dashboard provides detailed performance tracking, highlighting strengths, weaknesses, and trends across multiple sessions. This helps you focus on areas that need improvement."
+  },
+  {
+    question: "Is my interview data secure?",
+    answer:
+      "Yes. We prioritize user privacy and secure data handling. Your interview responses and personal information are stored securely and used only to enhance your practice experience."
+  },
+  {
+    question: "Is Intervyo free to use?",
+    answer:
+      "Intervyo offers both free and premium features. You can begin practicing with core functionality for free, while advanced analytics, extended question libraries, and enterprise tools may require a paid plan."
   }
 ];
 

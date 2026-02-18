@@ -1852,6 +1852,107 @@ export default function LandingPage() {
                 </p>
               )}
             </div>
+
+            {/* FAQ 7 */}
+            <div className="border-b-4 border-white/30 hover:border-sky-300 pb-6 transition-colors duration-300">
+              <button
+                onClick={() => toggleFaq(6)}
+                className="w-full flex items-center justify-between text-left group"
+              >
+                <h3 className="text-2xl md:text-3xl font-bold text-white pr-8 group-hover:text-sky-200 transition-colors">
+                  Is Intervyo suitable for beginners?
+                </h3>
+                <ChevronDown
+                  className={`w-12 h-12 text-white group-hover:text-sky-300 flex-shrink-0 transition-all duration-300 ${
+                    openFaq === 6 ? "rotate-180" : ""
+                  }`}
+                  strokeWidth={3}
+                />
+              </button>
+              {openFaq === 6 && (
+                <p className="mt-6 text-xl text-white/90 leading-relaxed">
+                  Absolutely! Intervyo is designed for learners at all levels —
+                  from students and freshers to experienced professionals.
+                  You can start with beginner-friendly questions and gradually
+                  move to advanced topics as your confidence grows.
+                </p>
+              )}
+            </div>
+
+            {/* FAQ 8 */}
+            <div className="border-b-4 border-white/30 hover:border-orange-300 pb-6 transition-colors duration-300">
+              <button
+                onClick={() => toggleFaq(7)}
+                className="w-full flex items-center justify-between text-left group"
+              >
+                <h3 className="text-2xl md:text-3xl font-bold text-white pr-8 group-hover:text-orange-200 transition-colors">
+                  Do you provide real interview questions?
+                </h3>
+                <ChevronDown
+                  className={`w-12 h-12 text-white group-hover:text-orange-300 flex-shrink-0 transition-all duration-300 ${
+                    openFaq === 7 ? "rotate-180" : ""
+                  }`}
+                  strokeWidth={3}
+                />
+              </button>
+              {openFaq === 7 && (
+                <p className="mt-6 text-xl text-white/90 leading-relaxed">
+                  Yes. Our question bank is inspired by real interview patterns used
+                  at top tech companies. We continuously update our database based on
+                  industry trends so you practice what actually gets asked.
+                </p>
+              )}
+            </div>
+
+            {/* FAQ 9 */}
+            <div className="border-b-4 border-white/30 hover:border-indigo-300 pb-6 transition-colors duration-300">
+              <button
+                onClick={() => toggleFaq(8)}
+                className="w-full flex items-center justify-between text-left group"
+              >
+                <h3 className="text-2xl md:text-3xl font-bold text-white pr-8 group-hover:text-indigo-200 transition-colors">
+                  Can I track my performance over time?
+                </h3>
+                <ChevronDown
+                  className={`w-12 h-12 text-white group-hover:text-indigo-300 flex-shrink-0 transition-all duration-300 ${
+                    openFaq === 8 ? "rotate-180" : ""
+                  }`}
+                  strokeWidth={3}
+                />
+              </button>
+              {openFaq === 8 && (
+                <p className="mt-6 text-xl text-white/90 leading-relaxed">
+                  Definitely. Your dashboard provides detailed analytics including
+                  clarity scores, technical depth ratings, structure evaluation,
+                  and overall progress trends so you can clearly see your improvement.
+                </p>
+              )}
+            </div>
+            
+            {/* FAQ 10 */}
+            <div className="border-b-4 border-white/30 hover:border-pink-300 pb-6 transition-colors duration-300">
+              <button
+                onClick={() => toggleFaq(9)}
+                className="w-full flex items-center justify-between text-left group"
+              >
+                <h3 className="text-2xl md:text-3xl font-bold text-white pr-8 group-hover:text-pink-200 transition-colors">
+                  Is my interview data secure?
+                </h3>
+                <ChevronDown
+                  className={`w-12 h-12 text-white group-hover:text-pink-300 flex-shrink-0 transition-all duration-300 ${
+                    openFaq === 9 ? "rotate-180" : ""
+                  }`}
+                  strokeWidth={3}
+                />
+              </button>
+              {openFaq === 9 && (
+                <p className="mt-6 text-xl text-white/90 leading-relaxed">
+                  Yes. We prioritize your privacy and data security. Your responses,
+                  recordings, and analytics are securely stored and never shared
+                  without your permission.
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </section>
