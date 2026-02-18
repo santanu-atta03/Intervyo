@@ -1,48 +1,47 @@
 // frontend/src/App.jsx
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route } from 'react-router-dom';
 
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import AuthCallback from "./pages/AuthCallback";
-import Dashboard from "./pages/Dashboard";
-import ProtectedRoute from "./components/ProtectedRoute";
-import Landing from "./pages/Landing";
-import InterviewSetup from "./components/AiInterview/InterviewSetup";
-import VerifyEmail from "./pages/VerifyEmail";
-import DomainSelection from "./pages/DomainSelection";
-import InterviewRoom from "./components/AiInterview/InterviewRoom";
-import Results from "./pages/Results";
-import Settings from "./components/Dashboard/Settings";
-import InterviewWrapper from "./components/Interview/InterviewWrapper";
-import Leaderboard from "./pages/Leaderboard";
-import ReviewHistory from "./components/Dashboard/ReviewHistory";
-import LearningHub from "./components/Dashboard/LearningHub";
-import BlogPlatform from "./components/Blogs/BlogPlatform";
-import Achievements from "./components/Dashboard/Achievements";
-import VoiceflowChatbot from "./components/Chatbot/VoiceflowChatbot";
-import NotFound from "./pages/NotFound";
-import FAQ from "./pages/FAQ";
-import Analytics from "./pages/Analytics";
-import AdvancedFeaturesDashboard from "./pages/AdvancedFeaturesDashboard";
-import ScrollToTop from "./components/shared/ScrollToTopButton";
-import Footer from "./components/shared/Footer";
-import TermsAndConditions from "./pages/Terms";
-import PrivacyPolicy from "./pages/Privacy";
-import AboutUs from "./pages/AboutUs";
-import ContactUs from "./pages/ContactUs";
-import PracticeLab from "./pages/PracticeLab";
-import Career from "./pages/Career";
-import PricingPage from "./pages/PricingPage";
-import QuizPage from "./pages/QuizPage";
-import CookiePolicy from "./pages/CookiePolicy";
-import ScrollToTopOnRouteChange from "./components/shared/ScrollToTopOnRouteChange";
-import Navbar from "./components/Navbar";
+import Login from './pages/Login';
+import Register from './pages/Register';
+import AuthCallback from './pages/AuthCallback';
+import Dashboard from './pages/Dashboard';
+import ProtectedRoute from './components/ProtectedRoute';
+import Landing from './pages/Landing';
+import InterviewSetup from './components/AiInterview/InterviewSetup';
+import VerifyEmail from './pages/VerifyEmail';
+import DomainSelection from './pages/DomainSelection';
+import InterviewRoom from './components/AiInterview/InterviewRoom';
+import Results from './pages/Results';
+import Settings from './components/Dashboard/Settings';
+import InterviewWrapper from './components/Interview/InterviewWrapper';
+import Leaderboard from './pages/Leaderboard';
+import ReviewHistory from './components/Dashboard/ReviewHistory';
+import LearningHub from './components/Dashboard/LearningHub';
+import BlogPlatform from './components/Blogs/BlogPlatform';
+import Achievements from './components/Dashboard/Achievements';
+import VoiceflowChatbot from './components/Chatbot/VoiceflowChatbot';
+import NotFound from './pages/NotFound';
+import FAQ from './pages/FAQ';
+import Analytics from './pages/Analytics';
+import AdvancedFeaturesDashboard from './pages/AdvancedFeaturesDashboard';
+import ScrollToTop from './components/shared/ScrollToTop';
+import Footer from './components/shared/Footer';
+import TermsAndConditions from './pages/Terms';
+import PrivacyPolicy from './pages/Privacy';
+import AboutUs from './pages/AboutUs';
+import ContactUs from './pages/ContactUs';
+import PracticeLab from './pages/PracticeLab';
+import Career from './pages/Career';
+import PricingPage from './pages/PricingPage';
+import QuizPage from './pages/QuizPage';
+import { useEffect } from 'react';
 
 function App() {
-  const location = useLocation();
-
-  const hideFooterRoutes = ["/login", "/register"];
-  const hideFooter = hideFooterRoutes.includes(location.pathname);
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js");
+    }
+  }, []);
 
   return (
     <>
@@ -98,7 +97,7 @@ function App() {
         <Route path="/contact" element={<ContactUs />} />
         <Route path="/career" element={<Career />} />
         <Route path="/pricing" element={<PricingPage />} />
-        <Route path="/cookie-policy" element={<CookiePolicy />} />
+
         <Route path="/domain-selection" element={<DomainSelection />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/blog" element={<BlogPlatform />} />
