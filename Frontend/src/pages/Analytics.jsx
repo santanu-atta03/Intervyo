@@ -87,7 +87,7 @@ export default function Analytics() {
 
   return (
     <div
-      className={`min-h-screen ${isDark ? "bg-gray-900" : "bg-gray-50"} p-6`}
+      className={`min-h-screen ${isDark ? "bg-gray-900" : "bg-gray-50"} p-6 pt-32`}
     >
       <div className="max-w-7xl mx-auto">
         {/* Header */}

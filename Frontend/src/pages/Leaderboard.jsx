@@ -80,7 +80,7 @@ export default function Leaderboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 pt-[25vh]">
       {/* Header */}
       <div className="bg-gray-800/50 backdrop-blur-xl border-b border-gray-700/50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -113,11 +113,10 @@ export default function Leaderboard() {
             <button
               key={p.value}
               onClick={() => setPeriod(p.value)}
-              className={`px-6 py-3 rounded-xl font-semibold transition ${
-                period === p.value
+              className={`px-6 py-3 rounded-xl font-semibold transition ${period === p.value
                   ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30"
                   : "bg-gray-800/50 text-gray-400 hover:text-white hover:bg-gray-700/50"
-              }`}
+                }`}
             >
               {p.label}
             </button>
@@ -190,13 +189,12 @@ export default function Leaderboard() {
                     className={`relative mb-4 ${index === 0 ? "w-24 h-24" : "w-20 h-20"}`}
                   >
                     <div
-                      className={`w-full h-full bg-gradient-to-br ${
-                        index === 0
+                      className={`w-full h-full bg-gradient-to-br ${index === 0
                           ? "from-yellow-400 to-orange-500"
                           : index === 1
                             ? "from-gray-300 to-gray-400"
                             : "from-orange-400 to-orange-600"
-                      } rounded-full flex items-center justify-center text-white font-bold text-2xl overflow-hidden border-4 border-gray-900 shadow-xl`}
+                        } rounded-full flex items-center justify-center text-white font-bold text-2xl overflow-hidden border-4 border-gray-900 shadow-xl`}
                     >
                       {entry.profilePicture ? (
                         <img

@@ -74,7 +74,7 @@ export default function AdvancedFeaturesDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6 pt-32">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20">
@@ -151,15 +151,14 @@ export default function AdvancedFeaturesDashboard() {
                   </h3>
                   <div className="flex items-center gap-2 text-sm">
                     <div
-                      className={`px-3 py-1 rounded-full ${
-                        company.readinessLevel === "Excellent"
+                      className={`px-3 py-1 rounded-full ${company.readinessLevel === "Excellent"
                           ? "bg-green-500/20 text-green-400"
                           : company.readinessLevel === "Good"
                             ? "bg-blue-500/20 text-blue-400"
                             : company.readinessLevel === "Moderate"
                               ? "bg-yellow-500/20 text-yellow-400"
                               : "bg-red-500/20 text-red-400"
-                      }`}
+                        }`}
                     >
                       {company.readinessLevel}
                     </div>
@@ -199,7 +198,7 @@ export default function AdvancedFeaturesDashboard() {
               {calendars.slice(0, 3).map((cal) => {
                 const daysRemaining = Math.ceil(
                   (new Date(cal.interviewDate) - new Date()) /
-                    (1000 * 60 * 60 * 24),
+                  (1000 * 60 * 60 * 24),
                 );
                 return (
                   <div

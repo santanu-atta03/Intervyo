@@ -54,8 +54,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "https://intervyo.onrender.com/api/auth/google/callback",
-      // callbackURL: '/api/auth/google/callback',
+      callbackURL: "/api/auth/google/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
@@ -149,12 +148,15 @@ passport.use(
 //     )
 // );
 
+// ========================================
+// 3. GITHUB STRATEGY
+// ========================================
 passport.use(
   new GitHubStrategy(
     {
       clientID: process.env.GITHUB_CLIENT_ID,
       clientSecret: process.env.GITHUB_CLIENT_SECRET,
-      callbackURL: "https://intervyo.onrender.com/api/auth/github/callback",
+      callbackURL: "/api/auth/github/callback",
       scope: ["user:email"],
     },
     async (accessToken, refreshToken, profile, done) => {

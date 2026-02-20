@@ -35,20 +35,7 @@ router.get(
   }),
   (req, res) => {
     const token = req.user.generateAuthToken();
-
-    //   res.cookie('token', token, {
-    //     httpOnly: true,
-    //     secure: true,          // REQUIRED on HTTPS (Render + Vercel)
-    //     sameSite: 'none',      // REQUIRED for cross-domain cookies
-    //     maxAge: 7 * 24 * 60 * 60 * 1000
-
-    // //     secure: false,
-    // // sameSite: 'lax',
-    //   });
-
-    // Double-whammy: Cookie AND Token in URL (Upstream req)
     res.redirect(`${process.env.CLIENT_URL}/auth/callback?token=${token}`);
-    // res.redirect(`http://localhost:5173/auth/callback`);
   },
 );
 
@@ -61,16 +48,6 @@ router.get(
 );
 
 // GitHub OAuth Callback
-// router.get('/github/callback',
-//   passport.authenticate('github', {
-//     session: false,
-//     failureRedirect: `${process.env.CLIENT_URL}/login?error=github_auth_failed`
-//   }),
-//   (req, res) => {
-//     const token = req.user.generateAuthToken();
-//     res.redirect(`${process.env.CLIENT_URL}/auth/callback?token=${token}`);
-//   }
-// );
 router.get(
   "/github/callback",
   passport.authenticate("github", {

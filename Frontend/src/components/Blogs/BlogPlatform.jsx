@@ -1,6 +1,6 @@
-import { useState, useEffect ,useMemo} from 'react';
-import { 
-  Search, Plus, TrendingUp, Clock, Eye, Heart, MessageCircle, 
+import { useState, useEffect, useMemo } from 'react';
+import {
+  Search, Plus, TrendingUp, Clock, Eye, Heart, MessageCircle,
   Tag, User, Calendar, Edit, Trash2, Share2, Bookmark, Filter,
   ChevronRight, Sparkles, X, ArrowLeft, Send, MoreVertical, Star
 } from 'lucide-react';
@@ -100,28 +100,28 @@ export default function BlogPlatform() {
   }, [searchQuery, selectedTag, sortBy, currentPageNum]);
 
   const fetchBlogs = async () => {
-  setLoading(true);
-  try {
-    const params = new URLSearchParams({ 
-      page: currentPageNum, limit: 12, search: searchQuery, tag: selectedTag, sort: sortBy 
-    });
-    const response = await fetch(`${API_URL}/blogs?${params}`);
-    const data = await response.json();
-    
-    if (data.success) {
-      setBlogs(data.blogs);
-      setTotalPages(data.pagination.pages);
-    } else {
-      setBlogs(SEED_ARTICLES); // Fallback if success is false
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({
+        page: currentPageNum, limit: 12, search: searchQuery, tag: selectedTag, sort: sortBy
+      });
+      const response = await fetch(`${API_URL}/blogs?${params}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setBlogs(data.blogs);
+        setTotalPages(data.pagination.pages);
+      } else {
+        setBlogs(SEED_ARTICLES); // Fallback if success is false
+      }
+    } catch (error) {
+      console.error('API Error:', error);
+      setBlogs(SEED_ARTICLES); // Fallback if API is blocked (CORS)
+    } finally {
+      // Add a slight delay for a smooth "Wow" transition from skeleton to content
+      setTimeout(() => setLoading(false), 800);
     }
-  } catch (error) {
-    console.error('API Error:', error);
-    setBlogs(SEED_ARTICLES); // Fallback if API is blocked (CORS)
-  } finally {
-    // Add a slight delay for a smooth "Wow" transition from skeleton to content
-    setTimeout(() => setLoading(false), 800); 
-  }
-};
+  };
 
   const fetchFeaturedBlogs = async () => {
     try {
@@ -133,20 +133,20 @@ export default function BlogPlatform() {
     }
   };
   // Ensure this useMemo is inside your BlogPlatform function
-const displayBlogs = useMemo(() => {
-  // Use API blogs if available, otherwise fall back to SEED_ARTICLES
-  let list = blogs.length > 0 ? blogs : SEED_ARTICLES;
+  const displayBlogs = useMemo(() => {
+    // Use API blogs if available, otherwise fall back to SEED_ARTICLES
+    let list = blogs.length > 0 ? blogs : SEED_ARTICLES;
 
-  // Real-time filtering logic
-  return list.filter(blog => {
-    const titleMatch = blog.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const excerptMatch = blog.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
-    const tagMatch = blog.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    // Show if search matches title, excerpt, OR tags
-    return titleMatch || excerptMatch || tagMatch;
-  });
-}, [blogs, searchQuery]);
+    // Real-time filtering logic
+    return list.filter(blog => {
+      const titleMatch = blog.title.toLowerCase().includes(searchQuery.toLowerCase());
+      const excerptMatch = blog.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
+      const tagMatch = blog.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+
+      // Show if search matches title, excerpt, OR tags
+      return titleMatch || excerptMatch || tagMatch;
+    });
+  }, [blogs, searchQuery]);
   const fetchPopularTags = async () => {
     try {
       const response = await fetch(`${API_URL}/blogs/tags`);
@@ -171,7 +171,7 @@ const displayBlogs = useMemo(() => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0f1419]">
+    <div className="min-h-screen bg-[#0f1419] pt-32">
       {currentPage === "list" && (
         <BlogList
           blogs={blogs}
@@ -360,38 +360,37 @@ function BlogList({
           <div className="lg:col-span-1">
             <div className="sticky top-6 space-y-6">
               {/* Filters */}
-                              {/* Sidebar - Clickable Filters */}
-                <div className="lg:col-span-3 space-y-8">
-                  <div className="p-6 bg-[#161b22] rounded-3xl border border-gray-800/50">
-                    <h3 className="text-white font-black mb-6 flex items-center gap-2">
-                      <Filter className="w-5 h-5 text-orange-500" /> DISCOVER
-                    </h3>
-                    
-                    <div className="space-y-4">
-                      <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest px-1">
-                        Sort by
-                      </p>
-                      <div className="flex flex-col gap-3">
-                        {[
-                          { label: 'Latest Stories', value: '-publishedAt' },
-                          { label: 'Most Viewed', value: '-views' },
-                          { label: 'Highly Rated', value: '-likes' }
-                        ].map((item) => (
-                          <button
-                            key={item.value}
-                            onClick={() => setSortBy(item.value)}
-                            className={`text-left px-4 py-2 rounded-xl text-sm font-bold transition-all ${
-                              sortBy === item.value 
-                              ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20 shadow-[0_0_15px_rgba(212,88,31,0.1)]' 
-                              : 'text-gray-400 hover:text-white hover:bg-gray-800/50 border border-transparent'
+              {/* Sidebar - Clickable Filters */}
+              <div className="lg:col-span-3 space-y-8">
+                <div className="p-6 bg-[#161b22] rounded-3xl border border-gray-800/50">
+                  <h3 className="text-white font-black mb-6 flex items-center gap-2">
+                    <Filter className="w-5 h-5 text-orange-500" /> DISCOVER
+                  </h3>
+
+                  <div className="space-y-4">
+                    <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest px-1">
+                      Sort by
+                    </p>
+                    <div className="flex flex-col gap-3">
+                      {[
+                        { label: 'Latest Stories', value: '-publishedAt' },
+                        { label: 'Most Viewed', value: '-views' },
+                        { label: 'Highly Rated', value: '-likes' }
+                      ].map((item) => (
+                        <button
+                          key={item.value}
+                          onClick={() => setSortBy(item.value)}
+                          className={`text-left px-4 py-2 rounded-xl text-sm font-bold transition-all ${sortBy === item.value
+                            ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20 shadow-[0_0_15px_rgba(212,88,31,0.1)]'
+                            : 'text-gray-400 hover:text-white hover:bg-gray-800/50 border border-transparent'
                             }`}
-                          >
-                            {sortBy === item.value && <span className="mr-2">●</span>}
-                            {item.label}
-                          </button>
-                        ))}
-                      </div>
+                        >
+                          {sortBy === item.value && <span className="mr-2">●</span>}
+                          {item.label}
+                        </button>
+                      ))}
                     </div>
+                  </div>
 
                   {/* Clear All Option - Only shows if a tag or specific sort is active */}
                   {(selectedTag || sortBy !== '-publishedAt') && (
@@ -409,101 +408,99 @@ function BlogList({
 
                 {/* Tags section follows below... */}
               </div>
-                            {/* In the Blog Grid section of BlogList */}
-              
-                            {/* Popular Tags */}
-                            <div className="flex flex-wrap gap-2">
+              {/* In the Blog Grid section of BlogList */}
+
+              {/* Popular Tags */}
+              <div className="flex flex-wrap gap-2">
                 {/* Standard "All" button */}
-                
+
 
                 {/* Dynamic tags from your data */}
                 {popularTags.map(tag => (
                   <button
                     key={tag.name}
                     onClick={() => setSelectedTag(tag.name)}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
-                      selectedTag === tag.name 
-                      ? 'bg-orange-500 border-orange-500 text-white' 
+                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${selectedTag === tag.name
+                      ? 'bg-orange-500 border-orange-500 text-white'
                       : 'bg-[#0d1117] border-gray-800 text-gray-400 hover:border-gray-600'
-                    }`}
+                      }`}
                   >
                     {tag.name}
                   </button>
                 ))}
               </div>
-                          </div>
-                        </div>
+            </div>
+          </div>
 
-                          {/* Blog Grid */}
-                          <div className="lg:col-span-3">
-                            {loading ? (
-                              <div className="text-center py-20">
-                                <div className="w-12 h-12 border-3 border-[#8b5cf6] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                                <p className="text-gray-400">Loading articles...</p>
-                              </div>
-                            ) : blogs.length === 0 ? (
-                              <div className="text-center py-20 bg-[#1a1f2e] rounded-xl border border-gray-800">
-                                <p className="text-gray-400 text-lg mb-4">No articles found</p>
-                                <button
-                                  onClick={onCreateBlog}
-                                  className="px-6 py-3 bg-[#8b5cf6] hover:bg-[#7c3aed] rounded-xl text-white font-semibold transition-all"
-                                >
-                                  Write the first article
-                                </button>
-                              </div>
-                            ) : (
-                              <>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                                  {blogs.map(blog => (
-                                    <BlogCard key={blog._id} blog={blog} onView={onViewBlog} />
-                                  ))}
-                                </div>
+          {/* Blog Grid */}
+          <div className="lg:col-span-3">
+            {loading ? (
+              <div className="text-center py-20">
+                <div className="w-12 h-12 border-3 border-[#8b5cf6] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-gray-400">Loading articles...</p>
+              </div>
+            ) : blogs.length === 0 ? (
+              <div className="text-center py-20 bg-[#1a1f2e] rounded-xl border border-gray-800">
+                <p className="text-gray-400 text-lg mb-4">No articles found</p>
+                <button
+                  onClick={onCreateBlog}
+                  className="px-6 py-3 bg-[#8b5cf6] hover:bg-[#7c3aed] rounded-xl text-white font-semibold transition-all"
+                >
+                  Write the first article
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                  {blogs.map(blog => (
+                    <BlogCard key={blog._id} blog={blog} onView={onViewBlog} />
+                  ))}
+                </div>
 
-                                {/* Pagination */}
-                                {totalPages > 1 && (
-                                  <div className="flex items-center justify-center gap-2">
-                                    <button
-                                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                                      disabled={currentPage === 1}
-                                      className="px-4 py-2 bg-[#1a1f2e] hover:bg-[#8b5cf6]/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white text-sm font-medium transition-all border border-gray-800"
-                                    >
-                                      Previous
-                                    </button>
-                                    
-                                    {[...Array(Math.min(5, totalPages))].map((_, idx) => {
-                                      const pageNum = idx + 1;
-                                      return (
-                                        <button
-                                          key={pageNum}
-                                          onClick={() => setCurrentPage(pageNum)}
-                                          className={`w-10 h-10 rounded-lg font-semibold text-sm transition-all ${
-                                            currentPage === pageNum
-                                              ? 'bg-[#8b5cf6] text-white'
-                                              : 'bg-[#1a1f2e] text-gray-400 hover:bg-[#8b5cf6]/20 border border-gray-800'
-                                          }`}
-                                        >
-                                          {pageNum}
-                                        </button>
-                                      );
-                                    })}
-                                    
-                                    <button
-                                      onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                                      disabled={currentPage === totalPages}
-                                      className="px-4 py-2 bg-[#1a1f2e] hover:bg-[#8b5cf6]/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white text-sm font-medium transition-all border border-gray-800"
-                                    >
-                                      Next
-                                    </button>
-                                  </div>
-                                )}
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                }
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-center gap-2">
+                    <button
+                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                      disabled={currentPage === 1}
+                      className="px-4 py-2 bg-[#1a1f2e] hover:bg-[#8b5cf6]/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white text-sm font-medium transition-all border border-gray-800"
+                    >
+                      Previous
+                    </button>
+
+                    {[...Array(Math.min(5, totalPages))].map((_, idx) => {
+                      const pageNum = idx + 1;
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => setCurrentPage(pageNum)}
+                          className={`w-10 h-10 rounded-lg font-semibold text-sm transition-all ${currentPage === pageNum
+                            ? 'bg-[#8b5cf6] text-white'
+                            : 'bg-[#1a1f2e] text-gray-400 hover:bg-[#8b5cf6]/20 border border-gray-800'
+                            }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+
+                    <button
+                      onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                      disabled={currentPage === totalPages}
+                      className="px-4 py-2 bg-[#1a1f2e] hover:bg-[#8b5cf6]/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white text-sm font-medium transition-all border border-gray-800"
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // ============================================
 // BLOG CARD COMPONENT
@@ -518,7 +515,7 @@ function BlogCard({ blog, onView }) {
     >
       {/* Top Accent Line */}
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity" />
-      
+
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-orange-500 to-purple-500 flex items-center justify-center text-white font-bold">
@@ -534,7 +531,7 @@ function BlogCard({ blog, onView }) {
       <h3 className="text-xl font-extrabold text-white mb-3 group-hover:text-orange-400 transition-colors line-clamp-2">
         {blog.title}
       </h3>
-      
+
       <div className="flex flex-wrap gap-2 mb-6">
         {blog.tags.slice(0, 3).map(tag => (
           <span key={tag} className="text-[10px] font-bold px-3 py-1 bg-gray-800/50 text-gray-300 rounded-lg border border-gray-700 group-hover:border-orange-500/30">
@@ -696,11 +693,10 @@ function BlogDetail({ blog, currentUser, onBack, onEdit }) {
             <div className="flex items-center gap-3 py-6 border-t border-gray-800">
               <button
                 onClick={handleLike}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold transition-all ${
-                  liked
-                    ? "bg-red-500 text-white"
-                    : "bg-[#0f1419] text-gray-300 hover:bg-red-500/20 border border-gray-700"
-                }`}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold transition-all ${liked
+                  ? "bg-red-500 text-white"
+                  : "bg-[#0f1419] text-gray-300 hover:bg-red-500/20 border border-gray-700"
+                  }`}
               >
                 <Heart className={`w-5 h-5 ${liked ? "fill-current" : ""}`} />
                 {likesCount}

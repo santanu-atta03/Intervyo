@@ -54,7 +54,7 @@ function useSpeechRecognition() {
     try {
       recognitionRef.current.start();
       setListening(true);
-    } catch (_) {}
+    } catch (_) { }
   };
 
   const stop = () => {
@@ -62,7 +62,7 @@ function useSpeechRecognition() {
     try {
       recognitionRef.current.stop();
       setListening(false);
-    } catch (_) {}
+    } catch (_) { }
   };
 
   const reset = () => setTranscript("");
@@ -163,7 +163,7 @@ export default function PracticeLab() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6 pt-32">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20">

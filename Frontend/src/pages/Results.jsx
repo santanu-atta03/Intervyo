@@ -221,8 +221,8 @@ const Results = () => {
               (session?.communicationScore ||
                 feedback?.communicationScore ||
                 0) *
-                10 -
-                5,
+              10 -
+              5,
             ),
             confidence:
               (session?.communicationScore ||
@@ -243,16 +243,16 @@ const Results = () => {
               (session?.problemSolvingScore ||
                 feedback?.problemSolvingScore ||
                 0) *
-                10 +
-                5,
+              10 +
+              5,
             ),
             efficiency: Math.max(
               0,
               (session?.problemSolvingScore ||
                 feedback?.problemSolvingScore ||
                 0) *
-                10 -
-                3,
+              10 -
+              3,
             ),
           },
         },
@@ -269,18 +269,18 @@ const Results = () => {
             feedback?.areasOfConcern || session?.feedback?.areasOfConcern || [],
           technicalAnalysis: feedback?.technicalAnalysis ||
             session?.feedback?.technicalAnalysis || {
-              coreConcepts: "Not available",
-              problemSolvingApproach: "Not available",
-              codeQuality: "Not available",
-              bestPractices: "Not available",
-            },
+            coreConcepts: "Not available",
+            problemSolvingApproach: "Not available",
+            codeQuality: "Not available",
+            bestPractices: "Not available",
+          },
           behavioralAnalysis: feedback?.behavioralAnalysis ||
             session?.feedback?.behavioralAnalysis || {
-              communication: "Not available",
-              confidence: "Not available",
-              professionalism: "Not available",
-              adaptability: "Not available",
-            },
+            communication: "Not available",
+            confidence: "Not available",
+            professionalism: "Not available",
+            adaptability: "Not available",
+          },
         },
 
         improvementPlan: {
@@ -530,7 +530,7 @@ const Results = () => {
   ];
 
   return (
-    <div className="results-container min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-4">
+    <div className="results-container min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-4 pt-32">
       {/* Confetti Effect */}
       {showConfetti && (
         <div className="fixed inset-0 pointer-events-none z-50">
@@ -557,9 +557,8 @@ const Results = () => {
         >
           <div className="text-center">
             <div
-              className={`inline-flex items-center justify-center w-32 h-32 rounded-full mb-4 ${
-                summary.passed ? "bg-green-100" : "bg-yellow-100"
-              }`}
+              className={`inline-flex items-center justify-center w-32 h-32 rounded-full mb-4 ${summary.passed ? "bg-green-100" : "bg-yellow-100"
+                }`}
             >
               <span className="text-4xl font-bold">
                 {summary.overallScore || 0}
@@ -603,11 +602,10 @@ const Results = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors whitespace-nowrap ${
-                  activeTab === tab.id
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors whitespace-nowrap ${activeTab === tab.id
                     ? "bg-blue-600 text-white"
                     : "text-gray-600 hover:bg-gray-100"
-                }`}
+                  }`}
               >
                 <Icon className="w-4 h-4" />
                 <span className="text-sm font-medium">{tab.label}</span>

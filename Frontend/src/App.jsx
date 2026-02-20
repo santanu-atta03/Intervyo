@@ -71,6 +71,12 @@ function App() {
   }, []);
 
   useEffect(() => {
+  const hideNavbarRoutes = ["/dashboard", "/settings", "/pricing", "/career", "/terms", "/privacy", "/cookie-policy", "/interview-setup", "/auth/callback"];
+  const hideNavbar =
+    hideNavbarRoutes.includes(location.pathname) ||
+    location.pathname.startsWith("/interview-room");
+
+  useEffect(() => {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js");
     }
@@ -115,7 +121,7 @@ function App() {
 
       <ScrollToTop />
       <ScrollToTopOnRouteChange />
-      <Navbar />
+      {!hideNavbar && <Navbar />}
 
       <Routes>
         <Route path="/" element={<Landing />} />

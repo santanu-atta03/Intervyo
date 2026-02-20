@@ -65,10 +65,9 @@ export default function Navbar() {
   }, []);
 
   const linkClass = (id) =>
-    `relative cursor-pointer transition-colors duration-300 ${
-      activeSection === id
-        ? "text-emerald-500"
-        : "text-gray-900 dark:text-gray-300 hover:text-emerald-500"
+    `relative cursor-pointer transition-colors duration-300 ${activeSection === id
+      ? "text-emerald-500"
+      : "text-gray-900 dark:text-gray-300 hover:text-emerald-500"
     }`;
 
   const pageActive = (path) =>
@@ -97,11 +96,10 @@ export default function Navbar() {
           {/* Home Icon near features */}
           <Home
             size={20}
-            className={`cursor-pointer ${
-              location.pathname === "/"
+            className={`cursor-pointer ${location.pathname === "/"
                 ? "text-emerald-500"
                 : "text-gray-900 dark:text-gray-300 hover:text-emerald-500"
-            }`}
+              }`}
             onClick={handleHomeClick}
           />
         </div>
