@@ -3,6 +3,7 @@ import { Routes, Route, useLocation } from "react-router-dom";
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
 import AuthCallback from "./pages/AuthCallback";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -43,7 +44,7 @@ import Lenis from "@studio-freight/lenis";
 function App() {
   const location = useLocation();
 
-  const hideFooterRoutes = ["/login", "/register"];
+  const hideFooterRoutes = ["/login", "/register", "/forgot-password"];
   const hideFooter = hideFooterRoutes.includes(location.pathname);
 
   // Initialize smooth scrolling with Lenis
@@ -127,6 +128,7 @@ function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/faq" element={<FAQ />} />
