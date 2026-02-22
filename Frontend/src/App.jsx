@@ -71,7 +71,6 @@ function App() {
     };
   }, []);
 
-  useEffect(() => {
   const hideNavbarRoutes = ["/dashboard", "/settings", "/pricing", "/career", "/terms", "/privacy", "/cookie-policy", "/interview-setup", "/auth/callback"];
   const hideNavbar =
     hideNavbarRoutes.includes(location.pathname) ||
