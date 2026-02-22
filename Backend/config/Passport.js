@@ -49,48 +49,52 @@ passport.use(
 // ========================================
 // 2. GOOGLE STRATEGY
 // ========================================
-passport.use(
-  new GoogleStrategy(
-    {
-      clientID: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "/api/auth/google/callback",
-    },
-    async (accessToken, refreshToken, profile, done) => {
-      try {
-        // Check if user already exists
-        let user = await User.findOne({
-          $or: [{ googleId: profile.id }, { email: profile.emails[0].value }],
-        });
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+  passport.use(
+    new GoogleStrategy(
+      {
+        clientID: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        callbackURL: "/api/auth/google/callback",
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        try {
+          // Check if user already exists
+          let user = await User.findOne({
+            $or: [{ googleId: profile.id }, { email: profile.emails[0].value }],
+          });
 
-        if (user) {
-          // Update Google ID if user signed up with email first
-          if (!user.googleId) {
-            user.googleId = profile.id;
-            await user.save();
+          if (user) {
+            // Update Google ID if user signed up with email first
+            if (!user.googleId) {
+              user.googleId = profile.id;
+              await user.save();
+            }
+            return done(null, user);
           }
+
+          const email = profile.emails[0].value;
+          const avatarUrl = generateAvatarGoogle(email);
+          // Create new user
+          user = await User.create({
+            googleId: profile.id,
+            email: profile.emails[0].value,
+            name: profile.displayName,
+            profilePicture: avatarUrl,
+            authProvider: "google",
+            isVerified: true, // Google emails are verified
+          });
+
           return done(null, user);
+        } catch (error) {
+          return done(error, null);
         }
-
-        const email = profile.emails[0].value;
-        const avatarUrl = generateAvatarGoogle(email);
-        // Create new user
-        user = await User.create({
-          googleId: profile.id,
-          email: profile.emails[0].value,
-          name: profile.displayName,
-          profilePicture: avatarUrl,
-          authProvider: "google",
-          isVerified: true, // Google emails are verified
-        });
-
-        return done(null, user);
-      } catch (error) {
-        return done(error, null);
-      }
-    },
-  ),
-);
+      },
+    ),
+  );
+} else {
+  console.log("⚠️ Google Strategy skipped: GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET not provided.");
+}
 
 // ========================================
 // 3. GITHUB STRATEGY
@@ -151,55 +155,59 @@ passport.use(
 // ========================================
 // 3. GITHUB STRATEGY
 // ========================================
-passport.use(
-  new GitHubStrategy(
-    {
-      clientID: process.env.GITHUB_CLIENT_ID,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET,
-      callbackURL: "/api/auth/github/callback",
-      scope: ["user:email"],
-    },
-    async (accessToken, refreshToken, profile, done) => {
-      try {
-        const email = profile.emails?.[0]?.value;
-        if (!email)
-          return done(
-            new Error("No email associated with GitHub account"),
-            null,
-          );
+if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
+  passport.use(
+    new GitHubStrategy(
+      {
+        clientID: process.env.GITHUB_CLIENT_ID,
+        clientSecret: process.env.GITHUB_CLIENT_SECRET,
+        callbackURL: "/api/auth/github/callback",
+        scope: ["user:email"],
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        try {
+          const email = profile.emails?.[0]?.value;
+          if (!email)
+            return done(
+              new Error("No email associated with GitHub account"),
+              null,
+            );
 
-        let user = await User.findOne({
-          $or: [{ githubId: profile.id }, { email }],
-        });
+          let user = await User.findOne({
+            $or: [{ githubId: profile.id }, { email }],
+          });
 
-        if (user) {
-          if (!user.githubId) {
-            user.githubId = profile.id;
-            user.github = profile.username;
-            await user.save();
+          if (user) {
+            if (!user.githubId) {
+              user.githubId = profile.id;
+              user.github = profile.username;
+              await user.save();
+            }
+            return done(null, user);
           }
+
+          const avatarUrl = generateAvatarGithub(email);
+          // Create new user
+          user = await User.create({
+            githubId: profile.id,
+            email,
+            name: profile.displayName || profile.username,
+            profilePicture: avatarUrl,
+            authProvider: "github",
+            isVerified: true,
+            profile: { github: profile.username },
+          });
+
           return done(null, user);
+        } catch (error) {
+          return done(error, null);
         }
-
-        const avatarUrl = generateAvatarGithub(email);
-        // Create new user
-        user = await User.create({
-          githubId: profile.id,
-          email,
-          name: profile.displayName || profile.username,
-          profilePicture: avatarUrl,
-          authProvider: "github",
-          isVerified: true,
-          profile: { github: profile.username },
-        });
-
-        return done(null, user);
-      } catch (error) {
-        return done(error, null);
-      }
-    },
-  ),
-);
+      },
+    ),
+  );
+} else {
+  console.log("⚠️ GitHub Strategy skipped: GITHUB_CLIENT_ID or GITHUB_CLIENT_SECRET not provided.");
+}
 
 // ========================================
 // SERIALIZE/DESERIALIZE USER

@@ -1,0 +1,109 @@
+﻿[dotenv@17.2.3] injecting env (18) from .env -- tip: ΓÜÖ∩╕Å  load multiple .env files with { path: ['.env.local', '.env'] }
+ΓÜá∩╕Å Google Strategy skipped: GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET not provided.
+ΓÜá∩╕Å GitHub Strategy skipped: GITHUB_CLIENT_ID or GITHUB_CLIENT_SECRET not provided.
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ΓÜÖ∩╕Å  load multiple .env files with { path: ['.env.local', '.env'] }
+[dotenv@17.2.3] injecting env (0) from .env -- tip: Γ£à audit secrets and track compliance: https://dotenvx.com/ops
+ΓÜá∩╕Å  AI Content Generator disabled (missing GROQ_API_KEY)
+ΓÜá∩╕Å  OpenAI API disabled (missing API key)
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ≡ƒöä add secrets lifecycle management: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ΓÜÖ∩╕Å  specify custom .env file path with { path: '/custom/path/.env' }
+node : (node:3228) 
+[MONGOOSE] Warning: 
+Duplicate schema 
+index on 
+{"interviewId":1} 
+found. This is often 
+due to declaring an 
+index using both 
+"index: true" and 
+"schema.index()". 
+Please remove the 
+duplicate index 
+definition.
+At line:1 char:1
++ node index.js 2>&1 
+| Out-File -Encoding 
+utf8 backend-startup-
+verifica ...
++ ~~~~~~~~~~~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: ((node:3   
+ 228) [MO...dex d    
+efinition.:Strin    
+g) [], RemoteExc    
+eption
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+(Use `node 
+--trace-warnings 
+...` to show where 
+the warning was 
+created)
+(node:3228) 
+[MONGOOSE] Warning: 
+Duplicate schema 
+index on 
+{"shareToken":1} 
+found. This is often 
+due to declaring an 
+index using both 
+"index: true" and 
+"schema.index()". 
+Please remove the 
+duplicate index 
+definition.
+[2m[2026-02-22T04:33
+:29.487Z][0m 
+[31m[ERROR][0m 
+[Intervyo] Uncaught 
+Exception:
+[90m{
+  "errorMessage": 
+"listen EADDRINUSE: 
+address already in 
+use :::5000",
+  "errorStack": 
+"Error: listen 
+EADDRINUSE: address 
+already in use 
+:::5000\n    at Serve
+r.setupListenHandle 
+[as _listen2] 
+(node:net:1940:16)\n 
+   at 
+listenInCluster 
+(node:net:1997:12)\n 
+   at Server.listen 
+(node:net:2102:7)\n  
+  at file:///K:/Open%
+20source/Intervyo/Bac
+kend/index.js:183:10\
+n    at 
+ModuleJob.run (node:i
+nternal/modules/esm/m
+odule_job:377:25)\n  
+  at async onImport.t
+racePromise.__proto__
+ (node:internal/modul
+es/esm/loader:671:26)
+\n    at async asyncR
+unEntryPointWithESMLo
+ader (node:internal/m
+odules/run_main:101:5
+)",
+  "errorName": 
+"Error"
+}[0m
+[2m[2026-02-22T04:33
+:29.488Z][0m 
+[33m[WARN][0m 
+[Intervyo] 
+uncaughtException 
+received. Starting 
+graceful shutdown...
+[2m[2026-02-22T04:33:29.489Z][0m [32m[INFO][0m [Intervyo] HTTP server closed
+Γ£à Connected to MongoDB
+[2m[2026-02-22T04:33:29.513Z][0m [32m[INFO][0m [Intervyo] MongoDB connection closed

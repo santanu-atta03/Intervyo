@@ -1,0 +1,59 @@
+﻿[dotenv@17.2.3] injecting env (18) from .env -- tip: ΓÜÖ∩╕Å  specify custom .env file path with { path: '/custom/path/.env' }
+ΓÜá∩╕Å Google Strategy skipped: GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET not provided.
+ΓÜá∩╕Å GitHub Strategy skipped: GITHUB_CLIENT_ID or GITHUB_CLIENT_SECRET not provided.
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ΓÜÖ∩╕Å  write to custom object with { processEnv: myObject }
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ΓÜÖ∩╕Å  suppress all logs with { quiet: true }
+ΓÜá∩╕Å  AI Content Generator disabled (missing GROQ_API_KEY)
+ΓÜá∩╕Å  OpenAI API disabled (missing API key)
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ΓÜÖ∩╕Å  enable debug logging with { debug: true }
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ΓÜÖ∩╕Å  write to custom object with { processEnv: myObject }
+node : (node:9324) 
+[MONGOOSE] Warning: 
+Duplicate schema 
+index on 
+{"interviewId":1} 
+found. This is often 
+due to declaring an 
+index using both 
+"index: true" and 
+"schema.index()". 
+Please remove the 
+duplicate index 
+definition.
+At line:1 char:1
++ node index.js 2>&1 
+| Out-File -Encoding 
+utf8 backend-final-ch
+eck.txt
++ ~~~~~~~~~~~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: ((node:9   
+ 324) [MO...dex d    
+efinition.:Strin    
+g) [], RemoteExc    
+eption
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+(Use `node 
+--trace-warnings 
+...` to show where 
+the warning was 
+created)
+(node:9324) 
+[MONGOOSE] Warning: 
+Duplicate schema 
+index on 
+{"shareToken":1} 
+found. This is often 
+due to declaring an 
+index using both 
+"index: true" and 
+"schema.index()". 
+Please remove the 
+duplicate index 
+definition.
+[2m[2026-02-22T04:36:03.517Z][0m [32m[INFO][0m [Intervyo] Server running on port 5000
+Γ£à Connected to MongoDB

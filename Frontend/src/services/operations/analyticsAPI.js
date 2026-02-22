@@ -1,13 +1,14 @@
 import { apiConnector } from "../apiConnector";
 import { toast } from "react-hot-toast";
+import { analyticsEndpoints } from "../apis";
 
-const BASE_URL = "https://intervyo.onrender.com/api/analytics";
+const { GET_USER_ANALYTICS_API, GET_SKILL_RADAR_API } = analyticsEndpoints;
 
 export const getUserAnalytics = async (token, timeRange = 30) => {
   try {
     const response = await apiConnector(
       "GET",
-      `${BASE_URL}?timeRange=${timeRange}`,
+      `${GET_USER_ANALYTICS_API}?timeRange=${timeRange}`,
       null,
       {
         Authorization: `Bearer ${token}`,
@@ -23,7 +24,7 @@ export const getUserAnalytics = async (token, timeRange = 30) => {
 
 export const getSkillRadar = async (token) => {
   try {
-    const response = await apiConnector("GET", `${BASE_URL}/skills`, null, {
+    const response = await apiConnector("GET", GET_SKILL_RADAR_API, null, {
       Authorization: `Bearer ${token}`,
     });
     return response.data;

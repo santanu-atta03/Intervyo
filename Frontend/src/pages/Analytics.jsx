@@ -13,6 +13,8 @@ import {
   Brain,
 } from "lucide-react";
 import {
+  AreaChart,
+  Area,
   LineChart,
   Line,
   BarChart,
@@ -118,7 +120,7 @@ export default function Analytics() {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
           <StatCard
             icon={<BarChart3 />}
             label="Total Interviews"
@@ -149,6 +151,31 @@ export default function Analytics() {
           />
         </div>
 
+        {/* Gamification Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <StatCard
+            icon={<Award />}
+            label="Current Level"
+            value={`Lvl ${analytics?.gamification?.level || 1}`}
+            color="purple"
+            isDark={isDark}
+          />
+          <StatCard
+            icon={<Zap />}
+            label="Current Streak"
+            value={`${analytics?.gamification?.streak || 0} Days`}
+            color="amber"
+            isDark={isDark}
+          />
+          <StatCard
+            icon={<TrendingUp />}
+            label="Total XP"
+            value={analytics?.gamification?.xpPoints || 0}
+            color="green"
+            isDark={isDark}
+          />
+        </div>
+
         {/* Charts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* Performance Trend */}
@@ -159,7 +186,13 @@ export default function Analytics() {
               Performance Trend
             </h3>
             <ResponsiveContainer width="100%" height={250}>
-              <LineChart data={analytics?.performanceTrend || []}>
+              <AreaChart data={analytics?.performanceTrend || []}>
+                <defs>
+                  <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
                 <CartesianGrid
                   strokeDasharray="3 3"
                   stroke={isDark ? "#374151" : "#e5e7eb"}
@@ -185,14 +218,15 @@ export default function Analytics() {
                     borderRadius: "8px",
                   }}
                 />
-                <Line
+                <Area
                   type="monotone"
                   dataKey="score"
                   stroke="#8b5cf6"
                   strokeWidth={2}
-                  dot={{ fill: "#8b5cf6" }}
+                  fillOpacity={1}
+                  fill="url(#colorScore)"
                 />
-              </LineChart>
+              </AreaChart>
             </ResponsiveContainer>
           </div>
 

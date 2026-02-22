@@ -9,6 +9,14 @@ export const getUserAnalytics = async (req, res) => {
     const userId = req.user.id;
     const { timeRange = "30" } = req.query; // days
 
+    const user = await User.findById(userId).lean();
+    const gamification = user?.stats || {
+      xpPoints: 0,
+      level: 1,
+      streak: 0,
+      totalInterviews: 0,
+    };
+
     const dateFilter = new Date();
     dateFilter.setDate(dateFilter.getDate() - parseInt(timeRange));
 
@@ -138,6 +146,7 @@ export const getUserAnalytics = async (req, res) => {
             0,
           ),
         },
+        gamification,
         performanceTrend,
         categoryScores: avgCategoryScores,
         domainBreakdown,

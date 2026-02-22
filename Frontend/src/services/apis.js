@@ -1,5 +1,5 @@
-// const BASE_URL = "http://localhost:5000/api";
-const BASE_URL = 'https://intervyo.onrender.com/api';
+const BASE_URL = "http://localhost:5000/api";
+// const BASE_URL = 'https://intervyo.onrender.com/api';
 
 export const authEndpoints = {
   SEND_OTP_API: `${BASE_URL}/auth/send-otp`,
@@ -46,4 +46,9 @@ export const careerEndpoints = {
   GET_JOB_API: `${BASE_URL}/career/jobs/:id`,
   GET_RESOURCES_API: `${BASE_URL}/career/resources`,
   GET_FEATURED_API: `${BASE_URL}/career/featured`,
+};
+
+export const analyticsEndpoints = {
+  GET_USER_ANALYTICS_API: `${BASE_URL}/analytics`,
+  GET_SKILL_RADAR_API: `${BASE_URL}/analytics/skills`,
 };
