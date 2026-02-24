@@ -61,7 +61,7 @@ export default function Dashboard() {
 
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [scrollY, setScrollY] = useState(0);
+  const [isScrolled, setIsScrolled] = useState(false);
   const [hoveredCard, setHoveredCard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isHovering, setIsHovering] = useState(false);
@@ -279,7 +279,7 @@ export default function Dashboard() {
   }, [user?.stats]);
 
   useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -471,7 +471,7 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gradient-to-br from-skin-primary via-skin-secondary to-skin-primary text-skin-primary">
       {/* Navigation Bar */}
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrollY > 20
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
           ? "bg-skin-primary/95 backdrop-blur-xl shadow-lg shadow-black/5"
           : "bg-transparent"
           }`}
@@ -1435,26 +1435,6 @@ export default function Dashboard() {
 
         .animate-slideInRight {
           animation: slideInRight 0.6s ease-out forwards;
-        }
-
-        /* Smooth scrollbar */
-        ::-webkit-scrollbar {
-          width: 8px;
-          height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-          background: rgba(31, 41, 55, 0.5);
-          border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-          background: linear-gradient(to bottom, rgb(168, 85, 247), rgb(236, 72, 153));
-          border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-          background: linear-gradient(to bottom, rgb(147, 51, 234), rgb(219, 39, 119));
         }
 
         /* Enhanced gradient text */

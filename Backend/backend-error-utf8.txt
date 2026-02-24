@@ -1,0 +1,67 @@
+﻿[dotenv@17.2.3] injecting env (18) from .env -- tip: ≡ƒöÉ prevent building .env in docker: https://dotenvx.com/prebuild
+node : K:\Open source
+\Intervyo\Backend\nod
+e_modules\passport-oa
+uth2\lib\strategy.js:
+87
+At line:1 char:1
++ node index.js 2>&1 
+| Out-File -Encoding 
+utf8 backend-error-ut
+f8.txt
++ ~~~~~~~~~~~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: (K:\Open   
+  source\...\stra    
+tegy.js:87:Strin    
+g) [], RemoteExc    
+eption
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+  if 
+(!options.clientID) 
+{ throw new TypeError
+('OAuth2Strategy 
+requires a clientID 
+option'); }
+                     
+            ^
+
+TypeError: 
+OAuth2Strategy 
+requires a clientID 
+option
+    at Strategy.OAuth
+2Strategy (K:\Open so
+urce\Intervyo\Backend
+\node_modules\passpor
+t-oauth2\lib\strategy
+.js:87:34)
+    at new Strategy 
+(K:\Open source\Inter
+vyo\Backend\node_modu
+les\passport-google-o
+auth20\lib\strategy.j
+s:52:18)
+    at file:///K:/Ope
+n%20source/Intervyo/B
+ackend/config/Passpor
+t.js:53:3
+    at ModuleJob.run 
+(node:internal/module
+s/esm/module_job:377:
+25)
+    at async onImport
+.tracePromise.__proto
+__ (node:internal/mod
+ules/esm/loader:671:2
+6)
+    at async asyncRun
+EntryPointWithESMLoad
+er (node:internal/mod
+ules/run_main:101:5)
+
+Node.js v24.11.1

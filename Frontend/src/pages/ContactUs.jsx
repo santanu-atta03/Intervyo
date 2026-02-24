@@ -6,9 +6,6 @@ import { submitContactForm } from "../services/operations/contactAPI";
 import Lenis from "@studio-freight/lenis";
 
 export default function ContactUs() {
-  const navigate = useNavigate();
-  const { token } = useSelector((state) => state.auth);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const lenisRef = useRef(null);
 

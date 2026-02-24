@@ -1,18 +1,7 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Menu, X } from "lucide-react";
-import { useState } from "react";
-import { useSelector } from "react-redux";
+import Navbar from "../components/Navbar";
 
 export default function PrivacyPolicy() {
-  const token = useSelector((state) => state.auth.token);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const navigate = useNavigate();
-
-  const closeMobileMenu = () => {
-    setMobileMenuOpen(false);
-  };
-
   return (
     <>
       {/* Navbar */}

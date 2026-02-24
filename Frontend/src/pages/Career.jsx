@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
 import {
     Briefcase,
     BookOpen,
@@ -14,11 +13,10 @@ import {
     Target,
     Users,
     Sparkles,
-    Menu,
-    X
 } from "lucide-react";
 import { apiConnector } from "../services/apiConnector";
 import { careerEndpoints } from "../services/apis";
+import Navbar from "../components/Navbar";
 
 const MOCK_JOBS = [
     {
@@ -69,13 +67,11 @@ const MOCK_RESOURCES = [
 
 export default function Career() {
     const navigate = useNavigate();
-    const { token } = useSelector((state) => state.auth);
     const [jobs, setJobs] = useState([]);
     const [resources, setResources] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [activeTab, setActiveTab] = useState("jobs");
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     useEffect(() => {
         fetchFeaturedContent();
@@ -114,101 +110,7 @@ export default function Career() {
 
     return (
         <div className="min-h-screen bg-gray-950 text-white font-sans pt-20">
-            {/* Navbar */}
-            <nav className="fixed top-6 left-1/2 transform -translate-x-1/2 w-[95%] max-w-7xl bg-white/95 backdrop-blur-md rounded-full shadow-lg z-50 border border-gray-200">
-                <div className="px-4 md:px-8 py-4 flex items-center justify-between">
-                    <Link to="/" className="text-xl md:text-2xl font-bold">
-                        <span className="text-gray-900">Interv</span>
-                        <span className="text-emerald-500">yo</span>
-                    </Link>
-
-                    {/* Desktop Navigation */}
-                    <div className="hidden lg:flex items-center gap-8">
-                        <Link to="/#features" className="text-gray-600 hover:text-gray-900 font-medium transition-colors cursor-pointer">
-                            Features
-                        </Link>
-                        <Link to="/about" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
-                            About
-                        </Link>
-                        <Link to="/#how-it-works" className="text-gray-600 hover:text-gray-900 font-medium transition-colors cursor-pointer">
-                            How it Works
-                        </Link>
-                        <Link to="/#pricing" className="text-gray-600 hover:text-gray-900 font-medium transition-colors cursor-pointer">
-                            Pricing
-                        </Link>
-                        <Link to="/#faq" className="text-gray-600 hover:text-gray-900 font-medium transition-colors cursor-pointer">
-                            FAQ
-                        </Link>
-                        <Link to="/contact" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
-                            Contact
-                        </Link>
-                    </div>
-
-                    {/* Desktop Buttons */}
-                    <div className="hidden lg:flex items-center gap-4">
-                        {token && (
-                            <button
-                                onClick={() => navigate("/dashboard")}
-                                className="px-6 py-2.5 bg-black text-white rounded-lg hover:bg-gray-800 font-semibold shadow-lg transition-all"
-                            >
-                                Dashboard
-                            </button>
-                        )}
-                    </div>
-
-                    {/* Mobile Hamburger Button */}
-                    <button
-                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                        className="lg:hidden p-2 text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-                        aria-label="Toggle menu"
-                    >
-                        {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-                    </button>
-                </div>
-
-                {/* Mobile Menu */}
-                {mobileMenuOpen && (
-                    <div className="lg:hidden absolute top-full left-0 right-0 mt-2 bg-white backdrop-blur-md rounded-2xl shadow-xl border border-gray-200 mx-2 overflow-hidden text-gray-900">
-                        <div className="p-6 space-y-4">
-                            <Link to="/" className="block text-gray-600 hover:text-gray-900 font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors" onClick={() => setMobileMenuOpen(false)}>
-                                Home
-                            </Link>
-                            <Link to="/about" className="block text-gray-600 hover:text-gray-900 font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors" onClick={() => setMobileMenuOpen(false)}>
-                                About
-                            </Link>
-                            <Link to="/career" className="block text-emerald-500 font-medium py-3 px-4 rounded-lg bg-emerald-50" onClick={() => setMobileMenuOpen(false)}>
-                                Careers
-                            </Link>
-                            <Link to="/#how-it-works" className="block text-gray-600 hover:text-gray-900 font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors" onClick={() => setMobileMenuOpen(false)}>
-                                How it Works
-                            </Link>
-                            <Link to="/#pricing" className="block text-gray-600 hover:text-gray-900 font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors" onClick={() => setMobileMenuOpen(false)}>
-                                Pricing
-                            </Link>
-                            <Link to="/#faq" className="block text-gray-600 hover:text-gray-900 font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors" onClick={() => setMobileMenuOpen(false)}>
-                                FAQ
-                            </Link>
-                            <Link to="/contact" className="block text-gray-600 hover:text-gray-900 font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors" onClick={() => setMobileMenuOpen(false)}>
-                                Contact
-                            </Link>
-
-                            <div className="pt-4 border-t border-gray-200 space-y-3">
-                                {token && (
-                                    <button
-                                        onClick={() => {
-                                            navigate("/dashboard");
-                                            setMobileMenuOpen(false);
-                                        }}
-                                        className="w-full px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 font-semibold shadow-lg transition-all"
-                                    >
-                                        Dashboard
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </nav>
+            <Navbar tone="light" showAuthButtons={false} />
 
             {/* Background decoration */}
             <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-emerald-900/10 to-transparent pointer-events-none" />

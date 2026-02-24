@@ -13,12 +13,13 @@ import {
   Building2,
   ChevronDown,
 } from "lucide-react";
+import { Check, Zap, Users, BarChart, Sparkles, Crown, Building2, ChevronDown } from "lucide-react";
+
 import Lenis from "@studio-freight/lenis";
+import Navbar from "../components/Navbar";
 
 export default function PricingPage() {
   const navigate = useNavigate();
-  const { token } = useSelector((state) => state.auth);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [billingCycle, setBillingCycle] = useState("monthly");
   const [openFaq, setOpenFaq] = useState(null);
   const lenisRef = useRef(null);
@@ -52,10 +53,6 @@ export default function PricingPage() {
 
   const toggleFaq = (index) => {
     setOpenFaq(openFaq === index ? null : index);
-  };
-
-  const closeMobileMenu = () => {
-    setMobileMenuOpen(false);
   };
 
   return (
@@ -199,6 +196,9 @@ export default function PricingPage() {
           </div>
         )}
       </nav>
+
+      <Navbar tone="light" />
+
 
       {/* Hero Section */}
       <section className="pt-40 pb-20 px-6 relative overflow-hidden bg-gray-950">
