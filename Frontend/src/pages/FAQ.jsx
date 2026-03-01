@@ -1,5 +1,3 @@
-import { useState } from "react";
-import Navbar from "../components/Navbar";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -191,43 +189,6 @@ export default function FAQ() {
         />
       </div>
 
-      {/* Enhanced Navbar */}
-      <motion.nav
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ type: "spring", stiffness: 100 }}
-        className={`fixed w-full z-50 transition-all duration-500 ${
-          scrollY > 50
-            ? "bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl shadow-2xl border-b border-purple-200/50 dark:border-purple-800/30"
-            : "bg-transparent"
-        }`}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3 group">
-            <motion.div
-              whileHover={{ scale: 1.15, rotate: 360 }}
-              transition={{ type: "spring", stiffness: 300 }}
-              className="relative w-12 h-12"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-pink-500 to-blue-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-purple-500/50 animate-pulse-glow">
-                <span className="font-bold text-lg">AI</span>
-              </div>
-            </motion.div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
-              Intervyo
-            </span>
-          </Link>
-
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Link
-              to="/"
-              className="px-6 py-3 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 text-white rounded-xl hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 font-semibold"
-            >
-              Home
-            </Link>
-          </motion.div>
-        </div>
-      </motion.nav>
 
       {/* FAQ Section */}
       <div className="pt-32 pb-12 max-w-5xl mx-auto relative z-10">
@@ -323,11 +284,10 @@ export default function FAQ() {
 
                 <motion.div
                   whileHover={{ scale: 1.02, y: -2 }}
-                  className={`relative bg-white/90 dark:bg-slate-800/90 backdrop-blur-2xl rounded-2xl border-2 transition-all duration-500 overflow-hidden shadow-xl ${
-                    isActive
+                  className={`relative bg-white/90 dark:bg-slate-800/90 backdrop-blur-2xl rounded-2xl border-2 transition-all duration-500 overflow-hidden shadow-xl ${isActive
                       ? "border-purple-500 shadow-2xl shadow-purple-500/30"
                       : "border-gray-200/50 dark:border-gray-700/50 hover:border-purple-400/50 dark:hover:border-purple-600/50"
-                  }`}
+                    }`}
                 >
                   {/* Animated Gradient Border Effect */}
                   {isActive && (
@@ -359,11 +319,10 @@ export default function FAQ() {
                         isActive ? { scale: [1, 1.2, 1], rotate: [0, 360] } : {}
                       }
                       transition={{ duration: 0.6 }}
-                      className={`flex-shrink-0 p-3 rounded-xl transition-all duration-300 ${
-                        isActive
+                      className={`flex-shrink-0 p-3 rounded-xl transition-all duration-300 ${isActive
                           ? `bg-gradient-to-br ${getCategoryColor(faq.category)} text-white shadow-2xl shadow-purple-500/50`
                           : "bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 text-gray-500 dark:text-gray-400 group-hover:from-purple-100 group-hover:to-blue-100 dark:group-hover:from-purple-900/30 dark:group-hover:to-blue-900/30 group-hover:text-purple-600 dark:group-hover:text-purple-400"
-                      }`}
+                        }`}
                     >
                       <IconComponent className="w-6 h-6" strokeWidth={2.5} />
                     </motion.div>
@@ -371,11 +330,10 @@ export default function FAQ() {
                     {/* Question Text */}
                     <div className="flex-1 min-w-0 pt-1">
                       <h3
-                        className={`font-bold text-lg sm:text-xl transition-all duration-300 ${
-                          isActive
+                        className={`font-bold text-lg sm:text-xl transition-all duration-300 ${isActive
                             ? "bg-gradient-to-r from-purple-700 via-pink-600 to-blue-700 dark:from-purple-400 dark:via-pink-400 dark:to-blue-400 bg-clip-text text-transparent"
                             : "text-gray-800 dark:text-gray-200 group-hover:text-purple-700 dark:group-hover:text-purple-400"
-                        }`}
+                          }`}
                       >
                         {faq.question}
                       </h3>
@@ -395,18 +353,16 @@ export default function FAQ() {
                       className="flex-shrink-0 pt-1"
                     >
                       <div
-                        className={`p-2 rounded-lg transition-all duration-300 ${
-                          isActive
+                        className={`p-2 rounded-lg transition-all duration-300 ${isActive
                             ? "bg-purple-100 dark:bg-purple-900/50"
                             : "bg-gray-100 dark:bg-gray-700 group-hover:bg-purple-100 dark:group-hover:bg-purple-900/30"
-                        }`}
+                          }`}
                       >
                         <ChevronDown
-                          className={`w-6 h-6 transition-colors duration-300 ${
-                            isActive
+                          className={`w-6 h-6 transition-colors duration-300 ${isActive
                               ? "text-purple-600 dark:text-purple-400"
                               : "text-gray-500 dark:text-gray-400 group-hover:text-purple-600 dark:group-hover:text-purple-400"
-                          }`}
+                            }`}
                           strokeWidth={3}
                         />
                       </div>
