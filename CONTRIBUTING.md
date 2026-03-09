@@ -47,42 +47,50 @@ Don’t introduce unnecessary frameworks.
 
 ## 📁 Project Structure (Advanced Features)
 
-### Backend
-```
+## 🖥️ Backend Architecture
+```bash
 Backend/
-├── models/
-│   ├── InterviewCalendar.model.js    # Interview scheduling
-│   ├── RealQuestion.model.js         # Crowdsourced questions
-│   ├── BuddyMatch.model.js           # Buddy matching & study groups
-│   └── Company.model.js              # Enhanced with metrics
-├── services/
-│   ├── companyRecommendation.service.js
-│   ├── calendarService.js
-│   ├── questionDatabase.service.js
-│   └── buddyMatching.service.js
-├── controllers/
-│   ├── CompanyRecommendation.controller.js
-│   ├── Calendar.controller.js
-│   ├── QuestionDatabase.controller.js
-│   └── BuddyMatch.controller.js
-└── routes/
-    ├── companyRecommendation.routes.js
-    ├── calendar.routes.js
-    ├── questionDatabase.routes.js
-    └── buddyMatch.routes.js
+├── 📦 models/
+│   ├── 📅 InterviewCalendar.model.js     # Interview scheduling
+│   ├── ❓ RealQuestion.model.js          # Crowdsourced interview questions
+│   ├── 🤝 BuddyMatch.model.js            # Buddy matching & study groups
+│   └── 🏢 Company.model.js               # Company data enhanced with metrics
+│
+├── ⚙️ services/
+│   ├── 🧠 companyRecommendation.service.js
+│   ├── 📆 calendarService.js
+│   ├── 📚 questionDatabase.service.js
+│   └── 👥 buddyMatching.service.js
+│
+├── 🎮 controllers/
+│   ├── 🏢 CompanyRecommendation.controller.js
+│   ├── 📅 Calendar.controller.js
+│   ├── ❓ QuestionDatabase.controller.js
+│   └── 🤝 BuddyMatch.controller.js
+│
+└── 🛣️ routes/
+    ├── 🏢 companyRecommendation.routes.js
+    ├── 📅 calendar.routes.js
+    ├── ❓ questionDatabase.routes.js
+    └── 🤝 buddyMatch.routes.js
 ```
 
-### Frontend
-```
+---
+
+## 💻 Frontend Structure
+
+```bash
 Frontend/src/
-├── pages/
-│   └── AdvancedFeaturesDashboard.jsx
-└── services/operations/
-    ├── recommendationAPI.js
-    ├── calendarAPI.js
-    ├── questionAPI.js
-    └── buddyAPI.js
+├── 📄 pages/
+│   └── 📊 AdvancedFeaturesDashboard.jsx
+│
+└── 🔗 services/operations/
+    ├── 🧠 recommendationAPI.js
+    ├── 📅 calendarAPI.js
+    ├── ❓ questionAPI.js
+    └── 🤝 buddyAPI.js
 ```
+
 
 ---
 
@@ -92,6 +100,7 @@ Frontend/src/
 ### 2. Fork the Repository
 ```bash
 git fork https://github.com/santanu-atta03/intervyo.git
+```
 
 ⚠️ ECWoC 2026 RULES
 
@@ -99,9 +108,3 @@ git fork https://github.com/santanu-atta03/intervyo.git
 2. PRs without the label will not be reviewed for ECWoC points.
 3. Spam, low-effort, or documentation-only PRs may be closed without review.
 4. One meaningful PR per contributor at a time.
-
-
-Just tell me the tone you want:  
-**strict / balanced / very strict** 😈
-
-

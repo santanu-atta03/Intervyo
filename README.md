@@ -172,15 +172,24 @@ If it doesn’t help you perform better in a real interview, it doesn’t belong
 ---
 
 ## 🧩 System Architecture (High Level)
+```mermaid
+flowchart LR
+U[User]
+F[Frontend - React]
+B[Backend API - Express]
+AI[AI Evaluation Engine]
+DB[(MongoDB Database)]
+AN[Feedback & Analytics]
 
-User  
-→ Frontend (React)  
-→ Backend (Express API)  
-→ AI Evaluation Engine  
-→ Database (MongoDB)  
-→ Feedback & Analytics  
+U --> F
+F --> B
+B --> AI
+AI --> DB
+DB --> AN
+AN --> F
+```
 
-Simple, scalable, and not overengineered.
+Simple, scalable, and not over-engineered.
 
 ---
 
@@ -194,16 +203,18 @@ Simple, scalable, and not overengineered.
 ---
 
 ### 📥 Clone the Repository
+```bash
 git clone https://github.com/santanu-atta03/Intervyo  
 cd intervyo
-
+```
 ---
 
 ### 🔧 Backend Setup
+```bash
 cd backend  
 npm install  
 npm run dev  
-
+```
 ---
 ### ⚠️ React Version Compatibility Note
 
@@ -218,23 +229,24 @@ Until full React 19 support is available across dependencies, install frontend p
 
 ```bash
 npm install --legacy-peer-deps
-
+```
 ---
 ### 💻 Frontend Setup
+```bash
 cd frontend  
 npm install  
 npm run dev
-
+```
 ---
 
 ### 🔑 Environment Variables
 
 Create a `.env` file in the backend directory:
-
+```bash
 PORT=5000  
 MONGO_URI=your_mongodb_connection_string  
 AI_API_KEY=your_ai_api_key  
-
+```
 ---
 
 ## Docker (Optional)
@@ -245,12 +257,12 @@ This setup is for local development only and does not change the default workflo
 `Backend/.env.example` by default and overrides the MongoDB host.
 
 2) Start the stack:
-```
+```bash
 docker compose up --build
 ```
 
-Frontend: http://localhost:5173  
-Backend: http://localhost:5000  
+Frontend: `http://localhost:5173`
+Backend: `http://localhost:5000`
 
 If you want to point the frontend to a different API URL, set
 `VITE_API_BASE_URL` before building.
@@ -291,7 +303,7 @@ This platform is built to expose weaknesses, not hide them.
 
 ## 🤝 Contributing
 
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.  
+Please read [CONTRIBUTING](CONTRIBUTING.md) before opening a pull request.  
 Low-effort, spam, or cosmetic-only contributions will be closed.
 
 ---
@@ -299,4 +311,4 @@ Low-effort, spam, or cosmetic-only contributions will be closed.
 ## 📜 Code of Conduct
 
 This project follows the Contributor Covenant Code of Conduct.  
-Please read CODE_OF_CONDUCT.md before contributing.
+Please read [CODE_OF_CONDUCT](CODE_OF_CONDUCT.md) before contributing.
