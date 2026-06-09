@@ -635,7 +635,7 @@ export default function Dashboard() {
                         {user?.name || "User"}
                       </div>
                       <div className="text-xs text-gray-400 truncate">
-                        {user?.email || "email@example.com"}
+                      {user?.email || "Email not available"}
                       </div>
                     </div>
                     <button
