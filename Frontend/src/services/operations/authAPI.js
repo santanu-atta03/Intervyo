@@ -171,7 +171,7 @@ export function logout(navigate) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       navigate("/");
-    } catch (e) {
+    } catch (error) {
       console.error("Login Error:", error);
       customToast.error(error.response?.data?.message || "Login failed");
     } finally {
