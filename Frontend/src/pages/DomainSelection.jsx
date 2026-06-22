@@ -102,11 +102,12 @@ export default function DomainSelection() {
             {domains.map((domain) => (
               <button
                 key={domain.id}
+                disabled={loading}
                 onClick={() => {
                   setFormData({ ...formData, domain: domain.id });
                   setErrors({ ...errors, domain: "" });
                 }}
-                className={`group p-4 rounded-xl border transition-all duration-300 transform active:scale-95 ${formData.domain === domain.id
+                className={`group p-4 rounded-xl border transition-all duration-300 transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${formData.domain === domain.id
                     ? `bg-gradient-to-br ${domain.color} text-white border-transparent shadow-[0_0_20px_rgba(16,185,129,0.2)]`
                     : 'bg-zinc-900 border-zinc-700 hover:border-emerald-500/50 hover:bg-zinc-800'
                   }`}
@@ -128,8 +129,9 @@ export default function DomainSelection() {
               <select
                 name="experience"
                 value={formData.experience}
+                disabled={loading}
                 onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
-                className="w-full px-4 py-3 bg-zinc-900 border border-zinc-700 rounded-xl text-white focus:ring-2 focus:ring-emerald-500 outline-none transition appearance-none cursor-pointer"
+                className="w-full px-4 py-3 bg-zinc-900 border border-zinc-700 rounded-xl text-white focus:ring-2 focus:ring-emerald-500 outline-none transition appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <option value="">Select experience</option>
                 <option value="0">Fresher</option>
@@ -155,7 +157,7 @@ export default function DomainSelection() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
-                  Processing...
+                  Signing up...
                 </>
               ) : (
                 'Complete Registration 🎉'

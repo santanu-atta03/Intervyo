@@ -110,12 +110,13 @@ export default function Login() {
               <input
                 type="email"
                 value={email}
+                disabled={loading}
                 onChange={(e) => setEmail(e.target.value)}
                 onKeyDownCapture={handleKeyDown}
                 placeholder="you@example.com"
                 className="w-full px-4 py-3 rounded-lg bg-zinc-900 border border-zinc-700
                 text-white placeholder-gray-500
-                focus:ring-2 focus:ring-emerald-500 outline-none"
+                focus:ring-2 focus:ring-emerald-500 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
 
@@ -128,17 +129,19 @@ export default function Login() {
                   id="password-input"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
+                  disabled={loading}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   className="w-full px-4 py-3 pr-10 rounded-lg bg-zinc-900 border border-zinc-700
       text-white placeholder-gray-500
-      focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+      focus:ring-2 focus:ring-emerald-500 outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 />
                 {/* Password Visibility Toggle Button */}
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white focus:outline-none transition"
+                  disabled={loading}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white focus:outline-none transition disabled:opacity-50"
                 >
                   {showPassword ? (
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -176,7 +179,7 @@ export default function Login() {
               active:scale-95 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
             >
               <span className="relative z-10">
-                {loading ? "Signing in..." : "Sign In"}
+                {loading ? "Logging in..." : "Sign In"}
               </span>
               <span className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-emerald-600 opacity-0 hover:opacity-100 transition-opacity" />
             </button>
@@ -191,18 +194,20 @@ export default function Login() {
           <div className="space-y-3">
             <button
               onClick={handleGoogleLogin}
+              disabled={loading}
               className="w-full flex items-center justify-center gap-3 rounded-lg border border-zinc-700
               bg-zinc-900 py-3 font-semibold text-white
-              hover:border-emerald-500 hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] transition"
+              hover:border-emerald-500 hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Continue with Google
             </button>
 
             <button
               onClick={handleGitHubLogin}
+              disabled={loading}
               className="w-full flex items-center justify-center gap-3 rounded-lg
               bg-zinc-800 py-3 font-semibold text-white
-              hover:bg-zinc-700 hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] transition"
+              hover:bg-zinc-700 hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Continue with GitHub
             </button>
