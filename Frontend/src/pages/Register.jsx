@@ -201,8 +201,9 @@ export default function Register() {
                   type="text"
                   name="name"
                   value={formData.name}
+                  disabled={loading}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 rounded-lg bg-zinc-900 border ${errors.name ? "border-red-500/50" : "border-zinc-700"} text-white placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 outline-none transition`}
+                  className={`w-full px-4 py-3 rounded-lg bg-zinc-900 border ${errors.name ? "border-red-500/50" : "border-zinc-700"} text-white placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 outline-none transition disabled:opacity-50 disabled:cursor-not-allowed`}
                   placeholder="John Doe"
                 />
                 {errors.name && (
@@ -218,8 +219,9 @@ export default function Register() {
                   type="email"
                   name="email"
                   value={formData.email}
+                  disabled={loading}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 rounded-lg bg-zinc-900 border ${errors.email ? "border-red-500/50" : "border-zinc-700"} text-white placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 outline-none transition`}
+                  className={`w-full px-4 py-3 rounded-lg bg-zinc-900 border ${errors.email ? "border-red-500/50" : "border-zinc-700"} text-white placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 outline-none transition disabled:opacity-50 disabled:cursor-not-allowed`}
                   placeholder="you@example.com"
                 />
                 {errors.email && (
@@ -235,10 +237,11 @@ export default function Register() {
                     type={showPassword ? 'text' : 'password'}
                     name="password"
                     value={formData.password}
+                    disabled={loading}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-lg bg-zinc-900 border border-zinc-700 text-white focus:ring-2 focus:ring-emerald-500 outline-none"
+                    className="w-full px-4 py-3 rounded-lg bg-zinc-900 border border-zinc-700 text-white focus:ring-2 focus:ring-emerald-500 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                   />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} disabled={loading} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white disabled:opacity-50">
                     {showPassword ? '👁️' : '👁️‍🗨️'}
                   </button>
                 </div>
@@ -271,8 +274,9 @@ export default function Register() {
                     type={showConfirmPassword ? 'text' : 'password'}
                     name="confirmPassword"
                     value={formData.confirmPassword}
+                    disabled={loading}
                     onChange={handleChange}
-                    className={`w-full px-4 py-3 rounded-lg bg-zinc-900 border ${formData.confirmPassword && (formData.password === formData.confirmPassword ? 'border-emerald-500/50' : 'border-red-500/50')} text-white outline-none`}
+                    className={`w-full px-4 py-3 rounded-lg bg-zinc-900 border ${formData.confirmPassword && (formData.password === formData.confirmPassword ? 'border-emerald-500/50' : 'border-red-500/50')} text-white outline-none disabled:opacity-50 disabled:cursor-not-allowed`}
                   />
                   {formData.confirmPassword && (
                     <span className={`absolute right-10 top-1/2 -translate-y-1/2 text-[10px] font-bold uppercase ${formData.password === formData.confirmPassword ? 'text-emerald-500' : 'text-red-500'}`}>
@@ -293,7 +297,7 @@ export default function Register() {
               active:scale-95 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
             >
               <span className="relative z-10">
-                {loading ? "Sending OTP..." : "Continue →"}
+                {loading ? "Signing up..." : "Continue →"}
               </span>
               <span className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-emerald-600 opacity-0 hover:opacity-100 transition-opacity" />
             </button>
@@ -309,9 +313,10 @@ export default function Register() {
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={handleGoogleAuth}
+                disabled={loading}
                 className="flex items-center justify-center gap-3 rounded-lg border border-zinc-700
                 bg-zinc-900 py-3 font-semibold text-white
-                hover:border-emerald-500 hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] transition"
+                hover:border-emerald-500 hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                   <path
@@ -336,9 +341,10 @@ export default function Register() {
 
               <button
                 onClick={handleGithubAuth}
+                disabled={loading}
                 className="flex items-center justify-center gap-3 rounded-lg
                 bg-zinc-800 py-3 font-semibold text-white
-                hover:bg-zinc-700 hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] transition"
+                hover:bg-zinc-700 hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <svg
                   className="w-5 h-5"
