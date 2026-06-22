@@ -9,6 +9,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import io from "socket.io-client";
 import Editor from "@monaco-editor/react";
+import { toast } from "react-hot-toast";
 import {
   Code2,
   X,
@@ -169,6 +170,10 @@ const InterviewRoom = () => {
         ) {
           updateMetricsFromEvaluations(sessionData.questionEvaluations);
         }
+      } else if (interviewData.status === "completed") {
+        toast.error("This interview session has already been completed.");
+        navigate(`/results/${interviewId}`);
+        return;
       } else {
         setCurrentMessage(
           "Ready to start? Click the button below when you're prepared.",
@@ -178,8 +183,8 @@ const InterviewRoom = () => {
       setLoading(false);
     } catch (error) {
       console.error("❌ Init error:", error);
-      addNotification("Failed to load interview. Redirecting...", "error");
-      setTimeout(() => navigate("/dashboard"), 2000);
+      toast.error("Please start or join an interview session first.");
+      navigate("/dashboard");
     }
   };
 
@@ -221,6 +226,8 @@ const InterviewRoom = () => {
   // ============================================
 
   useEffect(() => {
+    if (!interview) return;
+
     let mounted = true;
     let localStream = null;
 

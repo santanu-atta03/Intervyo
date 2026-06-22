@@ -204,7 +204,11 @@ function App() {
 
         <Route
           path="/interview-room/:interviewId"
-          element={<InterviewRoom />}
+          element={
+            <ProtectedRoute>
+              <InterviewRoom />
+            </ProtectedRoute>
+          }
         />
 
         <Route
