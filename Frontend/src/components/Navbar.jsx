@@ -19,14 +19,14 @@ const NAV_TONES = {
   },
   skin: {
     nav: "fixed top-6 left-1/2 transform -translate-x-1/2 w-[95%] max-w-7xl bg-skin-primary/95 backdrop-blur-md rounded-full shadow-lg z-50 border border-skin-primary",
-    link: "text-gray-600 hover:text-skin-primary",
-    mobileMenu: "bg-white backdrop-blur-md rounded-2xl shadow-xl border border-gray-200",
-    mobileLink: "text-gray-600 hover:text-skin-primary",
-    menuButton: "text-skin-primary hover:bg-gray-100",
+    link: "text-skin-secondary hover:text-skin-primary",
+    mobileMenu: "bg-skin-primary backdrop-blur-md rounded-2xl shadow-xl border border-skin-primary",
+    mobileLink: "text-skin-secondary hover:text-skin-primary",
+    menuButton: "text-skin-primary hover:bg-skin-tertiary",
     logoPrimary: "text-skin-primary",
     logoSecondary: "text-emerald-500",
     activeLink: "text-emerald-500",
-    activeMobile: "text-emerald-500 bg-emerald-50",
+    activeMobile: "text-emerald-500 bg-emerald-500/10",
   },
   light: {
     nav: "fixed top-6 left-1/2 transform -translate-x-1/2 w-[95%] max-w-7xl bg-white/95 backdrop-blur-md rounded-full shadow-lg z-50 border border-gray-200",
@@ -209,7 +209,7 @@ export default function Navbar({
           <div className="p-6 space-y-4">
             {links.map((link) => {
               const isActive = activeKey === link.key;
-              const className = `block font-medium py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors ${
+              const className = `block font-medium py-3 px-4 rounded-lg hover:bg-skin-tertiary transition-colors ${
                 styles.mobileLink
               }${isActive ? ` ${styles.activeMobile}` : ""}`;
 
@@ -243,14 +243,14 @@ export default function Navbar({
             })}
 
             {showThemeToggle && (
-              <div className="flex items-center justify-between py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors">
-                <span className="text-gray-600 font-medium">Theme</span>
+              <div className="flex items-center justify-between py-3 px-4 rounded-lg hover:bg-skin-tertiary transition-colors">
+                <span className="text-skin-secondary font-medium">Theme</span>
                 <ThemeToggle />
               </div>
             )}
 
             {(showDashboardButton || showAuthButtons) && (
-              <div className="pt-4 border-t border-gray-200 space-y-3">
+              <div className="pt-4 border-t border-skin-primary space-y-3">
                 {token ? (
                   showDashboardButton && (
                     <button
