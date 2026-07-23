@@ -4,7 +4,7 @@ import Navbar from "../components/Navbar";
 export default function PrivacyPolicy() {
   return (
     <>  
-      <Navbar tone="light" activeKey="about" />
+      <Navbar tone="skin" activeKey="about" showThemeToggle />
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-purple-900 to-slate-900 text-white px-4 py-24">
       <div className="max-w-5xl mx-auto bg-white/5 backdrop-blur-lg rounded-3xl p-6 md:p-12 border border-white/10">
         <h1 className="text-3xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
