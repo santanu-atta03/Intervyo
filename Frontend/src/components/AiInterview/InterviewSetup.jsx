@@ -91,7 +91,7 @@ const InterviewSetup = () => {
 
     try {
       const interview = await createInterview(data, setLoading, token);
-      navigate(`/interview/${interview._id}`);
+      navigate(`/interview/${interview.id || interview.interviewId}`);
     } catch (error) {
       console.error("Setup error:", error);
     }

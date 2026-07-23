@@ -7,13 +7,17 @@ const InterviewSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
+  role: { type: String },
+  resumeUrl: { type: String },
+  resumeText: { type: String },
+  scheduledAt: { type: Date },
   config: {
-    domain: { type: String, required: true },
-    subDomain: { type: String, required: true },
+    domain: { type: String },
+    subDomain: { type: String },
     interviewType: {
       type: String,
       enum: ["behavioral", "technical", "system-design", "coding", "mixed"],
-      required: true,
+      default: "mixed",
     },
     difficulty: {
       type: String,
