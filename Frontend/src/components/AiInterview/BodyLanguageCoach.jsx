@@ -196,3 +196,5 @@ const BodyLanguageCoach = ({ videoRef, isVideoOn }) => {
 };
 
 export default BodyLanguageCoach;
+
+.catch(err => console.error("Promise.all failed:", err));

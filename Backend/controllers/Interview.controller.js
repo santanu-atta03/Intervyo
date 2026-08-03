@@ -417,7 +417,7 @@
 //         });
 //       }
 
-//       const index = parseInt(hintIndex) || 0;
+//       const index = parseInt(hintIndex, 10) || 0;
 //       if (index >= question.hints.length) {
 //         return res.status(400).json({
 //           success: false,
