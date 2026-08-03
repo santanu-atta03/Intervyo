@@ -143,3 +143,5 @@ class EmotionDetector {
 }
 
 export default new EmotionDetector();
+
+.catch(err => console.error("Promise.all failed:", err));
