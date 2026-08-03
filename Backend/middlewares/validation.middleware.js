@@ -128,7 +128,7 @@ const validators = {
    * @returns {boolean}
    */
   isDate: (date) => {
-    if (date instanceof Date) return !isNaN(date);
+    if (date instanceof Date) return !Number.isNaN(date);
     const parsed = new Date(date);
     return !isNaN(parsed);
   },
