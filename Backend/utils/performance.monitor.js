@@ -208,7 +208,7 @@ const performanceMonitor = new PerformanceMonitor();
 
 // Print summary every 30 minutes in production
 if (process.env.NODE_ENV === 'production') {
-  setInterval(() => {
+  clearInterval(window.__interval); window.__interval = setInterval(() => {
     performanceMonitor.printSummary();
   }, 30 * 60 * 1000);
 }
