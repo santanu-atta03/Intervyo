@@ -129,7 +129,7 @@ export default function ReviewHistory() {
     return {
       total: interviews.length,
       completed: completed.length,
-      avgScore: Math.round(avgScore * 10) / 10,
+      avgScore: Math.round(avgScore * 10 + Number.EPSILON) / 10,
       thisMonth: lastMonth.length,
       highestScore: Math.max(...completed.map((i) => i.overallScore || 0), 0),
     };
