@@ -266,7 +266,7 @@ export default function Settings() {
             name: profileData.name,
             phone: profileData.phone,
             gender: profileData.gender,
-            age: parseInt(profileData.age) || null,
+            age: parseInt(profileData.age, 10) || null,
             bio: profileData.bio,
             location: profileData.location,
           }));
