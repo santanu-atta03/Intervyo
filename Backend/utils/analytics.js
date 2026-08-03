@@ -11,7 +11,7 @@
  */
 export const calculateAverageScore = (scores) => {
   if (!Array.isArray(scores) || scores.length === 0) return 0;
-  const validScores = scores.filter(s => typeof s === 'number' && !isNaN(s));
+  const validScores = scores.filter(s => typeof s === 'number' && !Number.isNaN(s));
   if (validScores.length === 0) return 0;
   
   const sum = validScores.reduce((acc, score) => acc + score, 0);
