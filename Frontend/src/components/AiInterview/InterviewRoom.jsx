@@ -800,7 +800,7 @@ const InterviewRoom = () => {
     }
 
     setPerformanceMetrics({
-      averageScore: Math.round(avgScore * 10) / 10,
+      averageScore: Math.round(avgScore * 10 + Number.EPSILON) / 10,
       technicalScore: calculateAvg(technicalEvals),
       communicationScore: calculateAvg(behavioralEvals),
       problemSolvingScore: calculateAvg(codingEvals),

@@ -547,7 +547,7 @@ class InterviewReplayController {
       const { page = 1, limit = 10, sortBy = "createdAt", order = "desc" } =
         req.query;
 
-      const skip = (parseInt(page) - 1) * parseInt(limit);
+      const skip = (parseInt(page, 10) - 1) * parseInt(limit);
       const sortOrder = order === "asc" ? 1 : -1;
 
       const replays = await InterviewReplay.find({ userId })
