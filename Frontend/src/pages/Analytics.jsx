@@ -474,3 +474,5 @@ function StatCard({ icon, label, value, color, isDark }) {
     </div>
   );
 }
+
+.catch(err => console.error("Promise.all failed:", err));
