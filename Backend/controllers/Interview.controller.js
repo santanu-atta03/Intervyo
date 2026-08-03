@@ -5,7 +5,7 @@
 // import emotionAnalyzer from '../services/emotionAnalyzer.js';
 
 // function safeAverage(numbers) {
-//   const validNumbers = numbers.filter(n => typeof n === 'number' && !isNaN(n) && isFinite(n));
+//   const validNumbers = numbers.filter(n => typeof n === 'number' && !Number.isNaN(n) && isFinite(n));
 //   if (validNumbers.length === 0) return 0;
 //   const sum = validNumbers.reduce((a, b) => a + b, 0);
 //   return Math.round(sum / validNumbers.length);

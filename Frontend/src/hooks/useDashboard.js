@@ -142,3 +142,5 @@ export default function Dashboard() {
   // Call refreshData() to manually refresh all data
 }
 */
+
+.catch(err => console.error("Promise.all failed:", err));
