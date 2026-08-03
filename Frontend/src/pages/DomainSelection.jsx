@@ -41,7 +41,7 @@ export default function DomainSelection() {
 
     const profile = {
       domain: formData.domain,
-      experience: parseInt(formData.experience) || 0,
+      experience: parseInt(formData.experience, 10) || 0,
     };
 
     dispatch(signup(name, email, password, otp, profilePicture, profile, navigate));
