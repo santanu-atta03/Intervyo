@@ -139,7 +139,7 @@ const ResultsPage = ({ interviewId, result, navigate }) => {
     `;
 
     const styleElement = document.createElement("style");
-    styleElement.innerHTML = printStyles;
+    styleElement.textContent = printStyles;
     document.head.appendChild(styleElement);
 
     // Print
