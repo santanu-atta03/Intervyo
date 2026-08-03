@@ -22,7 +22,7 @@ const requiredEnvVars = {
     required: false,
     description: 'Server port number',
     default: '5000',
-    validate: (value) => !isNaN(value) && parseInt(value) > 0 && parseInt(value) < 65536,
+    validate: (value) => !Number.isNaN(value) && parseInt(value) > 0 && parseInt(value) < 65536,
     errorMessage: 'PORT must be a valid port number (1-65535)'
   },
   NODE_ENV: {
