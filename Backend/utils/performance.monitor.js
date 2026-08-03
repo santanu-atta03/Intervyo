@@ -7,7 +7,7 @@
 class PerformanceMonitor {
   constructor() {
     this.metrics = new Map();
-    this.slowThreshold = parseInt(process.env.SLOW_REQUEST_THRESHOLD) || 1000; // 1 second
+    this.slowThreshold = parseInt(process.env.SLOW_REQUEST_THRESHOLD, 10) || 1000; // 1 second
   }
 
   /**
