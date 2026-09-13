@@ -673,6 +673,10 @@ import emotionAnalyzer from "../services/emotionAnalyzer.js";
 import resultsGenerator from "../services/resultsGenerator.js";
 import mongoose from "mongoose";
 import groqService from "../services/groqService.js";
+import fs from "fs";
+import pdfParse from "pdf-parse";
+import { uploadToCloudinary } from "../config/cloudinary.js";
+import InterviewSession from "../models/InterviewSession.js";
 
 // Helper function to safely get number
 function safeNumber(value, defaultValue = 0) {
@@ -710,26 +714,14 @@ class InterviewController {
 
       const userId = req.user.id;
 
-      if (!domain || !subDomain || !interviewType) {
-        return res.status(400).json({
-          success: false,
-          message: "Please provide all required fields (domain, subDomain, interviewType)",
-        });
-      }
+      let role = req.body.role;
+      let resumeUrl = "";
+      let resumeText = "";
+      let scheduledAt = req.body.scheduledAt || new Date();
 
-      const validTypes = [
-        "behavioral",
-        "technical",
-        "system-design",
-        "coding",
-        "mixed",
-      ];
-      if (!validTypes.includes(interviewType)) {
-        return res.status(400).json({
-          success: false,
-          message: `Invalid interview type. Must be one of: ${validTypes.join(", ")}`,
-        });
-      }
+      let finalDomain = domain;
+      let finalSubDomain = subDomain;
+      let finalInterviewType = interviewType || "mixed";
 
       let parsedQuestions = [];
       if (customQuestions) {
@@ -745,13 +737,96 @@ class InterviewController {
         }
       }
 
+      if (role) {
+        // Resume-based flow
+        const resumeFile = req.files && req.files.resume;
+        if (!resumeFile) {
+          return res.status(400).json({
+            success: false,
+            message: "Resume file is required",
+          });
+        }
+
+        // 1. Parse resume text
+        try {
+          if (/\.pdf$/i.test(resumeFile.name)) {
+            const fileBuffer = await fs.promises.readFile(resumeFile.tempFilePath);
+            const pdfData = await pdfParse(fileBuffer);
+            resumeText = pdfData.text;
+          } else {
+            resumeText = `Resume content of ${resumeFile.name}`;
+          }
+        } catch (parseError) {
+          console.error("Error parsing resume:", parseError);
+          resumeText = "Error parsing resume content";
+        }
+
+        // 2. Upload resume to Cloudinary
+        try {
+          const uploadResult = await uploadToCloudinary(resumeFile, "resumes");
+          resumeUrl = uploadResult.secure_url;
+        } catch (uploadError) {
+          console.error("Cloudinary upload error:", uploadError);
+          return res.status(500).json({
+            success: false,
+            message: "Failed to upload resume to Cloudinary",
+            error: uploadError.message,
+          });
+        }
+
+        // 3. Infer domain, subDomain, and interviewType from role
+        const roleLower = role.toLowerCase();
+        finalDomain = "Engineering";
+        finalSubDomain = role;
+        
+        if (roleLower.includes("front")) {
+          finalDomain = "Frontend";
+        } else if (roleLower.includes("back")) {
+          finalDomain = "Backend";
+        } else if (roleLower.includes("full")) {
+          finalDomain = "Full Stack";
+        } else if (roleLower.includes("data")) {
+          finalDomain = "Data Science";
+        } else if (roleLower.includes("devops")) {
+          finalDomain = "DevOps";
+        } else if (roleLower.includes("mobile") || roleLower.includes("android") || roleLower.includes("ios")) {
+          finalDomain = "Mobile";
+        }
+      } else {
+        // Direct configuration flow
+        if (!finalDomain || !finalSubDomain || !finalInterviewType) {
+          return res.status(400).json({
+            success: false,
+            message: "Please provide all required fields (domain, subDomain, interviewType)",
+          });
+        }
+
+        const validTypes = [
+          "behavioral",
+          "technical",
+          "system-design",
+          "coding",
+          "mixed",
+        ];
+        if (!validTypes.includes(finalInterviewType)) {
+          return res.status(400).json({
+            success: false,
+            message: `Invalid interview type. Must be one of: ${validTypes.join(", ")}`,
+          });
+        }
+      }
+
       // Create interview
       const interview = new Interview({
         userId,
+        role,
+        resumeUrl,
+        resumeText,
+        scheduledAt,
         config: {
-          domain,
-          subDomain,
-          interviewType,
+          domain: finalDomain,
+          subDomain: finalSubDomain,
+          interviewType: finalInterviewType,
           difficulty: difficulty || "medium",
           duration: duration || 30,
           targetCompany: targetCompany || "General",
@@ -1995,6 +2070,64 @@ Be encouraging but honest. Provide specific, actionable feedback.`,
       res.status(500).json({
         success: false,
         message: "Failed to get results",
+        error: error.message,
+      });
+    }
+  }
+
+  // Get Interview by ID
+  async getInterviewById(req, res) {
+    try {
+      const { interviewId } = req.params;
+      const userId = req.user.id;
+
+      const interview = await Interview.findOne({ _id: interviewId, userId });
+
+      if (!interview) {
+        return res.status(404).json({
+          success: false,
+          message: "Interview not found",
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        data: interview,
+      });
+    } catch (error) {
+      console.error("Get interview by ID error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch interview details",
+        error: error.message,
+      });
+    }
+  }
+
+  // Get Interview Session
+  async getInterviewSession(req, res) {
+    try {
+      const { interviewId } = req.params;
+      const userId = req.user.id;
+
+      const session = await InterviewSession.findOne({ interviewId, userId });
+
+      if (!session) {
+        return res.status(404).json({
+          success: false,
+          message: "Interview session not found",
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        data: session,
+      });
+    } catch (error) {
+      console.error("Get interview session error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch interview session",
         error: error.message,
       });
     }

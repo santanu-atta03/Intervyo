@@ -80,8 +80,13 @@ router.get(
   interviewController.getDetailedResults,
 );
 
-// ==================== HISTORY ====================
 // Get interview history
 router.get("/history", interviewController.getInterviewHistory);
+
+// Get single interview details
+router.get("/:interviewId", interviewController.getInterviewById);
+
+// Get interview session
+router.get("/:interviewId/session", interviewController.getInterviewSession);
 
 export default router;
