@@ -205,7 +205,7 @@ Simple, scalable, and not over-engineered.
 ### 📥 Clone the Repository
 ```bash
 git clone https://github.com/santanu-atta03/Intervyo  
-cd intervyo
+cd Intervyo
 ```
 ---
 
