@@ -249,7 +249,9 @@ AI_API_KEY=your_ai_api_key
 ```
 ---
 
-## Docker (Optional)
+<!-- Improved heading consistency by adding an icon to match the styling used throughout the README. -->
+
+## 🐳 Docker (Optional)
 
 This setup is for local development only and does not change the default workflows.
 
