@@ -54,6 +54,7 @@ const otpEmailTemplate = (otp) => {
 // Send verification email before saving
 otpSchema.post("save", async function (doc) {
   try {
+    console.log("🔑 [DEV MODE] Generated OTP is:", doc.otp);
     await sendEmail({
       to: doc.email,
       subject: "Email Verification - Intervyo",

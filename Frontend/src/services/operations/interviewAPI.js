@@ -74,7 +74,7 @@ export const createInterview = (interviewConfig, navigate, token) => {
 
       if (interviewConfig instanceof FormData) {
         dataToSend = interviewConfig;
-        // Don't set Content-Type, let the browser handle it for FormData
+        headers["Content-Type"] = "multipart/form-data";
       } else {
         // Validate config before sending
         if (

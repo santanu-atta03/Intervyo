@@ -1088,7 +1088,7 @@ import {
 // ============================================
 // ACTIVE SESSIONS TRACKING
 // ============================================
-const activeSessions = new Map(); // sessionId -> session data
+const Interview = require("../models/Interview.model.js"); // sessionId -> session data
 const questionTimers = new Map(); // sessionId -> timer
 const performanceCache = new Map(); // sessionId -> performance stats
 const socketToSession = new Map(); // socket.id -> sessionId

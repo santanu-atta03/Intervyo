@@ -16,44 +16,47 @@ import Lenis from "@studio-freight/lenis";
 import Navbar from "../components/Navbar";
 import SEO from "../components/shared/SEO";
 
-
 // Animation variants
 const fadeInUp = {
   hidden: { opacity: 0, y: 60 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
 };
 
 const fadeInDown = {
   hidden: { opacity: 0, y: -40 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
 };
 
 const fadeInLeft = {
   hidden: { opacity: 0, x: -60 },
-  visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: "easeOut" } }
+  visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: "easeOut" } },
 };
 
 const fadeInRight = {
   hidden: { opacity: 0, x: 60 },
-  visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: "easeOut" } }
+  visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: "easeOut" } },
 };
 
 const scaleIn = {
   hidden: { opacity: 0, scale: 0.8 },
-  visible: { opacity: 1, scale: 1, transition: { duration: 0.5, ease: "easeOut" } }
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.5, ease: "easeOut" },
+  },
 };
 
 const staggerContainer = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.1, delayChildren: 0.2 }
-  }
+    transition: { staggerChildren: 0.1, delayChildren: 0.2 },
+  },
 };
 
 const staggerItem = {
   hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
 };
 
 // Hover card component with magnetic effect
@@ -66,14 +69,14 @@ const HoverCard = ({ children, className, glowColor = "emerald" }) => {
     cyan: "hover:shadow-[0_0_40px_rgba(34,211,238,0.4)]",
     orange: "hover:shadow-[0_0_40px_rgba(251,146,60,0.4)]",
   };
-  
+
   return (
     <motion.div
       className={`${className} ${glowColors[glowColor]} transition-all duration-500`}
-      whileHover={{ 
-        scale: 1.03, 
+      whileHover={{
+        scale: 1.03,
         y: -12,
-        boxShadow: "0 30px 60px -15px rgba(0, 0, 0, 0.3)"
+        boxShadow: "0 30px 60px -15px rgba(0, 0, 0, 0.3)",
       }}
       whileTap={{ scale: 0.98 }}
     >
@@ -83,19 +86,30 @@ const HoverCard = ({ children, className, glowColor = "emerald" }) => {
 };
 
 // Animated button component
-const AnimatedButton = ({ children, onClick, className, variant = "primary" }) => {
+const AnimatedButton = ({
+  children,
+  onClick,
+  className,
+  variant = "primary",
+}) => {
   const variants = {
-    primary: "bg-gradient-to-r from-sky-400 via-blue-500 to-cyan-500 hover:from-emerald-400 hover:via-green-500 hover:to-lime-400 text-white shadow-lg shadow-sky-500/30 hover:shadow-green-400/50",
-    secondary: "bg-white/5 border-2 border-sky-400/60 hover:border-sky-300 hover:bg-gradient-to-r hover:from-sky-500/20 hover:to-blue-500/20 text-gray-700 dark:text-white backdrop-blur-md",
+    primary:
+      "bg-gradient-to-r from-sky-400 via-blue-500 to-cyan-500 hover:from-emerald-400 hover:via-green-500 hover:to-lime-400 text-white shadow-lg shadow-sky-500/30 hover:shadow-green-400/50",
+    secondary:
+      "bg-white/5 border-2 border-sky-400/60 hover:border-sky-300 hover:bg-gradient-to-r hover:from-sky-500/20 hover:to-blue-500/20 text-gray-700 dark:text-white backdrop-blur-md",
     dark: "bg-gradient-to-r from-slate-700 via-gray-700 to-zinc-700 hover:from-sky-900 hover:via-blue-900 hover:to-indigo-900 text-white shadow-lg hover:shadow-sky-500/30 dark:from-slate-800 dark:via-gray-800 dark:to-zinc-800",
-    accent: "bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500 hover:from-blue-400 hover:via-sky-400 hover:to-cyan-400 text-white shadow-lg shadow-sky-500/30 hover:shadow-sky-400/50"
+    accent:
+      "bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500 hover:from-blue-400 hover:via-sky-400 hover:to-cyan-400 text-white shadow-lg shadow-sky-500/30 hover:shadow-sky-400/50",
   };
-  
+
   return (
     <motion.button
       onClick={onClick}
       className={`${variants[variant]} ${className} relative overflow-hidden group transition-all duration-300`}
-      whileHover={{ scale: 1.05, boxShadow: "0 25px 50px -12px rgba(34, 197, 94, 0.5)" }}
+      whileHover={{
+        scale: 1.05,
+        boxShadow: "0 25px 50px -12px rgba(34, 197, 94, 0.5)",
+      }}
       whileTap={{ scale: 0.95 }}
     >
       <motion.span
@@ -168,13 +182,13 @@ export default function LandingPage() {
   };
 
   return (
-      <div className="bg-skin-primary text-skin-primary transition-colors duration-300">
-      <SEO 
-        title="AI Interview Practice Platform" 
+    <div className="bg-skin-primary text-skin-primary transition-colors duration-300">
+      <SEO
+        title="AI Interview Practice Platform"
         description="Master your tech interviews with AI-powered mock interviews, real-time feedback, and personalized coaching on Intervyo."
         canonical="/"
       />
-      
+
       {/* Hero Section */}
       <section className="pt-32 pb-20 px-6 relative overflow-hidden bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 transition-colors duration-500">
         {/* Grid Background Pattern - Dark Mode */}
@@ -209,9 +223,14 @@ export default function LandingPage() {
         <motion.div
           className="absolute inset-0 w-1/3 bg-gradient-to-r from-transparent via-violet-500/10 dark:via-violet-500/20 to-transparent blur-2xl"
           animate={{ x: ["-50%", "150%"] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+          transition={{
+            duration: 10,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 2,
+          }}
         />
-        
+
         {/* Floating orbs */}
         <motion.div
           className="absolute top-20 left-10 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl"
@@ -221,53 +240,62 @@ export default function LandingPage() {
         <motion.div
           className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"
           animate={{ scale: [1.2, 1, 1.2], opacity: [0.2, 0.4, 0.2] }}
-          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+          transition={{
+            duration: 5,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 1,
+          }}
         />
 
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/50 to-white dark:via-gray-950/50 dark:to-gray-950 pointer-events-none" />
 
         <div className="max-w-6xl mx-auto text-center relative z-10">
-          <motion.div 
+          <motion.div
             className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500/10 to-violet-500/10 dark:from-emerald-500/20 dark:to-violet-500/20 mb-6 border border-emerald-500/30 px-4 py-2 rounded-full"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <motion.span 
+            <motion.span
               className="w-2 h-2 bg-emerald-500 dark:bg-emerald-400 rounded-full"
               animate={{ scale: [1, 1.5, 1] }}
               transition={{ duration: 1.5, repeat: Infinity }}
             />
-            <span className="font-medium text-emerald-700 dark:text-emerald-300 text-sm">AI-Powered Interview Platform</span>
+            <span className="font-medium text-emerald-700 dark:text-emerald-300 text-sm">
+              AI-Powered Interview Platform
+            </span>
           </motion.div>
 
-          <motion.h1 
+          <motion.h1
             className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight text-gray-900 dark:text-white"
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2 }}
           >
-          Ace Your Next Tech
-          <br />
-          Interview with{" "}
-          <motion.span 
-            className="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 dark:from-emerald-400 dark:via-teal-400 dark:to-cyan-400 bg-clip-text text-transparent"
-            animate={{ backgroundPosition: ["0%", "100%", "0%"] }}
-            transition={{ duration: 3, repeat: Infinity }}
-            style={{ backgroundSize: "200% auto" }}
-          >
-            AI
-          </motion.span>
-          <br />
-          <span className="bg-gradient-to-r from-violet-500 via-purple-500 to-pink-500 dark:from-violet-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent">Coaching</span>
-        </motion.h1>
-        <motion.p className="text-gray-600 dark:text-gray-400 text-xl">
-          <br />
-          and receive instant, actionable feedback to boost your confidence.
-        </motion.p>
+            Ace Your Next Tech
+            <br />
+            Interview with{" "}
+            <motion.span
+              className="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 dark:from-emerald-400 dark:via-teal-400 dark:to-cyan-400 bg-clip-text text-transparent"
+              animate={{ backgroundPosition: ["0%", "100%", "0%"] }}
+              transition={{ duration: 3, repeat: Infinity }}
+              style={{ backgroundSize: "200% auto" }}
+            >
+              AI
+            </motion.span>
+            <br />
+            <span className="bg-gradient-to-r from-violet-500 via-purple-500 to-pink-500 dark:from-violet-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
+              Coaching
+            </span>
+          </motion.h1>
+          <motion.p className="text-gray-600 dark:text-gray-400 text-xl">
+            <br />
+            and receive instant, actionable feedback to boost your confidence.
+          </motion.p>
 
-          <motion.div 
+          <motion.div
             className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -278,7 +306,13 @@ export default function LandingPage() {
               className="px-8 py-4  rounded-xl font-semibold text-lg flex items-center gap-2"
               variant="primary"
             >
-              Start Practicing Free <motion.span animate={{ x: [0, 5, 0] }} transition={{ duration: 1, repeat: Infinity }}>{'->'}</motion.span>
+              Start Practicing Free{" "}
+              <motion.span
+                animate={{ x: [0, 5, 0] }}
+                transition={{ duration: 1, repeat: Infinity }}
+              >
+                {"->"}
+              </motion.span>
             </AnimatedButton>
             <AnimatedButton
               onClick={() => navigate("/dashboard")}
@@ -290,13 +324,13 @@ export default function LandingPage() {
           </motion.div>
 
           {/* Mockup */}
-          <motion.div 
+          <motion.div
             className="relative max-w-5xl mx-auto"
             initial={{ opacity: 0, y: 60, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.8, ease: "easeOut" }}
           >
-            <motion.div 
+            <motion.div
               className="absolute -inset-4 bg-gradient-to-r from-emerald-500/20 via-purple-500/20 to-pink-500/20 rounded-3xl blur-2xl"
               animate={{ opacity: [0.5, 0.8, 0.5] }}
               transition={{ duration: 3, repeat: Infinity }}
@@ -337,7 +371,9 @@ export default function LandingPage() {
                   <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                     <div className="flex items-center gap-2 mb-4">
                       <div className="text-emerald-500">✓</div>
-                      <h4 className="font-semibold text-gray-900">AI Feedback</h4>
+                      <h4 className="font-semibold text-gray-900">
+                        AI Feedback
+                      </h4>
                     </div>
                     <div className="space-y-3 mb-4">
                       <div className="flex justify-between items-center">
@@ -383,7 +419,7 @@ export default function LandingPage() {
           </motion.div>
 
           {/* Trust Badge */}
-          <div className="mt-16 px-4"> 
+          <div className="mt-16 px-4">
             <p className="text-sky-600 mb-8 text-center">
               <span className="bg-yellow-400/20 text-yellow-800 dark:bg-yellow-400 dark:text-gray-900 px-2 py-1 inline-block leading-relaxed max-w-full rounded">
                 Trusted by <strong>5,000+</strong> job seekers preparing for
@@ -394,36 +430,68 @@ export default function LandingPage() {
               <div className="grid grid-cols-2 md:grid-cols-4 border border-gray-200 dark:border-gray-700 max-w-7xl mx-auto min-w-[600px] md:min-w-0 bg-white dark:bg-gray-900">
                 {/* Company grid items here, only once */}
                 <div className="flex flex-col items-center justify-center p-8 border-r border-b border-gray-200 dark:border-gray-700 hover:bg-gradient-to-br hover:from-cyan-500/10 hover:to-emerald-500/10 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
-                  <span className="text-2xl font-bold text-gray-700 dark:text-white mb-2 text-center group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">TechCorp</span>
-                  <span className="text-sm text-gray-500 dark:text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-cyan-600 dark:group-hover:text-cyan-300 transition-all flex items-center gap-1">Learn More →</span>
+                  <span className="text-2xl font-bold text-gray-700 dark:text-white mb-2 text-center group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
+                    TechCorp
+                  </span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-cyan-600 dark:group-hover:text-cyan-300 transition-all flex items-center gap-1">
+                    Learn More →
+                  </span>
                 </div>
                 <div className="flex flex-col items-center justify-center p-8 border-r border-b border-gray-200 dark:border-gray-700 hover:bg-gradient-to-br hover:from-violet-500/10 hover:to-purple-500/10 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
-                  <span className="text-2xl font-bold text-gray-700 dark:text-white mb-2 text-center group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">Innovate Inc</span>
-                  <span className="text-sm text-gray-500 dark:text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-violet-600 dark:group-hover:text-violet-300 transition-all flex items-center gap-1">Learn More →</span>
+                  <span className="text-2xl font-bold text-gray-700 dark:text-white mb-2 text-center group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+                    Innovate Inc
+                  </span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-violet-600 dark:group-hover:text-violet-300 transition-all flex items-center gap-1">
+                    Learn More →
+                  </span>
                 </div>
                 <div className="flex flex-col items-center justify-center p-8 border-r border-b border-gray-200 dark:border-gray-700 hover:bg-gradient-to-br hover:from-fuchsia-500/10 hover:to-pink-500/10 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
-                  <span className="text-2xl font-bold text-gray-700 dark:text-white mb-2 text-center group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-400 transition-colors">DevStudio</span>
-                  <span className="text-sm text-gray-500 dark:text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-300 transition-all flex items-center gap-1">Learn More →</span>
+                  <span className="text-2xl font-bold text-gray-700 dark:text-white mb-2 text-center group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-400 transition-colors">
+                    DevStudio
+                  </span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-300 transition-all flex items-center gap-1">
+                    Learn More →
+                  </span>
                 </div>
                 <div className="flex flex-col items-center justify-center p-8 border-b border-gray-200 dark:border-gray-700 hover:bg-gradient-to-br hover:from-amber-500/10 hover:to-orange-500/10 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
-                  <span className="text-2xl font-bold text-gray-700 dark:text-white mb-2 text-center group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">CodeAcademy</span>
-                  <span className="text-sm text-gray-500 dark:text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-amber-600 dark:group-hover:text-amber-300 transition-all flex items-center gap-1">Learn More →</span>
+                  <span className="text-2xl font-bold text-gray-700 dark:text-white mb-2 text-center group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                    CodeAcademy
+                  </span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-amber-600 dark:group-hover:text-amber-300 transition-all flex items-center gap-1">
+                    Learn More →
+                  </span>
                 </div>
                 <div className="flex flex-col items-center justify-center p-8 border-r border-gray-200 dark:border-gray-700 hover:bg-gradient-to-br hover:from-rose-500/10 hover:to-red-500/10 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
-                  <span className="text-2xl font-bold text-gray-700 dark:text-white mb-2 text-center group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">StartupHub</span>
-                  <span className="text-sm text-gray-500 dark:text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-rose-600 dark:group-hover:text-rose-300 transition-all flex items-center gap-1">Learn More →</span>
+                  <span className="text-2xl font-bold text-gray-700 dark:text-white mb-2 text-center group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">
+                    StartupHub
+                  </span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-rose-600 dark:group-hover:text-rose-300 transition-all flex items-center gap-1">
+                    Learn More →
+                  </span>
                 </div>
                 <div className="flex flex-col items-center justify-center p-8 border-r border-gray-200 dark:border-gray-700 hover:bg-gradient-to-br hover:from-teal-500/10 hover:to-cyan-500/10 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
-                  <span className="text-2xl font-bold text-gray-700 dark:text-white mb-2 text-center group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">CareerBoost</span>
-                  <span className="text-sm text-gray-500 dark:text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-teal-600 dark:group-hover:text-teal-300 transition-all flex items-center gap-1">Learn More →</span>
+                  <span className="text-2xl font-bold text-gray-700 dark:text-white mb-2 text-center group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
+                    CareerBoost
+                  </span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-teal-600 dark:group-hover:text-teal-300 transition-all flex items-center gap-1">
+                    Learn More →
+                  </span>
                 </div>
                 <div className="flex flex-col items-center justify-center p-8 border-r border-gray-200 dark:border-gray-700 hover:bg-gradient-to-br hover:from-indigo-500/10 hover:to-blue-500/10 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
-                  <span className="text-2xl font-bold text-gray-700 dark:text-white mb-2 text-center group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">HireRight</span>
-                  <span className="text-sm text-gray-500 dark:text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-all flex items-center gap-1">Learn More →</span>
+                  <span className="text-2xl font-bold text-gray-700 dark:text-white mb-2 text-center group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                    HireRight
+                  </span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-all flex items-center gap-1">
+                    Learn More →
+                  </span>
                 </div>
                 <div className="flex flex-col items-center justify-center p-8 hover:bg-gradient-to-br hover:from-emerald-500/10 hover:to-green-500/10 hover:-translate-y-2 transition-all duration-300 min-h-[120px] group cursor-pointer">
-                  <span className="text-2xl font-bold text-gray-700 dark:text-white mb-2 text-center group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">SkillBoost</span>
-                  <span className="text-sm text-gray-500 dark:text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-300 transition-all flex items-center gap-1">Learn More →</span>
+                  <span className="text-2xl font-bold text-gray-700 dark:text-white mb-2 text-center group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                    SkillBoost
+                  </span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400 opacity-0 group-hover:opacity-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-300 transition-all flex items-center gap-1">
+                    Learn More →
+                  </span>
                 </div>
               </div>
             </div>
@@ -432,16 +500,19 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 px-6 bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 transition-colors duration-500">
+      <section
+        id="features"
+        className="py-20 px-6 bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 transition-colors duration-500"
+      >
         <div className="max-w-7xl mx-auto">
-          <motion.div 
+          <motion.div
             className="text-center mb-16"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
             variants={fadeInUp}
           >
-            <motion.div 
+            <motion.div
               className="inline-block bg-gradient-to-r from-emerald-100 to-teal-100 dark:from-emerald-900/30 dark:to-teal-900/30 text-emerald-700 dark:text-emerald-300 px-6 py-2 rounded-full mb-4 font-semibold border border-emerald-200 dark:border-emerald-800"
               whileHover={{ scale: 1.05 }}
             >
@@ -450,7 +521,9 @@ export default function LandingPage() {
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900 dark:text-white">
               Everything you need to
               <br />
-              <span className="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 bg-clip-text text-transparent">nail your interview</span>
+              <span className="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 bg-clip-text text-transparent">
+                nail your interview
+              </span>
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-400">
               From practice questions to AI feedback, Intervyo gives you the
@@ -461,7 +534,7 @@ export default function LandingPage() {
           </motion.div>
 
           {/* Bento Grid Layout */}
-          <motion.div 
+          <motion.div
             className="grid grid-cols-1 md:grid-cols-3 gap-4"
             initial="hidden"
             whileInView="visible"
@@ -469,9 +542,12 @@ export default function LandingPage() {
             variants={staggerContainer}
           >
             {/* AI-Powered Questions - Emerald Green Card */}
-            <HoverCard className="bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-600 rounded-3xl p-10 shadow-lg border-4 border-transparent dark:border-gray-900 min-h-[280px] flex flex-col justify-center cursor-pointer" glowColor="emerald">
+            <HoverCard
+              className="bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-600 rounded-3xl p-10 shadow-lg border-4 border-transparent dark:border-gray-900 min-h-[280px] flex flex-col justify-center cursor-pointer"
+              glowColor="emerald"
+            >
               <motion.div variants={staggerItem}>
-                <motion.div 
+                <motion.div
                   className="text-yellow-200 text-6xl font-bold mb-3"
                   initial={{ scale: 0 }}
                   whileInView={{ scale: 1 }}
@@ -492,7 +568,7 @@ export default function LandingPage() {
                 <h3 className="text-amber-600 dark:text-amber-300 text-2xl font-semibold mb-4">
                   Active Users
                 </h3>
-                <motion.div 
+                <motion.div
                   className="text-amber-500 dark:text-amber-200 text-7xl font-bold mb-6"
                   initial={{ scale: 0 }}
                   whileInView={{ scale: 1 }}
@@ -504,9 +580,12 @@ export default function LandingPage() {
             </HoverCard>
 
             {/* Instant Feedback - Yellow Lime Card */}
-            <HoverCard className="bg-gradient-to-br from-yellow-300 via-amber-300 to-orange-300 rounded-3xl p-10 shadow-lg border-4 border-transparent dark:border-gray-900 min-h-[280px] flex flex-col justify-center cursor-pointer" glowColor="yellow">
+            <HoverCard
+              className="bg-gradient-to-br from-yellow-300 via-amber-300 to-orange-300 rounded-3xl p-10 shadow-lg border-4 border-transparent dark:border-gray-900 min-h-[280px] flex flex-col justify-center cursor-pointer"
+              glowColor="yellow"
+            >
               <motion.div variants={staggerItem}>
-                <motion.div 
+                <motion.div
                   className="bg-gradient-to-br from-yellow-400 to-orange-400 rounded-2xl p-4 inline-block mb-6 shadow-lg"
                   whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
                   transition={{ duration: 0.5 }}
@@ -523,9 +602,12 @@ export default function LandingPage() {
             </HoverCard>
 
             {/* Large Purple Card with Chart */}
-            <HoverCard className="md:col-span-2 bg-gradient-to-br from-purple-100 via-violet-100 to-fuchsia-100 dark:from-purple-200 dark:via-violet-200 dark:to-fuchsia-200 rounded-3xl p-10 shadow-lg border-4 border-transparent dark:border-gray-900 cursor-pointer" glowColor="purple">
+            <HoverCard
+              className="md:col-span-2 bg-gradient-to-br from-purple-100 via-violet-100 to-fuchsia-100 dark:from-purple-200 dark:via-violet-200 dark:to-fuchsia-200 rounded-3xl p-10 shadow-lg border-4 border-transparent dark:border-gray-900 cursor-pointer"
+              glowColor="purple"
+            >
               <motion.div variants={staggerItem}>
-                <motion.div 
+                <motion.div
                   className="bg-gradient-to-r from-purple-200 to-violet-200 dark:from-purple-300 dark:to-violet-300 rounded-2xl px-6 py-2 inline-block mb-4"
                   whileHover={{ scale: 1.05 }}
                 >
@@ -533,7 +615,7 @@ export default function LandingPage() {
                     Interview Success Rate
                   </h3>
                 </motion.div>
-                <motion.div 
+                <motion.div
                   className="text-6xl font-bold mb-2 bg-gradient-to-r from-purple-700 to-violet-700 bg-clip-text text-transparent"
                   initial={{ scale: 0 }}
                   whileInView={{ scale: 1 }}
@@ -542,10 +624,8 @@ export default function LandingPage() {
                   87%
                 </motion.div>
                 <div className="flex items-center gap-2 text-purple-700 mb-6"></div>
-                <motion.div 
-                  className="h-32 bg-gradient-to-r from-purple-300/50 to-violet-300/50 rounded-xl overflow-hidden relative"
-                >
-                  <motion.div 
+                <motion.div className="h-32 bg-gradient-to-r from-purple-300/50 to-violet-300/50 rounded-xl overflow-hidden relative">
+                  <motion.div
                     className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-purple-500 to-transparent"
                     initial={{ height: 0 }}
                     whileInView={{ height: "87%" }}
@@ -556,9 +636,12 @@ export default function LandingPage() {
             </HoverCard>
 
             {/* Skill Assessment - Pink Card */}
-            <HoverCard className="bg-gradient-to-br from-pink-200 via-rose-200 to-red-200 rounded-3xl p-10 shadow-lg border-4 border-transparent dark:border-gray-900 cursor-pointer" glowColor="pink">
+            <HoverCard
+              className="bg-gradient-to-br from-pink-200 via-rose-200 to-red-200 rounded-3xl p-10 shadow-lg border-4 border-transparent dark:border-gray-900 cursor-pointer"
+              glowColor="pink"
+            >
               <motion.div variants={staggerItem}>
-                <motion.div 
+                <motion.div
                   className="flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-pink-300 to-rose-400 mb-6 shadow-lg"
                   whileHover={{ rotate: 360 }}
                   transition={{ duration: 0.6 }}
@@ -572,12 +655,15 @@ export default function LandingPage() {
             </HoverCard>
 
             {/* Progress Tracking - Yellow Card */}
-            <HoverCard className="bg-gradient-to-br from-yellow-300 via-amber-300 to-orange-300 rounded-3xl p-10 shadow-lg border-4 border-transparent dark:border-gray-900 cursor-pointer" glowColor="yellow">
+            <HoverCard
+              className="bg-gradient-to-br from-yellow-300 via-amber-300 to-orange-300 rounded-3xl p-10 shadow-lg border-4 border-transparent dark:border-gray-900 cursor-pointer"
+              glowColor="yellow"
+            >
               <motion.div variants={staggerItem}>
                 <h3 className="text-2xl font-bold mb-3 text-amber-900">
                   Practice Sessions
                 </h3>
-                <motion.div 
+                <motion.div
                   className="text-5xl font-bold mb-2 text-amber-800"
                   initial={{ scale: 0 }}
                   whileInView={{ scale: 1 }}
@@ -590,7 +676,10 @@ export default function LandingPage() {
             </HoverCard>
 
             {/* Industry Insights - Emerald Card - Wide */}
-            <HoverCard className="md:col-span-2 bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-600 rounded-3xl p-10 shadow-lg border-4 border-transparent dark:border-gray-900 text-white flex items-center justify-between cursor-pointer" glowColor="emerald">
+            <HoverCard
+              className="md:col-span-2 bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-600 rounded-3xl p-10 shadow-lg border-4 border-transparent dark:border-gray-900 text-white flex items-center justify-between cursor-pointer"
+              glowColor="emerald"
+            >
               <motion.div className="flex-1" variants={staggerItem}>
                 <h3 className="text-3xl font-bold mb-3 text-amber-200">
                   We Build Future of
@@ -602,7 +691,7 @@ export default function LandingPage() {
                   Crafting Meaningful AI-Driven Experience
                 </p>
               </motion.div>
-              <motion.div 
+              <motion.div
                 className="w-32 h-32 rounded-full border-4 border-amber-200 flex items-center justify-center bg-gradient-to-br from-emerald-400/20 to-teal-400/20"
                 whileHover={{ rotate: 180, scale: 1.1 }}
                 transition={{ duration: 0.5 }}
@@ -669,7 +758,7 @@ export default function LandingPage() {
                 </div>
                 <div className="bg-white dark:bg-gray-700 p-4 rounded flex flex-col items-center justify-center">
                   <span className="text-emerald-500 text-3xl font-bold mb-2">
-                  ✓
+                    ✓
                   </span>
                   <span className="text-gray-500 dark:text-gray-300 text-xs font-semibold">
                     Affordable
@@ -733,7 +822,7 @@ export default function LandingPage() {
                 </div>
                 <div className="bg-white dark:bg-gray-700 p-4 rounded flex flex-col items-center justify-center">
                   <span className="text-gray-400 dark:text-gray-500 text-2xl font-bold mb-2">
-                  —
+                    —
                   </span>
                   <span className="text-gray-500 dark:text-gray-300 text-xs font-semibold">
                     Custom
@@ -912,16 +1001,16 @@ export default function LandingPage() {
         {/* Background decoration */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-emerald-200/30 to-teal-200/30 dark:from-emerald-900/10 dark:to-teal-900/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-purple-200/20 to-pink-200/20 dark:from-purple-900/10 dark:to-pink-900/10 rounded-full blur-3xl" />
-        
+
         <div className="max-w-6xl mx-auto relative z-10">
-          <motion.div 
+          <motion.div
             className="text-center mb-16"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
             variants={fadeInUp}
           >
-            <motion.div 
+            <motion.div
               className="inline-block bg-gradient-to-r from-emerald-100 to-teal-100 dark:from-emerald-900/30 dark:to-teal-900/30 text-emerald-700 dark:text-emerald-300 px-6 py-2 rounded-full mb-6 font-semibold text-sm tracking-wide border border-emerald-200 dark:border-emerald-800"
               whileHover={{ scale: 1.05 }}
             >
@@ -930,7 +1019,9 @@ export default function LandingPage() {
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900 dark:text-white">
               Four steps to
               <br />
-              <span className="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 bg-clip-text text-transparent">interview success</span>
+              <span className="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 bg-clip-text text-transparent">
+                interview success
+              </span>
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
               Our streamlined process makes interview prep efficient and
@@ -938,41 +1029,46 @@ export default function LandingPage() {
             </p>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             className="space-y-6"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-50px" }}
             variants={staggerContainer}
           >
-            {["Choose Your Role", "Practice Interviews", "Get AI Feedback", "Track Progress"].map((title, index) => {
+            {[
+              "Choose Your Role",
+              "Practice Interviews",
+              "Get AI Feedback",
+              "Track Progress",
+            ].map((title, index) => {
               const descriptions = [
                 "Select from 50+ tech roles including Frontend, Backend, Data Science, DevOps, and more. We'll tailor questions to match.",
                 "Answer realistic interview questions through voice or text. Our AI simulates a real interviewer experience.",
                 "Receive instant, detailed feedback on clarity, technical accuracy, structure, and areas for improvement.",
-                "Monitor your improvement with analytics dashboards and prepare strategically for your actual interview."
+                "Monitor your improvement with analytics dashboards and prepare strategically for your actual interview.",
               ];
               const gradients = [
                 "from-emerald-500 to-teal-500",
                 "from-violet-500 to-purple-500",
                 "from-amber-500 to-orange-500",
-                "from-pink-500 to-rose-500"
+                "from-pink-500 to-rose-500",
               ];
-              
+
               return (
-                <motion.div 
+                <motion.div
                   key={index}
                   className="flex flex-col md:flex-row gap-6 items-start bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-8 shadow-sm border border-gray-200 dark:border-gray-700 group cursor-pointer"
                   variants={staggerItem}
-                  whileHover={{ 
-                    scale: 1.02, 
+                  whileHover={{
+                    scale: 1.02,
                     x: 10,
                     boxShadow: "0 20px 40px -15px rgba(0, 0, 0, 0.1)",
-                    borderColor: "rgb(16, 185, 129)" 
+                    borderColor: "rgb(16, 185, 129)",
                   }}
                   transition={{ duration: 0.3 }}
                 >
-                  <motion.div 
+                  <motion.div
                     className={`flex-shrink-0 w-16 h-16 bg-gradient-to-br ${gradients[index]} rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-lg`}
                     whileHover={{ rotate: 360, scale: 1.1 }}
                     transition={{ duration: 0.5 }}
@@ -987,7 +1083,7 @@ export default function LandingPage() {
                       {descriptions[index]}
                     </p>
                   </div>
-                  <motion.div 
+                  <motion.div
                     className="text-gray-300 dark:text-gray-600 group-hover:text-emerald-500 text-4xl hidden md:block"
                     animate={{ x: [0, 5, 0] }}
                     transition={{ duration: 1.5, repeat: Infinity }}
@@ -1004,19 +1100,19 @@ export default function LandingPage() {
       {/* Testimonials Section */}
       <section className="py-20 px-6 bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 relative overflow-hidden transition-colors duration-500">
         {/* Background effects */}
-        <motion.div 
+        <motion.div
           className="absolute top-20 left-10 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl"
           animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0.5, 0.3] }}
           transition={{ duration: 5, repeat: Infinity }}
         />
-        <motion.div 
+        <motion.div
           className="absolute bottom-20 right-10 w-80 h-80 bg-purple-500/5 rounded-full blur-3xl"
           animate={{ scale: [1.2, 1, 1.2], opacity: [0.2, 0.4, 0.2] }}
           transition={{ duration: 6, repeat: Infinity, delay: 1 }}
         />
-        
+
         <div className="max-w-7xl mx-auto relative z-10">
-          <motion.div 
+          <motion.div
             className="text-center mb-16"
             initial="hidden"
             whileInView="visible"
@@ -1028,11 +1124,13 @@ export default function LandingPage() {
               <br />
               people have been saying
               <br />
-              <span className="bg-gradient-to-r from-emerald-500 to-cyan-500 bg-clip-text text-transparent">some things...</span>
+              <span className="bg-gradient-to-r from-emerald-500 to-cyan-500 bg-clip-text text-transparent">
+                some things...
+              </span>
             </h2>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
             initial="hidden"
             whileInView="visible"
@@ -1040,10 +1138,14 @@ export default function LandingPage() {
             variants={staggerContainer}
           >
             {/* Testimonial 1 */}
-            <motion.div 
+            <motion.div
               className="bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700/50 group cursor-pointer"
               variants={staggerItem}
-              whileHover={{ scale: 1.03, y: -5, borderColor: "rgb(16, 185, 129)" }}
+              whileHover={{
+                scale: 1.03,
+                y: -5,
+                borderColor: "rgb(16, 185, 129)",
+              }}
               transition={{ duration: 0.3 }}
             >
               <p className="text-gray-600 dark:text-gray-300 mb-4">
@@ -1051,24 +1153,32 @@ export default function LandingPage() {
                 incredibly accurate and helped me improve my answers."
               </p>
               <div className="flex items-center gap-2">
-                <motion.div 
+                <motion.div
                   className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg"
                   whileHover={{ scale: 1.2, rotate: 10 }}
                 >
                   PS
                 </motion.div>
                 <div>
-                  <p className="text-gray-900 dark:text-white text-sm font-medium">Priya Sharma</p>
-                  <p className="text-gray-500 dark:text-gray-500 text-xs">Software Engineer</p>
+                  <p className="text-gray-900 dark:text-white text-sm font-medium">
+                    Priya Sharma
+                  </p>
+                  <p className="text-gray-500 dark:text-gray-500 text-xs">
+                    Software Engineer
+                  </p>
                 </div>
               </div>
             </motion.div>
 
             {/* Testimonial 2 */}
-            <motion.div 
+            <motion.div
               className="bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700/50 group cursor-pointer"
               variants={staggerItem}
-              whileHover={{ scale: 1.03, y: -5, borderColor: "rgb(139, 92, 246)" }}
+              whileHover={{
+                scale: 1.03,
+                y: -5,
+                borderColor: "rgb(139, 92, 246)",
+              }}
               transition={{ duration: 0.3 }}
             >
               <p className="text-gray-600 dark:text-gray-300 mb-4">
@@ -1076,24 +1186,32 @@ export default function LandingPage() {
                 practicing, which helped me perform better in the real thing."
               </p>
               <div className="flex items-center gap-2">
-                <motion.div 
+                <motion.div
                   className="w-8 h-8 bg-gradient-to-br from-violet-400 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg"
                   whileHover={{ scale: 1.2, rotate: 10 }}
                 >
                   RK
                 </motion.div>
                 <div>
-                  <p className="text-gray-900 dark:text-white text-sm font-medium">Rahul Kumar</p>
-                  <p className="text-gray-500 dark:text-gray-500 text-xs">Full Stack Developer</p>
+                  <p className="text-gray-900 dark:text-white text-sm font-medium">
+                    Rahul Kumar
+                  </p>
+                  <p className="text-gray-500 dark:text-gray-500 text-xs">
+                    Full Stack Developer
+                  </p>
                 </div>
               </div>
             </motion.div>
 
             {/* Testimonial 3 */}
-            <motion.div 
+            <motion.div
               className="bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700/50 group cursor-pointer"
               variants={staggerItem}
-              whileHover={{ scale: 1.03, y: -5, borderColor: "rgb(251, 191, 36)" }}
+              whileHover={{
+                scale: 1.03,
+                y: -5,
+                borderColor: "rgb(251, 191, 36)",
+              }}
               transition={{ duration: 0.3 }}
             >
               <p className="text-gray-600 dark:text-gray-300 mb-4">
@@ -1101,24 +1219,32 @@ export default function LandingPage() {
                 The AI coaching is next level!"
               </p>
               <div className="flex items-center gap-2">
-                <motion.div 
+                <motion.div
                   className="w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg"
                   whileHover={{ scale: 1.2, rotate: 10 }}
                 >
                   AP
                 </motion.div>
                 <div>
-                  <p className="text-gray-900 dark:text-white text-sm font-medium">Aisha Patel</p>
-                  <p className="text-gray-500 dark:text-gray-500 text-xs">Data Scientist</p>
+                  <p className="text-gray-900 dark:text-white text-sm font-medium">
+                    Aisha Patel
+                  </p>
+                  <p className="text-gray-500 dark:text-gray-500 text-xs">
+                    Data Scientist
+                  </p>
                 </div>
               </div>
             </motion.div>
 
             {/* Testimonial 4 */}
-            <motion.div 
+            <motion.div
               className="bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700/50 group cursor-pointer"
               variants={staggerItem}
-              whileHover={{ scale: 1.03, y: -5, borderColor: "rgb(236, 72, 153)" }}
+              whileHover={{
+                scale: 1.03,
+                y: -5,
+                borderColor: "rgb(236, 72, 153)",
+              }}
               transition={{ duration: 0.3 }}
             >
               <p className="text-gray-600 dark:text-gray-300 mb-4">
@@ -1126,27 +1252,31 @@ export default function LandingPage() {
                 exact same questions in my Amazon interview!"
               </p>
               <div className="flex items-center gap-2">
-                <motion.div 
+                <motion.div
                   className="w-8 h-8 bg-gradient-to-br from-pink-400 to-rose-500 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg"
                   whileHover={{ scale: 1.2, rotate: 10 }}
                 >
                   AS
                 </motion.div>
                 <div>
-                  <p className="text-gray-900 dark:text-white text-sm font-medium">Arjun Singh</p>
-                  <p className="text-gray-500 dark:text-gray-500 text-xs">Backend Engineer</p>
+                  <p className="text-gray-900 dark:text-white text-sm font-medium">
+                    Arjun Singh
+                  </p>
+                  <p className="text-gray-500 dark:text-gray-500 text-xs">
+                    Backend Engineer
+                  </p>
                 </div>
               </div>
             </motion.div>
 
             {/* Testimonial 5 - Highlighted */}
-            <motion.div 
+            <motion.div
               className="bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 rounded-2xl p-6 shadow-lg cursor-pointer relative overflow-hidden"
               variants={staggerItem}
               whileHover={{ scale: 1.05, y: -8 }}
               transition={{ duration: 0.3 }}
             >
-              <motion.div 
+              <motion.div
                 className="absolute inset-0 bg-white/10"
                 animate={{ x: ["-100%", "200%"] }}
                 transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
@@ -1156,7 +1286,7 @@ export default function LandingPage() {
                 interview-ready. Now I'm at Microsoft!"
               </p>
               <div className="flex items-center gap-2 relative z-10">
-                <motion.div 
+                <motion.div
                   className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-emerald-600 text-sm font-bold shadow-lg"
                   whileHover={{ scale: 1.2, rotate: 10 }}
                 >
@@ -1170,10 +1300,14 @@ export default function LandingPage() {
             </motion.div>
 
             {/* Testimonial 6 */}
-            <motion.div 
+            <motion.div
               className="bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700/50 group cursor-pointer"
               variants={staggerItem}
-              whileHover={{ scale: 1.03, y: -5, borderColor: "rgb(34, 211, 238)" }}
+              whileHover={{
+                scale: 1.03,
+                y: -5,
+                borderColor: "rgb(34, 211, 238)",
+              }}
               transition={{ duration: 0.3 }}
             >
               <p className="text-gray-600 dark:text-gray-300 mb-4">
@@ -1181,24 +1315,32 @@ export default function LandingPage() {
                 if my answers were good enough!"
               </p>
               <div className="flex items-center gap-2">
-                <motion.div 
+                <motion.div
                   className="w-8 h-8 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg"
                   whileHover={{ scale: 1.2, rotate: 10 }}
                 >
                   VR
                 </motion.div>
                 <div>
-                  <p className="text-gray-900 dark:text-white text-sm font-medium">Vikram Reddy</p>
-                  <p className="text-gray-500 dark:text-gray-500 text-xs">DevOps Engineer</p>
+                  <p className="text-gray-900 dark:text-white text-sm font-medium">
+                    Vikram Reddy
+                  </p>
+                  <p className="text-gray-500 dark:text-gray-500 text-xs">
+                    DevOps Engineer
+                  </p>
                 </div>
               </div>
             </motion.div>
 
             {/* Testimonial 7 */}
-            <motion.div 
+            <motion.div
               className="bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700/50 group cursor-pointer"
               variants={staggerItem}
-              whileHover={{ scale: 1.03, y: -5, borderColor: "rgb(16, 185, 129)" }}
+              whileHover={{
+                scale: 1.03,
+                y: -5,
+                borderColor: "rgb(16, 185, 129)",
+              }}
               transition={{ duration: 0.3 }}
             >
               <p className="text-gray-600 dark:text-gray-300 mb-4">
@@ -1206,24 +1348,32 @@ export default function LandingPage() {
                 confidence went through the roof!"
               </p>
               <div className="flex items-center gap-2">
-                <motion.div 
+                <motion.div
                   className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-green-500 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg"
                   whileHover={{ scale: 1.2, rotate: 10 }}
                 >
                   SG
                 </motion.div>
                 <div>
-                  <p className="text-gray-900 dark:text-white text-sm font-medium">Sneha Gupta</p>
-                  <p className="text-gray-500 dark:text-gray-500 text-xs">Product Manager</p>
+                  <p className="text-gray-900 dark:text-white text-sm font-medium">
+                    Sneha Gupta
+                  </p>
+                  <p className="text-gray-500 dark:text-gray-500 text-xs">
+                    Product Manager
+                  </p>
                 </div>
               </div>
             </motion.div>
 
             {/* Testimonial 8 */}
-            <motion.div 
+            <motion.div
               className="bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700/50 group cursor-pointer"
               variants={staggerItem}
-              whileHover={{ scale: 1.03, y: -5, borderColor: "rgb(168, 85, 247)" }}
+              whileHover={{
+                scale: 1.03,
+                y: -5,
+                borderColor: "rgb(168, 85, 247)",
+              }}
               transition={{ duration: 0.3 }}
             >
               <p className="text-gray-600 dark:text-gray-300 mb-4">
@@ -1231,24 +1381,32 @@ export default function LandingPage() {
                 Improved my technical depth score from 3 to 5 stars!"
               </p>
               <div className="flex items-center gap-2">
-                <motion.div 
+                <motion.div
                   className="w-8 h-8 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg"
                   whileHover={{ scale: 1.2, rotate: 10 }}
                 >
                   RM
                 </motion.div>
                 <div>
-                  <p className="text-gray-900 dark:text-white text-sm font-medium">Rohan Mehta</p>
-                  <p className="text-gray-500 dark:text-gray-500 text-xs">Cloud Architect</p>
+                  <p className="text-gray-900 dark:text-white text-sm font-medium">
+                    Rohan Mehta
+                  </p>
+                  <p className="text-gray-500 dark:text-gray-500 text-xs">
+                    Cloud Architect
+                  </p>
                 </div>
               </div>
             </motion.div>
 
             {/* Testimonial 9 */}
-            <motion.div 
+            <motion.div
               className="bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700/50 group cursor-pointer"
               variants={staggerItem}
-              whileHover={{ scale: 1.03, y: -5, borderColor: "rgb(244, 114, 182)" }}
+              whileHover={{
+                scale: 1.03,
+                y: -5,
+                borderColor: "rgb(244, 114, 182)",
+              }}
               transition={{ duration: 0.3 }}
             >
               <p className="text-gray-600 dark:text-gray-300 mb-4">
@@ -1256,15 +1414,19 @@ export default function LandingPage() {
                 comfortable speaking my answers out loud!"
               </p>
               <div className="flex items-center gap-2">
-                <motion.div 
+                <motion.div
                   className="w-8 h-8 bg-gradient-to-br from-pink-400 to-fuchsia-500 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg"
                   whileHover={{ scale: 1.2, rotate: 10 }}
                 >
                   NV
                 </motion.div>
                 <div>
-                  <p className="text-gray-900 dark:text-white text-sm font-medium">Neha Verma</p>
-                  <p className="text-gray-500 dark:text-gray-500 text-xs">ML Engineer</p>
+                  <p className="text-gray-900 dark:text-white text-sm font-medium">
+                    Neha Verma
+                  </p>
+                  <p className="text-gray-500 dark:text-gray-500 text-xs">
+                    ML Engineer
+                  </p>
                 </div>
               </div>
             </motion.div>
@@ -1273,21 +1435,24 @@ export default function LandingPage() {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="py-24 px-6 bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 relative overflow-hidden transition-colors duration-500">
+      <section
+        id="pricing"
+        className="py-24 px-6 bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 relative overflow-hidden transition-colors duration-500"
+      >
         {/* Background decorations */}
-        <motion.div 
+        <motion.div
           className="absolute top-40 -left-20 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl"
           animate={{ scale: [1, 1.2, 1] }}
           transition={{ duration: 6, repeat: Infinity }}
         />
-        <motion.div 
+        <motion.div
           className="absolute bottom-20 -right-20 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl"
           animate={{ scale: [1.2, 1, 1.2] }}
           transition={{ duration: 5, repeat: Infinity, delay: 2 }}
         />
-        
+
         <div className="max-w-7xl mx-auto relative z-10">
-          <motion.div 
+          <motion.div
             className="text-center mb-16"
             initial="hidden"
             whileInView="visible"
@@ -1297,15 +1462,18 @@ export default function LandingPage() {
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
               Down to business.
               <br />
-              Pick your plan <motion.span 
+              Pick your plan{" "}
+              <motion.span
                 className="inline-block"
                 animate={{ y: [0, 10, 0] }}
                 transition={{ duration: 1.5, repeat: Infinity }}
-              >↓</motion.span>
+              >
+                ↓
+              </motion.span>
             </h2>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             className="grid md:grid-cols-3 gap-8"
             initial="hidden"
             whileInView="visible"
@@ -1313,15 +1481,17 @@ export default function LandingPage() {
             variants={staggerContainer}
           >
             {/* Free Plan */}
-            <motion.div 
+            <motion.div
               className="bg-white dark:bg-gray-900 rounded-lg p-10 shadow-2xl border-8 border-gray-100 dark:border-gray-800 hover:border-sky-400 dark:hover:border-sky-600 flex flex-col relative overflow-hidden group cursor-pointer transition-colors duration-300"
               variants={staggerItem}
-              whileHover={{ scale: 1.03, y: -10, boxShadow: "0 0 50px rgba(56, 189, 248, 0.3)" }}
+              whileHover={{
+                scale: 1.03,
+                y: -10,
+                boxShadow: "0 0 50px rgba(56, 189, 248, 0.3)",
+              }}
               transition={{ duration: 0.3 }}
             >
-              <motion.div 
-                className="absolute inset-0 bg-gradient-to-br from-sky-400/10 via-blue-400/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-              />
+              <motion.div className="absolute inset-0 bg-gradient-to-br from-sky-400/10 via-blue-400/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <h3 className="text-4xl font-bold text-sky-600 mb-6">Free</h3>
 
               <p className="text-gray-600 dark:text-gray-400 text-lg mb-8 pb-6 border-b border-gray-200 dark:border-gray-700">
@@ -1410,13 +1580,17 @@ export default function LandingPage() {
             </motion.div>
 
             {/* Pro Plan - Most Popular */}
-            <motion.div 
+            <motion.div
               className="bg-white dark:bg-gray-900 rounded-lg p-10 shadow-2xl border-8 border-sky-400 hover:border-sky-300 relative flex flex-col overflow-hidden group cursor-pointer transition-colors duration-300"
               variants={staggerItem}
-              whileHover={{ scale: 1.05, y: -15, boxShadow: "0 0 60px rgba(56, 189, 248, 0.4)" }}
+              whileHover={{
+                scale: 1.05,
+                y: -15,
+                boxShadow: "0 0 60px rgba(56, 189, 248, 0.4)",
+              }}
               transition={{ duration: 0.3 }}
             >
-              <motion.div 
+              <motion.div
                 className="absolute -top-1 -right-1 bg-gradient-to-r from-sky-400 to-blue-500 text-white text-xs font-bold px-4 py-1 rounded-bl-lg"
                 initial={{ x: 100 }}
                 whileInView={{ x: 0 }}
@@ -1424,9 +1598,7 @@ export default function LandingPage() {
               >
                 POPULAR
               </motion.div>
-              <motion.div 
-                className="absolute inset-0 bg-gradient-to-br from-sky-400/15 via-blue-400/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-              />
+              <motion.div className="absolute inset-0 bg-gradient-to-br from-sky-400/15 via-blue-400/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="absolute -top-5 left-1/2 transform -translate-x-1/2"></div>
 
               <h3 className="text-4xl font-bold text-sky-600 mb-6">Pro</h3>
@@ -1559,15 +1731,17 @@ export default function LandingPage() {
             </motion.div>
 
             {/* Enterprise Plan */}
-            <motion.div 
+            <motion.div
               className="bg-white dark:bg-gray-900 rounded-lg p-10 shadow-2xl border-8 border-gray-100 dark:border-gray-800 hover:border-sky-400 dark:hover:border-sky-600 flex flex-col relative overflow-hidden group cursor-pointer transition-colors duration-300"
               variants={staggerItem}
-              whileHover={{ scale: 1.03, y: -10, boxShadow: "0 0 50px rgba(56, 189, 248, 0.3)" }}
+              whileHover={{
+                scale: 1.03,
+                y: -10,
+                boxShadow: "0 0 50px rgba(56, 189, 248, 0.3)",
+              }}
               transition={{ duration: 0.3 }}
             >
-              <motion.div 
-                className="absolute inset-0 bg-gradient-to-br from-sky-400/10 via-blue-400/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-              />
+              <motion.div className="absolute inset-0 bg-gradient-to-br from-sky-400/10 via-blue-400/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <h3 className="text-4xl font-bold text-sky-600 mb-6">
                 Enterprise
               </h3>
@@ -1576,9 +1750,7 @@ export default function LandingPage() {
                 Custom solutions for teams and organizations
               </p>
 
-              <div className="text-6xl font-bold text-sky-600 mb-8">
-                Custom
-              </div>
+              <div className="text-6xl font-bold text-sky-600 mb-8">Custom</div>
 
               <div className="space-y-4 mb-10 flex-grow">
                 <div className="flex items-start gap-3">
@@ -1700,181 +1872,181 @@ export default function LandingPage() {
 
       {/* FAQ Section */}
       <section
-    id="faq"
-    className="py-24 px-6 bg-gradient-to-br from-emerald-600 to-emerald-500"
-  >
-  <div className="max-w-4xl mx-auto">
-    <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-16">
-      I've got questions.
-    </h2>
+        id="faq"
+        className="py-24 px-6 bg-gradient-to-br from-emerald-600 to-emerald-500"
+      >
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-16">
+            I've got questions.
+          </h2>
 
-    <div className="space-y-4">
-      {/* FAQ 1 */}
-      <div className="border-b-4 border-white pb-6 rounded-2xl transition-all duration-300 hover:bg-white/10 hover:backdrop-blur-md hover:border-white/70 hover:shadow-[0_8px_32px_rgba(255,255,255,0.15)] px-4">
-        <button
-          onClick={() => toggleFaq(0)}
-          className="w-full flex items-center justify-between text-left group"
-        >
-          <h3 className="text-2xl md:text-3xl font-bold text-white pr-8">
-            How does AI feedback work?
-          </h3>
-          <ChevronDown
-            className={`w-12 h-12 text-white flex-shrink-0 transition-transform duration-300 ${
-              openFaq === 0 ? "rotate-180" : ""
-            }`}
-            strokeWidth={3}
-          />
-        </button>
-        {openFaq === 0 && (
-          <p className="mt-6 text-xl text-white/90 leading-relaxed">
-            Our AI analyzes your responses in real-time, evaluating clarity,
-            technical accuracy, structure, and completeness. You'll receive
-            instant, actionable feedback on how to improve your answers, just
-            like a real interviewer would provide.
-          </p>
-        )}
-      </div>
+          <div className="space-y-4">
+            {/* FAQ 1 */}
+            <div className="border-b-4 border-white pb-6 rounded-2xl transition-all duration-300 hover:bg-white/10 hover:backdrop-blur-md hover:border-white/70 hover:shadow-[0_8px_32px_rgba(255,255,255,0.15)] px-4">
+              <button
+                onClick={() => toggleFaq(0)}
+                className="w-full flex items-center justify-between text-left group"
+              >
+                <h3 className="text-2xl md:text-3xl font-bold text-white pr-8">
+                  How does AI feedback work?
+                </h3>
+                <ChevronDown
+                  className={`w-12 h-12 text-white flex-shrink-0 transition-transform duration-300 ${
+                    openFaq === 0 ? "rotate-180" : ""
+                  }`}
+                  strokeWidth={3}
+                />
+              </button>
+              {openFaq === 0 && (
+                <p className="mt-6 text-xl text-white/90 leading-relaxed">
+                  Our AI analyzes your responses in real-time, evaluating
+                  clarity, technical accuracy, structure, and completeness.
+                  You'll receive instant, actionable feedback on how to improve
+                  your answers, just like a real interviewer would provide.
+                </p>
+              )}
+            </div>
 
-      {/* FAQ 2 */}
-      <div className="border-b-4 border-white pb-6 rounded-2xl transition-all duration-300 hover:bg-white/10 hover:backdrop-blur-md hover:border-white/70 hover:shadow-[0_8px_32px_rgba(255,255,255,0.15)] px-4">
-        <button
-          onClick={() => toggleFaq(1)}
-          className="w-full flex items-center justify-between text-left group"
-        >
-          <h3 className="text-2xl md:text-3xl font-bold text-white pr-8">
-            Can I practice for specific tech roles?
-          </h3>
-          <ChevronDown
-            className={`w-12 h-12 text-white flex-shrink-0 transition-transform duration-300 ${
-              openFaq === 1 ? "rotate-180" : ""
-            }`}
-            strokeWidth={3}
-          />
-        </button>
-        {openFaq === 1 && (
-          <p className="mt-6 text-xl text-white/90 leading-relaxed">
-            Yes! We have role-specific question banks for 50+ tech positions
-            including Frontend, Backend, Full Stack, DevOps, Data Science, ML
-            Engineer, Product Manager, and more.
-          </p>
-        )}
-      </div>
+            {/* FAQ 2 */}
+            <div className="border-b-4 border-white pb-6 rounded-2xl transition-all duration-300 hover:bg-white/10 hover:backdrop-blur-md hover:border-white/70 hover:shadow-[0_8px_32px_rgba(255,255,255,0.15)] px-4">
+              <button
+                onClick={() => toggleFaq(1)}
+                className="w-full flex items-center justify-between text-left group"
+              >
+                <h3 className="text-2xl md:text-3xl font-bold text-white pr-8">
+                  Can I practice for specific tech roles?
+                </h3>
+                <ChevronDown
+                  className={`w-12 h-12 text-white flex-shrink-0 transition-transform duration-300 ${
+                    openFaq === 1 ? "rotate-180" : ""
+                  }`}
+                  strokeWidth={3}
+                />
+              </button>
+              {openFaq === 1 && (
+                <p className="mt-6 text-xl text-white/90 leading-relaxed">
+                  Yes! We have role-specific question banks for 50+ tech
+                  positions including Frontend, Backend, Full Stack, DevOps,
+                  Data Science, ML Engineer, Product Manager, and more.
+                </p>
+              )}
+            </div>
 
-      {/* FAQ 3 */}
-      <div className="border-b-4 border-white pb-6 rounded-2xl transition-all duration-300 hover:bg-white/10 hover:backdrop-blur-md hover:border-white/70 hover:shadow-[0_8px_32px_rgba(255,255,255,0.15)] px-4">
-        <button
-          onClick={() => toggleFaq(2)}
-          className="w-full flex items-center justify-between text-left group"
-        >
-          <h3 className="text-2xl md:text-3xl font-bold text-white pr-8">
-            How fast will I see improvement?
-          </h3>
-          <ChevronDown
-            className={`w-12 h-12 text-white flex-shrink-0 transition-transform duration-300 ${
-              openFaq === 2 ? "rotate-180" : ""
-            }`}
-            strokeWidth={3}
-          />
-        </button>
-        {openFaq === 2 && (
-          <p className="mt-6 text-xl text-white/90 leading-relaxed">
-            Most users see significant improvement within 1-2 weeks of
-            consistent practice. Practice 3-5 interviews per week for best
-            results.
-          </p>
-        )}
-      </div>
+            {/* FAQ 3 */}
+            <div className="border-b-4 border-white pb-6 rounded-2xl transition-all duration-300 hover:bg-white/10 hover:backdrop-blur-md hover:border-white/70 hover:shadow-[0_8px_32px_rgba(255,255,255,0.15)] px-4">
+              <button
+                onClick={() => toggleFaq(2)}
+                className="w-full flex items-center justify-between text-left group"
+              >
+                <h3 className="text-2xl md:text-3xl font-bold text-white pr-8">
+                  How fast will I see improvement?
+                </h3>
+                <ChevronDown
+                  className={`w-12 h-12 text-white flex-shrink-0 transition-transform duration-300 ${
+                    openFaq === 2 ? "rotate-180" : ""
+                  }`}
+                  strokeWidth={3}
+                />
+              </button>
+              {openFaq === 2 && (
+                <p className="mt-6 text-xl text-white/90 leading-relaxed">
+                  Most users see significant improvement within 1-2 weeks of
+                  consistent practice. Practice 3-5 interviews per week for best
+                  results.
+                </p>
+              )}
+            </div>
 
-      {/* FAQ 4 */}
-      <div className="border-b-4 border-white pb-6 rounded-2xl transition-all duration-300 hover:bg-white/10 hover:backdrop-blur-md hover:border-white/70 hover:shadow-[0_8px_32px_rgba(255,255,255,0.15)] px-4">
-        <button
-          onClick={() => toggleFaq(3)}
-          className="w-full flex items-center justify-between text-left group"
-        >
-          <h3 className="text-2xl md:text-3xl font-bold text-white pr-8">
-            Is voice practice really necessary?
-          </h3>
-          <ChevronDown
-            className={`w-12 h-12 text-white flex-shrink-0 transition-transform duration-300 ${
-              openFaq === 3 ? "rotate-180" : ""
-            }`}
-            strokeWidth={3}
-          />
-        </button>
-        {openFaq === 3 && (
-          <p className="mt-6 text-xl text-white/90 leading-relaxed">
-            Absolutely! Speaking your answers out loud helps you practice
-            articulation, pacing, and confidence.
-          </p>
-        )}
-      </div>
+            {/* FAQ 4 */}
+            <div className="border-b-4 border-white pb-6 rounded-2xl transition-all duration-300 hover:bg-white/10 hover:backdrop-blur-md hover:border-white/70 hover:shadow-[0_8px_32px_rgba(255,255,255,0.15)] px-4">
+              <button
+                onClick={() => toggleFaq(3)}
+                className="w-full flex items-center justify-between text-left group"
+              >
+                <h3 className="text-2xl md:text-3xl font-bold text-white pr-8">
+                  Is voice practice really necessary?
+                </h3>
+                <ChevronDown
+                  className={`w-12 h-12 text-white flex-shrink-0 transition-transform duration-300 ${
+                    openFaq === 3 ? "rotate-180" : ""
+                  }`}
+                  strokeWidth={3}
+                />
+              </button>
+              {openFaq === 3 && (
+                <p className="mt-6 text-xl text-white/90 leading-relaxed">
+                  Absolutely! Speaking your answers out loud helps you practice
+                  articulation, pacing, and confidence.
+                </p>
+              )}
+            </div>
 
-      {/* FAQ 5 */}
-      <div className="border-b-4 border-white pb-6 rounded-2xl transition-all duration-300 hover:bg-white/10 hover:backdrop-blur-md hover:border-white/70 hover:shadow-[0_8px_32px_rgba(255,255,255,0.15)] px-4">
-        <button
-          onClick={() => toggleFaq(4)}
-          className="w-full flex items-center justify-between text-left group"
-        >
-          <h3 className="text-2xl md:text-3xl font-bold text-white pr-8">
-            Can I use this to prepare my team for interviews?
-          </h3>
-          <ChevronDown
-            className={`w-12 h-12 text-white flex-shrink-0 transition-transform duration-300 ${
-              openFaq === 4 ? "rotate-180" : ""
-            }`}
-            strokeWidth={3}
-          />
-        </button>
-        {openFaq === 4 && (
-          <p className="mt-6 text-xl text-white/90 leading-relaxed">
-            Yes! Our Enterprise plan includes team management features and
-            custom branding.
-          </p>
-        )}
-      </div>
+            {/* FAQ 5 */}
+            <div className="border-b-4 border-white pb-6 rounded-2xl transition-all duration-300 hover:bg-white/10 hover:backdrop-blur-md hover:border-white/70 hover:shadow-[0_8px_32px_rgba(255,255,255,0.15)] px-4">
+              <button
+                onClick={() => toggleFaq(4)}
+                className="w-full flex items-center justify-between text-left group"
+              >
+                <h3 className="text-2xl md:text-3xl font-bold text-white pr-8">
+                  Can I use this to prepare my team for interviews?
+                </h3>
+                <ChevronDown
+                  className={`w-12 h-12 text-white flex-shrink-0 transition-transform duration-300 ${
+                    openFaq === 4 ? "rotate-180" : ""
+                  }`}
+                  strokeWidth={3}
+                />
+              </button>
+              {openFaq === 4 && (
+                <p className="mt-6 text-xl text-white/90 leading-relaxed">
+                  Yes! Our Enterprise plan includes team management features and
+                  custom branding.
+                </p>
+              )}
+            </div>
 
-      {/* FAQ 6 */}
-      <div className="border-b-4 border-white pb-6 rounded-2xl transition-all duration-300 hover:bg-white/10 hover:backdrop-blur-md hover:border-white/70 hover:shadow-[0_8px_32px_rgba(255,255,255,0.15)] px-4">
-        <button
-          onClick={() => toggleFaq(5)}
-          className="w-full flex items-center justify-between text-left group"
-        >
-          <h3 className="text-2xl md:text-3xl font-bold text-white pr-8">
-            What companies do your questions prepare me for?
-          </h3>
-          <ChevronDown
-            className={`w-12 h-12 text-white flex-shrink-0 transition-transform duration-300 ${
-              openFaq === 5 ? "rotate-180" : ""
-            }`}
-            strokeWidth={3}
-          />
-        </button>
-        {openFaq === 5 && (
-          <p className="mt-6 text-xl text-white/90 leading-relaxed">
-            Our question banks prepare you for FAANG, Microsoft, startups, and
-            mid-size tech companies.
-          </p>
-        )}
-      </div>
-    </div>
-  </div>
-</section>
+            {/* FAQ 6 */}
+            <div className="border-b-4 border-white pb-6 rounded-2xl transition-all duration-300 hover:bg-white/10 hover:backdrop-blur-md hover:border-white/70 hover:shadow-[0_8px_32px_rgba(255,255,255,0.15)] px-4">
+              <button
+                onClick={() => toggleFaq(5)}
+                className="w-full flex items-center justify-between text-left group"
+              >
+                <h3 className="text-2xl md:text-3xl font-bold text-white pr-8">
+                  What companies do your questions prepare me for?
+                </h3>
+                <ChevronDown
+                  className={`w-12 h-12 text-white flex-shrink-0 transition-transform duration-300 ${
+                    openFaq === 5 ? "rotate-180" : ""
+                  }`}
+                  strokeWidth={3}
+                />
+              </button>
+              {openFaq === 5 && (
+                <p className="mt-6 text-xl text-white/90 leading-relaxed">
+                  Our question banks prepare you for FAANG, Microsoft, startups,
+                  and mid-size tech companies.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* CTA Section */}
       <section className="py-20 px-6 bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 text-gray-900 dark:text-white relative overflow-hidden transition-colors duration-500">
         {/* Animated background */}
-        <motion.div 
+        <motion.div
           className="absolute inset-0 opacity-30"
           style={{
             backgroundImage: `radial-gradient(circle at 20% 50%, rgba(16, 185, 129, 0.15) 0%, transparent 50%),
-                              radial-gradient(circle at 80% 50%, rgba(139, 92, 246, 0.15) 0%, transparent 50%)`
+                              radial-gradient(circle at 80% 50%, rgba(139, 92, 246, 0.15) 0%, transparent 50%)`,
           }}
           animate={{ opacity: [0.2, 0.4, 0.2] }}
           transition={{ duration: 4, repeat: Infinity }}
         />
-        
+
         <div className="max-w-7xl mx-auto relative z-10">
-          <motion.div 
+          <motion.div
             className="flex flex-col md:flex-row items-center justify-between gap-12"
             initial="hidden"
             whileInView="visible"
@@ -1883,7 +2055,7 @@ export default function LandingPage() {
           >
             <div className="flex-1">
               <h2 className="text-4xl md:text-5xl font-bold mb-4">
-                <motion.span 
+                <motion.span
                   className="bg-gradient-to-r from-emerald-500 to-teal-500 px-3 py-1 rounded inline-block text-white"
                   whileHover={{ scale: 1.05 }}
                 >
@@ -1899,15 +2071,16 @@ export default function LandingPage() {
                 tech jobs.
               </p>
             </div>
-            <motion.div 
-              className="flex-shrink-0"
-              whileHover={{ scale: 1.05 }}
-            >
+            <motion.div className="flex-shrink-0" whileHover={{ scale: 1.05 }}>
               <AnimatedButton
                 onClick={() => navigate("/register")}
                 className="px-8 py-4 bg-gray-900 dark:bg-white text-white dark:text-sky-900 rounded-xl font-semibold text-lg flex items-center gap-2"
               >
-                Get Started <motion.span animate={{ x: [0, 5, 0] }} transition={{ duration: 1, repeat: Infinity }}></motion.span>
+                Get Started{" "}
+                <motion.span
+                  animate={{ x: [0, 5, 0] }}
+                  transition={{ duration: 1, repeat: Infinity }}
+                ></motion.span>
               </AnimatedButton>
             </motion.div>
           </motion.div>

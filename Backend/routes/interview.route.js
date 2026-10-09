@@ -21,6 +21,12 @@ router.post(
   interviewController.startInterview,
 );
 
+// Get single interview by ID
+router.get("/:interviewId", interviewController.getInterviewById);
+
+// Get active session for an interview
+router.get("/:interviewId/session", interviewController.getInterviewSession);
+
 // ==================== REAL-TIME AI INTERVIEW ====================
 // Start conversational AI interview (NEW)
 router.post(

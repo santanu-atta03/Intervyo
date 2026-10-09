@@ -43,7 +43,7 @@ import {
   deleteNotification,
   clearReadNotifications,
 } from "../services/operations/notificationAPI";
-import logo from "../assets/intervyologo.png"
+import logo from "../assets/intervyologo.png";
 
 export default function Dashboard() {
   const dispatch = useDispatch();
@@ -457,8 +457,6 @@ export default function Dashboard() {
     };
   }, [showProfileMenu]);
 
-
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
@@ -471,10 +469,11 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gradient-to-br from-skin-primary via-skin-secondary to-skin-primary text-skin-primary">
       {/* Navigation Bar */}
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
-          ? "bg-skin-primary/95 backdrop-blur-xl shadow-lg shadow-black/5"
-          : "bg-transparent"
-          }`}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          isScrolled
+            ? "bg-skin-primary/95 backdrop-blur-xl shadow-lg shadow-black/5"
+            : "bg-transparent"
+        }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16 sm:h-20">
@@ -483,7 +482,6 @@ export default function Dashboard() {
                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center ">
                   <img src={logo} alt="logo" />
                 </div>
-
               </div>
               <div>
                 <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
@@ -546,10 +544,11 @@ export default function Dashboard() {
                         <div
                           key={notif._id}
                           onClick={() => handleNotificationClick(notif)}
-                          className={`px-4 py-3 hover:bg-gray-700/50 transition cursor-pointer border-l-4 ${!notif.isRead
-                            ? "border-l-purple-500 bg-gray-800/50"
-                            : "border-l-transparent"
-                            }`}
+                          className={`px-4 py-3 hover:bg-gray-700/50 transition cursor-pointer border-l-4 ${
+                            !notif.isRead
+                              ? "border-l-purple-500 bg-gray-800/50"
+                              : "border-l-transparent"
+                          }`}
                         >
                           <div className="flex items-start justify-between">
                             <div className="flex-1">

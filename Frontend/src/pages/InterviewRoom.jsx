@@ -1,7 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { io } from "socket.io-client";
+import emotionDetector from "../services/emotionDetector";
+import speechAnalyzer from "../services/speechAnalyzer";
+import { apiConnector } from "../services/apiConnector";
 import Editor from "@monaco-editor/react";
 import {
   Mic,
@@ -42,11 +45,11 @@ export default function InterviewRoom() {
   // WebSocket
   const socketRef = useRef(null);
   const webcamRef = useRef(null);
-  const audioRef = useRef(null);
+  const _audioRef = useRef(null);
   // Emotion & Confidence
   const [emotionData, setEmotionData] = useState(null);
   const [confidenceData, setConfidenceData] = useState(null);
-  const [emotionMetrics, setEmotionMetrics] = useState(null);
+  const [_emotionMetrics, setEmotionMetrics] = useState(null);
   const [showEmotionPanel, setShowEmotionPanel] = useState(true);
 
   // Redux state
@@ -62,7 +65,7 @@ export default function InterviewRoom() {
 
   // Interview States
   const [interviewStatus, setInterviewStatus] = useState("waiting"); // waiting, ready, active, paused, completed
-  const [config, setConfig] = useState({
+  const [config, _setConfig] = useState({
     role: "Full Stack Developer",
     difficulty: "medium",
     duration: 1800, // 30 minutes in seconds
@@ -77,11 +80,11 @@ export default function InterviewRoom() {
   // AI States
   const [isAISpeaking, setIsAISpeaking] = useState(false);
   const [isAIThinking, setIsAIThinking] = useState(false);
-  const [aiMessage, setAiMessage] = useState("");
+  const [_aiMessage, setAiMessage] = useState("");
   const [userTranscript, setUserTranscript] = useState("");
 
   // Performance Tracking
-  const [performance, setPerformance] = useState({
+  const [performance, _setPerformance] = useState({
     questionsAnswered: 0,
     averageScore: 0,
     strengths: [],
@@ -93,7 +96,7 @@ export default function InterviewRoom() {
   const [showCodeEditor, setShowCodeEditor] = useState(false);
   const [code, setCode] = useState("");
   const [language, setLanguage] = useState("python");
-  const [testResults, setTestResults] = useState(null);
+  const [_testResults, setTestResults] = useState(null);
 
   // Chat/Conversation
   const [conversation, setConversation] = useState([]);
@@ -108,7 +111,7 @@ export default function InterviewRoom() {
   });
 
   // Audio/Visual Feedback States
-  const [audioLevel, setAudioLevel] = useState(0);
+  const [_audioLevel, _setAudioLevel] = useState(0);
   const [isProcessingSpeech, setIsProcessingSpeech] = useState(false);
   const [speechBars, setSpeechBars] = useState([0, 0, 0, 0, 0]);
 
@@ -141,7 +144,7 @@ export default function InterviewRoom() {
       addNotification("Connected to interview server", "success");
     });
 
-    socket.on("interview-ready", (data) => {
+    socket.on("interview-ready", (_data) => {
       setInterviewStatus("ready");
       addNotification(
         "Interview room ready! Click Start when you're prepared.",
@@ -175,7 +178,7 @@ export default function InterviewRoom() {
     return () => {
       socket.disconnect();
     };
-  }, [interviewId, token, navigate]);
+  }, [interviewId, token, navigate, handleAIMessage, addNotification]);
 
   // Timer
   useEffect(() => {
@@ -192,7 +195,7 @@ export default function InterviewRoom() {
 
       return () => clearInterval(timer);
     }
-  }, [interviewStatus, isPaused, timeRemaining]);
+  }, [interviewStatus, isPaused, timeRemaining, handleEndInterview]);
 
   // Emotion detection when interview is active
   useEffect(() => {
@@ -254,7 +257,7 @@ export default function InterviewRoom() {
   }, [isListening]);
 
   // Handle AI Message
-  const handleAIMessage = (data) => {
+  const handleAIMessage = useCallback((data) => {
     setIsAIThinking(false);
     setAiMessage(data.message);
 
@@ -281,7 +284,7 @@ export default function InterviewRoom() {
     } else if (isAudioEnabled) {
       speakText(data.message);
     }
-  };
+  }, [addToConversation, questionIndex, isAudioEnabled]);
 
   // Speech Synthesis
   const speakText = (text) => {
@@ -318,18 +321,18 @@ export default function InterviewRoom() {
   };
 
   // Add to Conversation
-  const addToConversation = (message) => {
+  const addToConversation = useCallback((message) => {
     setConversation((prev) => [...prev.slice(-50), message]); // Keep last 50 messages
-  };
+  }, []);
 
   // Add Notification
-  const addNotification = (message, type = "info") => {
+  const addNotification = useCallback((message, type = "info") => {
     const id = Date.now();
     setNotifications((prev) => [...prev, { id, message, type }]);
     setTimeout(() => {
       setNotifications((prev) => prev.filter((n) => n.id !== id));
     }, 5000);
-  };
+  }, []);
 
   // Start Interview
   const handleStartInterview = () => {
@@ -449,7 +452,7 @@ export default function InterviewRoom() {
   };
 
   // End Interview
-  const handleEndInterview = async () => {
+  const handleEndInterview = useCallback(async () => {
     if (!confirm("Are you sure you want to end the interview?")) return;
 
     // Stop analysis
@@ -474,7 +477,7 @@ export default function InterviewRoom() {
       sessionId: "session-123",
       interviewId,
     });
-  };
+  }, [token, interviewId]);
 
   // Format Time
   const formatTime = (seconds) => {

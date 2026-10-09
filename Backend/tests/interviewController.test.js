@@ -50,7 +50,7 @@ const sessionCreateMock = jest.fn();
 const sessionFindOneMock = jest.fn();
 const sessionDeleteOneMock = jest.fn();
 
-jest.unstable_mockModule("../models/Interview.js", () => ({
+jest.unstable_mockModule("../models/Interview.model.js", () => ({
   default: {
     create: (...args) => interviewCreateMock(...args),
     findOne: (...args) => interviewFindOneMock(...args),

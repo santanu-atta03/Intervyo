@@ -667,6 +667,7 @@
 
 // controllers/interviewController.js
 import Interview from "../models/Interview.model.js";
+import InterviewSession from "../models/InterviewSession.js";
 import questionGenerator from "../services/questionGenerator.js";
 import answerEvaluator from "../services/answerEvaluator.js";
 import emotionAnalyzer from "../services/emotionAnalyzer.js";
@@ -959,6 +960,26 @@ class InterviewController {
         });
       }
 
+      // Create or update InterviewSession
+      let session = await InterviewSession.findOne({ interviewId: updatedInterview._id, userId: objectUserId });
+      if (!session) {
+        session = new InterviewSession({
+          interviewId: updatedInterview._id,
+          userId: objectUserId,
+          sessionStatus: "active",
+          conversation: [],
+          questionEvaluations: [],
+          stats: {
+            totalQuestions: questions.length,
+            questionsAnswered: 0,
+            questionsSkipped: 0,
+            averageResponseTime: 0,
+            totalTimeSpent: 0
+          }
+        });
+        await session.save();
+      }
+
       // Calculate time remaining
       const timeRemaining = updatedInterview.config.duration * 60;
 
@@ -966,6 +987,7 @@ class InterviewController {
         success: true,
         data: {
           interviewId: updatedInterview._id,
+          session,
           config: updatedInterview.config,
           rounds: updatedInterview.rounds,
           currentQuestion: questions[0],
@@ -1978,6 +2000,7 @@ Be encouraging but honest. Provide specific, actionable feedback.`,
           success: false,
           message: "Interview not yet completed",
         });
+        
       }
 
       res.json({
@@ -1995,6 +2018,64 @@ Be encouraging but honest. Provide specific, actionable feedback.`,
       res.status(500).json({
         success: false,
         message: "Failed to get results",
+        error: error.message,
+      });
+    }
+  }
+
+  // Get single interview by ID
+  async getInterviewById(req, res) {
+    try {
+      const { interviewId } = req.params;
+      const userId = req.user.id;
+
+      const interview = await Interview.findOne({ _id: interviewId, userId });
+
+      if (!interview) {
+        return res.status(404).json({
+          success: false,
+          message: "Interview not found",
+        });
+      }
+
+      res.json({
+        success: true,
+        data: interview,
+      });
+    } catch (error) {
+      console.error("Get interview by ID error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch interview",
+        error: error.message,
+      });
+    }
+  }
+
+  // Get active session for an interview
+  async getInterviewSession(req, res) {
+    try {
+      const { interviewId } = req.params;
+      const userId = req.user.id;
+
+      const session = await InterviewSession.findOne({ interviewId, userId });
+
+      if (!session) {
+        return res.status(404).json({
+          success: false,
+          message: "Session not found",
+        });
+      }
+
+      res.json({
+        success: true,
+        data: session,
+      });
+    } catch (error) {
+      console.error("Get interview session error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch session",
         error: error.message,
       });
     }

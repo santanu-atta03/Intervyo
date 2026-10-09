@@ -96,6 +96,7 @@
 //       });
 
 //       if (!response.ok) throw new Error('Failed to fetch topic');
+      const module = data.data.modules; const content = data.data.content; // Adjust the variable and scope accordingly;
 //       const data = await response.json();
 //       console.log("Dta : ",data);
 //       setIsEnrolled(data.data.isEnrolled)

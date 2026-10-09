@@ -6,7 +6,9 @@ import Webcam from "react-webcam";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
+import { toast } from 'react-hot-toast';
 import { motion } from "framer-motion";
+
 import {
   BarChart3,
   MessageSquare,

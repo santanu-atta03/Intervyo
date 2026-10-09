@@ -114,9 +114,9 @@ export function login(email, password, navigate) {
     // For now, let's keep the existing check but make it clearer.
     const existingToken = localStorage.getItem("token");
     if (existingToken) {
-       // Optional: Navigate to dashboard if already authenticated
-       // navigate("/dashboard");
-       // return;
+      // Optional: Navigate to dashboard if already authenticated
+      // navigate("/dashboard");
+      // return;
     }
 
     const toastId = customToast.loading("Verifying credentials...");
@@ -140,15 +140,19 @@ export function login(email, password, navigate) {
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
 
-      customToast.success("Welcome back, " + (user.name.split(' ')[0]) + "!");
+      customToast.success("Welcome back, " + user.name.split(" ")[0] + "!");
       navigate("/dashboard");
     } catch (error) {
       console.error("Login Error:", error);
-      
+
       let errorMessage = "Login failed. Please try again.";
-      
-      if (error.code === 'ERR_NETWORK' || error.message.includes('Network Error')) {
-        errorMessage = "Server is unreachable. If the backend was sleeping (Render cold start), it might take 30-60 seconds to wake up. Please wait a moment and try again.";
+
+      if (
+        error.code === "ERR_NETWORK" ||
+        error.message.includes("Network Error")
+      ) {
+        errorMessage =
+          "Server is unreachable. If the backend was sleeping (Render cold start), it might take 30-60 seconds to wake up. Please wait a moment and try again.";
       } else if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       }
@@ -171,7 +175,7 @@ export function logout(navigate) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       navigate("/");
-    } catch (e) {
+    } catch (error) {
       console.error("Login Error:", error);
       customToast.error(error.response?.data?.message || "Login failed");
     } finally {

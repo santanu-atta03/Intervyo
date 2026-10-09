@@ -1,10 +1,10 @@
 import React from "react";
 import Navbar from "../components/Navbar";
 
-export default function PrivacyPolicy() {
+export default function CookiePolicy() {
   return (
     <>
-      {/* Navbar */}
+<Navbar />
       <nav className="fixed top-6 left-1/2 transform -translate-x-1/2 w-[95%] max-w-7xl bg-white/95 backdrop-blur-md rounded-full shadow-lg z-50 border border-gray-200">
         <div className="px-4 md:px-8 py-4 flex items-center justify-between">
           <Link to="/" className="text-xl md:text-2xl font-bold">
