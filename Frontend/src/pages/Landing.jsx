@@ -252,21 +252,6 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/50 to-white dark:via-gray-950/50 dark:to-gray-950 pointer-events-none" />
 
         <div className="max-w-6xl mx-auto text-center relative z-10">
-          <motion.div
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500/10 to-violet-500/10 dark:from-emerald-500/20 dark:to-violet-500/20 mb-6 border border-emerald-500/30 px-4 py-2 rounded-full"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <motion.span
-              className="w-2 h-2 bg-emerald-500 dark:bg-emerald-400 rounded-full"
-              animate={{ scale: [1, 1.5, 1] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-            />
-            <span className="font-medium text-emerald-700 dark:text-emerald-300 text-sm">
-              AI-Powered Interview Platform
-            </span>
-          </motion.div>
 
           <motion.h1
             className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight text-gray-900 dark:text-white"

@@ -1,6 +1,6 @@
 const VITE_BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:5000";
 export const BASE_URL = VITE_BASE_URL + "/api";
-console.log("Current BASE_URL:", BASE_URL);
+// Note: BASE_URL console.log removed to avoid leaking server address in production
 
 export const authEndpoints = {
   SEND_OTP_API: `${BASE_URL}/auth/send-otp`,
@@ -40,6 +40,8 @@ export const interviewEndpoints = {
   GET_HISTORY_API: BASE_URL + "/interview/history",
   START_CONVERSATION_API:
     BASE_URL + "/interview/:interviewId/start-conversation",
+  // Helper: builds the GET interview URL for a specific ID
+  GET_INTERVIEW_API: (interviewId) => `${BASE_URL}/interviews/${interviewId}`,
 };
 
 export const careerEndpoints = {

@@ -7,7 +7,7 @@ import AuthCallback from "./pages/AuthCallback";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Landing from "./pages/Landing";
-import InterviewSetup from "./components/AiInterview/InterviewSetup";
+import InterviewSetup from "./pages/InterviewSetup";
 import VerifyEmail from "./pages/VerifyEmail";
 import DomainSelection from "./pages/DomainSelection";
 import InterviewRoom from "./components/AiInterview/InterviewRoom";
@@ -39,6 +39,7 @@ import ScrollToTopOnRouteChange from "./components/shared/ScrollToTopOnRouteChan
 import Navbar from "./components/Navbar";
 import { useEffect } from "react";
 import Lenis from "@studio-freight/lenis";
+import DashboardApple from "./pages/Dashboard";
 
 function App() {
   const location = useLocation();
@@ -116,7 +117,7 @@ function App() {
           path="/dashboard"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <DashboardApple />
             </ProtectedRoute>
           }
         />

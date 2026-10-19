@@ -1,29 +1,28 @@
+// export { default } from "./DashboardApple";
+
 import React, { useState, useEffect, useContext, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ChevronRight,
+  ChevronDown,
+  ArrowUpRight,
   Trophy,
   Target,
-  Zap,
   TrendingUp,
-  Award,
   Star,
   Calendar,
   Clock,
   BarChart3,
-  BookOpen,
-  Code,
-  MessageSquare,
   Brain,
-  Menu,
-  X,
   Bell,
   Settings,
   LogOut,
   Sparkles,
   Flame,
   Crown,
+  Menu,
+  X,
 } from "lucide-react";
 import { logout } from "../services/operations/authAPI";
 import { getAllInterviews } from "../services/operations/aiInterviewApi";
@@ -45,7 +44,281 @@ import {
 } from "../services/operations/notificationAPI";
 import logo from "../assets/intervyologo.png";
 
-export default function Dashboard() {
+/* ------------------------------------------------------------------ */
+/*  Nike design system – tokens, components and motion                 */
+/*  Light is the documented palette. When the app theme is "dark" the  */
+/*  neutral tokens invert (ink <-> canvas); the pill grammar is kept.  */
+/* ------------------------------------------------------------------ */
+export const NIKE_CSS = `
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500&display=swap");
+
+.nk-root {
+  --nk-ink: #111111;
+  --nk-on-ink: #ffffff;
+  --nk-canvas: #ffffff;
+  --nk-cloud: #f5f5f5;
+  --nk-hairline: #cacacb;
+  --nk-hairline-soft: #e5e5e5;
+  --nk-charcoal: #39393b;
+  --nk-mute: #707072;
+  --nk-stone: #9e9ea0;
+  --nk-success: #007d48;
+  --nk-sale: #d30005;
+  --nk-bg: #4f1a1bff;
+  --nk-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  font-family: "Helvetica Now Text", "Helvetica Neue", "Inter", Helvetica, Arial, sans-serif;
+  font-size: 16px; font-weight: 400; line-height: 1.5; letter-spacing: 0;
+  background: var(--nk-canvas); color: var(--nk-ink);
+  -webkit-font-smoothing: antialiased; min-height: 100vh; overflow-x: hidden;
+}
+.nk-root[data-nk-theme="dark"] {
+  --nk-ink: #ffffff; --nk-on-ink: #111111; --nk-canvas: #111111; --nk-cloud: #1f1f21;
+  --nk-hairline: #39393b; --nk-hairline-soft: #2a2a2c; --nk-charcoal: #cacacb;
+  --nk-mute: #9e9ea0; --nk-success: #1eaa52;
+}
+.nk-root *, .nk-root *::before, .nk-root *::after { box-sizing: border-box; }
+.nk-root button { font: inherit; color: inherit; cursor: pointer; }
+.nk-root a { color: inherit; text-decoration: none; }
+
+/* Typography (weights 400 / 500 only) */
+.nk-display { font-family: "Nike Futura ND", "Bebas Neue", Anton, Impact, "Helvetica Neue", sans-serif; font-size: 96px; font-weight: 500; line-height: 0.9; text-transform: uppercase; letter-spacing: -0.005em; }
+.nk-h-xl { font-family: "Helvetica Now Display", "Helvetica Neue", "Inter", sans-serif; font-size: 32px; font-weight: 500; line-height: 1.2; text-transform: uppercase; }
+.nk-h-lg { font-size: 24px; font-weight: 500; line-height: 1.2; }
+.nk-h-md { font-size: 16px; font-weight: 500; line-height: 1.75; }
+.nk-body-strong { font-size: 16px; font-weight: 500; line-height: 1.5; }
+.nk-caption { font-size: 14px; font-weight: 500; line-height: 1.5; }
+.nk-caption-sm { font-size: 12px; font-weight: 500; line-height: 1.5; }
+.nk-mute { color: var(--nk-mute); }
+
+/* Layout */
+.nk-container { width: 100%; max-width: 1440px; margin: 0 auto; padding: 0 48px; }
+.nk-section { padding-top: 48px;}
+.nk-section-last { padding-bottom: 80px; }
+.nk-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+
+/* Utility bar + primary nav */
+.nk-utility { background: var(--nk-cloud); height: 36px; font-size: 12px; font-weight: 500; }
+.nk-utility .nk-container { height: 100%; display: flex; align-items: center; justify-content: flex-end; gap: 16px; }
+.nk-utility a, .nk-utility button { background: none; border: 0; padding: 0; font-size: 12px; font-weight: 500; }
+.nk-utility a:hover, .nk-utility button:hover { color: var(--nk-mute); }
+.nk-nav { position: sticky; top: 0; z-index: 60; height: 60px; background: var(--nk-canvas); transition: box-shadow .3s ease; }
+.nk-nav[data-scrolled="true"] { box-shadow: inset 0 -1px 0 var(--nk-hairline-soft); }
+.nk-nav .nk-container { height: 100%; display: flex; align-items: center; justify-content: space-between; }
+.nk-nav-links { display: flex; align-items: center; gap: 28px; height: 100%; }
+.nk-nav-link { position: relative; height: 100%; display: inline-flex; align-items: center; font-size: 16px; font-weight: 500; }
+.nk-nav-link::after { content: ""; position: absolute; left: 0; right: 0; bottom: 8px; height: 2px; background: var(--nk-ink); transform: scaleX(0); transform-origin: left; transition: transform .35s var(--nk-ease); }
+.nk-nav-link:hover::after, .nk-nav-link[aria-current="page"]::after { transform: scaleX(1); }
+.nk-nav-right { display: flex; align-items: center; gap: 8px; }
+
+/* Buttons: pill only */
+.nk-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 48px; padding: 0 32px; border-radius: 30px; border: 0; font-size: 16px; font-weight: 500; line-height: 1.5; white-space: nowrap; transition: transform .18s var(--nk-ease), opacity .18s ease, background-color .25s ease; }
+.nk-btn-primary { background: var(--nk-ink); color: var(--nk-on-ink) !important; }
+.nk-btn-secondary { background: var(--nk-cloud); color: var(--nk-ink); }
+.nk-btn-onimage { background: #ffffff; color: #111111 !important; height: 44px; padding: 0 24px; }
+.nk-btn-sm { height: 40px; padding: 0 20px; font-size: 14px; }
+.nk-btn:active { transform: scale(0.5); opacity: 0.5; }
+.nk-btn .nk-arrow { transition: transform .3s var(--nk-ease); }
+.nk-btn:hover .nk-arrow { transform: translateX(4px); }
+.nk-btn-primary:hover { background: var(--nk-charcoal); }
+.nk-btn-secondary:hover { background: var(--nk-hairline-soft); }
+.nk-icon-btn { position: relative; width: 40px; height: 40px; border-radius: 9999px; border: 0; background: transparent; display: inline-flex; align-items: center; justify-content: center; transition: background-color .25s ease, transform .18s var(--nk-ease); }
+.nk-icon-btn:hover { background: var(--nk-cloud); }
+.nk-icon-btn:active { transform: scale(0.85); }
+.nk-root :is(a, button, [role="button"]):focus-visible { outline: 2px solid var(--nk-ink); outline-offset: 2px; }
+.nk-link { background: none; border: 0; padding: 0; font-size: 16px; font-weight: 500; text-decoration: underline; text-underline-offset: 3px; display: inline-flex; align-items: center; gap: 4px; }
+.nk-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--nk-canvas); border: 1px solid var(--nk-hairline); border-radius: 30px; padding: 4px 12px; font-size: 12px; font-weight: 500; line-height: 1.5; color: var(--nk-ink); }
+.nk-badge-dot { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; border-radius: 9999px; background: var(--nk-sale); }
+.nk-badge-dot::after { content: ""; position: absolute; inset: 0; border-radius: 9999px; background: var(--nk-sale); animation: nk-ping 1.8s ease-out infinite; }
+.nk-avatar { width: 32px; height: 32px; border-radius: 9999px; background: var(--nk-ink); color: var(--nk-on-ink); display: inline-flex; align-items: center; justify-content: center; overflow: hidden; font-size: 14px; font-weight: 500; }
+
+/* Campaign hero (flat ink block; photography slot) */
+.nk-campaign { position: relative; background: #111111; color: #ffffff;  display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; }
+.nk-campaign-title { min-height: 1.6em; max-width: 15ch; padding-top:40px; overflow-wrap: anywhere; }
+.nk-campaign-sub { font-size: 24px; font-weight: 500; line-height: 1.2;  max-width: 640px; }
+.nk-campaign-actions { margin-top: 32px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.nk-campaign-streak { position: absolute; top: 48px; right: 48px; display: flex; align-items: center; gap: 12px; }
+.nk-flame { animation: nk-flicker 1.6s ease-in-out infinite; transform-origin: 50% 90%; }
+
+/* Flat tiles */
+.nk-grid-4 { display: grid; gap: 8px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.nk-tile { background: var(--nk-cloud); padding: 24px; display: flex; flex-direction: column; transition: background-color .3s ease; }
+.nk-stat { min-height: 180px; justify-content: space-between; }
+.nk-stat:hover { background: var(--nk-hairline-soft); }
+.nk-action { min-height: 320px; text-align: left; border: 0; justify-content: space-between; width: 100%; position: relative; overflow: hidden; }
+.nk-action .nk-action-icon { transition: transform .5s var(--nk-ease); }
+.nk-action:hover .nk-action-icon { transform: translate(6px, -6px) rotate(8deg) scale(1.08); }
+.nk-action-primary { background: #111111; color: #ffffff; }
+.nk-action-primary:hover { background: #2a2a2c; }
+.nk-action:active { transform: scale(0.98); }
+.nk-circle { width: 48px; height: 48px; border-radius: 9999px; background: var(--nk-canvas); color: var(--nk-ink); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.nk-action-primary .nk-circle { background: #ffffff; color: #111111; }
+
+/* Progress */
+.nk-track { height: 4px; background: var(--nk-hairline-soft); overflow: hidden; }
+.nk-track-lg { height: 8px; }
+.nk-fill { height: 100%; width: 0; background: var(--nk-ink); transition: width 1.2s var(--nk-ease); }
+.nk-fill-success { background: var(--nk-success); }
+.nk-tile-ink .nk-track { background: #39393b; }
+.nk-tile-ink .nk-fill { background: #ffffff; }
+
+/* Rows */
+.nk-row { display: flex; align-items: center; gap: 16px; padding: 24px 0; border-top: 1px solid var(--nk-hairline); cursor: pointer; transition: background-color .3s ease, padding .4s var(--nk-ease); }
+.nk-row:hover { background: var(--nk-cloud); padding-left: 16px; padding-right: 16px; }
+.nk-score { width: 80px; height: 80px; background: var(--nk-cloud); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 32px; font-weight: 500; transition: background-color .3s ease, color .3s ease; }
+.nk-row:hover .nk-score { background: var(--nk-ink); color: var(--nk-on-ink); }
+.nk-disclosure { padding: 24px 0; border-top: 1px solid var(--nk-hairline); }
+
+/* Menus */
+.nk-menu { position: absolute; right: 0; top: calc(100% + 8px); width: 340px; max-height: 440px; overflow-y: auto; background: var(--nk-canvas); border: 1px solid var(--nk-hairline); z-index: 80; animation: nk-menu-in .28s var(--nk-ease) both; transform-origin: top right; }
+.nk-menu-item { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 16px; font-size: 14px; font-weight: 500; background: none; border: 0; text-align: left; transition: background-color .2s ease; }
+.nk-menu-item:hover { background: var(--nk-cloud); }
+.nk-drawer-scrim { position: fixed; inset: 0; background: rgba(17,17,17,0.5); z-index: 90; animation: nk-fade .3s ease both; }
+.nk-drawer { position: fixed; top: 0; bottom: 0; left: 0; width: min(88vw, 360px); background: var(--nk-canvas); z-index: 95; overflow-y: auto; padding: 16px 24px 48px; animation: nk-drawer-in .4s var(--nk-ease) both; }
+.nk-drawer a, .nk-drawer .nk-drawer-item { display: flex; align-items: center; gap: 12px; width: 100%; padding: 24px 0 0; background: none; border: 0; text-align: left; font-size: 24px; font-weight: 500; line-height: 1.2; }
+.nk-drawer .nk-menu { position: static; width: 100%; max-height: none; margin: 16px 0 0; animation: none; }
+
+/* Motion */
+.nk-reveal { opacity: 0; transform: translateY(28px); transition: opacity .8s var(--nk-ease), transform .8s var(--nk-ease); will-change: opacity, transform; }
+.nk-reveal.is-in { opacity: 1; transform: none; }
+.nk-rise { opacity: 0; animation: nk-rise .9s var(--nk-ease) both; }
+.nk-d1 { animation-delay: .15s; } .nk-d2 { animation-delay: .3s; } .nk-d3 { animation-delay: .45s; }
+@keyframes nk-rise { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: none; } }
+@keyframes nk-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes nk-menu-in { from { opacity: 0; transform: translateY(-8px) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes nk-drawer-in { from { transform: translateX(-100%); } to { transform: none; } }
+@keyframes nk-ping { 0% { transform: scale(1); opacity: .7; } 80%, 100% { transform: scale(3); opacity: 0; } }
+@keyframes nk-flicker { 0%, 100% { transform: scale(1) rotate(0); } 25% { transform: scale(1.08) rotate(-4deg); } 60% { transform: scale(0.96) rotate(3deg); } }
+@keyframes nk-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+/* Responsive */
+@media (min-width: 1920px) { .nk-container { padding: 0 80px; } }
+@media (max-width: 1023px) {
+  .nk-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .nk-display { font-size: 64px; }
+  .nk-section { padding-top: 32px; }
+  .nk-container { padding: 0 32px; }
+}
+@media (max-width: 960px) { .nk-nav-links { display: none; } }
+@media (min-width: 961px) { .nk-hamburger { display: none; } }
+@media (max-width: 599px) {
+  .nk-grid-4 { grid-template-columns: minmax(0, 1fr); }
+  .nk-display { font-size: 48px; }
+  .nk-section { padding-top: 24px; }
+  .nk-container { padding: 0 16px; }
+  .nk-campaign { padding: 24px 16px; min-height: 480px; }
+  .nk-campaign-streak { top: 24px; right: 16px; }
+  .nk-campaign-sub { font-size: 18px; }
+  .nk-action { min-height: 220px; }
+  .nk-h-xl { font-size: 24px; }
+  .nk-score { width: 64px; height: 64px; font-size: 24px; }
+  .nk-menu { width: calc(100vw - 32px); right: -8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nk-root *, .nk-root *::before, .nk-root *::after { animation: none !important; transition: none !important; }
+  .nk-reveal, .nk-rise { opacity: 1 !important; transform: none !important; }
+}
+`;
+
+const prefersReducedMotion = () =>
+  typeof window !== "undefined" &&
+  window.matchMedia &&
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/** True once the element has scrolled into view (fires once). */
+function useInView(threshold = 0.15) {
+  const ref = useRef(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    if (prefersReducedMotion() || !("IntersectionObserver" in window)) {
+      setInView(true);
+      return undefined;
+    }
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          io.disconnect();
+        }
+      },
+      { threshold, rootMargin: "0px 0px -40px 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [threshold]);
+  return [ref, inView];
+}
+
+/** Scroll-reveal wrapper (fade + rise, optional stagger delay in ms). */
+function Reveal({ as: Tag = "div", delay = 0, className = "", style, children, ...rest }) {
+  const [ref, inView] = useInView(0.1);
+  return (
+    <Tag
+      ref={ref}
+      className={`nk-reveal ${inView ? "is-in" : ""} ${className}`}
+      style={{ transitionDelay: `${delay}ms`, ...(style || {}) }}
+      {...rest}
+    >
+      {children}
+    </Tag>
+  );
+}
+
+/** Animated number that counts up when scrolled into view. */
+function CountUp({ end = 0, decimals = 0, suffix = "", duration = 1100 }) {
+  const [ref, inView] = useInView(0.3);
+  const [val, setVal] = useState(0);
+  useEffect(() => {
+    if (!inView) return undefined;
+    if (prefersReducedMotion()) {
+      setVal(end);
+      return undefined;
+    }
+    let raf;
+    const t0 = performance.now();
+    const tick = (t) => {
+      const p = Math.min(1, (t - t0) / duration);
+      setVal(end * (1 - Math.pow(1 - p, 3)));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [inView, end, duration]);
+  const text =
+    decimals > 0
+      ? val.toFixed(decimals)
+      : Math.round(val).toLocaleString();
+  return (
+    <span ref={ref}>
+      {text}
+      {suffix}
+    </span>
+  );
+}
+
+function ProgressBar({ value, label, large = false, success = false }) {
+  const [ref, inView] = useInView(0.3);
+  const pct = Math.max(0, Math.min(100, Number(value) || 0));
+  return (
+    <div
+      ref={ref}
+      className={`nk-track ${large ? "nk-track-lg" : ""}`}
+      role="progressbar"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={Math.round(pct)}
+      aria-label={label}
+    >
+      <div
+        className={`nk-fill ${success ? "nk-fill-success" : ""}`}
+        style={{ width: inView ? `${pct}%` : "0%" }}
+      />
+    </div>
+  );
+}
+
+function Dashboard() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.profile);
@@ -62,9 +335,7 @@ export default function Dashboard() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [hoveredCard, setHoveredCard] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isHovering, setIsHovering] = useState(false);
   const { theme, toggleTheme } = useContext(ThemeContext);
   const [learningProgress, setLearningProgress] = useState([]);
   const [dashboardData, setDashboardData] = useState({
@@ -117,6 +388,7 @@ export default function Dashboard() {
 
       if (notification.link) {
         setShowNotifications(false);
+        setIsMobileMenuOpen(false);
         navigate(notification.link);
       }
     } catch (error) {
@@ -172,19 +444,6 @@ export default function Dashboard() {
     if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
     if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
     return new Date(date).toLocaleDateString();
-  };
-
-  const getNotificationColor = (type) => {
-    const colors = {
-      achievement: "from-purple-500 to-pink-500",
-      streak: "from-orange-500 to-red-500",
-      level_up: "from-yellow-500 to-orange-500",
-      resource: "from-blue-500 to-cyan-500",
-      badge: "from-yellow-400 to-orange-500",
-      subscription: "from-purple-600 to-pink-600",
-      interview: "from-emerald-500 to-green-500",
-    };
-    return colors[type] || "from-gray-500 to-gray-600";
   };
 
   const handleAchievementModalClose = async () => {
@@ -346,15 +605,15 @@ export default function Dashboard() {
     return trend > 0 ? `+${trend.toFixed(1)}%` : `${trend.toFixed(1)}%`;
   };
 
+  const avgScore = calculateAverageScore();
   const stats = [
     {
       label: "Total Interviews",
-      value:
+      end:
         user?.stats?.totalInterviews ||
         dashboardData.recentInterviews.length ||
         0,
       icon: BarChart3,
-      color: "from-blue-500 to-cyan-500",
       trend:
         dashboardData.recentInterviews.length > 0
           ? `+${dashboardData.recentInterviews.length}`
@@ -362,24 +621,24 @@ export default function Dashboard() {
     },
     {
       label: "Average Score",
-      value: calculateAverageScore() > 0 ? `${calculateAverageScore()}%` : "0%",
+      end: avgScore,
+      decimals: Number.isInteger(avgScore) ? 0 : 1,
+      suffix: "%",
       icon: TrendingUp,
-      color: "from-emerald-500 to-green-500",
       trend: calculateTrend(),
     },
     {
       label: "Current Streak",
-      value: `${user?.stats?.streak || 0} days`,
+      end: user?.stats?.streak || 0,
+      suffix: " days",
       icon: Flame,
-      color: "from-orange-500 to-red-500",
       trend: user?.stats?.streak > 0 ? "Active" : "Start now",
     },
     {
       label: "XP Points",
-      value: (user?.stats?.xpPoints || 0).toLocaleString(),
+      end: user?.stats?.xpPoints || 0,
       icon: Sparkles,
-      color: "from-purple-500 to-pink-500",
-      trend: "+340",
+      trend: null,
     },
   ];
 
@@ -387,48 +646,28 @@ export default function Dashboard() {
     {
       title: "Start Interview",
       icon: Target,
-      color: "from-blue-500 to-cyan-500",
       description: "Begin practice session",
       action: () => navigate("/interview-setup"),
     },
     {
       title: "Analytics",
       icon: TrendingUp,
-      color: "from-violet-500 to-purple-500",
       description: "View your stats",
       action: () => navigate("/analytics"),
     },
     {
       title: "Review History",
       icon: BarChart3,
-      color: "from-emerald-500 to-green-500",
       description: "Analyze performance",
       action: () => navigate("/history"),
     },
     {
       title: "Leaderboard",
       icon: Trophy,
-      color: "from-yellow-500 to-orange-500",
       description: "View rankings",
       action: () => navigate("/leaderboard"),
     },
   ];
-
-  const getScoreGradient = (score) => {
-    if (score >= 90) return "from-emerald-400 to-green-500";
-    if (score >= 75) return "from-blue-400 to-cyan-500";
-    if (score >= 60) return "from-yellow-400 to-orange-500";
-    return "from-red-400 to-pink-500";
-  };
-
-  const getDifficultyColor = (difficulty) => {
-    const lowerDiff = difficulty?.toLowerCase();
-    if (lowerDiff === "easy")
-      return "bg-green-500/20 text-green-400 border-green-500/30";
-    if (lowerDiff === "medium")
-      return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
-    return "bg-red-500/20 text-red-400 border-red-500/30";
-  };
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -457,1016 +696,600 @@ export default function Dashboard() {
     };
   }, [showProfileMenu]);
 
+  // Lock page scroll while the mobile drawer is open
+  useEffect(() => {
+    document.body.style.overflow = isMobileMenuOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMobileMenuOpen]);
+
+  // Escape closes any open menu
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === "Escape") {
+        setShowProfileMenu(false);
+        setShowNotifications(false);
+        setIsMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  const nkTheme = theme === "dark" ? "dark" : "light";
+  const planLimit =
+    user?.subscription?.plan === "pro"
+      ? 25
+      : user?.subscription?.plan === "enterprise"
+        ? Infinity
+        : 2;
+  const planLimitLabel =
+    user?.subscription?.plan === "pro"
+      ? "25"
+      : user?.subscription?.plan === "enterprise"
+        ? "∞"
+        : "2";
+  const planProgress =
+    user?.subscription?.plan === "enterprise"
+      ? 100
+      : ((user?.subscription?.interviewsRemaining || 0) / planLimit) * 100;
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
+      <div
+        className="nk-root flex items-center justify-center"
+        data-nk-theme={nkTheme}
+      >
+        <style>{NIKE_CSS}</style>
         <LightningLoader />
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-skin-primary via-skin-secondary to-skin-primary text-skin-primary">
-      {/* Navigation Bar */}
-      <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled
-            ? "bg-skin-primary/95 backdrop-blur-xl shadow-lg shadow-black/5"
-            : "bg-transparent"
-        }`}
+  const firstName = user?.name?.split(" ")[0] || "there";
+  const subscriptionLabel = user?.subscription?.plan?.toUpperCase() || "FREE";
+
+  // Shared notification list (desktop dropdown + mobile drawer)
+  const renderNotifications = () => (
+    <div className="nk-menu" role="region" aria-label="Notifications">
+      <div
+        className="flex items-center justify-between px-4 py-3"
+        style={{ borderBottom: "1px solid var(--nk-hairline)" }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16 sm:h-20">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="relative">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center ">
-                  <img src={logo} alt="logo" />
-                </div>
-              </div>
-              <div>
-                <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                  Intervyo
-                </span>
-                <div className="text-xs text-gray-500 font-medium hidden sm:block">
-                  AI-Powered Practice
-                </div>
-              </div>
-            </div>
-
-            {/* Mobile Menu Button */}
-            <button
-              className="sm:hidden p-2 rounded-lg hover:bg-gray-800/50 transition"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
-              <div className="w-6 h-6 flex flex-col justify-center gap-1">
-                <div
-                  className={`h-0.5 bg-white transition-all duration-300 ${isMobileMenuOpen ? "rotate-45 translate-y-1.5" : ""}`}
-                ></div>
-                <div
-                  className={`h-0.5 bg-white transition-all duration-300 ${isMobileMenuOpen ? "opacity-0" : ""}`}
-                ></div>
-                <div
-                  className={`h-0.5 bg-white transition-all duration-300 ${isMobileMenuOpen ? "-rotate-45 -translate-y-1.5" : ""}`}
-                ></div>
-              </div>
+        <h3 className="nk-body-strong">Notifications</h3>
+        <div className="flex items-center gap-3">
+          {unreadCount > 0 && (
+            <button onClick={handleMarkAllAsRead} className="nk-link nk-caption-sm">
+              Mark all read
             </button>
-
-            <div className="hidden sm:flex items-center gap-3">
-              <ThemeToggle />
-              <div className="relative">
-                <button
-                  onClick={() => setShowNotifications(!showNotifications)}
-                  className="relative p-3 hover:bg-gray-800/50 rounded-xl transition group"
-                >
-                  <Bell className="w-5 h-5 text-gray-400 group-hover:text-white transition" />
-                  {unreadCount > 0 && (
-                    <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-                  )}
-                </button>
-
-                {showNotifications && (
-                  <div className="absolute right-0 mt-2 w-80 bg-gray-800/95 backdrop-blur-xl rounded-xl shadow-2xl border border-gray-700/50 py-2 max-h-96 overflow-y-auto z-50">
-                    <div className="px-4 py-3 border-b border-gray-700/50 flex justify-between items-center">
-                      <h3 className="text-white font-semibold">
-                        Notifications
-                      </h3>
-                      {unreadCount > 0 && (
-                        <button
-                          onClick={handleMarkAllAsRead}
-                          className="text-xs text-purple-400 hover:text-purple-300"
-                        >
-                          Mark all read
-                        </button>
-                      )}
-                    </div>
-                    {notifications.length > 0 ? (
-                      notifications.map((notif) => (
-                        <div
-                          key={notif._id}
-                          onClick={() => handleNotificationClick(notif)}
-                          className={`px-4 py-3 hover:bg-gray-700/50 transition cursor-pointer border-l-4 ${
-                            !notif.isRead
-                              ? "border-l-purple-500 bg-gray-800/50"
-                              : "border-l-transparent"
-                          }`}
-                        >
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <p className="text-sm text-gray-300">
-                                {notif.message}
-                              </p>
-                              <p className="text-xs text-gray-500 mt-1">
-                                {formatTimeAgo(notif.createdAt)}
-                              </p>
-                            </div>
-                            <button
-                              onClick={(e) =>
-                                handleDeleteNotification(e, notif._id)
-                              }
-                              className="ml-2 text-gray-500 hover:text-red-400 transition"
-                            >
-                              ×
-                            </button>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="px-4 py-8 text-center">
-                        <Bell className="w-8 h-8 text-gray-600 mx-auto mb-2" />
-                        <p className="text-gray-400 text-sm">
-                          No notifications yet
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              <Link
-                to={"/blog"}
-                className="p-3 text-white hover:bg-gray-800/50 rounded-xl transition font-medium"
-              >
-                Blog
-              </Link>
-
-              <div ref={profileMenuRef} className="relative">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation(); // ⛔ prevents immediate close
-                    setShowProfileMenu((prev) => !prev);
-                  }}
-                  className="flex items-center gap-2 sm:gap-3 hover:bg-gray-800/50 px-2 sm:px-3 py-2 rounded-xl transition group"
-                >
-                  <div className="relative">
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold shadow-lg overflow-hidden">
-                      {user?.profilePicture ? (
-                        <img
-                          src={user.profilePicture}
-                          className="w-full h-full object-cover"
-                          alt="Profile"
-                        />
-                      ) : (
-                        user?.name?.charAt(0) || "U"
-                      )}
-                    </div>
-                    <div className="absolute -bottom-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center border-2 border-gray-900">
-                      <Crown className="w-2 h-2 text-white" />
-                    </div>
-                  </div>
-                  <div className="text-left hidden sm:block">
-                    <div className="text-sm font-semibold text-white">
-                      {user?.name || "User"}
-                    </div>
-                    <div className="text-xs text-purple-400 font-medium flex items-center gap-1">
-                      <Crown className="w-3 h-3" />
-                      {user?.subscription?.plan?.toUpperCase() || "FREE"}
-                    </div>
-                  </div>
-                  <ChevronRight
-                    className={`w-4 h-4 text-gray-400 transition-transform hidden sm:block ${showProfileMenu ? "rotate-90" : ""}`}
-                  />
-                </button>
-
-                {showProfileMenu && (
-                  <div className="absolute right-0 mt-2 w-48 sm:w-56 bg-gray-800/95 backdrop-blur-xl rounded-xl shadow-2xl border border-gray-700/50 py-2 overflow-hidden z-50">
-                    <div className="px-4 py-3 border-b border-gray-700/50">
-                      <div className="text-sm font-semibold text-white">
-                        {user?.name || "User"}
-                      </div>
-                      <div className="text-xs text-gray-400 truncate">
-                      {user?.email || "Email not available"}
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => {
-                        navigate("/settings");
-                        setShowProfileMenu(false);
-                      }}
-                      className="flex items-center gap-3 px-4 py-3 text-sm text-gray-300 hover:bg-gray-700/50 transition group w-full text-left"
-                    >
-                      <Settings className="w-4 h-4 group-hover:text-purple-400" />
-                      Profile Settings
-                    </button>
-                    <button
-                      onClick={() => {
-                        navigate("/subscription");
-                        setShowProfileMenu(false);
-                      }}
-                      className="flex items-center gap-3 px-4 py-3 text-sm text-gray-300 hover:bg-gray-700/50 transition group w-full text-left"
-                    >
-                      <Crown className="w-4 h-4 group-hover:text-yellow-400" />
-                      Subscription
-                    </button>
-                    <hr className="my-2 border-gray-700/50" />
-                    <button
-                      onClick={() => dispatch(logout(navigate))}
-                      className="flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 transition group w-full text-left"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+          )}
+          {notifications.some((n) => n.isRead) && (
+            <button onClick={handleClearRead} className="nk-link nk-caption-sm">
+              Clear read
+            </button>
+          )}
         </div>
-
-        {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <div className="sm:hidden bg-gray-900/95 backdrop-blur-xl shadow-lg border-t border-gray-700/50">
-            <div className="px-4 py-3 space-y-2">
-              {/* Theme Toggle Mobile */}
-              <div className="flex items-center justify-between px-4 py-3 text-gray-300 hover:bg-gray-800/50 rounded-xl transition">
-                <span>Theme</span>
-                <ThemeToggle />
-              </div>
-
-              {/* Mobile Notifications */}
-              <div className="relative">
-                <button
-                  onClick={() => setShowNotifications(!showNotifications)}
-                  className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800/50 rounded-xl transition w-full text-left"
-                >
-                  <Bell className="w-5 h-5" />
-                  Notifications
-                  {unreadCount > 0 && (
-                    <span className="ml-auto w-6 h-6 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                      {unreadCount}
-                    </span>
-                  )}
-                </button>
-              </div>
-
-              <Link
-                to="/blog"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800/50 rounded-xl transition"
-              >
-                <MessageSquare className="w-5 h-5" />
-                Blog
-              </Link>
-
-              <Link
-                to="/settings"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800/50 rounded-xl transition"
-              >
-                <Settings className="w-5 h-5" />
-                Profile Settings
-              </Link>
-
-              <Link
-                to="/subscription"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800/50 rounded-xl transition"
-              >
-                <Crown className="w-5 h-5" />
-                Subscription
-              </Link>
-
-              <hr className="my-2 border-gray-700/50" />
-
-              <button
-                onClick={() => dispatch(logout(navigate))}
-                className="flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-xl transition w-full text-left"
-              >
-                <LogOut className="w-5 h-5" />
-                Logout
-              </button>
-            </div>
-          </div>
-        )}
-      </nav>
-
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 pt-24 sm:pt-28 pb-8 sm:pb-16">
-        {/* Welcome Header - More Personal & Motivational */}
-        <div className="mb-8 sm:mb-10 animate-fadeIn">
-          <div className="flex items-start justify-between mb-4">
+      </div>
+      {notifications.length > 0 ? (
+        notifications.map((notif) => (
+          <div
+            key={notif._id}
+            role="button"
+            tabIndex={0}
+            onClick={() => handleNotificationClick(notif)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleNotificationClick(notif);
+              }
+            }}
+            className="nk-menu-item"
+            style={{
+              alignItems: "flex-start",
+              cursor: "pointer",
+              borderLeft: !notif.isRead
+                ? "2px solid var(--nk-ink)"
+                : "2px solid transparent",
+            }}
+          >
             <div className="flex-1">
-              <div className="flex items-center gap-3 mb-3">
-                <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-white flex items-center gap-3">
-                  <span
-                    className={`inline-block ${isHovering ? "animate-wave" : ""}`}
-                    onMouseEnter={() => setIsHovering(true)}
-                    onMouseLeave={() => setIsHovering(false)}
-                  >
-                    👋
-                  </span>
-                  <TextType
-                    text={[
-                      `Hey ${user?.name?.split(" ")[0] || "there"}!`,
-                      "Ready to shine?",
-                      "Let's ace this!",
-                    ]}
-                    typingSpeed={11}
-                    pauseDuration={3500}
-                    showCursor={true}
-                    cursorCharacter="|"
-                  />
-                </h1>
-              </div>
-              <p className="text-gray-400 text-base sm:text-xl leading-relaxed">
-                {user?.stats?.totalInterviews > 0
-                  ? `You've completed ${user.stats.totalInterviews} interview${user.stats.totalInterviews > 1 ? "s" : ""} so far. Keep up the momentum! 🚀`
-                  : "Your journey to interview mastery starts here. Let's make today count! 💪"}
+              <p className="nk-caption" style={{ fontWeight: notif.isRead ? 400 : 500 }}>
+                {notif.message}
               </p>
+              <p className="nk-caption-sm nk-mute">{formatTimeAgo(notif.createdAt)}</p>
             </div>
-            {user?.stats?.streak > 0 && (
-              <div className="hidden lg:flex items-center gap-3 bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-500/30 rounded-2xl px-6 py-4">
-                <Flame className="w-8 h-8 text-orange-400 animate-pulse" />
-                <div>
-                  <div className="text-3xl font-bold text-white">
-                    {user.stats.streak}
-                  </div>
-                  <div className="text-sm text-orange-300">day streak!</div>
-                </div>
-              </div>
-            )}
+            <button
+              onClick={(e) => handleDeleteNotification(e, notif._id)}
+              aria-label="Delete notification"
+              className="nk-link nk-mute"
+              style={{ fontSize: 20, lineHeight: 1, textDecoration: "none" }}
+            >
+              ×
+            </button>
           </div>
+        ))
+      ) : (
+        <div className="px-4 py-10 text-center">
+          <Bell className="mx-auto mb-2 nk-mute" size={28} />
+          <p className="nk-caption nk-mute">No notifications yet</p>
         </div>
+      )}
+    </div>
+  );
 
-        {/* Level & XP Progress - Gamified & Engaging */}
-        <div className="relative mb-8 sm:mb-10 group">
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 rounded-2xl sm:rounded-3xl blur-2xl opacity-40 group-hover:opacity-60 transition-all duration-500"></div>
-          <div className="relative bg-gradient-to-br from-gray-800/95 to-gray-900/95 backdrop-blur-2xl rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-gray-700/50 shadow-2xl overflow-hidden">
-            {/* Decorative elements */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-purple-500/10 to-transparent rounded-full blur-3xl"></div>
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-pink-500/10 to-transparent rounded-full blur-3xl"></div>
+  const heroSubcopy =
+    user?.stats?.totalInterviews > 0
+      ? `You've completed ${user.stats.totalInterviews} interview${user.stats.totalInterviews > 1 ? "s" : ""} so far. Keep up the momentum.`
+      : "Your journey to interview mastery starts here.";
 
-            <div className="relative flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 lg:gap-8">
-              {/* Level Badge */}
-              <div className="flex items-center gap-6">
-                <div className="relative group/badge">
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl blur-xl opacity-75 group-hover/badge:opacity-100 transition"></div>
-                  <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-gradient-to-br from-purple-500 via-pink-500 to-purple-600 flex items-center justify-center shadow-2xl shadow-purple-500/50 transform group-hover/badge:scale-110 transition-all duration-300">
-                    <div className="text-4xl sm:text-5xl font-black text-white drop-shadow-lg">
-                      {user?.stats?.level || 1}
-                    </div>
-                  </div>
-                  <div className="absolute -bottom-2 -right-2 w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center border-4 border-gray-900 shadow-lg transform group-hover/badge:rotate-12 transition-all duration-300">
-                    <Crown className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                  </div>
-                </div>
+  return (
+    <div className="nk-root" data-nk-theme={nkTheme}>
+      <style>{NIKE_CSS}</style>
 
-                <div>
-                  <div className="text-sm sm:text-base text-gray-400 mb-2 font-medium">
-                    Your Level
-                  </div>
-                  <div className="text-3xl sm:text-4xl font-black text-white mb-2 tracking-tight">
-                    Level {user?.stats?.level || 1}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-purple-400" />
-                    <span className="text-base sm:text-lg text-purple-400 font-bold">
-                      {(user?.stats?.xpPoints || 0).toLocaleString()} XP
-                    </span>
-                  </div>
-                </div>
-              </div>
+      {/* Utility bar */}
+      <div className="nk-utility">
+        <div className="nk-container">
+          <Link to="/blog">Blog</Link>
+          <Link to="/settings">Settings</Link>
+          <Link to="/subscription">Subscription</Link>
+          <button onClick={() => dispatch(logout(navigate))}>Logout</button>
+        </div>
+      </div>
 
-              {/* Progress Bar - Asymmetric placement */}
-              <div className="flex-1 w-full lg:max-w-2xl">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm sm:text-base text-gray-300 font-semibold">
-                    Progress to Level {(user?.stats?.level || 1) + 1}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg sm:text-xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                      {Math.round(levelProgress)}%
-                    </span>
+      {/* Primary nav */}
+      <header className="nk-nav" data-scrolled={isScrolled}>
+        <div className="nk-container">
+          <div className="flex items-center gap-2">
+            <button
+              className="nk-icon-btn nk-hamburger"
+              onClick={() => setIsMobileMenuOpen(true)}
+              aria-label="Open menu"
+              aria-expanded={isMobileMenuOpen}
+            >
+              <Menu size={22} />
+            </button>
+            <Link to="/" aria-label="Intervyo home" className="flex items-center gap-2">
+              <img src={logo} alt="" style={{ width: 32, height: 32, objectFit: "contain" }} />
+              <span className="nk-h-md hidden sm:inline" style={{ textTransform: "uppercase" }}>
+                Intervyo
+              </span>
+            </Link>
+          </div>
+
+          <nav className="nk-nav-links" aria-label="Primary">
+            <Link to="/dashboard" className="nk-nav-link" aria-current="page">Dashboard</Link>
+            <Link to="/interview-setup" className="nk-nav-link">Interview</Link>
+            <Link to="/analytics" className="nk-nav-link">Analytics</Link>
+            <Link to="/history" className="nk-nav-link">History</Link>
+            <Link to="/leaderboard" className="nk-nav-link">Leaderboard</Link>
+          </nav>
+
+          <div className="nk-nav-right">
+            <ThemeToggle />
+            <div className="relative">
+              <button
+                className="nk-icon-btn"
+                onClick={() => {
+                  setShowNotifications(!showNotifications);
+                  setShowProfileMenu(false);
+                }}
+                aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ""}`}
+                aria-expanded={showNotifications}
+              >
+                <Bell size={20} />
+                {unreadCount > 0 && <span className="nk-badge-dot" />}
+              </button>
+              {showNotifications && renderNotifications()}
+            </div>
+
+            <div ref={profileMenuRef} className="relative hidden sm:block">
+              <button
+                className="nk-icon-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowProfileMenu((prev) => !prev);
+                  setShowNotifications(false);
+                }}
+                aria-haspopup="menu"
+                aria-expanded={showProfileMenu}
+                aria-label="Account menu"
+                style={{ width: "auto", padding: "0 8px 0 4px", gap: 6 }}
+              >
+                <span className="nk-avatar">
+                  {user?.profilePicture ? (
+                    <img src={user.profilePicture} className="h-full w-full object-cover" alt="Profile" />
+                  ) : (
+                    user?.name?.charAt(0) || "U"
+                  )}
+                </span>
+                <ChevronDown
+                  size={16}
+                  style={{ transition: "transform .3s var(--nk-ease)", transform: showProfileMenu ? "rotate(180deg)" : "none" }}
+                />
+              </button>
+              {showProfileMenu && (
+                <div className="nk-menu" role="menu" style={{ width: 260 }}>
+                  <div className="px-4 py-3" style={{ borderBottom: "1px solid var(--nk-hairline)" }}>
+                    <div className="nk-body-strong">{user?.name || "User"}</div>
+                    <div className="nk-caption-sm nk-mute truncate">{user?.email || "Email not available"}</div>
+                    <span className="nk-chip mt-2"><Crown size={12} /> {subscriptionLabel}</span>
                   </div>
-                </div>
-                <div className="relative h-4 bg-gray-700/50 rounded-full overflow-hidden backdrop-blur-sm border border-gray-600/30">
-                  <div
-                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 rounded-full transition-all duration-700 ease-out shadow-lg shadow-purple-500/50 overflow-hidden"
-                    style={{ width: `${levelProgress}%` }}
+                  <button
+                    role="menuitem"
+                    className="nk-menu-item"
+                    onClick={() => {
+                      navigate("/settings");
+                      setShowProfileMenu(false);
+                    }}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"></div>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between mt-2">
-                  <span className="text-xs sm:text-sm text-gray-500 font-medium">
-                    {xpToNextLevel} XP to go
-                  </span>
-                  <span className="text-xs sm:text-sm text-emerald-400 font-semibold">
-                    Almost there! 🎯
-                  </span>
-                </div>
-              </div>
-
-              {/* Streak - Only on mobile/tablet */}
-              {user?.stats?.streak > 0 && (
-                <div className="flex lg:hidden items-center gap-4 bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-500/30 rounded-2xl px-6 py-4 w-full sm:w-auto">
-                  <Flame className="w-8 h-8 text-orange-400 animate-pulse" />
-                  <div>
-                    <div className="text-3xl font-bold text-white">
-                      {user.stats.streak}
-                    </div>
-                    <div className="text-sm text-orange-300">day streak!</div>
-                  </div>
+                    <Settings size={16} /> Profile Settings
+                  </button>
+                  <button
+                    role="menuitem"
+                    className="nk-menu-item"
+                    onClick={() => {
+                      navigate("/subscription");
+                      setShowProfileMenu(false);
+                    }}
+                  >
+                    <Crown size={16} /> Subscription
+                  </button>
+                  <button
+                    role="menuitem"
+                    className="nk-menu-item"
+                    style={{ borderTop: "1px solid var(--nk-hairline)" }}
+                    onClick={() => dispatch(logout(navigate))}
+                  >
+                    <LogOut size={16} /> Logout
+                  </button>
                 </div>
               )}
             </div>
           </div>
         </div>
+      </header>
 
-        {/* Stats Grid - Asymmetric & Dynamic Layout */}
-        <div className="mb-8 sm:mb-10">
-          <h2 className="text-xl sm:text-2xl font-bold text-white mb-5 flex items-center gap-2">
-            <TrendingUp className="w-6 h-6 text-emerald-400" />
-            Your Stats at a Glance
-          </h2>
-
-          {/* Asymmetric Grid Layout */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 sm:gap-5">
-            {/* Featured Stat - Larger Card */}
-            <div
-              className="lg:col-span-7 group relative"
-              style={{ animationDelay: "0ms" }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl blur-xl opacity-0 group-hover:opacity-60 transition duration-500"></div>
-              <div className="relative bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-xl rounded-2xl p-6 sm:p-8 border border-gray-700/50 hover:border-gray-600/50 transition-all shadow-xl hover:shadow-2xl transform hover:-translate-y-1 h-full">
-                <div className="flex items-start justify-between mb-6">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center shadow-2xl shadow-blue-500/50 group-hover:scale-110 transition-all duration-300">
-                    <BarChart3 className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
-                  </div>
-                  <div className="text-sm font-bold text-emerald-400 bg-emerald-400/10 px-3 py-1.5 rounded-full border border-emerald-400/20 flex items-center gap-1">
-                    <TrendingUp className="w-3 h-3" />
-                    {stats[0].trend}
-                  </div>
-                </div>
-                <div className="text-5xl sm:text-6xl font-black text-white mb-3 tracking-tight">
-                  {user?.stats?.totalInterviews ||
-                    dashboardData.recentInterviews.length ||
-                    0}
-                </div>
-                <div className="text-base sm:text-lg text-gray-300 font-semibold mb-2">
-                  Total Interviews
-                </div>
-                <div className="text-sm text-gray-400">
-                  {user?.stats?.totalInterviews > 0
-                    ? `You're building great momentum! 🎯`
-                    : `Start your first interview to begin tracking! 🚀`}
-                </div>
-              </div>
-            </div>
-
-            {/* Secondary Stats - Stacked */}
-            <div className="lg:col-span-5 flex flex-col gap-4 sm:gap-5">
-              {stats.slice(1, 3).map((stat, index) => {
-                const Icon = stat.icon;
-                return (
-                  <div
-                    key={index}
-                    className="group relative"
-                    style={{ animationDelay: `${(index + 1) * 100}ms` }}
-                  >
-                    <div
-                      className={`absolute inset-0 bg-gradient-to-r ${stat.color} rounded-2xl blur-xl opacity-0 group-hover:opacity-50 transition duration-300`}
-                    ></div>
-                    <div className="relative bg-gray-800/70 backdrop-blur-xl rounded-2xl p-5 border border-gray-700/50 hover:border-gray-600/50 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
-                      <div className="flex items-center justify-between mb-4">
-                        <div
-                          className={`w-12 h-12 bg-gradient-to-br ${stat.color} rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-all`}
-                        >
-                          <Icon className="w-6 h-6 text-white" />
-                        </div>
-                        <div className="text-xs font-bold text-emerald-400 bg-emerald-400/10 px-2.5 py-1 rounded-full border border-emerald-400/20">
-                          {stat.trend}
-                        </div>
-                      </div>
-                      <div className="text-3xl sm:text-4xl font-black text-white mb-1">
-                        {stat.value}
-                      </div>
-                      <div className="text-sm text-gray-400 font-medium">
-                        {stat.label}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* XP Points - Wide Card */}
-            <div
-              className="lg:col-span-12 group relative"
-              style={{ animationDelay: "300ms" }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur-xl opacity-0 group-hover:opacity-50 transition duration-500"></div>
-              <div className="relative bg-gradient-to-br from-purple-900/40 to-pink-900/40 backdrop-blur-xl rounded-2xl p-5 sm:p-6 border border-purple-500/30 hover:border-purple-500/50 transition-all shadow-xl hover:shadow-2xl transform hover:-translate-y-1">
-                <div className="flex items-center justify-between flex-wrap gap-4">
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-xl shadow-purple-500/50 group-hover:rotate-12 transition-all duration-300">
-                      <Sparkles className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
-                    </div>
-                    <div>
-                      <div className="text-3xl sm:text-4xl font-black text-white mb-1">
-                        {(user?.stats?.xpPoints || 0).toLocaleString()} XP
-                      </div>
-                      <div className="text-sm text-purple-300 font-semibold">
-                        Experience Points Earned
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm font-bold text-emerald-400 bg-emerald-400/10 px-4 py-2 rounded-full border border-emerald-400/20">
-                    <Sparkles className="w-4 h-4" />
-                    +340 this week
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Actions - More Intentional & Engaging */}
-        <div className="mb-8 sm:mb-10">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
-              <Zap className="w-6 h-6 text-yellow-400 animate-pulse" />
-              What would you like to do?
-            </h2>
-            <div className="hidden sm:block text-sm text-gray-400">
-              Choose your path →
-            </div>
-          </div>
-
-          {/* Asymmetric Action Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-            {/* Primary Action - Emphasized */}
-            <div className="sm:col-span-2 lg:col-span-1">
-              <button
-                onClick={quickActions[0].action}
-                className="group relative overflow-hidden bg-gradient-to-br from-blue-600 to-cyan-600 rounded-2xl p-6 sm:p-8 border border-blue-400/30 hover:border-blue-400/50 transition-all text-left shadow-2xl hover:shadow-blue-500/40 transform hover:-translate-y-2 hover:scale-[1.02] w-full h-full"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
-                <div className="relative">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-4 sm:mb-6 shadow-xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-                    <Target className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
-                  </div>
-                  <h3 className="font-black text-white mb-2 text-xl sm:text-2xl">
-                    {quickActions[0].title}
-                  </h3>
-                  <p className="text-sm sm:text-base text-blue-100 mb-4">
-                    {quickActions[0].description}
-                  </p>
-                  <div className="flex items-center gap-2 text-base font-bold text-white bg-white/20 px-4 py-2 rounded-xl w-fit group-hover:bg-white/30 transition">
-                    <span>Let's Go!</span>
-                    <ChevronRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
-                  </div>
-                </div>
+      {/* Mobile drawer */}
+      {isMobileMenuOpen && (
+        <>
+          <div className="nk-drawer-scrim" onClick={() => setIsMobileMenuOpen(false)} />
+          <aside className="nk-drawer" aria-label="Menu">
+            <div className="flex items-center justify-between">
+              <span className="nk-h-md" style={{ textTransform: "uppercase" }}>Intervyo</span>
+              <button className="nk-icon-btn" onClick={() => setIsMobileMenuOpen(false)} aria-label="Close menu">
+                <X size={22} />
               </button>
             </div>
+            <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>Dashboard</Link>
+            <Link to="/interview-setup" onClick={() => setIsMobileMenuOpen(false)}>Interview</Link>
+            <Link to="/analytics" onClick={() => setIsMobileMenuOpen(false)}>Analytics</Link>
+            <Link to="/history" onClick={() => setIsMobileMenuOpen(false)}>History</Link>
+            <Link to="/leaderboard" onClick={() => setIsMobileMenuOpen(false)}>Leaderboard</Link>
+            <Link to="/blog" onClick={() => setIsMobileMenuOpen(false)}>Blog</Link>
+            <Link to="/settings" onClick={() => setIsMobileMenuOpen(false)}>Profile Settings</Link>
+            <Link to="/subscription" onClick={() => setIsMobileMenuOpen(false)}>Subscription</Link>
+            <button className="nk-drawer-item" onClick={() => setShowNotifications(!showNotifications)}>
+              Notifications{unreadCount > 0 ? ` (${unreadCount})` : ""}
+            </button>
+            {showNotifications && renderNotifications()}
+            <button className="nk-drawer-item" onClick={() => dispatch(logout(navigate))}>
+              Logout
+            </button>
+          </aside>
+        </>
+      )}
 
-            {/* Secondary Actions */}
-            {quickActions.slice(1).map((action, index) => {
-              const Icon = action.icon;
-              return (
-                <button
-                  key={index}
-                  onClick={action.action}
-                  className="group relative overflow-hidden bg-gray-800/70 backdrop-blur-xl rounded-2xl p-6 border border-gray-700/50 hover:border-gray-600/50 transition-all text-left shadow-lg hover:shadow-2xl transform hover:-translate-y-1"
-                >
-                  <div
-                    className={`absolute inset-0 bg-gradient-to-br ${action.color} opacity-0 group-hover:opacity-10 transition duration-300`}
-                  ></div>
-                  <div className="relative">
-                    <div
-                      className={`w-14 h-14 bg-gradient-to-br ${action.color} rounded-xl flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}
-                    >
-                      <Icon className="w-7 h-7 text-white" />
-                    </div>
-                    <h3 className="font-bold text-white mb-1.5 text-base sm:text-lg">
-                      {action.title}
-                    </h3>
-                    <p className="text-sm text-gray-400 mb-3">
-                      {action.description}
-                    </p>
-                    <div className="flex items-center gap-1 text-sm font-semibold text-purple-400 group-hover:text-purple-300 transition">
-                      <span>Explore</span>
-                      <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </div>
+      <main>
+        {/* Campaign hero */}
+        <section className="nk-container" style={{ paddingTop: 0 }} aria-label="Welcome">
+          <div className="nk-campaign">
+            {/* <div className="nk-marquee" aria-hidden="true">
+              <div>
+                {"Practice · Perform · Progress · Practice · Perform · Progress · ".repeat(2)}
+              </div>
+            </div> */}
+
+            {user?.stats?.streak > 0 && (
+              <div className="nk-campaign-streak nk-rise nk-d3">
+                <Flame className="nk-flame" size={32} aria-hidden="true" />
+                <div>
+                  <div className="nk-h-lg">{user.stats.streak}</div>
+                  <div className="nk-caption-sm" style={{ color: "#9e9ea0" }}>day streak</div>
+                </div>
+              </div>
+            )}
+
+            <h1 className="nk-display nk-campaign-title nk-rise">
+              <TextType
+                text={[`Hey ${firstName}.`, "Ready to shine?", "Let's ace this."]}
+                typingSpeed={11}
+                pauseDuration={3500}
+                showCursor={true}
+                cursorCharacter="|"
+              />
+            </h1>
+            <p className="nk-campaign-sub nk-rise nk-d1">{heroSubcopy}</p>
+            <div className="nk-campaign-actions nk-rise nk-d2">
+              <button className="nk-btn nk-btn-onimage text-black" onClick={() => navigate("/interview-setup")}>
+                Start Interview <ArrowUpRight className="nk-arrow" size={18} aria-hidden="true" />
+              </button>
+              <button
+                className="nk-btn nk-btn-onimage"
+                onClick={() => navigate("/history")}
+              >
+                Review history
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* Level & XP */}
+        <section className="nk-section nk-container " aria-labelledby="level-h">
+          <Reveal>
+            <div className="nk-head">
+              <h2 id="level-h" className="nk-h-xl">Your level</h2>
+              <span className="nk-caption nk-mute">{(user?.stats?.xpPoints || 0).toLocaleString()} XP total</span>
+            </div>
+          </Reveal>
+          <Reveal delay={80}>
+            <div className="nk-tile nk-tile-ink" style={{ background: "#111111", color: "#fff", padding: 32 }}>
+              <div className="grid items-end gap-8 lg:grid-cols-12">
+                <div className="lg:col-span-4">
+                  <div className="nk-caption" style={{ color: "#9e9ea0" }}>Current level</div>
+                  <div className="nk-display" style={{ fontSize: 72 }}>
+                    <CountUp end={user?.stats?.level || 1} duration={900} />
                   </div>
-                </button>
+                </div>
+                <div className="lg:col-span-8">
+                  <div className="mb-3 flex items-baseline justify-between">
+                    <span className="nk-body-strong">Progress to Level {(user?.stats?.level || 1) + 1}</span>
+                    <span className="nk-h-lg"><CountUp end={Math.round(levelProgress)} suffix="%" /></span>
+                  </div>
+                  <ProgressBar value={levelProgress} label="Progress to next level" large />
+                  <div className="mt-3 flex items-center justify-between">
+                    <span className="nk-caption" style={{ color: "#9e9ea0" }}>{xpToNextLevel} XP to go</span>
+                    {levelProgress >= 75 && <span className="nk-caption">Almost there</span>}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Reveal>
+        </section>
+
+        {/* Stats */}
+        <section className="nk-section nk-container" aria-labelledby="stats-h">
+          <Reveal>
+            <div className="nk-head">
+              <h2 id="stats-h" className="nk-h-xl">Stats at a glance</h2>
+            </div>
+          </Reveal>
+          <div className="nk-grid-4">
+            {stats.map((stat, i) => {
+              const Icon = stat.icon;
+              return (
+                <Reveal key={stat.label} delay={i * 90} className="nk-tile nk-stat">
+                  <div className="flex items-start justify-between">
+                    <span className="nk-circle"><Icon size={20} aria-hidden="true" /></span>
+                    {stat.trend && <span className="nk-chip">{stat.trend}</span>}
+                  </div>
+                  <div className="mt-8">
+                    <div className="nk-h-xl" style={{ textTransform: "none" }}>
+                      <CountUp end={stat.end} decimals={stat.decimals || 0} suffix={stat.suffix || ""} />
+                    </div>
+                    <div className="nk-caption nk-mute">{stat.label}</div>
+                    {stat.label === "Total Interviews" && (
+                      <div className="nk-caption-sm nk-mute mt-1">
+                        {user?.stats?.totalInterviews > 0
+                          ? "You're building great momentum."
+                          : "Start your first interview to begin tracking."}
+                      </div>
+                    )}
+                  </div>
+                </Reveal>
               );
             })}
           </div>
-        </div>
+        </section>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
-          {/* Recent Interviews - More prominent */}
-          <div className="lg:col-span-2 space-y-5 sm:space-y-6">
-            <div className="bg-gray-800/60 backdrop-blur-xl rounded-2xl border border-gray-700/50 p-5 sm:p-7 shadow-2xl">
-              <div className="flex items-center justify-between mb-5 sm:mb-6">
-                <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
-                  <BarChart3 className="w-6 h-6 text-blue-400" />
-                  Your Interview Journey
-                </h2>
-                <button
-                  onClick={() => navigate("/history")}
-                  className="text-sm text-purple-400 hover:text-purple-300 font-semibold flex items-center gap-1 hover:gap-2 transition-all group"
-                >
-                  View All
-                  <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </button>
-              </div>
-              <div className="space-y-4">
-                {dashboardData.recentInterviews.length > 0 ? (
-                  dashboardData.recentInterviews
-                    .slice(0, 3)
-                    .map((interview, idx) => (
-                      <div
-                        key={interview._id}
-                        onClick={() => navigate(`/results/${interview._id}`)}
-                        className="group relative bg-gradient-to-br from-gray-900/70 to-gray-800/70 rounded-xl p-5 border border-gray-700/50 hover:border-gray-600/50 transition-all cursor-pointer overflow-hidden shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                        style={{ animationDelay: `${idx * 100}ms` }}
-                      >
-                        <div
-                          className={`absolute inset-0 bg-gradient-to-r ${getScoreGradient(interview.overallScore || 0)} opacity-0 group-hover:opacity-[0.07] transition-all duration-300`}
-                        ></div>
-                        <div className="relative">
-                          <div className="flex items-start justify-between mb-3">
-                            <div className="flex items-center gap-4 flex-1">
-                              {/* Score Badge */}
-                              <div
-                                className={`relative w-14 h-14 rounded-xl bg-gradient-to-br ${getScoreGradient(interview.overallScore || 0)} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}
-                              >
-                                <span className="text-xl font-black text-white">
-                                  {interview.overallScore || 0}
-                                </span>
-                                <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center border-2 border-gray-900">
-                                  <Star className="w-2.5 h-2.5 text-white" />
-                                </div>
-                              </div>
+        {/* Quick actions */}
+        <section className="nk-section nk-container" aria-labelledby="actions-h">
+          <Reveal>
+            <div className="nk-head">
+              <h2 id="actions-h" className="nk-h-xl">What would you like to do?</h2>
+            </div>
+          </Reveal>
+          <div className="nk-grid-4">
+            {quickActions.map((action, index) => {
+              const Icon = action.icon;
+              return (
+                <Reveal key={action.title} delay={index * 90}>
+                  <button
+                    onClick={action.action}
+                    className={`nk-tile nk-action ${index === 0 ? "nk-action-primary" : ""}`}
+                  >
+                    <span className="nk-circle nk-action-icon"><Icon size={22} aria-hidden="true" /></span>
+                    <span>
+                      <span className="nk-h-lg block">{action.title}</span>
+                      <span className="nk-caption block mb-5" style={{ color: index === 0 ? "#9e9ea0" : "var(--nk-mute)" }}>
+                        {action.description}
+                      </span>
+                      <span className={`nk-btn nk-btn-sm ${index === 0 ? "nk-btn-onimage" : "nk-btn-primary"}`} style={{ pointerEvents: "none" }}>
+                        {index === 0 ? "Let's go" : "Explore"}
+                        <ChevronRight className="nk-arrow" size={16} aria-hidden="true" />
+                      </span>
+                    </span>
+                  </button>
+                </Reveal>
+              );
+            })}
+          </div>
+        </section>
 
-                              {/* Interview Info */}
-                              <div className="flex-1 min-w-0">
-                                <h3 className="font-bold text-white text-base sm:text-lg mb-1.5 truncate group-hover:text-purple-300 transition">
-                                  {interview.role || "Interview"}
-                                </h3>
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <span
-                                    className={`text-xs px-2.5 py-1 rounded-lg border ${getDifficultyColor(interview.difficulty)} font-semibold`}
-                                  >
-                                    {interview.difficulty || "Medium"}
-                                  </span>
-                                  <span className="text-xs text-gray-400 capitalize font-medium">
-                                    {interview.status || "completed"}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Meta Info */}
-                          <div className="flex items-center justify-between text-xs sm:text-sm text-gray-400 mb-3 flex-wrap gap-2">
-                            <div className="flex items-center gap-3">
-                              <span className="flex items-center gap-1.5">
-                                <Calendar className="w-3.5 h-3.5" />
-                                {formatDate(
-                                  interview.completedAt || interview.createdAt,
-                                )}
-                              </span>
-                              <span className="flex items-center gap-1.5">
-                                <Clock className="w-3.5 h-3.5" />
-                                {interview.duration || 30}min
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Progress Bar */}
-                          <div className="relative h-2 bg-gray-800 rounded-full overflow-hidden">
-                            <div
-                              className={`absolute inset-y-0 left-0 bg-gradient-to-r ${getScoreGradient(interview.overallScore || 0)} rounded-full transition-all duration-700 shadow-lg relative`}
-                              style={{
-                                width: `${interview.overallScore || 0}%`,
-                              }}
-                            >
-                              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"></div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                ) : (
-                  <div className="text-center py-12 sm:py-16">
-                    <div className="text-6xl sm:text-7xl mb-4 animate-bounce">
-                      🎯
-                    </div>
-                    <h3 className="text-xl sm:text-2xl font-bold text-white mb-3">
-                      Ready to Begin?
-                    </h3>
-                    <p className="text-gray-400 text-base sm:text-lg mb-6 max-w-md mx-auto">
-                      Take your first step towards interview mastery. Every
-                      expert was once a beginner!
-                    </p>
-                    <button
-                      onClick={() => navigate("/interview-setup")}
-                      className="px-6 py-3 sm:px-8 sm:py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-bold hover:shadow-2xl hover:shadow-purple-500/50 transition-all transform hover:scale-105 text-base sm:text-lg"
-                    >
-                      Start Your First Interview 🚀
+        {/* Journey + sidebar */}
+        <section className="nk-section nk-section-last nk-container">
+          <div className="grid grid-cols-1 gap-12 lg:grid-cols-3">
+            <div className="space-y-12 lg:col-span-2">
+              <div>
+                <Reveal>
+                  <div className="nk-head">
+                    <h2 className="nk-h-xl">Your interview journey</h2>
+                    <button onClick={() => navigate("/history")} className="nk-link">
+                      View all
                     </button>
                   </div>
-                )}
-              </div>
-            </div>
-            <div>
-              <ContributionGraph interviews={dashboardData.recentInterviews} />
-            </div>
-          </div>
+                </Reveal>
 
-          {/* Sidebar - Enhanced with personality */}
-          <div className="space-y-5 sm:space-y-6">
-            {/* Learning Progress */}
-            <div className="bg-gray-800/60 backdrop-blur-xl rounded-2xl border border-gray-700/50 p-5 sm:p-6 shadow-xl">
-              <h2 className="text-lg sm:text-xl font-bold text-white mb-4 flex items-center gap-2">
-                <Brain className="w-5 h-5 text-purple-400" />
-                Learning Path
-              </h2>
-              <div className="space-y-4">
-                {learningProgress?.length > 0 ? (
-                  learningProgress.map((topic, index) => (
-                    <div key={index} className="group cursor-pointer">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2.5">
-                          <span className="text-2xl transform group-hover:scale-125 transition-transform">
-                            {topic.topic?.icon || "📚"}
-                          </span>
-                          <span className="text-sm font-bold text-gray-200 truncate group-hover:text-white transition">
-                            {topic.topic?.title || "Untitled"}
-                          </span>
-                        </div>
-                        <span className="text-sm font-black text-purple-400">
-                          {topic.progress || 0}%
-                        </span>
-                      </div>
-                      <div className="relative h-2.5 bg-gray-700/50 rounded-full overflow-hidden">
-                        <div
-                          className="absolute inset-y-0 left-0 bg-gradient-to-r from-emerald-400 via-cyan-500 to-blue-500 rounded-full transition-all duration-700 group-hover:shadow-lg group-hover:shadow-emerald-500/50"
-                          style={{ width: `${topic.progress || 0}%` }}
-                        >
-                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"></div>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between mt-1.5 text-xs text-gray-500">
-                        <span className="font-medium">
-                          {topic.totalTimeSpent || "0"} invested
-                        </span>
-                        {topic.progress === 100 && (
-                          <span className="text-emerald-400 font-bold">
-                            ✓ Complete
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-8">
-                    <div className="text-5xl mb-3">📚</div>
-                    <p className="text-sm text-gray-400 leading-relaxed">
-                      Your learning journey starts with your first interview
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Achievements - More celebratory */}
-            <div className="bg-gray-800/60 backdrop-blur-xl rounded-2xl border border-gray-700/50 p-5 sm:p-6 shadow-xl">
-              <h2 className="text-lg sm:text-xl font-bold text-white mb-4 flex items-center gap-2">
-                <Trophy className="w-5 h-5 text-yellow-400" />
-                Hall of Fame
-              </h2>
-              <div className="space-y-3">
-                {user?.stats?.badges && user.stats.badges.length > 0 ? (
-                  user.stats.badges.slice(0, 3).map((badge, index) => (
-                    <div key={index} className="relative group cursor-pointer">
-                      <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-xl blur-md opacity-0 group-hover:opacity-100 transition-all"></div>
-                      <div className="relative flex items-center gap-3 p-4 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 rounded-xl border border-yellow-500/30 hover:border-yellow-500/50 transition-all transform group-hover:scale-[1.02]">
-                        <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center text-2xl shadow-lg group-hover:rotate-12 transition-transform">
-                          {badge.icon || "🏆"}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-bold text-white text-sm mb-1 truncate">
-                            {badge.name || "Achievement"}
-                          </div>
-                          <div className="text-xs text-yellow-300/80 font-medium">
-                            Earned {formatDate(badge.earnedAt)}
-                          </div>
-                        </div>
-                        <Sparkles className="w-5 h-5 text-yellow-400 opacity-0 group-hover:opacity-100 transition flex-shrink-0" />
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-8">
-                    <div className="text-5xl mb-3">🏆</div>
-                    <p className="text-sm text-gray-400 leading-relaxed mb-3">
-                      Your trophy case is ready!
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Complete interviews to unlock badges
-                    </p>
-                  </div>
-                )}
-                {user?.stats?.badges && user.stats.badges.length > 0 && (
-                  <button
-                    onClick={() => navigate("/achievements")}
-                    className="w-full py-3 text-sm text-purple-400 hover:text-purple-300 font-bold hover:bg-purple-500/10 rounded-xl transition-all flex items-center justify-center gap-2 border border-purple-500/20 hover:border-purple-500/40"
-                  >
-                    <span>
-                      View All {user.stats.badges.length} Badge
-                      {user.stats.badges.length > 1 ? "s" : ""}
-                    </span>
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Subscription Status - More engaging */}
-            <div className="relative group overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-pink-600 to-purple-700 rounded-2xl blur-xl opacity-60 group-hover:opacity-80 transition-all"></div>
-              <div className="relative bg-gradient-to-br from-purple-600 via-pink-600 to-purple-700 rounded-2xl p-6 shadow-2xl">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <Crown className="w-6 h-6 text-yellow-300 animate-pulse" />
-                    <h3 className="font-black text-white text-xl">
-                      {user?.subscription?.plan?.toUpperCase() || "FREE"}
-                    </h3>
-                  </div>
-                  <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center transform group-hover:rotate-12 transition-transform">
-                    <span className="text-2xl">👑</span>
-                  </div>
-                </div>
-                <div className="mb-4">
-                  <div className="text-sm text-purple-100 mb-2 font-semibold">
-                    Interviews This Month
-                  </div>
-                  <div className="flex items-baseline gap-2 mb-3">
-                    <span className="text-4xl font-black text-white">
-                      {user?.subscription?.interviewsRemaining || 0}
-                    </span>
-                    <span className="text-purple-200 text-base font-medium">
-                      of{" "}
-                      {user?.subscription?.plan === "pro"
-                        ? "25"
-                        : user?.subscription?.plan === "enterprise"
-                          ? "∞"
-                          : "2"}{" "}
-                      left
-                    </span>
-                  </div>
-                  <div className="mt-3 h-2.5 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm">
-                    <div
-                      className="h-full bg-gradient-to-r from-white via-yellow-200 to-white rounded-full transition-all duration-700 relative overflow-hidden"
-                      style={{
-                        width: `${user?.subscription?.plan === "enterprise" ? 100 : ((user?.subscription?.interviewsRemaining || 0) / (user?.subscription?.plan === "pro" ? 25 : 2)) * 100}%`,
+                {dashboardData.recentInterviews.length > 0 ? (
+                  dashboardData.recentInterviews.slice(0, 3).map((interview, idx) => (
+                    <Reveal
+                      key={interview._id}
+                      delay={idx * 90}
+                      role="link"
+                      tabIndex={0}
+                      className="nk-row"
+                      onClick={() => navigate(`/results/${interview._id}`)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") navigate(`/results/${interview._id}`);
                       }}
                     >
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer"></div>
-                    </div>
-                  </div>
-                </div>
-                <button
-                  onClick={() => navigate("/subscription")}
-                  className="w-full bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 group/btn transform hover:scale-[1.02]"
-                >
-                  <span>Manage Plan</span>
-                  <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                </button>
+                      <div className="nk-score" aria-label={`Score ${interview.overallScore || 0}`}>
+                        {interview.overallScore || 0}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="nk-body-strong truncate">{interview.role || "Interview"}</h3>
+                          <span className="nk-chip">{interview.difficulty || "Medium"}</span>
+                        </div>
+                        <div className="nk-caption nk-mute mt-1 flex flex-wrap items-center gap-x-4 gap-y-1">
+                          <span className="capitalize">{interview.status || "completed"}</span>
+                          <span className="inline-flex items-center gap-1">
+                            <Calendar size={14} aria-hidden="true" />
+                            {formatDate(interview.completedAt || interview.createdAt)}
+                          </span>
+                          <span className="inline-flex items-center gap-1">
+                            <Clock size={14} aria-hidden="true" />
+                            {interview.duration || 30}min
+                          </span>
+                        </div>
+                        <div className="mt-3">
+                          <ProgressBar value={interview.overallScore || 0} label="Overall score" />
+                        </div>
+                      </div>
+                      <ChevronRight size={20} className="hidden sm:block" aria-hidden="true" />
+                    </Reveal>
+                  ))
+                ) : (
+                  <Reveal className="nk-tile" style={{ padding: "64px 24px", alignItems: "center", textAlign: "center" }}>
+                    <h3 className="nk-h-xl mb-3">Ready to begin?</h3>
+                    <p className="nk-mute mb-6" style={{ maxWidth: 420 }}>
+                      Take your first step towards interview mastery. Every expert was once a beginner.
+                    </p>
+                    <button className="nk-btn nk-btn-primary text-black" onClick={() => navigate("/interview-setup")}>
+                      Start your first interview
+                    </button>
+                  </Reveal>
+                )}
               </div>
+
+              <Reveal>
+                <ContributionGraph interviews={dashboardData.recentInterviews} />
+              </Reveal>
+            </div>
+
+            {/* Sidebar */}
+            <div className="space-y-12">
+              <div>
+                <Reveal>
+                  <h2 className="nk-h-lg mb-4 flex items-center gap-2">
+                    <Brain size={22} aria-hidden="true" /> Learning path
+                  </h2>
+                </Reveal>
+                {learningProgress?.length > 0 ? (
+                  learningProgress.map((topic, index) => (
+                    <Reveal key={index} delay={index * 60} className="nk-disclosure">
+                      <div className="mb-2 flex items-center justify-between gap-3">
+                        <div className="flex min-w-0 items-center gap-2">
+                          <span style={{ fontSize: 20 }} aria-hidden="true">{topic.topic?.icon || "📚"}</span>
+                          <span className="nk-body-strong truncate">{topic.topic?.title || "Untitled"}</span>
+                        </div>
+                        <span className="nk-body-strong">{topic.progress || 0}%</span>
+                      </div>
+                      <ProgressBar
+                        value={topic.progress || 0}
+                        label={topic.topic?.title || "Topic progress"}
+                        success={topic.progress === 100}
+                      />
+                      <div className="nk-caption-sm nk-mute mt-2 flex items-center justify-between">
+                        <span>{topic.totalTimeSpent || "0"} invested</span>
+                        {topic.progress === 100 && (
+                          <span style={{ color: "var(--nk-success)" }}>Complete</span>
+                        )}
+                      </div>
+                    </Reveal>
+                  ))
+                ) : (
+                  <p className="nk-disclosure nk-caption nk-mute">
+                    Your learning journey starts with your first interview.
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <Reveal>
+                  <h2 className="nk-h-lg mb-4 flex items-center gap-2">
+                    <Trophy size={22} aria-hidden="true" /> Hall of fame
+                  </h2>
+                </Reveal>
+                {user?.stats?.badges && user.stats.badges.length > 0 ? (
+                  <>
+                    {user.stats.badges.slice(0, 3).map((badge, index) => (
+                      <Reveal key={index} delay={index * 60} className="nk-disclosure flex items-center gap-4">
+                        <span className="nk-circle" style={{ background: "var(--nk-cloud)", fontSize: 22 }} aria-hidden="true">
+                          {badge.icon || <Star size={20} />}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className="nk-body-strong truncate">{badge.name || "Achievement"}</div>
+                          <div className="nk-caption-sm nk-mute">Earned {formatDate(badge.earnedAt)}</div>
+                        </div>
+                      </Reveal>
+                    ))}
+                    <div className="nk-disclosure">
+                      <button onClick={() => navigate("/achievements")} className="nk-btn nk-btn-secondary w-full">
+                        View all {user.stats.badges.length} badge{user.stats.badges.length > 1 ? "s" : ""}
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="nk-disclosure">
+                    <p className="nk-body-strong">Your trophy case is ready.</p>
+                    <p className="nk-caption nk-mute">Complete interviews to unlock badges.</p>
+                  </div>
+                )}
+              </div>
+
+              <Reveal className="nk-tile nk-tile-ink" style={{ background: "#111111", color: "#fff", padding: 32 }}>
+                <h3 className="nk-h-lg mb-6 flex items-center gap-2">
+                  <Crown size={22} aria-hidden="true" /> {subscriptionLabel}
+                </h3>
+                <div className="nk-caption mb-1" style={{ color: "#9e9ea0" }}>Interviews this month</div>
+                <div className="mb-4 flex items-baseline gap-2">
+                  <span className="nk-display" style={{ fontSize: 64 }}>
+                    <CountUp end={user?.subscription?.interviewsRemaining || 0} duration={900} />
+                  </span>
+                  <span className="nk-caption" style={{ color: "#9e9ea0" }}>of {planLimitLabel} left</span>
+                </div>
+                <div className="mb-6">
+                  <ProgressBar value={planProgress} label="Interviews remaining this month" />
+                </div>
+                <button onClick={() => navigate("/subscription")} className="nk-btn nk-btn-onimage w-full">
+                  Manage plan
+                </button>
+              </Reveal>
             </div>
           </div>
-        </div>
-      </div>
-
-      <style>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes wave {
-          0%, 100% {
-            transform: rotate(0deg);
-          }
-          10%, 30% {
-            transform: rotate(14deg);
-          }
-          20% {
-            transform: rotate(-8deg);
-          }
-          40% {
-            transform: rotate(-4deg);
-          }
-          50% {
-            transform: rotate(10deg);
-          }
-        }
-
-        @keyframes shimmer {
-          0% {
-            transform: translateX(-100%);
-          }
-          100% {
-            transform: translateX(200%);
-          }
-        }
-
-        @keyframes float {
-          0%, 100% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-10px);
-          }
-        }
-
-        @keyframes glow {
-          0%, 100% {
-            box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
-          }
-          50% {
-            box-shadow: 0 0 40px rgba(168, 85, 247, 0.8);
-          }
-        }
-
-        @keyframes slideInRight {
-          from {
-            opacity: 0;
-            transform: translateX(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-
-        .animate-fadeIn {
-          animation: fadeIn 0.8s ease-out forwards;
-        }
-
-        .animate-wave {
-          animation: wave 2.5s infinite;
-          transform-origin: 70% 70%;
-          display: inline-block;
-        }
-
-        .animate-shimmer {
-          animation: shimmer 3s infinite;
-        }
-
-        .animate-float {
-          animation: float 3s ease-in-out infinite;
-        }
-
-        .animate-glow {
-          animation: glow 2s ease-in-out infinite;
-        }
-
-        .animate-slideInRight {
-          animation: slideInRight 0.6s ease-out forwards;
-        }
-
-        /* Enhanced gradient text */
-        .gradient-text {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-        }
-
-        /* Card hover effects */
-        .card-hover-effect {
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .card-hover-effect:hover {
-          transform: translateY(-4px) scale(1.01);
-        }
-
-        /* Pulsing effect for important elements */
-        @keyframes pulse-soft {
-          0%, 100% {
-            opacity: 1;
-          }
-          50% {
-            opacity: 0.7;
-          }
-        }
-
-        .animate-pulse-soft {
-          animation: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-      `}</style>
+        </section>
+      </main>
 
       {/* Achievement Modal */}
       {showAchievementModal && newAchievements.length > 0 && (
@@ -1478,3 +1301,5 @@ export default function Dashboard() {
     </div>
   );
 }
+
+export default Dashboard;

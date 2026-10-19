@@ -111,8 +111,9 @@ export const createInterview = (interviewConfig, navigate, token) => {
       dispatch(setCurrentInterview(response.data.data));
       toast.success("Interview created successfully!");
 
-      // Navigate to interview room
-      navigate(`/interview/${response.data.data.id || response.data.data.interviewId}`);
+      // Navigate to interview room — must match the route in App.jsx (/interview-room/:interviewId)
+      const interviewId = response.data.data.id || response.data.data._id || response.data.data.interviewId;
+      navigate(`/interview-room/${interviewId}`);
     } catch (error) {
       console.error("CREATE_INTERVIEW_API ERROR:", error);
       const message = error.response?.data?.message || error.message || "Failed to create interview";

@@ -1,23 +1,1246 @@
-import { useState } from "react";
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import React from "react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  ChevronRight,
+  Clock3,
+  FileText,
+  Lightbulb,
+  LoaderCircle,
+  Plus,
+  Rocket,
+  Sparkles,
+  Target,
+  Trash2,
+  Upload,
+  User,
+  WandSparkles,
+} from "lucide-react";
+import {
+  PanelsTopLeft,
+  Server,
+  Layers3,
+  Smartphone,
+  BrainCircuit,
+} from "lucide-react";
+import {
+  SiMeta,
+  SiNetflix,
+  SiTesla
+} from "react-icons/si";
+import { FaAmazon, FaGoogle, FaMicrosoft, FaApple, FaSalesforce, FaPencilAlt } from "react-icons/fa";
+import { BiLogoAdobe } from "react-icons/bi";
+import { GrOracle } from "react-icons/gr";
 import { createInterview } from "../services/operations/interviewAPI";
 import { resetInterview, setInterviewConfig } from "../slices/interviewSlice";
+import { ThemeContext } from "../components/shared/ThemeContext";
+import ThemeToggle from "../components/ThemeToggle";
 
-export default function InterviewSetup() {
-  const { token } = useSelector((state) => state.auth);
-  const { interviewConfig, loading } = useSelector((state) => state.interview);
-  const { user } = useSelector((state) => state.profile);
-  const navigate = useNavigate();
+const INTERVIEW_SETUP_CSS = `
+.nk-setup {
+  --nk-ink: #111111;
+  --nk-on-ink: #ffffff;
+  --nk-canvas: #ffffff;
+  --nk-cloud: #f5f5f5;
+  --nk-hairline: #cacacb;
+  --nk-hairline-soft: #e5e5e5;
+  --nk-charcoal: #39393b;
+  --nk-mute: #707072;
+  --nk-success: #007d48;
+  --nk-sale: #d30005;
+  --nk-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 5% 0%, rgba(124, 58, 237, .10), transparent 28rem),
+    radial-gradient(circle at 95% 10%, rgba(236, 72, 153, .08), transparent 28rem),
+    var(--nk-canvas);
+  color: var(--nk-ink);
+  font-family: "Helvetica Now Text", "Helvetica Neue", Inter, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+.nk-setup[data-nk-theme="dark"] {
+  --nk-ink: #ffffff;
+  --nk-on-ink: #111111;
+  --nk-canvas: #111111;
+  --nk-cloud: #1f1f21;
+  --nk-hairline: #39393b;
+  --nk-hairline-soft: #2a2a2c;
+  --nk-charcoal: #cacacb;
+  --nk-mute: #9e9ea0;
+  --nk-success: #1eaa52;
+}
+
+.nk-setup *,
+.nk-setup *::before,
+.nk-setup *::after {
+  box-sizing: border-box;
+}
+
+.nk-setup button,
+.nk-setup input {
+  font: inherit;
+}
+
+.nk-setup button {
+  cursor: pointer;
+}
+
+.nk-setup button:disabled {
+  cursor: not-allowed;
+}
+
+.nk-setup :is(button, input):focus-visible {
+  outline: 2px solid var(--nk-ink);
+  outline-offset: 3px;
+}
+
+.nk-setup .setup-container {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 48px;
+}
+
+.nk-setup .setup-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  background: color-mix(in srgb, var(--nk-canvas) 90%, transparent);
+  border-bottom: 1px solid var(--nk-hairline-soft);
+  backdrop-filter: blur(18px);
+}
+
+.nk-setup .setup-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.nk-setup .setup-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nk-setup .setup-brand-mark {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--nk-ink);
+  color: var(--nk-on-ink);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .04em;
+}
+
+.nk-setup .setup-user {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--nk-ink);
+  color: var(--nk-on-ink);
+}
+
+.nk-setup .setup-user img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.nk-setup .setup-main {
+  padding: 48px 0 80px;
+}
+
+.nk-setup .setup-progress {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 40px;
+}
+
+.nk-setup .setup-progress-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.nk-setup .setup-progress-item:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 20px;
+  left: 44px;
+  right: -12px;
+  height: 1px;
+  background: var(--nk-hairline);
+  z-index: 0;
+}
+
+.nk-setup .setup-progress-item.is-complete:not(:last-child)::after {
+  background: var(--nk-ink);
+}
+
+.nk-setup .setup-progress-number {
+  position: relative;
+  z-index: 1;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--nk-hairline);
+  border-radius: 50%;
+  background: var(--nk-canvas);
+  color: var(--nk-mute);
+  font-size: 14px;
+  font-weight: 500;
+  transition: all .35s var(--nk-ease);
+}
+
+.nk-setup .setup-progress-item.is-active .setup-progress-number,
+.nk-setup .setup-progress-item.is-complete .setup-progress-number {
+  border-color: var(--nk-ink);
+  background: var(--nk-ink);
+  color: var(--nk-on-ink);
+  transform: scale(1.08);
+}
+
+.nk-setup .setup-progress-label strong,
+.nk-setup .setup-progress-label span {
+  display: block;
+}
+
+.nk-setup .setup-progress-label strong {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.nk-setup .setup-progress-label span {
+  margin-top: 2px;
+  color: var(--nk-mute);
+  font-size: 12px;
+}
+
+.nk-setup .setup-card {
+  position: relative;
+  overflow: hidden;
+  padding: 48px;
+  background: var(--nk-canvas);
+  border: 1px solid var(--nk-hairline-soft);
+  box-shadow: 0 24px 80px rgba(17, 17, 17, .08);
+}
+
+.nk-setup .setup-card::before {
+  content: "";
+  position: absolute;
+  top: -180px;
+  right: -160px;
+  width: 360px;
+  height: 360px;
+  border-radius: 50%;
+  background: rgba(124, 58, 237, .10);
+  filter: blur(55px);
+  pointer-events: none;
+}
+
+.nk-setup .setup-content {
+  position: relative;
+  z-index: 1;
+}
+
+.nk-setup .setup-intro {
+  max-width: 760px;
+  margin-bottom: 40px;
+}
+
+.nk-setup .setup-kicker {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 14px;
+  border: 1px solid var(--nk-hairline);
+  border-radius: 999px;
+  color: var(--nk-mute);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.nk-setup .setup-title {
+  margin: 18px 0 0;
+  font-family: "Helvetica Now Display", "Helvetica Neue", Inter, sans-serif;
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -.045em;
+  text-transform: uppercase;
+}
+
+.nk-setup .setup-title-accent {
+  color: var(--nk-mute);
+}
+
+.nk-setup .setup-description {
+  max-width: 650px;
+  margin: 16px 0 0;
+  color: var(--nk-mute);
+  font-size: 18px;
+  line-height: 1.55;
+}
+
+.nk-setup .setup-section {
+  margin-top: 44px;
+}
+
+.nk-setup .setup-section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 18px;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.nk-setup .setup-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.nk-setup .setup-grid-two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.nk-setup .setup-grid-four {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.nk-setup .setup-option {
+  position: relative;
+  min-height: 205px;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  overflow: hidden;
+  text-align: left;
+  border: 1px solid transparent;
+  background: var(--nk-cloud);
+  color: var(--nk-ink);
+  transition:
+    transform .35s var(--nk-ease),
+    border-color .35s ease,
+    background-color .35s ease,
+    box-shadow .35s ease;
+}
+
+.nk-setup .setup-option:hover {
+  transform: translateY(-5px);
+  border-color: var(--nk-hairline);
+  background: var(--nk-canvas);
+  box-shadow: 0 16px 40px rgba(17, 17, 17, .08);
+}
+
+.nk-setup .setup-option.is-selected {
+  border-color: var(--nk-ink);
+  background: var(--nk-ink);
+  color: var(--nk-on-ink);
+  box-shadow: 0 18px 44px rgba(17, 17, 17, .18);
+}
+
+.nk-setup .setup-option-icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 28px;
+  border-radius: 50%;
+  background: var(--nk-canvas);
+  color: var(--nk-ink);
+  font-size: 24px;
+}
+.setup-option-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--nk-muted, #737373);
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.setup-option-icon svg {
+  width: 24px;
+  height: 24px;
+  stroke: currentColor;
+}
+
+.setup-option.is-selected .setup-option-icon {
+  color: var(--nk-ink, #171717);
+}
+
+.setup-option:hover .setup-option-icon {
+  color: var(--nk-ink, #171717);
+}
+
+.nk-setup .setup-option-title {
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.nk-setup .setup-option-description {
+  margin-top: 8px;
+  color: var(--nk-mute);
+  font-size: 14px;
+}
+
+.nk-setup .setup-option.is-selected .setup-option-description {
+  color: #cacacb;
+}
+
+.nk-setup .setup-option-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 18px;
+}
+
+.nk-setup .setup-feature {
+  padding: 4px 9px;
+  border: 1px solid var(--nk-hairline);
+  border-radius: 999px;
+  color: var(--nk-mute);
+  font-size: 11px;
+}
+
+.nk-setup .setup-option.is-selected .setup-feature {
+  border-color: #555557;
+  color: #cacacb;
+}
+
+.nk-setup .setup-check {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--nk-on-ink);
+  color: var(--nk-ink);
+}
+
+.nk-setup .setup-subdomain,
+.nk-setup .setup-panel,
+.nk-setup .setup-summary {
+  padding: 28px;
+  border: 1px solid var(--nk-hairline-soft);
+  background: var(--nk-cloud);
+}
+
+.nk-setup .setup-subdomain {
+  margin-top: 40px;
+  animation: nk-setup-rise .5s var(--nk-ease) both;
+}
+
+.nk-setup .setup-subdomain-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.nk-setup .setup-chip {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--nk-hairline);
+  background: var(--nk-canvas);
+  color: var(--nk-ink);
+  font-size: 14px;
+  font-weight: 500;
+  transition: all .25s ease;
+}
+
+.nk-setup .setup-chip:hover,
+.nk-setup .setup-chip.is-selected {
+  border-color: var(--nk-ink);
+  background: var(--nk-ink);
+  color: var(--nk-on-ink);
+}
+
+.nk-setup .setup-duration {
+  min-height: 150px;
+  text-align: center;
+}
+
+.nk-setup .setup-duration .setup-option-icon {
+  margin: 0 auto 18px;
+}
+
+.nk-setup .setup-duration-label {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.nk-setup .setup-duration-description {
+  margin-top: 5px;
+  color: var(--nk-mute);
+  font-size: 12px;
+}
+
+.nk-setup .setup-recommended {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--nk-ink);
+  color: var(--nk-on-ink);
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.nk-setup .setup-field {
+  width: 100%;
+  height: 52px;
+  padding: 0 16px;
+  border: 1px solid var(--nk-hairline);
+  outline: none;
+  background: var(--nk-canvas);
+  color: var(--nk-ink);
+  transition: border-color .25s ease, box-shadow .25s ease;
+}
+
+.nk-setup .setup-field::placeholder {
+  color: var(--nk-mute);
+}
+
+.nk-setup .setup-field:focus {
+  border-color: var(--nk-ink);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--nk-ink) 12%, transparent);
+}
+
+.nk-setup .setup-upload {
+  padding: 40px 28px;
+  text-align: center;
+  border: 1px dashed var(--nk-hairline);
+  background: var(--nk-cloud);
+}
+
+.nk-setup .setup-upload-icon {
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  background: var(--nk-ink);
+  color: var(--nk-on-ink);
+}
+
+.nk-setup .setup-upload-title {
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.nk-setup .setup-upload-description {
+  max-width: 520px;
+  margin: 8px auto 24px;
+  color: var(--nk-mute);
+}
+
+.nk-setup .setup-file {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  border: 1px solid var(--nk-ink);
+  background: var(--nk-ink);
+  color: var(--nk-on-ink);
+  font-size: 14px;
+  font-weight: 500;
+  transition: transform .25s var(--nk-ease), opacity .25s ease;
+}
+
+.nk-setup .setup-file:hover {
+  transform: translateY(-2px);
+  opacity: .85;
+}
+
+.nk-setup .setup-uploaded-file {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  border: 1px solid var(--nk-success);
+  background: color-mix(in srgb, var(--nk-success) 10%, transparent);
+}
+
+.nk-setup .setup-progress-track {
+  height: 7px;
+  margin-top: 24px;
+  overflow: hidden;
+  background: var(--nk-hairline-soft);
+}
+
+.nk-setup .setup-progress-fill {
+  height: 100%;
+  background: var(--nk-ink);
+  transition: width .35s var(--nk-ease);
+}
+
+.nk-setup .setup-question-form {
+  display: flex;
+  gap: 8px;
+}
+
+.nk-setup .setup-question-form .setup-field {
+  flex: 1;
+}
+
+.nk-setup .setup-question {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 0;
+  border-top: 1px solid var(--nk-hairline);
+}
+
+.nk-setup .setup-question-number {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--nk-ink);
+  color: var(--nk-on-ink);
+  font-size: 12px;
+}
+
+.nk-setup .setup-question-text {
+  flex: 1;
+  margin: 3px 0 0;
+  line-height: 1.5;
+}
+
+.nk-setup .setup-question-remove {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--nk-mute);
+}
+
+.nk-setup .setup-question-remove:hover {
+  color: var(--nk-sale);
+}
+
+.nk-setup .setup-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 24px;
+  padding: 16px;
+  border-left: 3px solid var(--nk-ink);
+  background: var(--nk-canvas);
+  color: var(--nk-mute);
+  font-size: 13px;
+}
+
+.nk-setup .setup-summary {
+  margin-top: 40px;
+}
+
+.nk-setup .setup-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.nk-setup .setup-summary-item {
+  min-height: 100px;
+  padding: 18px;
+  background: var(--nk-canvas);
+}
+
+.nk-setup .setup-summary-label {
+  color: var(--nk-mute);
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.nk-setup .setup-summary-value {
+  margin-top: 10px;
+  font-size: 17px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.nk-setup .setup-summary-subvalue {
+  margin-top: 3px;
+  color: var(--nk-mute);
+  font-size: 13px;
+}
+
+.nk-setup .setup-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.nk-setup .nk-btn {
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 0 24px;
+  border: 0;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 500;
+  transition:
+    transform .2s var(--nk-ease),
+    background-color .25s ease,
+    opacity .25s ease;
+}
+
+.nk-setup .nk-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.nk-setup .nk-btn:active:not(:disabled) {
+  transform: scale(.97);
+}
+
+.nk-setup .nk-btn-primary {
+  background: var(--nk-ink);
+  color: var(--nk-on-ink);
+}
+
+.nk-setup .nk-btn-primary:hover:not(:disabled) {
+  background: var(--nk-charcoal);
+}
+
+.nk-setup .nk-btn-secondary {
+  background: var(--nk-cloud);
+  color: var(--nk-ink);
+}
+
+.nk-setup .nk-btn-secondary:hover:not(:disabled) {
+  background: var(--nk-hairline-soft);
+}
+
+.nk-setup .nk-btn:disabled {
+  opacity: .42;
+}
+
+.nk-setup .setup-step-indicator {
+  margin-top: 28px;
+  text-align: center;
+  color: var(--nk-mute);
+  font-size: 13px;
+}
+
+.nk-setup .setup-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.nk-setup .setup-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--nk-hairline);
+  transition: all .3s var(--nk-ease);
+}
+
+.nk-setup .setup-dot.is-active {
+  width: 28px;
+  background: var(--nk-ink);
+}
+
+.nk-setup .setup-preparing {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 32px;
+}
+
+.nk-setup .setup-preparing-card {
+  width: min(100%, 520px);
+  padding: 44px;
+  background: var(--nk-canvas);
+  border: 1px solid var(--nk-hairline-soft);
+  box-shadow: 0 24px 80px rgba(17, 17, 17, .12);
+  animation: nk-setup-rise .6s var(--nk-ease) both;
+}
+
+.nk-setup .setup-loader {
+  width: 68px;
+  height: 68px;
+  margin: 0 auto 24px;
+  border: 3px solid var(--nk-hairline-soft);
+  border-top-color: var(--nk-ink);
+  border-radius: 50%;
+  animation: nk-setup-spin 1s linear infinite;
+}
+
+.nk-setup .setup-preparation-bar {
+  height: 8px;
+  margin-top: 26px;
+  overflow: hidden;
+  background: var(--nk-hairline-soft);
+}
+
+.nk-setup .setup-preparation-fill {
+  height: 100%;
+  background: var(--nk-ink);
+  transition: width .6s var(--nk-ease);
+}
+
+.nk-setup .setup-status-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.nk-setup .setup-status-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: var(--nk-cloud);
+  color: var(--nk-mute);
+  font-size: 13px;
+}
+
+.nk-setup .setup-status-item.is-complete {
+  color: var(--nk-ink);
+}
+
+.nk-setup .setup-fade-up {
+  animation: nk-setup-rise .55s var(--nk-ease) both;
+}
+
+.nk-setup .setup-stagger-1 {
+  animation-delay: 80ms;
+}
+
+.nk-setup .setup-stagger-2 {
+  animation-delay: 160ms;
+}
+
+.nk-setup .setup-stagger-3 {
+  animation-delay: 240ms;
+}
+
+@keyframes nk-setup-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes nk-setup-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1023px) {
+  .nk-setup .setup-container {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+
+  .nk-setup .setup-card {
+    padding: 36px 28px;
+  }
+
+  .nk-setup .setup-grid-four {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .nk-setup .setup-subdomain-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .nk-setup .setup-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .nk-setup .setup-container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .nk-setup .setup-main {
+    padding-top: 24px;
+    padding-bottom: 48px;
+  }
+
+  .nk-setup .setup-card {
+    padding: 24px 16px;
+  }
+
+  .nk-setup .setup-progress {
+    gap: 4px;
+  }
+
+  .nk-setup .setup-progress-item {
+    justify-content: center;
+  }
+
+  .nk-setup .setup-progress-label {
+    display: none;
+  }
+
+  .nk-setup .setup-progress-item:not(:last-child)::after {
+    left: 50%;
+    right: -4px;
+  }
+
+  .nk-setup .setup-grid,
+  .nk-setup .setup-grid-two,
+  .nk-setup .setup-grid-four,
+  .nk-setup .setup-subdomain-grid,
+  .nk-setup .setup-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .nk-setup .setup-option {
+    min-height: 170px;
+  }
+
+  .nk-setup .setup-question-form {
+    flex-direction: column;
+  }
+
+  .nk-setup .setup-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .nk-setup .setup-actions .nk-btn {
+    width: 100%;
+  }
+
+  .nk-setup .setup-preparing-card {
+    padding: 28px 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nk-setup *,
+  .nk-setup *::before,
+  .nk-setup *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+`;
+
+const DOMAINS = [
+  {
+    value: "frontend",
+    label: "Frontend Development",
+    icon: PanelsTopLeft,
+    color: "#3B82F6",
+    subDomains: [
+      "React",
+      "Vue",
+      "Angular",
+      "JavaScript",
+      "TypeScript",
+      "Next.js",
+      "CSS/HTML",
+      "Redux",
+    ],
+  },
+  {
+    value: "backend",
+    label: "Backend Development",
+    icon: Server,
+    subDomains: [
+      "Node.js",
+      "Python",
+      "Java",
+      "Go",
+      "C#",
+      "Ruby",
+      "PHP",
+      "Spring Boot",
+    ],
+  },
+  {
+    value: "fullstack",
+    label: "Full Stack",
+    icon: Layers3,
+    subDomains: [
+      "MERN",
+      "MEAN",
+      "Django",
+      "Spring Boot",
+      ".NET",
+      "Ruby on Rails",
+    ],
+  },
+  {
+    value: "mobile",
+    label: "Mobile Development",
+    icon: Smartphone,
+    subDomains: [
+      "React Native",
+      "Flutter",
+      "iOS (Swift)",
+      "Android (Kotlin)",
+      "Xamarin",
+    ],
+  },
+  {
+    value: "devops",
+    label: "DevOps & Cloud",
+    icon: Rocket,
+    subDomains: [
+      "AWS",
+      "Azure",
+      "GCP",
+      "Docker",
+      "Kubernetes",
+      "CI/CD",
+      "Terraform",
+    ],
+  },
+  {
+    value: "data",
+    label: "Data Science & AI",
+    icon: BrainCircuit,
+    subDomains: [
+      "Machine Learning",
+      "Data Analysis",
+      "Deep Learning",
+      "NLP",
+      "Computer Vision",
+    ],
+  },
+];
+
+const INTERVIEW_TYPES = [
+  {
+    value: "technical",
+    label: "Technical",
+    icon: "💡",
+    description: "Coding, algorithms and data structures",
+    features: ["Live coding", "Problem solving", "Code review"],
+  },
+  {
+    value: "behavioral",
+    label: "Behavioral",
+    icon: "💬",
+    description: "Communication and soft skills",
+    features: ["STAR method", "Team scenarios", "Leadership"],
+  },
+  {
+    value: "system-design",
+    label: "System Design",
+    icon: "🏗️",
+    description: "Architecture and scalability",
+    features: ["Microservices", "Database design", "Load balancing"],
+  },
+  {
+    value: "mixed",
+    label: "Mixed Interview",
+    icon: "🎯",
+    description: "A complete interview assessment",
+    features: ["All-in-one", "Realistic", "Complete evaluation"],
+  },
+];
+
+const DIFFICULTIES = [
+  {
+    value: "easy",
+    label: "Easy",
+    icon: "🟢",
+    description: "Perfect for beginners",
+    experience: "0–2 years",
+  },
+  {
+    value: "medium",
+    label: "Medium",
+    icon: "🟡",
+    description: "Intermediate challenges",
+    experience: "2–4 years",
+    recommended: true,
+  },
+  {
+    value: "hard",
+    label: "Hard",
+    icon: "🔴",
+    description: "Advanced concepts",
+    experience: "4–7 years",
+  },
+  {
+    value: "expert",
+    label: "Expert",
+    icon: "⚫",
+    description: "Senior-level mastery",
+    experience: "7+ years",
+  },
+];
+
+const DURATIONS = [
+  { value: 15, label: "15 min", icon: "⚡", description: "Quick practice" },
+  {
+    value: 30,
+    label: "30 min",
+    icon: "🎯",
+    description: "Standard session",
+    recommended: true,
+  },
+  { value: 45, label: "45 min", icon: "⏱️", description: "Extended practice" },
+  { value: 60, label: "1 hour", icon: "🕐", description: "Deep dive" },
+  { value: 90, label: "1.5 hours", icon: "⏰", description: "Full interview" },
+];
+
+const COMPANIES = [
+  { name: "Google", icon: FaGoogle },
+  { name: "Meta", icon: SiMeta },
+  { name: "Amazon", icon: FaAmazon },
+  { name: "Microsoft", icon: FaMicrosoft },
+  { name: "Apple", icon: FaApple },
+  { name: "Netflix", icon: SiNetflix },
+  { name: "Tesla", icon: SiTesla },
+  { name: "Adobe", icon: BiLogoAdobe },
+  { name: "Salesforce", icon: FaSalesforce },
+  { name: "Oracle", icon: GrOracle },
+  { name: "Startup", icon: Rocket },
+  { name: "Custom", icon: FaPencilAlt },
+];
+
+const STEPS = [
+  { number: 1, label: "Domain", description: "Choose field" },
+  { number: 2, label: "Format", description: "Select type" },
+  { number: 3, label: "Details", description: "Configure" },
+  { number: 4, label: "Extras", description: "Personalize" },
+];
+
+function SetupOption({
+  selected,
+  icon,
+  iconColor,
+  title,
+  onClick,
+  className = "",
+  description,
+  children,
+}) {
+  const isImage = typeof icon === "string";
+  const isComponent = typeof icon === "function";
+  const Icon = isComponent ? icon : null;
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`setup-option ${selected ? "is-selected" : ""} ${className}`}
+      aria-pressed={selected}
+    >
+      <span className="setup-option-icon" style={{ color: iconColor }}>
+        {typeof icon === "function" ? (
+          React.createElement(icon, {
+            size: 24,
+            strokeWidth: 1.8,
+            "aria-hidden": true,
+          })
+        ) : typeof icon === "string" ? (
+          <span>{icon}</span>
+        ) : React.isValidElement(icon) ? (
+          icon
+        ) : null}
+      </span>
+
+      <span className="setup-option-title">{title}</span>
+
+      {description && (
+        <span className="setup-option-description">{description}</span>
+      )}
+
+      {children}
+
+      {selected && (
+        <span className="setup-check" aria-hidden="true">
+          <Check size={16} />
+        </span>
+      )}
+    </button>
+  );
+}
+
+function StepHeader({ step, title, accent, description }) {
+  return (
+    <div className="setup-intro setup-fade-up">
+      <span className="setup-kicker">Step {step} of 4</span>
+      <h1 className="setup-title">
+        {title} <span className="setup-title-accent">{accent}</span>
+      </h1>
+      <p className="setup-description">{description}</p>
+    </div>
+  );
+}
+
+function InterviewSetup() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { theme } = useContext(ThemeContext);
+
+  const { token } = useSelector((state) => state.auth);
+  const { interviewConfig } = useSelector((state) => state.interview);
+  const { user } = useSelector((state) => state.profile);
 
   const [step, setStep] = useState(1);
   const [customQuestion, setCustomQuestion] = useState("");
   const [uploadProgress, setUploadProgress] = useState(0);
   const [showCustomCompany, setShowCustomCompany] = useState(false);
   const [customCompany, setCustomCompany] = useState("");
+  const [isPreparingInterview, setIsPreparingInterview] = useState(false);
+  const [preparationProgress, setPreparationProgress] = useState(0);
+  // Prevent duplicate submissions when the button is clicked multiple times
+  const isSubmittingRef = React.useRef(false);
+
   const [config, setConfig] = useState({
     domain: "",
     subDomain: "",
@@ -27,386 +1250,161 @@ export default function InterviewSetup() {
     targetCompany: "",
     questions: [],
     resume: null,
-    ...interviewConfig, // Merge with Redux config if exists
+    ...interviewConfig,
   });
-  const [isPreparingInterview, setIsPreparingInterview] = useState(false);
-  const [preparationProgress, setPreparationProgress] = useState(0);
+
+  const nkTheme = theme === "dark" ? "dark" : "light";
+
+  const selectedDomain = useMemo(
+    () => DOMAINS.find((domain) => domain.value === config.domain),
+    [config.domain],
+  );
+
+  // NOTE: resetInterview() was here before but it wiped interviewConfig on every
+  // mount, destroying selections made on a previous visit. Removed intentionally.
 
   useEffect(() => {
-    // Reset interview state when component mounts
-    dispatch(resetInterview());
-  }, [dispatch]);
+    if (!interviewConfig) return;
 
-  // Update config when interviewConfig changes
-  useEffect(() => {
-    if (interviewConfig) {
-      setConfig((prev) => ({
-        ...prev,
-        ...interviewConfig,
-      }));
-    }
+    setConfig((previous) => ({
+      ...previous,
+      ...interviewConfig,
+    }));
   }, [interviewConfig]);
 
-  const domains = [
-    {
-      value: "frontend",
-      label: "Frontend Development",
-      icon: "💻",
-      gradient: "from-blue-500 via-cyan-500 to-teal-500",
-      subDomains: [
-        "React",
-        "Vue",
-        "Angular",
-        "JavaScript",
-        "TypeScript",
-        "Next.js",
-        "CSS/HTML",
-        "Redux",
-      ],
-    },
-    {
-      value: "backend",
-      label: "Backend Development",
-      icon: "⚙️",
-      gradient: "from-green-500 via-emerald-500 to-teal-500",
-      subDomains: [
-        "Node.js",
-        "Python",
-        "Java",
-        "Go",
-        "C#",
-        "Ruby",
-        "PHP",
-        "Spring Boot",
-      ],
-    },
-    {
-      value: "fullstack",
-      label: "Full Stack",
-      icon: "🔧",
-      gradient: "from-purple-500 via-pink-500 to-rose-500",
-      subDomains: [
-        "MERN",
-        "MEAN",
-        "Django",
-        "Spring Boot",
-        ".NET",
-        "Ruby on Rails",
-      ],
-    },
-    {
-      value: "mobile",
-      label: "Mobile Development",
-      icon: "📱",
-      gradient: "from-orange-500 via-red-500 to-pink-500",
-      subDomains: [
-        "React Native",
-        "Flutter",
-        "iOS (Swift)",
-        "Android (Kotlin)",
-        "Xamarin",
-      ],
-    },
-    {
-      value: "devops",
-      label: "DevOps & Cloud",
-      icon: "🚀",
-      gradient: "from-yellow-500 via-orange-500 to-red-500",
-      subDomains: [
-        "AWS",
-        "Azure",
-        "GCP",
-        "Docker",
-        "Kubernetes",
-        "CI/CD",
-        "Terraform",
-      ],
-    },
-    {
-      value: "data",
-      label: "Data Science & AI",
-      icon: "🤖",
-      gradient: "from-indigo-500 via-purple-500 to-pink-500",
-      subDomains: [
-        "Machine Learning",
-        "Data Analysis",
-        "Deep Learning",
-        "NLP",
-        "Computer Vision",
-      ],
-    },
-  ];
-
-  const interviewTypes = [
-    {
-      value: "technical",
-      label: "Technical",
-      icon: "💡",
-      gradient: "from-blue-500 to-purple-600",
-      description: "Coding, algorithms & data structures",
-      features: ["Live coding", "Problem solving", "Code review"],
-    },
-    {
-      value: "behavioral",
-      label: "Behavioral",
-      icon: "💬",
-      gradient: "from-green-500 to-teal-600",
-      description: "Communication & soft skills",
-      features: ["STAR method", "Team scenarios", "Leadership"],
-    },
-    {
-      value: "system-design",
-      label: "System Design",
-      icon: "🏗️",
-      gradient: "from-orange-500 to-red-600",
-      description: "Architecture & scalability",
-      features: ["Microservices", "Database design", "Load balancing"],
-    },
-    {
-      value: "mixed",
-      label: "Mixed Interview",
-      icon: "🎯",
-      gradient: "from-pink-500 to-purple-600",
-      description: "Comprehensive assessment",
-      features: ["All-in-one", "Realistic", "Complete evaluation"],
-    },
-  ];
-
-  const difficulties = [
-    {
-      value: "easy",
-      label: "Easy",
-      icon: "🟢",
-      description: "Perfect for beginners",
-      gradient: "from-green-400 to-emerald-500",
-      exp: "0-2 years",
-      badge: "Beginner Friendly",
-    },
-    {
-      value: "medium",
-      label: "Medium",
-      icon: "🟡",
-      description: "Intermediate challenges",
-      gradient: "from-yellow-400 to-orange-500",
-      exp: "2-4 years",
-      badge: "Most Popular",
-    },
-    {
-      value: "hard",
-      label: "Hard",
-      icon: "🔴",
-      description: "Advanced concepts",
-      gradient: "from-red-400 to-pink-500",
-      exp: "4-7 years",
-      badge: "Advanced",
-    },
-    {
-      value: "expert",
-      label: "Expert",
-      icon: "⚫",
-      description: "Senior level mastery",
-      gradient: "from-purple-600 to-indigo-700",
-      exp: "7+ years",
-      badge: "Elite Level",
-    },
-  ];
-
-  const durations = [
-    { value: 15, label: "15 min", icon: "⚡", desc: "Quick practice" },
-    {
-      value: 30,
-      label: "30 min",
-      icon: "🎯",
-      desc: "Standard session",
-      recommended: true,
-    },
-    { value: 45, label: "45 min", icon: "⏱️", desc: "Extended practice" },
-    { value: 60, label: "1 hour", icon: "🕐", desc: "Deep dive" },
-    { value: 90, label: "1.5 hours", icon: "⏰", desc: "Full interview" },
-  ];
-
-  const topCompanies = [
-    {
-      name: "Google",
-      logo: "🔍",
-      gradient: "from-blue-500 to-red-500",
-      color: "blue",
-    },
-    {
-      name: "Meta",
-      logo: "👁️",
-      gradient: "from-blue-600 to-indigo-600",
-      color: "indigo",
-    },
-    {
-      name: "Amazon",
-      logo: "📦",
-      gradient: "from-orange-400 to-yellow-500",
-      color: "orange",
-    },
-    {
-      name: "Microsoft",
-      logo: "🪟",
-      gradient: "from-blue-500 to-cyan-500",
-      color: "cyan",
-    },
-    {
-      name: "Apple",
-      logo: "🍎",
-      gradient: "from-gray-700 to-gray-900",
-      color: "gray",
-    },
-    {
-      name: "Netflix",
-      logo: "🎬",
-      gradient: "from-red-600 to-red-700",
-      color: "red",
-    },
-    {
-      name: "Tesla",
-      logo: "⚡",
-      gradient: "from-red-500 to-gray-700",
-      color: "red",
-    },
-    {
-      name: "Adobe",
-      logo: "🎨",
-      gradient: "from-red-500 to-pink-500",
-      color: "pink",
-    },
-    {
-      name: "Salesforce",
-      logo: "☁️",
-      gradient: "from-blue-400 to-cyan-500",
-      color: "cyan",
-    },
-    {
-      name: "Oracle",
-      logo: "🔴",
-      gradient: "from-red-600 to-orange-600",
-      color: "orange",
-    },
-    {
-      name: "Startup",
-      logo: "🚀",
-      gradient: "from-purple-500 to-pink-500",
-      color: "purple",
-    },
-    {
-      name: "Custom",
-      logo: "✏️",
-      gradient: "from-gray-500 to-gray-700",
-      color: "gray",
-    },
-  ];
-
   const updateConfig = (updates) => {
-    const newConfig = { ...config, ...updates };
-    setConfig(newConfig);
+    setConfig((previous) => ({
+      ...previous,
+      ...updates,
+    }));
+
     dispatch(setInterviewConfig(updates));
   };
 
-  // Handle domain selection with subdomain reset
-  const handleDomainSelect = (domainValue) => {
+  const handleDomainSelect = (domain) => {
     updateConfig({
-      domain: domainValue,
-      subDomain: "", // Reset subdomain when domain changes
+      domain,
+      subDomain: "",
     });
   };
 
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    if (file && file.type === "application/pdf") {
-      setUploadProgress(0);
-      const interval = setInterval(() => {
-        setUploadProgress((prev) => {
-          if (prev >= 100) {
-            clearInterval(interval);
-            updateConfig({ resume: file });
-            return 100;
-          }
-          return prev + 10;
-        });
-      }, 100);
-    } else {
-      toast.error("Please upload a PDF file");
+  const handleCompanySelect = (companyName) => {
+    if (companyName === "Custom") {
+      setShowCustomCompany(true);
+      updateConfig({
+        targetCompany: customCompany,
+      });
+      return;
     }
+
+    setShowCustomCompany(false);
+    setCustomCompany("");
+    updateConfig({
+      targetCompany: companyName,
+    });
+  };
+
+  const handleFileUpload = (event) => {
+    const file = event.target.files?.[0];
+
+    if (!file) return;
+
+    if (file.type !== "application/pdf") {
+      toast.error("Please upload a PDF file.");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Resume must be smaller than 5MB.");
+      return;
+    }
+
+    setUploadProgress(0);
+
+    const interval = window.setInterval(() => {
+      setUploadProgress((previous) => {
+        const next = previous + 10;
+
+        if (next >= 100) {
+          window.clearInterval(interval);
+          updateConfig({ resume: file });
+          return 100;
+        }
+
+        return next;
+      });
+    }, 80);
   };
 
   const addCustomQuestion = () => {
-    if (customQuestion.trim()) {
-      const newQuestions = [...(config.questions || []), customQuestion.trim()];
-      updateConfig({ questions: newQuestions });
-      setCustomQuestion("");
-      toast.success("Custom question added!");
-    }
+    const question = customQuestion.trim();
+
+    if (!question) return;
+
+    updateConfig({
+      questions: [...(config.questions || []), question],
+    });
+
+    setCustomQuestion("");
+    toast.success("Custom question added.");
   };
 
   const removeQuestion = (index) => {
-    const newQuestions = (config.questions || []).filter((_, i) => i !== index);
-    updateConfig({ questions: newQuestions });
-    toast.success("Question removed");
+    updateConfig({
+      questions: (config.questions || []).filter(
+        (_, questionIndex) => questionIndex !== index,
+      ),
+    });
+
+    toast.success("Question removed.");
   };
 
   const isStepComplete = () => {
     switch (step) {
       case 1:
-        return config.domain && config.subDomain;
+        return Boolean(config.domain && config.subDomain);
       case 2:
-        return config.interviewType && config.difficulty;
+        return Boolean(config.interviewType && config.difficulty);
       case 3:
-        return config.duration && config.targetCompany;
+        return Boolean(config.duration && config.targetCompany);
       case 4:
-        return true; // Step 4 is optional
+        return true;
       default:
         return false;
     }
   };
 
   const handleStartInterview = async () => {
+    // Guard: prevent duplicate submissions while one is already in flight
+    if (isSubmittingRef.current) return;
+
     if (!token) {
-      toast.error("Please login to continue");
+      toast.error("Please log in to continue.");
       navigate("/login");
       return;
     }
 
-    // Validate required fields
-    if (
-      !config.domain ||
-      !config.subDomain ||
-      !config.interviewType ||
-      !config.difficulty ||
-      !config.duration ||
-      !config.targetCompany
-    ) {
-      toast.error("Please complete all required fields");
+    const requiredFields = [
+      config.domain,
+      config.subDomain,
+      config.interviewType,
+      config.difficulty,
+      config.duration,
+      config.targetCompany,
+    ];
+
+    if (requiredFields.some((field) => !field)) {
+      toast.error("Please complete all required fields.");
       return;
     }
 
-    // Show preparation screen
+    isSubmittingRef.current = true;
     setIsPreparingInterview(true);
+    setPreparationProgress(0);
 
-    // Simulate AI preparation with progress updates
-    const progressSteps = [
-      { progress: 20, message: "Analyzing your resume..." },
-      { progress: 40, message: "Generating personalized questions..." },
-      { progress: 60, message: "Setting up interview environment..." },
-      { progress: 80, message: "Configuring AI interviewer..." },
-      { progress: 100, message: "Ready to start!" },
-    ];
-
-    for (const step of progressSteps) {
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      setPreparationProgress(step.progress);
-      toast.loading(step.message, { id: "prep" });
-    }
-
-    toast.dismiss("prep");
-
-    // Prepare interview data
+    // Build the payload first (synchronously) so we know what to send
     let interviewData = { ...config };
 
-    // Handle file upload separately
     if (config.resume) {
       const formData = new FormData();
       formData.append("resume", config.resume);
@@ -414,916 +1412,817 @@ export default function InterviewSetup() {
       formData.append("subDomain", config.subDomain);
       formData.append("interviewType", config.interviewType);
       formData.append("difficulty", config.difficulty);
-      formData.append("duration", config.duration);
+      formData.append("duration", String(config.duration));
       formData.append("targetCompany", config.targetCompany);
 
-      // Only append questions if they exist
-      if (config.questions && config.questions.length > 0) {
+      if (config.questions?.length > 0) {
         formData.append("customQuestions", JSON.stringify(config.questions));
       }
 
       interviewData = formData;
     }
 
-    // Call API to create interview
-    dispatch(createInterview(interviewData, navigate, token));
+    // Run the visual progress animation and the real API call in parallel.
+    // The animation takes ~3.5 s; the API call usually takes 2–5 s.
+    // Neither blocks the other – we wait for both before navigating.
+    const animateProgress = async () => {
+      const steps = [20, 40, 60, 80, 100];
+      const messages = [
+        "Analyzing your resume...",
+        "Generating personalized questions...",
+        "Setting up the interview environment...",
+        "Configuring your AI interviewer...",
+        "Your interview is ready.",
+      ];
+
+      for (let i = 0; i < steps.length; i++) {
+        await new Promise((resolve) => window.setTimeout(resolve, 700));
+        setPreparationProgress(steps[i]);
+        toast.loading(messages[i], { id: "interview-preparation" });
+      }
+    };
+
+    try {
+      // Fire both concurrently; apiResult resolves with the created interview id
+      const [, createdInterview] = await Promise.all([
+        animateProgress(),
+        new Promise((resolve, reject) => {
+          // createInterview is a Redux thunk; we wrap it so we can get the result
+          import("../services/operations/interviewAPI").then(({ createInterview: create }) => {
+            let headers = { Authorization: `Bearer ${token}` };
+            let dataToSend = interviewData;
+
+            if (!(interviewData instanceof FormData)) {
+              if (!interviewData.domain || !interviewData.subDomain || !interviewData.interviewType) {
+                reject(new Error("Please complete all required fields"));
+                return;
+              }
+              dataToSend = {
+                domain: interviewData.domain,
+                subDomain: interviewData.subDomain,
+                interviewType: interviewData.interviewType,
+                difficulty: interviewData.difficulty,
+                duration: interviewData.duration,
+                targetCompany: interviewData.targetCompany,
+                customQuestions: interviewData.questions,
+              };
+            } else {
+              headers["Content-Type"] = "multipart/form-data";
+            }
+
+            import("../services/apiConnector").then(({ apiConnector }) => {
+              import("../services/apis").then(({ interviewEndpoints }) => {
+                apiConnector("POST", interviewEndpoints.CREATE_INTERVIEW_API, dataToSend, headers)
+                  .then((response) => {
+                    if (!response.data.success) {
+                      reject(new Error(response.data.message || "Failed to create interview"));
+                    } else {
+                      resolve(response.data.data);
+                    }
+                  })
+                  .catch(reject);
+              });
+            });
+          });
+        }),
+      ]);
+
+      toast.dismiss("interview-preparation");
+
+      if (createdInterview) {
+        const interviewId = createdInterview.id || createdInterview._id || createdInterview.interviewId;
+        toast.success("Interview created successfully!");
+        // Navigate to interview room with the real ID from the backend
+        navigate(`/interview-room/${interviewId}`);
+      } else {
+        throw new Error("No interview ID returned from server");
+      }
+    } catch (error) {
+      console.error("CREATE_INTERVIEW_API ERROR:", error);
+      toast.dismiss("interview-preparation");
+      toast.error(
+        error.response?.data?.message || error.message || "Failed to create interview"
+      );
+      // Reset so the user can retry from the setup form
+      setIsPreparingInterview(false);
+      setPreparationProgress(0);
+    } finally {
+      isSubmittingRef.current = false;
+    }
   };
 
-  if (isPreparingInterview) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-12 max-w-md w-full border border-white/20">
-          <div className="text-center">
-            <div className="w-24 h-24 mx-auto mb-6 relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full animate-pulse"></div>
-              <div className="absolute inset-2 bg-slate-900 rounded-full flex items-center justify-center">
-                <span className="text-4xl">🤖</span>
-              </div>
-            </div>
+  const renderPreparingScreen = () => (
+    <div className="nk-setup" data-nk-theme={nkTheme}>
+      <style>{INTERVIEW_SETUP_CSS}</style>
 
-            <h2 className="text-3xl font-bold text-white mb-4">
-              Preparing Your Interview
-            </h2>
+      <div className="setup-preparing">
+        <div className="setup-preparing-card">
+          <div className="setup-loader" aria-hidden="true" />
 
-            <div className="mb-6">
-              <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden">
+          <div style={{ textAlign: "center" }}>
+            <span className="setup-kicker">
+              <WandSparkles size={13} />
+              Preparing session
+            </span>
+
+            <h1 className="setup-title" style={{ fontSize: 36 }}>
+              Your interview is almost ready
+            </h1>
+
+            <p className="setup-description" style={{ fontSize: 15 }}>
+              We are configuring the experience around your selected goals.
+            </p>
+          </div>
+
+          <div className="setup-preparation-bar">
+            <div
+              className="setup-preparation-fill"
+              style={{ width: `${preparationProgress}%` }}
+            />
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              marginTop: 10,
+            }}
+          >
+            <span className="setup-progress-label">
+              <span>Preparing interview</span>
+            </span>
+            <strong>{preparationProgress}%</strong>
+          </div>
+
+          <div className="setup-status-list">
+            {[
+              ["Resume analysis", 20],
+              ["Question generation", 40],
+              ["Environment setup", 60],
+              ["AI configuration", 80],
+            ].map(([label, requiredProgress]) => {
+              const complete = preparationProgress >= requiredProgress;
+
+              return (
                 <div
-                  className="h-full bg-gradient-to-r from-purple-600 to-pink-600 transition-all duration-500"
-                  style={{ width: `${preparationProgress}%` }}
-                ></div>
-              </div>
-              <p className="text-white/60 mt-3 text-sm">
-                {preparationProgress}% Complete
-              </p>
-            </div>
-
-            <div className="space-y-3 text-left">
-              <div
-                className={`flex items-center gap-3 p-3 rounded-xl ${preparationProgress >= 20 ? "bg-green-500/20" : "bg-white/5"}`}
-              >
-                <span className="text-xl">
-                  {preparationProgress >= 20 ? "✅" : "⏳"}
-                </span>
-                <span className="text-white/80">Resume Analysis</span>
-              </div>
-              <div
-                className={`flex items-center gap-3 p-3 rounded-xl ${preparationProgress >= 40 ? "bg-green-500/20" : "bg-white/5"}`}
-              >
-                <span className="text-xl">
-                  {preparationProgress >= 40 ? "✅" : "⏳"}
-                </span>
-                <span className="text-white/80">Question Generation</span>
-              </div>
-              <div
-                className={`flex items-center gap-3 p-3 rounded-xl ${preparationProgress >= 60 ? "bg-green-500/20" : "bg-white/5"}`}
-              >
-                <span className="text-xl">
-                  {preparationProgress >= 60 ? "✅" : "⏳"}
-                </span>
-                <span className="text-white/80">Environment Setup</span>
-              </div>
-              <div
-                className={`flex items-center gap-3 p-3 rounded-xl ${preparationProgress >= 80 ? "bg-green-500/20" : "bg-white/5"}`}
-              >
-                <span className="text-xl">
-                  {preparationProgress >= 80 ? "✅" : "⏳"}
-                </span>
-                <span className="text-white/80">AI Configuration</span>
-              </div>
-            </div>
+                  key={label}
+                  className={`setup-status-item ${complete ? "is-complete" : ""
+                    }`}
+                >
+                  {complete ? (
+                    <Check size={16} />
+                  ) : (
+                    <LoaderCircle size={16} />
+                  )}
+                  <span>{label}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
-    );
+    </div>
+  );
+
+  if (isPreparingInterview) {
+    return renderPreparingScreen();
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
-      {/* Animated Background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-        <div className="absolute top-0 right-1/4 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-        <div className="absolute bottom-0 left-1/3 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
-      </div>
+    <div className="nk-setup" data-nk-theme={nkTheme}>
+      <style>{INTERVIEW_SETUP_CSS}</style>
 
-      {/* Header */}
-      <nav className="relative bg-white/5 backdrop-blur-xl border-b border-white/10 top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
-            <button
-              onClick={() => navigate("/dashboard")}
-              className="flex items-center gap-3 text-white/80 hover:text-white transition-all group"
-            >
-              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-all">
-                <span className="text-xl">←</span>
-              </div>
-              <span className="font-semibold hidden sm:block">
-                Back to Dashboard
-              </span>
-            </button>
+      <header className="setup-header">
+        <div className="setup-container setup-header-inner">
+          <button
+            type="button"
+            className="nk-btn nk-btn-secondary"
+            onClick={() => navigate("/dashboard")}
+          >
+            <ArrowLeft size={17} />
+            <span className="hidden sm:inline">Back to Dashboard</span>
+          </button>
 
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-purple-500/50 transform hover:scale-110 transition-all">
-                <span className="text-white font-bold text-2xl">AI</span>
-              </div>
-              <div className="hidden md:block">
-                <h1 className="text-xl font-bold text-white">
-                  Interview Setup
-                </h1>
-                <p className="text-xs text-white/60">
-                  Powered by AI • Real-time Analysis
-                </p>
-              </div>
-            </div>
+          <div className="setup-brand">
 
-            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center text-white font-bold shadow-2xl shadow-blue-500/50 ring-2 ring-white/20">
-              <span className="text-xl">👤</span>
+            <div className="hidden sm:block">
+              <div style={{ fontWeight: 500 }}>Interview setup</div>
+              <div style={{ color: "var(--nk-mute)", fontSize: 12 }}>
+                Build your personalized session
+              </div>
             </div>
           </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <ThemeToggle />
+
+            <span className="setup-user">
+              {user?.profilePicture ? (
+                <img src={user.profilePicture} alt="Profile" />
+              ) : user?.name ? (
+                user.name.charAt(0).toUpperCase()
+              ) : (
+                <User size={18} />
+              )}
+            </span>
+          </div>
         </div>
-      </nav>
+      </header>
 
-      <div className="relative max-w-7xl mx-auto px-4 py-8">
-        {/* Progress Steps */}
-        <div className="mb-12">
-          <div className="flex items-center justify-between relative">
-            <div className="absolute top-8 left-0 right-0 h-1 bg-white/10 rounded-full -z-10">
-              <div
-                className="h-full bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 rounded-full transition-all duration-700 shadow-lg shadow-purple-500/50"
-                style={{ width: `${((step - 1) / 3) * 100}%` }}
-              ></div>
-            </div>
+      <main className="setup-main">
+        <div className="setup-container">
+          <div className="setup-progress" aria-label="Interview setup progress">
+            {STEPS.map((setupStep) => {
+              const completed = step > setupStep.number;
+              const active = step === setupStep.number;
 
-            {[
-              { num: 1, label: "Domain", icon: "🎯", desc: "Choose field" },
-              { num: 2, label: "Type", icon: "💡", desc: "Select format" },
-              { num: 3, label: "Details", icon: "⚙️", desc: "Configure" },
-              { num: 4, label: "Extras", icon: "✨", desc: "Customize" },
-            ].map((s) => (
-              <div
-                key={s.num}
-                className="flex flex-col items-center z-10 group"
-              >
+              return (
                 <div
-                  className={`w-16 h-16 rounded-2xl flex flex-col items-center justify-center font-bold transition-all duration-500 transform relative ${
-                    step >= s.num
-                      ? "bg-gradient-to-br from-purple-600 to-pink-600 text-white shadow-2xl shadow-purple-500/50 scale-110"
-                      : "bg-white/10 backdrop-blur-xl text-white/40 border-2 border-white/20"
-                  }`}
+                  key={setupStep.number}
+                  className={`setup-progress-item ${completed ? "is-complete" : ""
+                    } ${active ? "is-active" : ""}`}
                 >
-                  {step > s.num ? (
-                    <span className="text-3xl">✓</span>
-                  ) : (
-                    <>
-                      <span className="text-2xl">{s.icon}</span>
-                      <span className="text-xs mt-1">{s.num}</span>
-                    </>
-                  )}
-                  {step === s.num && (
-                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 animate-pulse opacity-50"></div>
-                  )}
-                </div>
-                <span
-                  className={`mt-3 text-sm font-bold transition-all ${
-                    step >= s.num ? "text-white" : "text-white/40"
-                  }`}
-                >
-                  {s.label}
-                </span>
-                <span className="text-xs text-white/40 mt-1 hidden sm:block">
-                  {s.desc}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Main Content Card */}
-        <div className="bg-white/10 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/20 p-8 mb-6 relative overflow-hidden">
-          {/* Decorative Glow */}
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full filter blur-3xl opacity-20"></div>
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full filter blur-3xl opacity-20"></div>
-
-          <div className="relative z-10">
-            {/* STEP 1: Domain Selection */}
-            {step === 1 && (
-              <div className="space-y-8">
-                <div className="text-center mb-8">
-                  <div className="inline-block px-4 py-2 bg-purple-500/20 rounded-full border border-purple-500/30 mb-4">
-                    <span className="text-purple-300 text-sm font-semibold">
-                      Step 1 of 4
-                    </span>
+                  <div className="setup-progress-number">
+                    {completed ? <Check size={16} /> : setupStep.number}
                   </div>
-                  <h2 className="text-5xl font-bold text-white mb-4 leading-tight">
-                    Choose Your{" "}
-                    <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                      Domain
-                    </span>
-                  </h2>
-                  <p className="text-white/60 text-lg max-w-2xl mx-auto">
-                    Select the technical area where you want to showcase your
-                    expertise
-                  </p>
+
+                  <div className="setup-progress-label">
+                    <strong>{setupStep.label}</strong>
+                    <span>{setupStep.description}</span>
+                  </div>
                 </div>
+              );
+            })}
+          </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {domains.map((domain, idx) => (
-                    <button
-                      key={domain.value}
-                      onClick={() => handleDomainSelect(domain.value)}
-                      style={{ animationDelay: `${idx * 100}ms` }}
-                      className={`group relative p-8 rounded-2xl border-2 transition-all duration-500 transform hover:-translate-y-2 text-left overflow-hidden animate-fadeIn ${
-                        config.domain === domain.value
-                          ? "border-purple-500 bg-white/20 shadow-2xl shadow-purple-500/50 scale-105"
-                          : "border-white/20 hover:border-purple-400 bg-white/5 hover:bg-white/10 shadow-xl"
-                      }`}
-                    >
-                      <div
-                        className={`absolute inset-0 bg-gradient-to-br ${domain.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`}
-                      ></div>
+          <section className="setup-card">
+            <div className="setup-content">
+              {step === 1 && (
+                <div>
+                  <StepHeader
+                    step={1}
+                    title="Choose your"
+                    accent="domain"
+                    description="Select the technical area where you want to showcase your expertise."
+                  />
 
-                      <div className="relative">
-                        <div className="text-6xl mb-6 transform group-hover:scale-125 group-hover:rotate-12 transition-all duration-500">
-                          {domain.icon}
-                        </div>
-                        <h3 className="font-bold text-2xl text-white mb-3">
-                          {domain.label}
-                        </h3>
-                        <div className="flex items-center gap-2 text-white/60">
-                          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                          <span className="text-sm">
-                            {domain.subDomains.length} specializations
-                          </span>
-                        </div>
+                  <div className="setup-grid">
+                    {DOMAINS.map((domain, index) => (
+                      <SetupOption
+                        key={domain.value}
+                        selected={config.domain === domain.value}
+                        icon={domain.icon}
+                        iconColor={domain.color}
+                        title={domain.label}
+                        description={`${domain.subDomains.length} specializations`}
+                        onClick={() => handleDomainSelect(domain.value)}
+                        className={`setup-fade-up setup-stagger-${Math.min(
+                          index % 4,
+                          3,
+                        )}`}
+                      />
+                    ))}
+                  </div>
 
-                        {config.domain === domain.value && (
-                          <div className="absolute top-4 right-4 w-8 h-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center animate-bounce">
-                            <span className="text-white text-lg">✓</span>
-                          </div>
-                        )}
-                      </div>
-                    </button>
-                  ))}
-                </div>
+                  {selectedDomain && (
+                    <div className="setup-subdomain">
+                      <h2 className="setup-section-title">
+                        <Target size={20} />
+                        Select your specialization
+                      </h2>
 
-                {config.domain && (
-                  <div className="mt-12 animate-slideUp">
-                    <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-3xl p-8 border-2 border-purple-500/30 backdrop-blur-xl">
-                      <h3 className="text-3xl font-bold text-white mb-6 flex items-center gap-3">
-                        <span className="text-4xl">🎯</span>
-                        Select Your Specialization
-                      </h3>
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {domains
-                          .find((d) => d.value === config.domain)
-                          ?.subDomains.map((sub, idx) => (
-                            <button
-                              key={sub}
-                              onClick={() => updateConfig({ subDomain: sub })}
-                              style={{ animationDelay: `${idx * 50}ms` }}
-                              className={`group px-6 py-4 rounded-xl border-2 font-bold transition-all duration-300 transform hover:scale-105 animate-fadeIn ${
-                                config.subDomain === sub
-                                  ? "border-purple-500 bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-2xl shadow-purple-500/50"
-                                  : "border-white/30 bg-white/10 text-white hover:border-purple-400 hover:bg-white/20"
+                      <div className="setup-subdomain-grid">
+                        {selectedDomain.subDomains.map((subDomain) => (
+                          <button
+                            key={subDomain}
+                            type="button"
+                            className={`setup-chip ${config.subDomain === subDomain
+                              ? "is-selected"
+                              : ""
                               }`}
-                            >
-                              <div className="flex items-center justify-between">
-                                <span>{sub}</span>
-                                {config.subDomain === sub && (
-                                  <span className="text-xl">✓</span>
-                                )}
-                              </div>
-                            </button>
-                          ))}
+                            onClick={() =>
+                              updateConfig({ subDomain })
+                            }
+                            aria-pressed={config.subDomain === subDomain}
+                          >
+                            {subDomain}
+                            {config.subDomain === subDomain && (
+                              <Check
+                                size={14}
+                                style={{ marginLeft: 6, verticalAlign: "middle" }}
+                              />
+                            )}
+                          </button>
+                        ))}
                       </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* STEP 2: Interview Type & Difficulty */}
-            {step === 2 && (
-              <div className="space-y-10">
-                <div className="text-center mb-8">
-                  <div className="inline-block px-4 py-2 bg-purple-500/20 rounded-full border border-purple-500/30 mb-4">
-                    <span className="text-purple-300 text-sm font-semibold">
-                      Step 2 of 4
-                    </span>
-                  </div>
-                  <h2 className="text-5xl font-bold text-white mb-4 leading-tight">
-                    Choose Interview{" "}
-                    <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                      Format
-                    </span>
-                  </h2>
-                  <p className="text-white/60 text-lg max-w-2xl mx-auto">
-                    Select the type and difficulty level that matches your
-                    preparation goals
-                  </p>
+                  )}
                 </div>
+              )}
 
-                {/* Interview Type */}
+              {step === 2 && (
                 <div>
-                  <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                    <span className="text-3xl">💡</span>
-                    Interview Type
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {interviewTypes.map((type, idx) => (
-                      <button
-                        key={type.value}
-                        onClick={() =>
-                          updateConfig({ interviewType: type.value })
-                        }
-                        style={{ animationDelay: `${idx * 100}ms` }}
-                        className={`group relative p-8 rounded-2xl border-2 transition-all duration-500 transform hover:-translate-y-2 text-left overflow-hidden animate-fadeIn ${
-                          config.interviewType === type.value
-                            ? "border-purple-500 bg-white/20 shadow-2xl shadow-purple-500/50 scale-105"
-                            : "border-white/20 hover:border-purple-400 bg-white/5 hover:bg-white/10 shadow-xl"
-                        }`}
-                      >
-                        <div
-                          className={`absolute inset-0 bg-gradient-to-r ${type.gradient} opacity-0 group-hover:opacity-10 transition-opacity`}
-                        ></div>
+                  <StepHeader
+                    step={2}
+                    title="Choose interview"
+                    accent="format"
+                    description="Select the interview type and difficulty that match your preparation goals."
+                  />
 
-                        <div className="relative">
-                          <div className="flex items-start justify-between mb-4">
-                            <div className="text-5xl transform group-hover:scale-110 transition-transform">
-                              {type.icon}
-                            </div>
-                            {config.interviewType === type.value && (
-                              <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center">
-                                <span className="text-white">✓</span>
-                              </div>
-                            )}
-                          </div>
-                          <h3 className="font-bold text-2xl text-white mb-2">
-                            {type.label}
-                          </h3>
-                          <p className="text-white/60 mb-4">
-                            {type.description}
-                          </p>
-                          <div className="flex flex-wrap gap-2">
-                            {type.features.map((feature, i) => (
-                              <span
-                                key={i}
-                                className="px-3 py-1 bg-white/10 rounded-full text-xs text-white/80 border border-white/20"
-                              >
+                  <section className="setup-section" style={{ marginTop: 0 }}>
+                    <h2 className="setup-section-title">
+                      <Lightbulb size={20} />
+                      Interview type
+                    </h2>
+
+                    <div className="setup-grid setup-grid-two">
+                      {INTERVIEW_TYPES.map((type, index) => (
+                        <SetupOption
+                          key={type.value}
+                          selected={config.interviewType === type.value}
+                          icon={type.icon}
+                          title={type.label}
+                          description={type.description}
+                          onClick={() =>
+                            updateConfig({
+                              interviewType: type.value,
+                            })
+                          }
+                          className={`setup-fade-up setup-stagger-${Math.min(
+                            index,
+                            3,
+                          )}`}
+                        >
+                          <span className="setup-option-features">
+                            {type.features.map((feature) => (
+                              <span className="setup-feature" key={feature}>
                                 {feature}
                               </span>
                             ))}
-                          </div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                          </span>
+                        </SetupOption>
+                      ))}
+                    </div>
+                  </section>
 
-                {/* Difficulty Level */}
-                <div>
-                  <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                    <span className="text-3xl">🎚️</span>
-                    Difficulty Level
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-                    {difficulties.map((diff, idx) => (
-                      <button
-                        key={diff.value}
-                        onClick={() => updateConfig({ difficulty: diff.value })}
-                        style={{ animationDelay: `${idx * 100}ms` }}
-                        className={`relative p-6 rounded-2xl border-2 transition-all duration-500 transform hover:-translate-y-2 overflow-hidden animate-fadeIn ${
-                          config.difficulty === diff.value
-                            ? "border-purple-500 bg-white/20 shadow-2xl shadow-purple-500/50 scale-105"
-                            : "border-white/20 hover:border-purple-400 bg-white/5 hover:bg-white/10 shadow-xl"
-                        }`}
-                      >
-                        {diff.badge === "Most Popular" && (
-                          <div className="absolute top-3 right-3 px-2 py-1 bg-yellow-500 rounded-full text-xs font-bold text-black">
-                            ⭐ Popular
-                          </div>
-                        )}
+                  <section className="setup-section">
+                    <h2 className="setup-section-title">
+                      <Target size={20} />
+                      Difficulty level
+                    </h2>
 
-                        <div
-                          className={`absolute inset-0 bg-gradient-to-br ${diff.gradient} opacity-0 hover:opacity-10 transition-opacity`}
-                        ></div>
-
-                        <div className="relative text-center">
-                          <div className="text-5xl mb-4 transform hover:scale-125 transition-transform">
-                            {diff.icon}
-                          </div>
-                          <h3 className="font-bold text-xl text-white mb-2">
-                            {diff.label}
-                          </h3>
-                          <p className="text-white/60 text-sm mb-3">
-                            {diff.description}
-                          </p>
-                          <div className="inline-block px-3 py-1 bg-white/10 rounded-full text-xs text-white/80 border border-white/20">
-                            {diff.exp}
-                          </div>
-
-                          {config.difficulty === diff.value && (
-                            <div className="mt-4 w-8 h-8 mx-auto bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center animate-bounce">
-                              <span className="text-white">✓</span>
-                            </div>
-                          )}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* STEP 3: Duration & Company */}
-            {step === 3 && (
-              <div className="space-y-10">
-                <div className="text-center mb-8">
-                  <div className="inline-block px-4 py-2 bg-purple-500/20 rounded-full border border-purple-500/30 mb-4">
-                    <span className="text-purple-300 text-sm font-semibold">
-                      Step 3 of 4
-                    </span>
-                  </div>
-                  <h2 className="text-5xl font-bold text-white mb-4 leading-tight">
-                    Configure{" "}
-                    <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                      Details
-                    </span>
-                  </h2>
-                  <p className="text-white/60 text-lg max-w-2xl mx-auto">
-                    Set your interview duration and target company
-                  </p>
-                </div>
-
-                {/* Duration */}
-                <div>
-                  <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                    <span className="text-3xl">⏱️</span>
-                    Interview Duration
-                  </h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                    {durations.map((dur, idx) => (
-                      <button
-                        key={dur.value}
-                        onClick={() => updateConfig({ duration: dur.value })}
-                        style={{ animationDelay: `${idx * 50}ms` }}
-                        className={`relative p-6 rounded-2xl border-2 transition-all duration-300 transform hover:scale-110 animate-fadeIn ${
-                          config.duration === dur.value
-                            ? "border-purple-500 bg-gradient-to-br from-purple-600 to-pink-600 text-white shadow-2xl shadow-purple-500/50"
-                            : "border-white/20 bg-white/5 text-white hover:border-purple-400 hover:bg-white/10"
-                        }`}
-                      >
-                        {dur.recommended && (
-                          <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-xs">
-                            ⭐
-                          </div>
-                        )}
-                        <div className="text-center">
-                          <div className="text-4xl mb-3">{dur.icon}</div>
-                          <div className="text-2xl font-bold mb-1">
-                            {dur.label}
-                          </div>
-                          <div className="text-xs opacity-70">{dur.desc}</div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Target Company */}
-                <div>
-                  <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                    <span className="text-3xl">🏢</span>
-                    Target Company
-                  </h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {topCompanies.map((company, idx) => (
-                      <button
-                        key={company.name}
-                        onClick={() => {
-                          updateConfig({ targetCompany: company.name });
-                          if (company.name === "Custom") {
-                            setShowCustomCompany(true);
-                          } else {
-                            setShowCustomCompany(false);
+                    <div className="setup-grid setup-grid-four">
+                      {DIFFICULTIES.map((difficulty, index) => (
+                        <SetupOption
+                          key={difficulty.value}
+                          selected={config.difficulty === difficulty.value}
+                          icon={difficulty.icon}
+                          title={difficulty.label}
+                          description={difficulty.description}
+                          onClick={() =>
+                            updateConfig({
+                              difficulty: difficulty.value,
+                            })
                           }
-                        }}
-                        style={{ animationDelay: `${idx * 50}ms` }}
-                        className={`group relative p-6 rounded-2xl border-2 transition-all duration-300 transform hover:scale-105 animate-fadeIn ${
-                          config.targetCompany === company.name
-                            ? "border-purple-500 bg-white/20 shadow-2xl shadow-purple-500/50"
-                            : "border-white/20 bg-white/5 hover:border-purple-400 hover:bg-white/10"
-                        }`}
-                      >
-                        <div
-                          className={`absolute inset-0 bg-gradient-to-br ${company.gradient} opacity-0 group-hover:opacity-10 transition-opacity`}
-                        ></div>
-                        <div className="relative text-center">
-                          <div className="text-4xl mb-3 transform group-hover:scale-125 transition-transform">
-                            {company.logo}
-                          </div>
-                          <div className="text-white font-bold">
-                            {company.name}
-                          </div>
-                          {config.targetCompany === company.name && (
-                            <div className="absolute top-0 right-0 w-6 h-6 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center">
-                              <span className="text-white text-xs">✓</span>
-                            </div>
+                          className={`setup-fade-up setup-stagger-${Math.min(
+                            index,
+                            3,
+                          )}`}
+                        >
+                          <span className="setup-option-features">
+                            <span className="setup-feature">
+                              {difficulty.experience}
+                            </span>
+                          </span>
+
+                          {difficulty.recommended && (
+                            <span className="setup-recommended">
+                              Recommended
+                            </span>
                           )}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-
-                  {showCustomCompany && (
-                    <div className="mt-6 animate-slideUp">
-                      <input
-                        type="text"
-                        value={customCompany}
-                        onChange={(e) => {
-                          setCustomCompany(e.target.value);
-                          updateConfig({ targetCompany: e.target.value });
-                        }}
-                        placeholder="Enter company name..."
-                        className="w-full px-6 py-4 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/40 focus:border-purple-500 focus:outline-none backdrop-blur-xl transition-all"
-                      />
+                        </SetupOption>
+                      ))}
                     </div>
-                  )}
+                  </section>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* STEP 4: Optional Enhancements */}
-            {step === 4 && (
-              <div className="space-y-10">
-                <div className="text-center mb-8">
-                  <div className="inline-block px-4 py-2 bg-purple-500/20 rounded-full border border-purple-500/30 mb-4">
-                    <span className="text-purple-300 text-sm font-semibold">
-                      Step 4 of 4 - Optional
-                    </span>
-                  </div>
-                  <h2 className="text-5xl font-bold text-white mb-4 leading-tight">
-                    Enhance Your{" "}
-                    <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                      Experience
-                    </span>
-                  </h2>
-                  <p className="text-white/60 text-lg max-w-2xl mx-auto">
-                    Add custom questions and upload your resume for personalized
-                    questions
-                  </p>
-                </div>
+              {step === 3 && (
+                <div>
+                  <StepHeader
+                    step={3}
+                    title="Configure"
+                    accent="details"
+                    description="Set the length of your interview and choose the company context you want to practice for."
+                  />
 
-                {/* Resume Upload */}
-                <div className="bg-gradient-to-br from-white/5 to-white/10 border-2 border-dashed border-white/20 rounded-3xl p-10 hover:border-purple-400 transition-all duration-500 backdrop-blur-xl">
-                  <div className="text-center">
-                    <div className="inline-block p-6 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-3xl mb-6">
-                      <span className="text-7xl">📄</span>
+                  <section className="setup-section" style={{ marginTop: 0 }}>
+                    <h2 className="setup-section-title">
+                      <Clock3 size={20} />
+                      Interview duration
+                    </h2>
+
+                    <div className="setup-grid setup-grid-four">
+                      {DURATIONS.map((duration, index) => (
+                        <SetupOption
+                          key={duration.value}
+                          selected={config.duration === duration.value}
+                          icon={duration.icon}
+                          title={duration.label}
+                          description={duration.description}
+                          onClick={() =>
+                            updateConfig({
+                              duration: duration.value,
+                            })
+                          }
+                          className={`setup-duration setup-fade-up setup-stagger-${Math.min(
+                            index,
+                            3,
+                          )}`}
+                        >
+                          {duration.recommended && (
+                            <span className="setup-recommended">
+                              Recommended
+                            </span>
+                          )}
+                        </SetupOption>
+                      ))}
                     </div>
-                    <h3 className="text-3xl font-bold text-white mb-3">
-                      Upload Your Resume
-                    </h3>
-                    <p className="text-white/60 mb-6 text-lg">
-                      AI will analyze and create personalized questions based on
-                      your experience
+                  </section>
+
+                  <section className="setup-section">
+                    <h2 className="setup-section-title">
+                      <Target size={20} />
+                      Target company
+                    </h2>
+
+                    <div className="setup-grid setup-grid-four">
+                      {COMPANIES.map((company, index) => (
+                        <SetupOption
+                          key={company.name}
+                          selected={
+                            company.name === "Custom"
+                              ? showCustomCompany
+                              : config.targetCompany === company.name
+                          }
+                          icon={company.icon}
+                          title={company.name}
+                          onClick={() => handleCompanySelect(company.name)}
+                          className={`setup-duration setup-fade-up setup-stagger-${Math.min(
+                            index % 4,
+                            3,
+                          )}`}
+                        />
+                      ))}
+                    </div>
+
+                    {showCustomCompany && (
+                      <div
+                        className="setup-panel setup-fade-up"
+                        style={{ marginTop: 16 }}
+                      >
+                        <label
+                          htmlFor="custom-company"
+                          className="setup-summary-label"
+                        >
+                          Company name
+                        </label>
+
+                        <input
+                          id="custom-company"
+                          type="text"
+                          className="setup-field"
+                          style={{ marginTop: 8 }}
+                          value={customCompany}
+                          onChange={(event) => {
+                            const value = event.target.value;
+                            setCustomCompany(value);
+                            updateConfig({ targetCompany: value });
+                          }}
+                          placeholder="Enter company name"
+                        />
+                      </div>
+                    )}
+                  </section>
+                </div>
+              )}
+
+              {step === 4 && (
+                <div>
+                  <StepHeader
+                    step={4}
+                    title="Enhance your"
+                    accent="experience"
+                    description="Upload your resume and add custom questions for a more personalized interview."
+                  />
+
+                  <section className="setup-upload" style={{ marginTop: 0 }}>
+                    <div className="setup-upload-icon">
+                      <FileText size={28} />
+                    </div>
+
+                    <h2 className="setup-upload-title">
+                      Upload your resume
+                    </h2>
+
+                    <p className="setup-upload-description">
+                      The AI interviewer can use your experience to generate
+                      more relevant questions.
                     </p>
 
                     {!config.resume ? (
                       <>
-                        <label className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-xl cursor-pointer hover:shadow-2xl hover:shadow-purple-500/50 transition-all transform hover:scale-105">
-                          <span className="text-xl">📤</span>
-                          Choose PDF File
+                        <label className="setup-file">
+                          <Upload size={17} />
+                          Choose PDF file
                           <input
                             type="file"
-                            accept=".pdf"
+                            accept=".pdf,application/pdf"
                             onChange={handleFileUpload}
-                            className="hidden"
+                            hidden
                           />
                         </label>
-                        <p className="text-white/40 text-sm mt-4">
-                          Maximum file size: 5MB • PDF only
+
+                        <p
+                          style={{
+                            marginTop: 12,
+                            color: "var(--nk-mute)",
+                            fontSize: 12,
+                          }}
+                        >
+                          PDF only · Maximum file size 5MB
                         </p>
                       </>
                     ) : (
-                      <div className="space-y-4 animate-fadeIn">
-                        <div className="inline-flex items-center gap-4 px-6 py-4 bg-green-500/20 border-2 border-green-500/50 rounded-xl">
-                          <span className="text-3xl">✓</span>
-                          <div className="text-left">
-                            <div className="font-bold text-white text-lg">
-                              {config.resume.name}
-                            </div>
-                            <div className="text-green-400 text-sm">
+                      <div>
+                        <div className="setup-uploaded-file">
+                          <Check size={20} />
+                          <div style={{ textAlign: "left" }}>
+                            <strong>{config.resume.name}</strong>
+                            <div
+                              style={{
+                                color: "var(--nk-success)",
+                                fontSize: 12,
+                                marginTop: 3,
+                              }}
+                            >
                               Successfully uploaded
                             </div>
                           </div>
                         </div>
+
                         <button
+                          type="button"
+                          className="nk-btn nk-btn-secondary"
+                          style={{ marginTop: 16 }}
                           onClick={() => {
                             updateConfig({ resume: null });
                             setUploadProgress(0);
                           }}
-                          className="text-red-400 hover:text-red-300 font-semibold transition-colors"
                         >
-                          Remove File
+                          Remove file
                         </button>
                       </div>
                     )}
 
                     {uploadProgress > 0 && uploadProgress < 100 && (
-                      <div className="mt-6 animate-fadeIn">
-                        <div className="bg-white/10 h-3 rounded-full overflow-hidden backdrop-blur-xl">
+                      <div style={{ marginTop: 18 }}>
+                        <div className="setup-progress-track">
                           <div
-                            className="bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 h-full transition-all duration-300 relative"
+                            className="setup-progress-fill"
                             style={{ width: `${uploadProgress}%` }}
-                          >
-                            <div className="absolute inset-0 bg-white/30 animate-pulse"></div>
-                          </div>
+                          />
                         </div>
-                        <div className="text-white/60 text-sm mt-2 font-semibold">
-                          Uploading... {uploadProgress}%
+
+                        <div
+                          style={{
+                            marginTop: 8,
+                            color: "var(--nk-mute)",
+                            fontSize: 12,
+                          }}
+                        >
+                          Uploading… {uploadProgress}%
                         </div>
                       </div>
                     )}
-                  </div>
-                </div>
+                  </section>
 
-                {/* Custom Questions */}
-                <div className="bg-gradient-to-br from-white/5 to-white/10 border-2 border-white/20 rounded-3xl p-8 backdrop-blur-xl">
-                  <h3 className="text-3xl font-bold text-white mb-6 flex items-center gap-3">
-                    <span className="text-4xl">📝</span>
-                    Add Custom Questions
-                    <span className="text-sm font-normal text-white/60 ml-2">
-                      (Optional)
-                    </span>
-                  </h3>
+                  <section className="setup-panel setup-section">
+                    <h2 className="setup-section-title">
+                      <Sparkles size={20} />
+                      Add custom questions
+                      <span
+                        style={{
+                          color: "var(--nk-mute)",
+                          fontSize: 12,
+                          fontWeight: 400,
+                        }}
+                      >
+                        Optional
+                      </span>
+                    </h2>
 
-                  <div className="flex gap-3 mb-6">
-                    <input
-                      type="text"
-                      value={customQuestion}
-                      onChange={(e) => setCustomQuestion(e.target.value)}
-                      onKeyPress={(e) =>
-                        e.key === "Enter" && addCustomQuestion()
-                      }
-                      placeholder="Enter your custom question here..."
-                      className="flex-1 px-6 py-4 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/40 focus:border-purple-500 focus:outline-none backdrop-blur-xl transition-all"
-                    />
-                    <button
-                      onClick={addCustomQuestion}
-                      disabled={!customQuestion.trim()}
-                      className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-xl hover:shadow-2xl hover:shadow-purple-500/50 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                    >
-                      Add +
-                    </button>
-                  </div>
+                    <div className="setup-question-form">
+                      <input
+                        type="text"
+                        className="setup-field"
+                        value={customQuestion}
+                        onChange={(event) =>
+                          setCustomQuestion(event.target.value)
+                        }
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter") {
+                            event.preventDefault();
+                            addCustomQuestion();
+                          }
+                        }}
+                        placeholder="What would you like the interviewer to ask?"
+                      />
 
-                  {(config.questions || []).length > 0 && (
-                    <div className="space-y-3 mb-6">
-                      <div className="flex items-center gap-2 text-white/80 mb-4">
-                        <span className="text-xl">📋</span>
-                        <span className="font-semibold">
-                          {(config.questions || []).length} custom question(s)
-                          added
-                        </span>
-                      </div>
-                      {(config.questions || []).map((q, index) => (
+                      <button
+                        type="button"
+                        className="nk-btn nk-btn-primary"
+                        onClick={addCustomQuestion}
+                        disabled={!customQuestion.trim()}
+                      >
+                        <Plus size={17} />
+                        Add
+                      </button>
+                    </div>
+
+                    {config.questions?.length > 0 ? (
+                      <div style={{ marginTop: 24 }}>
                         <div
-                          key={index}
-                          className="group flex items-start gap-4 p-4 bg-white/10 rounded-xl border border-white/20 hover:bg-white/20 transition-all animate-slideUp"
+                          style={{
+                            marginBottom: 10,
+                            color: "var(--nk-mute)",
+                            fontSize: 13,
+                          }}
                         >
-                          <div className="flex items-center justify-center w-8 h-8 bg-purple-500/30 rounded-lg font-bold text-white flex-shrink-0">
-                            {index + 1}
+                          {config.questions.length} custom question
+                          {config.questions.length === 1 ? "" : "s"} added
+                        </div>
+
+                        {config.questions.map((question, index) => (
+                          <div className="setup-question" key={`${question}-${index}`}>
+                            <span className="setup-question-number">
+                              {index + 1}
+                            </span>
+
+                            <p className="setup-question-text">{question}</p>
+
+                            <button
+                              type="button"
+                              className="setup-question-remove"
+                              onClick={() => removeQuestion(index)}
+                              aria-label={`Remove question ${index + 1}`}
+                            >
+                              <Trash2 size={16} />
+                            </button>
                           </div>
-                          <p className="flex-1 text-white/90 leading-relaxed">
-                            {q}
-                          </p>
-                          <button
-                            onClick={() => removeQuestion(index)}
-                            className="opacity-0 group-hover:opacity-100 w-8 h-8 flex items-center justify-center bg-red-500/20 hover:bg-red-500 rounded-lg text-red-400 hover:text-white font-bold transition-all transform hover:scale-110"
-                          >
-                            ×
-                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <div
+                        style={{
+                          padding: "32px 0 8px",
+                          textAlign: "center",
+                          color: "var(--nk-mute)",
+                        }}
+                      >
+                        <FileText
+                          size={32}
+                          style={{ margin: "0 auto 10px", opacity: 0.6 }}
+                        />
+                        <div>No custom questions added yet.</div>
+                      </div>
+                    )}
+
+                    <div className="setup-tip">
+                      <Lightbulb size={18} />
+                      <span>
+                        Custom questions will be integrated with AI-generated
+                        questions for a more comprehensive interview.
+                      </span>
+                    </div>
+                  </section>
+
+                  <section className="setup-summary">
+                    <h2 className="setup-section-title" style={{ marginBottom: 0 }}>
+                      <Rocket size={20} />
+                      Interview summary
+                    </h2>
+
+                    <div className="setup-summary-grid">
+                      <div className="setup-summary-item">
+                        <div className="setup-summary-label">Domain</div>
+                        <div className="setup-summary-value">
+                          {config.domain || "—"}
                         </div>
-                      ))}
-                    </div>
-                  )}
+                        <div className="setup-summary-subvalue">
+                          {config.subDomain || "—"}
+                        </div>
+                      </div>
 
-                  {(config.questions || []).length === 0 && (
-                    <div className="text-center py-8 text-white/40">
-                      <span className="text-5xl mb-3 block">📝</span>
-                      <p>No custom questions added yet</p>
-                      <p className="text-sm mt-2">
-                        Add questions to personalize your interview
-                      </p>
-                    </div>
-                  )}
+                      <div className="setup-summary-item">
+                        <div className="setup-summary-label">Interview type</div>
+                        <div className="setup-summary-value">
+                          {config.interviewType || "—"}
+                        </div>
+                      </div>
 
-                  <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
-                    <div className="flex items-start gap-3">
-                      <span className="text-2xl">💡</span>
-                      <div className="text-sm text-blue-200">
-                        <strong className="block mb-1">Pro Tip:</strong>
-                        Custom questions will be seamlessly integrated with
-                        AI-generated questions for a comprehensive interview
-                        experience.
+                      <div className="setup-summary-item">
+                        <div className="setup-summary-label">Difficulty</div>
+                        <div className="setup-summary-value">
+                          {config.difficulty || "—"}
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                </div>
 
-                {/* Interview Summary */}
-                <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-3xl p-8 border-2 border-purple-500/30 backdrop-blur-xl">
-                  <div className="flex items-center gap-3 mb-6">
-                    <span className="text-4xl">📊</span>
-                    <h3 className="text-3xl font-bold text-white">
-                      Interview Summary
-                    </h3>
-                  </div>
+                      <div className="setup-summary-item">
+                        <div className="setup-summary-label">Duration</div>
+                        <div className="setup-summary-value">
+                          {config.duration ? `${config.duration} minutes` : "—"}
+                        </div>
+                      </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div className="bg-white/10 rounded-xl p-5 backdrop-blur-xl border border-white/20">
-                      <div className="text-white/60 text-sm mb-2 font-semibold">
-                        Domain
+                      <div className="setup-summary-item">
+                        <div className="setup-summary-label">
+                          Target company
+                        </div>
+                        <div className="setup-summary-value">
+                          {config.targetCompany || "—"}
+                        </div>
                       </div>
-                      <div className="text-white font-bold text-lg">
-                        {config.domain || "—"}
-                      </div>
-                      <div className="text-purple-300 text-sm mt-1">
-                        {config.subDomain || "—"}
-                      </div>
-                    </div>
 
-                    <div className="bg-white/10 rounded-xl p-5 backdrop-blur-xl border border-white/20">
-                      <div className="text-white/60 text-sm mb-2 font-semibold">
-                        Interview Type
-                      </div>
-                      <div className="text-white font-bold text-lg capitalize">
-                        {config.interviewType || "—"}
-                      </div>
-                    </div>
-
-                    <div className="bg-white/10 rounded-xl p-5 backdrop-blur-xl border border-white/20">
-                      <div className="text-white/60 text-sm mb-2 font-semibold">
-                        Difficulty
-                      </div>
-                      <div className="text-white font-bold text-lg capitalize">
-                        {config.difficulty || "—"}
-                      </div>
-                    </div>
-
-                    <div className="bg-white/10 rounded-xl p-5 backdrop-blur-xl border border-white/20">
-                      <div className="text-white/60 text-sm mb-2 font-semibold">
-                        Duration
-                      </div>
-                      <div className="text-white font-bold text-lg">
-                        {config.duration || "—"} minutes
-                      </div>
-                    </div>
-
-                    <div className="bg-white/10 rounded-xl p-5 backdrop-blur-xl border border-white/20">
-                      <div className="text-white/60 text-sm mb-2 font-semibold">
-                        Target Company
-                      </div>
-                      <div className="text-white font-bold text-lg">
-                        {config.targetCompany || "—"}
-                      </div>
-                    </div>
-
-                    <div className="bg-white/10 rounded-xl p-5 backdrop-blur-xl border border-white/20">
-                      <div className="text-white/60 text-sm mb-2 font-semibold">
-                        Custom Questions
-                      </div>
-                      <div className="text-white font-bold text-lg">
-                        {(config.questions || []).length} added
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-6 p-4 bg-green-500/20 border-2 border-green-500/30 rounded-xl">
-                    <div className="flex items-center gap-3 text-green-200">
-                      <span className="text-2xl">✓</span>
-                      <div>
-                        <div className="font-bold">Ready to Start!</div>
-                        <div className="text-sm opacity-80">
-                          Click "Launch Interview" when you're prepared
+                      <div className="setup-summary-item">
+                        <div className="setup-summary-label">
+                          Custom questions
+                        </div>
+                        <div className="setup-summary-value">
+                          {config.questions?.length || 0} added
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </section>
                 </div>
-              </div>
-            )}
-          </div>
-        </div>
+              )}
+            </div>
+          </section>
 
-        {/* Navigation Buttons */}
-        <div className="flex justify-between items-center gap-4">
-          <button
-            onClick={() => setStep(Math.max(1, step - 1))}
-            disabled={step === 1}
-            className={`group flex items-center gap-3 px-8 py-4 rounded-xl font-bold transition-all transform ${
-              step === 1
-                ? "bg-white/5 text-white/30 cursor-not-allowed border-2 border-white/10"
-                : "bg-white/10 text-white border-2 border-white/20 hover:bg-white/20 hover:border-purple-500 hover:shadow-2xl hover:shadow-purple-500/30 hover:-translate-x-2"
-            }`}
-          >
-            <span className="text-xl group-hover:-translate-x-1 transition-transform">
-              ←
-            </span>
-            Previous
-          </button>
+          <div className="setup-actions">
+            <button
+              type="button"
+              className="nk-btn nk-btn-secondary"
+              onClick={() => setStep((previous) => Math.max(1, previous - 1))}
+              disabled={step === 1}
+            >
+              <ArrowLeft size={17} />
+              Previous
+            </button>
 
-          <div className="flex items-center gap-3">
             {step < 4 ? (
               <button
-                onClick={() => setStep(step + 1)}
+                type="button"
+                className="nk-btn nk-btn-primary"
+                onClick={() => setStep((previous) => previous + 1)}
                 disabled={!isStepComplete()}
-                className={`group flex items-center gap-3 px-12 py-4 rounded-xl font-bold text-lg transition-all transform ${
-                  isStepComplete()
-                    ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:shadow-2xl hover:shadow-purple-500/50 hover:scale-105 hover:translate-x-2"
-                    : "bg-white/5 text-white/30 cursor-not-allowed border-2 border-white/10"
-                }`}
               >
-                Next Step
-                <span className="text-xl group-hover:translate-x-1 transition-transform">
-                  →
-                </span>
+                Continue
+                <ArrowRight size={17} />
               </button>
             ) : (
               <button
+                type="button"
+                className="nk-btn nk-btn-primary"
                 onClick={handleStartInterview}
                 disabled={!token}
-                className="group relative px-12 py-5 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 text-white font-bold text-xl rounded-xl hover:shadow-2xl hover:shadow-green-500/50 transition-all transform hover:scale-110 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <div className="absolute inset-0 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
-                <div className="relative flex items-center gap-3">
-                  <span className="text-3xl">🚀</span>
-                  Launch Interview Now
-                  <span className="text-2xl group-hover:translate-x-2 transition-transform">
-                    →
-                  </span>
-                </div>
+                <Rocket size={17} />
+                Launch interview
+                <ChevronRight size={17} />
               </button>
             )}
           </div>
-        </div>
 
-        {/* Progress Indicator */}
-        <div className="mt-8 text-center">
-          <div className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 backdrop-blur-xl rounded-full border border-white/20">
-            {[1, 2, 3, 4].map((s) => (
-              <div
-                key={s}
-                className={`w-2 h-2 rounded-full transition-all ${
-                  step >= s ? "bg-purple-500 w-8" : "bg-white/30"
-                }`}
-              ></div>
-            ))}
+          <div className="setup-step-indicator">
+            <div className="setup-dots" aria-hidden="true">
+              {[1, 2, 3, 4].map((item) => (
+                <span
+                  key={item}
+                  className={`setup-dot ${step >= item ? "is-active" : ""
+                    }`}
+                />
+              ))}
+            </div>
+
+            <div>
+              Step {step} of 4 · {Math.round((step / 4) * 100)}% complete
+            </div>
           </div>
-          <p className="text-white/60 text-sm mt-3">
-            Step {step} of 4 • {Math.round((step / 4) * 100)}% Complete
-          </p>
         </div>
-      </div>
-
-      <style>{`
-        @keyframes blob {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          25% { transform: translate(20px, -50px) scale(1.1); }
-          50% { transform: translate(-20px, 20px) scale(0.9); }
-          75% { transform: translate(50px, 50px) scale(1.05); }
-        }
-        
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes slideUp {
-          from { opacity: 0; transform: translateY(30px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .animate-blob {
-          animation: blob 7s infinite;
-        }
-        
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
-        
-        .animate-fadeIn {
-          animation: fadeIn 0.6s ease-out;
-        }
-        
-        .animate-slideUp {
-          animation: slideUp 0.5s ease-out;
-        }
-      `}</style>
+      </main>
     </div>
   );
 }
+
+export default InterviewSetup;
