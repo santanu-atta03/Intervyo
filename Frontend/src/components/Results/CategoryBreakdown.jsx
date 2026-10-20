@@ -1,238 +1,294 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Code, MessageSquare, Brain, Zap, CheckCircle, XCircle } from 'lucide-react';
+import React from "react";
+import { motion } from "framer-motion";
+import {
+  Brain,
+  CheckCircle,
+  Code2,
+  MessageSquare,
+  XCircle,
+  Zap,
+} from "lucide-react";
 
+import "../../styles/resultsComponents.css";
 
-const CategoryBreakdown = ({ categories, detailed = false }) => {
-  const categoryData = [
-    {
-      key: 'technical',
-      title: 'Technical Skills',
-      icon: Code,
-      color: '#667eea',
-      gradient: 'from-purple-500 to-indigo-600',
-      data: categories.technical
-    },
-    {
-      key: 'communication',
-      title: 'Communication',
-      icon: MessageSquare,
-      color: '#10b981',
-      gradient: 'from-green-500 to-emerald-600',
-      data: categories.communication
-    },
-    {
-      key: 'problemSolving',
-      title: 'Problem Solving',
-      icon: Brain,
-      color: '#f59e0b',
-      gradient: 'from-yellow-500 to-orange-600',
-      data: categories.problemSolving
-    }
-  ];
+const clamp = (value) =>
+  Math.max(0, Math.min(100, Number(value) || 0));
 
-  const CircularProgress = ({ percentage, color }) => {
-    const radius = 40;
-    const circumference = 2 * Math.PI * radius;
-    const offset = circumference - (percentage / 100) * circumference;
+const CircularProgress = ({ percentage }) => {
+  const safePercentage = clamp(percentage);
+  const radius = 40;
+  const circumference = 2 * Math.PI * radius;
+  const offset =
+    circumference - (circumference * safePercentage) / 100;
 
-    return (
-      <svg className="circular-progress" width="100" height="100">
+  return (
+    <div
+      style={{
+        position: "relative",
+        width: 100,
+        height: 100,
+        flexShrink: 0,
+      }}
+    >
+      <svg
+        viewBox="0 0 100 100"
+        width="100"
+        height="100"
+        style={{ transform: "rotate(-90deg)" }}
+        aria-label={`${Math.round(safePercentage)}%`}
+      >
         <circle
-          className="progress-bg"
           cx="50"
           cy="50"
           r={radius}
-          stroke="#e5e7eb"
-          strokeWidth="8"
           fill="none"
+          stroke="var(--rc-hairline-soft)"
+          strokeWidth="8"
         />
+
         <motion.circle
-          className="progress-bar"
           cx="50"
           cy="50"
           r={radius}
-          stroke={color}
-          strokeWidth="8"
           fill="none"
+          stroke="var(--rc-ink)"
+          strokeWidth="8"
+          strokeLinecap="round"
           strokeDasharray={circumference}
           initial={{ strokeDashoffset: circumference }}
           animate={{ strokeDashoffset: offset }}
-          transition={{ duration: 1.5, ease: "easeOut" }}
-          strokeLinecap="round"
+          transition={{ duration: 1.1, ease: "easeOut" }}
         />
-        <text x="50" y="50" textAnchor="middle" dy="7" className="progress-text">
-          {percentage}%
-        </text>
       </svg>
-    );
-  };
+
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          display: "grid",
+          placeItems: "center",
+          color: "var(--rc-ink)",
+          fontSize: 17,
+          fontWeight: 500,
+        }}
+      >
+        {Math.round(safePercentage)}%
+      </div>
+    </div>
+  );
+};
+
+const SubScore = ({ label, value, delay = 0 }) => {
+  const safeValue = clamp(value);
 
   return (
-    <motion.div
-      className={`category-breakdown ${detailed ? 'detailed' : ''}`}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <div className="card-header">
-        <Zap className="w-6 h-6 text-yellow-500" />
-        <h3>Category Breakdown</h3>
+    <div className="results-sub-score">
+      <span>{label}</span>
+      <span className="results-sub-score-value">
+        {Math.round(safeValue)}%
+      </span>
+
+      <div className="results-sub-score-bar">
+        <motion.div
+          className="results-sub-score-fill"
+          initial={{ width: 0 }}
+          animate={{ width: `${safeValue}%` }}
+          transition={{ duration: 0.9, delay }}
+        />
+      </div>
+    </div>
+  );
+};
+
+const StrengthList = ({ title, items = [], type = "strength" }) => {
+  if (!items.length) return null;
+
+  const isStrength = type === "strength";
+
+  return (
+    <div className="results-strength-section">
+      <div className="results-strength-heading">
+        {isStrength ? (
+          <CheckCircle size={15} color="var(--rc-success)" />
+        ) : (
+          <XCircle size={15} color="var(--rc-danger)" />
+        )}
+        <span>{title}</span>
       </div>
 
-      <div className="categories-grid">
+      <ul className="results-strength-list">
+        {items.map((item, index) => (
+          <li key={`${item}-${index}`}>{item}</li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+const CategoryBreakdown = ({
+  categories = {},
+  detailed = false,
+}) => {
+  const categoryData = [
+    {
+      key: "technical",
+      title: "Technical skills",
+      icon: Code2,
+      data: categories.technical || {},
+    },
+    {
+      key: "communication",
+      title: "Communication",
+      icon: MessageSquare,
+      data: categories.communication || {},
+    },
+    {
+      key: "problemSolving",
+      title: "Problem solving",
+      icon: Brain,
+      data: categories.problemSolving || {},
+    },
+  ];
+
+  return (
+    <motion.section
+      className="results-component"
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      aria-labelledby="category-breakdown-heading"
+    >
+      <div className="results-component-header">
+        <span className="results-component-header-icon">
+          <Zap size={18} />
+        </span>
+
+        <div>
+          <h3 id="category-breakdown-heading">
+            Category breakdown
+          </h3>
+          <p className="results-component-subtitle">
+            See how your interview performance was distributed across key skills.
+          </p>
+        </div>
+      </div>
+
+      <div className="results-categories">
         {categoryData.map((category, index) => {
           const Icon = category.icon;
+          const data = category.data;
+          const score = clamp(data.score);
+
           return (
-            <motion.div
+            <motion.article
               key={category.key}
-              className="category-card"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
+              className="results-category"
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              whileHover={{ scale: 1.02 }}
+              whileHover={{ y: -4 }}
             >
-              <div className={`category-header bg-gradient-to-r ${category.gradient}`}>
-                <Icon className="w-6 h-6 text-white" />
+              <div className="results-category-header">
+                <Icon size={18} />
                 <h4>{category.title}</h4>
               </div>
 
-              <div className="category-body">
-                <CircularProgress 
-                  percentage={category.data.score} 
-                  color={category.color}
-                />
+              <div className="results-category-body">
+                <div className="results-category-score">
+                  <CircularProgress percentage={score} />
 
-                {detailed && category.key === 'technical' && (
-                  <div className="category-details">
-                    <div className="detail-item">
-                      <span>Questions Answered</span>
-                      <span className="detail-value">{category.data.questionsAnswered}</span>
+                  <div>
+                    <strong>{Math.round(score)}%</strong>
+                    <span style={{ display: "block", marginTop: 5 }}>
+                      Overall score
+                    </span>
+                  </div>
+                </div>
+
+                <div className="results-category-progress">
+                  <motion.div
+                    className="results-category-progress-fill"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${score}%` }}
+                    transition={{
+                      duration: 1,
+                      delay: index * 0.1,
+                    }}
+                  />
+                </div>
+
+                {category.key === "technical" && (
+                  <>
+                    <div className="results-category-meta">
+                      <span>Questions answered</span>
+                      <strong>
+                        {data.questionsAnswered ?? 0}
+                      </strong>
                     </div>
-                    
-                    {category.data.strengths.length > 0 && (
-                      <div className="strengths-weaknesses">
-                        <div className="sw-section">
-                          <CheckCircle className="w-4 h-4 text-green-500" />
-                          <span className="sw-title">Strengths</span>
-                        </div>
-                        <ul className="sw-list">
-                          {category.data.strengths.map((strength, idx) => (
-                            <li key={idx}>{strength}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
 
-                    {category.data.weaknesses.length > 0 && (
-                      <div className="strengths-weaknesses">
-                        <div className="sw-section">
-                          <XCircle className="w-4 h-4 text-red-500" />
-                          <span className="sw-title">Areas to Improve</span>
-                        </div>
-                        <ul className="sw-list">
-                          {category.data.weaknesses.map((weakness, idx) => (
-                            <li key={idx}>{weakness}</li>
-                          ))}
-                        </ul>
+                    {detailed && (
+                      <div className="results-category-details">
+                        <StrengthList
+                          title="Strengths"
+                          items={data.strengths || []}
+                          type="strength"
+                        />
+
+                        <StrengthList
+                          title="Areas to improve"
+                          items={data.weaknesses || []}
+                          type="weakness"
+                        />
                       </div>
                     )}
+                  </>
+                )}
+
+                {detailed && category.key === "communication" && (
+                  <div className="results-sub-scores">
+                    <SubScore
+                      label="Clarity"
+                      value={data.clarity}
+                      delay={0.25}
+                    />
+                    <SubScore
+                      label="Articulation"
+                      value={data.articulation}
+                      delay={0.35}
+                    />
+                    <SubScore
+                      label="Confidence"
+                      value={data.confidence}
+                      delay={0.45}
+                    />
                   </div>
                 )}
 
-                {detailed && category.key === 'communication' && (
-                  <div className="sub-scores">
-                    <div className="sub-score-item">
-                      <span>Clarity</span>
-                      <div className="sub-score-bar">
-                        <motion.div
-                          className="sub-score-fill"
-                          initial={{ width: 0 }}
-                          animate={{ width: `${category.data.clarity}%` }}
-                          transition={{ duration: 1, delay: 0.5 }}
-                          style={{ background: category.color }}
-                        />
-                      </div>
-                      <span className="sub-score-value">{category.data.clarity}%</span>
-                    </div>
-                    <div className="sub-score-item">
-                      <span>Articulation</span>
-                      <div className="sub-score-bar">
-                        <motion.div
-                          className="sub-score-fill"
-                          initial={{ width: 0 }}
-                          animate={{ width: `${category.data.articulation}%` }}
-                          transition={{ duration: 1, delay: 0.6 }}
-                          style={{ background: category.color }}
-                        />
-                      </div>
-                      <span className="sub-score-value">{category.data.articulation}%</span>
-                    </div>
-                    <div className="sub-score-item">
-                      <span>Confidence</span>
-                      <div className="sub-score-bar">
-                        <motion.div
-                          className="sub-score-fill"
-                          initial={{ width: 0 }}
-                          animate={{ width: `${category.data.confidence}%` }}
-                          transition={{ duration: 1, delay: 0.7 }}
-                          style={{ background: category.color }}
-                        />
-                      </div>
-                      <span className="sub-score-value">{category.data.confidence}%</span>
-                    </div>
-                  </div>
-                )}
-
-                {detailed && category.key === 'problemSolving' && (
-                  <div className="sub-scores">
-                    <div className="sub-score-item">
-                      <span>Analytical Thinking</span>
-                      <div className="sub-score-bar">
-                        <motion.div
-                          className="sub-score-fill"
-                          initial={{ width: 0 }}
-                          animate={{ width: `${category.data.analyticalThinking}%` }}
-                          transition={{ duration: 1, delay: 0.5 }}
-                          style={{ background: category.color }}
-                        />
-                      </div>
-                      <span className="sub-score-value">{category.data.analyticalThinking}%</span>
-                    </div>
-                    <div className="sub-score-item">
-                      <span>Creativity</span>
-                      <div className="sub-score-bar">
-                        <motion.div
-                          className="sub-score-fill"
-                          initial={{ width: 0 }}
-                          animate={{ width: `${category.data.creativity}%` }}
-                          transition={{ duration: 1, delay: 0.6 }}
-                          style={{ background: category.color }}
-                        />
-                      </div>
-                      <span className="sub-score-value">{category.data.creativity}%</span>
-                    </div>
-                    <div className="sub-score-item">
-                      <span>Efficiency</span>
-                      <div className="sub-score-bar">
-                        <motion.div
-                          className="sub-score-fill"
-                          initial={{ width: 0 }}
-                          animate={{ width: `${category.data.efficiency}%` }}
-                          transition={{ duration: 1, delay: 0.7 }}
-                          style={{ background: category.color }}
-                        />
-                      </div>
-                      <span className="sub-score-value">{category.data.efficiency}%</span>
-                    </div>
+                {detailed && category.key === "problemSolving" && (
+                  <div className="results-sub-scores">
+                    <SubScore
+                      label="Analytical thinking"
+                      value={data.analyticalThinking}
+                      delay={0.25}
+                    />
+                    <SubScore
+                      label="Creativity"
+                      value={data.creativity}
+                      delay={0.35}
+                    />
+                    <SubScore
+                      label="Efficiency"
+                      value={data.efficiency}
+                      delay={0.45}
+                    />
                   </div>
                 )}
               </div>
-            </motion.div>
+            </motion.article>
           );
         })}
       </div>
-    </motion.div>
+    </motion.section>
   );
 };
 

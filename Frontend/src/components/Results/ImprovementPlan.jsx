@@ -1,304 +1,418 @@
-// components/results/ImprovementPlan.jsx
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import {
-  Target, Clock, TrendingUp, BookOpen, ExternalLink,
-  CheckCircle, AlertCircle, Zap, Calendar, Award,
-  Play, ChevronRight, Filter
-} from 'lucide-react';
+  AlertCircle,
+  Award,
+  BookOpen,
+  CalendarDays,
+  CheckCircle,
+  ChevronRight,
+  Clock3,
+  ExternalLink,
+  Filter,
+  Play,
+  Target,
+  TrendingUp,
+  Zap,
+} from "lucide-react";
 
-const ImprovementPlan = ({ plan }) => {
-  const [activeTimeframe, setActiveTimeframe] = useState('shortTerm');
-  const [selectedPriority, setSelectedPriority] = useState('all');
+import "../../styles/resultsComponents.css";
 
-  const timeframes = [
-    { id: 'shortTerm', label: 'Short Term', icon: Zap, color: '#ef4444', period: '1-2 weeks' },
-    { id: 'mediumTerm', label: 'Medium Term', icon: TrendingUp, color: '#f59e0b', period: '1-2 months' },
-    { id: 'longTerm', label: 'Long Term', icon: Target, color: '#10b981', period: '3-6 months' }
-  ];
+const TIMEFRAMES = [
+  {
+    id: "shortTerm",
+    label: "Short term",
+    period: "1–2 weeks",
+    icon: Zap,
+  },
+  {
+    id: "mediumTerm",
+    label: "Medium term",
+    period: "1–2 months",
+    icon: TrendingUp,
+  },
+  {
+    id: "longTerm",
+    label: "Long term",
+    period: "3–6 months",
+    icon: Target,
+  },
+];
 
-  const priorityColors = {
-    high: '#ef4444',
-    medium: '#f59e0b',
-    low: '#3b82f6'
-  };
+const PRIORITIES = ["all", "high", "medium", "low"];
 
-  const getPriorityIcon = (priority) => {
-    switch (priority) {
-      case 'high': return AlertCircle;
-      case 'medium': return Clock;
-      case 'low': return CheckCircle;
-      default: return CheckCircle;
+const priorityLabels = {
+  all: "All",
+  high: "High",
+  medium: "Medium",
+  low: "Low",
+};
+
+const priorityIcons = {
+  high: AlertCircle,
+  medium: Clock3,
+  low: CheckCircle,
+};
+
+const safeArray = (value) => (Array.isArray(value) ? value : []);
+
+const ImprovementPlan = ({ plan = {} }) => {
+  const [activeTimeframe, setActiveTimeframe] = useState("shortTerm");
+  const [selectedPriority, setSelectedPriority] = useState("all");
+
+  const currentGoals = safeArray(plan[activeTimeframe]);
+
+  const filteredGoals = useMemo(() => {
+    if (selectedPriority === "all") {
+      return currentGoals;
     }
-  };
 
-  const filterGoals = (goals) => {
-    if (selectedPriority === 'all') return goals;
-    return goals.filter(goal => goal.priority === selectedPriority);
-  };
-
-  const currentGoals = plan[activeTimeframe] || [];
-  const filteredGoals = filterGoals(currentGoals);
+    return currentGoals.filter(
+      (goal) => goal.priority === selectedPriority,
+    );
+  }, [currentGoals, selectedPriority]);
 
   return (
-    <div className="improvement-plan">
-      {/* Header */}
-      <motion.div
-        className="plan-header"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <div className="header-content">
-          <Target className="w-8 h-8 text-blue-500" />
-          <div>
-            <h2>Your Personalized Improvement Plan</h2>
-            <p>Structured roadmap to enhance your skills and knowledge</p>
-          </div>
-        </div>
-      </motion.div>
+    <motion.section
+      className="results-component improvement-plan"
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      aria-labelledby="improvement-plan-heading"
+    >
+      <div className="results-component-header">
+        <span className="results-component-header-icon">
+          <Target size={18} />
+        </span>
 
-      {/* Timeframe Tabs */}
-      <motion.div
-        className="timeframe-tabs"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-      >
-        {timeframes.map((timeframe, index) => {
+        <div>
+          <h3 id="improvement-plan-heading">
+            Your improvement plan
+          </h3>
+          <p className="results-component-subtitle">
+            A structured roadmap for turning your feedback into progress.
+          </p>
+        </div>
+      </div>
+
+      <div className="improvement-timeframes">
+        {TIMEFRAMES.map((timeframe, index) => {
           const Icon = timeframe.icon;
           const isActive = activeTimeframe === timeframe.id;
-          
+          const goalCount = safeArray(plan[timeframe.id]).length;
+
           return (
             <motion.button
               key={timeframe.id}
-              className={`timeframe-tab ${isActive ? 'active' : ''}`}
-              onClick={() => setActiveTimeframe(timeframe.id)}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.1 }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              style={{
-                borderBottom: isActive ? `3px solid ${timeframe.color}` : '3px solid transparent'
+              type="button"
+              className={`improvement-timeframe ${
+                isActive ? "is-active" : ""
+              }`}
+              onClick={() => {
+                setActiveTimeframe(timeframe.id);
+                setSelectedPriority("all");
               }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.08 }}
+              whileTap={{ scale: 0.98 }}
+              aria-pressed={isActive}
             >
-              <Icon style={{ color: timeframe.color }} />
-              <div className="tab-content">
-                <span className="tab-label">{timeframe.label}</span>
-                <span className="tab-period">{timeframe.period}</span>
-              </div>
-              {isActive && (
-                <motion.div
-                  className="tab-badge"
-                  layoutId="activeTab"
-                  style={{ background: timeframe.color }}
-                >
-                  {currentGoals.length}
-                </motion.div>
-              )}
+              <span className="improvement-timeframe-icon">
+                <Icon size={17} />
+              </span>
+
+              <span className="improvement-timeframe-copy">
+                <strong>{timeframe.label}</strong>
+                <small>{timeframe.period}</small>
+              </span>
+
+              <span className="improvement-timeframe-count">
+                {goalCount}
+              </span>
             </motion.button>
           );
         })}
-      </motion.div>
+      </div>
 
-      {/* Priority Filter */}
-      <motion.div
-        className="priority-filter"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3 }}
-      >
-        <Filter className="w-5 h-5" />
-        <span>Priority:</span>
-        <div className="filter-buttons">
-          {['all', 'high', 'medium', 'low'].map(priority => (
+      <div className="improvement-filter">
+        <div className="improvement-filter-label">
+          <Filter size={15} />
+          <span>Priority</span>
+        </div>
+
+        <div className="improvement-filter-buttons">
+          {PRIORITIES.map((priority) => (
             <button
               key={priority}
-              className={`filter-btn ${selectedPriority === priority ? 'active' : ''}`}
+              type="button"
+              className={`improvement-filter-button ${
+                selectedPriority === priority ? "is-active" : ""
+              }`}
               onClick={() => setSelectedPriority(priority)}
-              style={{
-                background: selectedPriority === priority 
-                  ? (priority === 'all' ? '#6366f1' : priorityColors[priority]) 
-                  : 'transparent',
-                color: selectedPriority === priority ? 'white' : '#6b7280'
-              }}
+              aria-pressed={selectedPriority === priority}
             >
-              {priority.charAt(0).toUpperCase() + priority.slice(1)}
+              {priorityLabels[priority]}
             </button>
           ))}
         </div>
-      </motion.div>
-
-      {/* Goals List */}
-      <div className="goals-container">
-        {filteredGoals.length > 0 ? (
-          filteredGoals.map((goal, index) => {
-            const PriorityIcon = getPriorityIcon(goal.priority);
-            
-            return (
-              <motion.div
-                key={index}
-                className="goal-card"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                whileHover={{ scale: 1.01, boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)' }}
-              >
-                <div className="goal-header">
-                  <div className="goal-title-section">
-                    <h3>{goal.title}</h3>
-                    <div 
-                      className="priority-badge"
-                      style={{ 
-                        background: `${priorityColors[goal.priority]}20`,
-                        color: priorityColors[goal.priority]
-                      }}
-                    >
-                      <PriorityIcon className="w-4 h-4" />
-                      {goal.priority}
-                    </div>
-                  </div>
-                  <div className="goal-time">
-                    <Clock className="w-4 h-4" />
-                    {goal.estimatedTime}
-                  </div>
-                </div>
-
-                <p className="goal-description">{goal.description}</p>
-
-                {goal.resources && goal.resources.length > 0 && (
-                  <div className="goal-resources">
-                    <h4>
-                      <BookOpen className="w-4 h-4" />
-                      Resources
-                    </h4>
-                    <ul>
-                      {goal.resources.map((resource, idx) => (
-                        <motion.li
-                          key={idx}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.05 * idx }}
-                        >
-                          <ChevronRight className="w-4 h-4" />
-                          {resource}
-                        </motion.li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </motion.div>
-            );
-          })
-        ) : (
-          <motion.div
-            className="no-goals"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-          >
-            <CheckCircle className="w-16 h-16 text-green-500" />
-            <p>No {selectedPriority !== 'all' ? selectedPriority + ' priority' : ''} goals for this timeframe</p>
-          </motion.div>
-        )}
       </div>
 
-      {/* Recommended Courses */}
-      {plan.recommendedCourses && plan.recommendedCourses.length > 0 && (
-        <motion.div
-          className="courses-section"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
+      <div className="improvement-goals">
+        <div className="improvement-section-heading">
+          <div>
+            <h4>Focus areas</h4>
+            <p>
+              {filteredGoals.length} goal
+              {filteredGoals.length === 1 ? "" : "s"} in this timeframe
+            </p>
+          </div>
+        </div>
+
+        <AnimatePresence mode="popLayout">
+          {filteredGoals.length > 0 ? (
+            filteredGoals.map((goal, index) => (
+              <ImprovementGoal
+                key={`${goal.title || "goal"}-${index}`}
+                goal={goal}
+                index={index}
+              />
+            ))
+          ) : (
+            <motion.div
+              className="improvement-empty"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <CheckCircle size={28} />
+              <strong>No matching goals</strong>
+              <span>
+                There are no{" "}
+                {selectedPriority === "all"
+                  ? ""
+                  : `${selectedPriority} priority `}
+                goals for this timeframe.
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {safeArray(plan.recommendedCourses).length > 0 && (
+        <ResourceSection
+          icon={Award}
+          title="Recommended courses"
+          subtitle="Structured learning options to deepen your skills."
+          className="improvement-courses"
         >
-          <h3 className="section-title">
-            <Award className="w-6 h-6" />
-            Recommended Courses
-          </h3>
-          <div className="courses-grid">
+          <div className="improvement-course-grid">
             {plan.recommendedCourses.map((course, index) => (
-              <motion.div
-                key={index}
-                className="course-card"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.1 * index }}
-                whileHover={{ scale: 1.02 }}
+              <motion.article
+                key={`${course.title || "course"}-${index}`}
+                className="improvement-course"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.08 }}
+                whileHover={{ y: -4 }}
               >
-                <div className="course-header">
-                  <Play className="w-5 h-5 text-blue-500" />
-                  <span className="course-level">{course.level}</span>
-                </div>
-                <h4>{course.title}</h4>
-                <div className="course-meta">
-                  <span className="course-platform">{course.platform}</span>
-                  <span className="course-duration">
-                    <Calendar className="w-4 h-4" />
-                    {course.duration}
+                <div className="improvement-course-top">
+                  <span className="improvement-resource-icon">
+                    <Play size={15} />
                   </span>
+
+                  {course.level && (
+                    <span className="improvement-label">
+                      {course.level}
+                    </span>
+                  )}
                 </div>
-                <a
-                  href={course.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="course-link"
-                >
-                  View Course
-                  <ExternalLink className="w-4 h-4" />
-                </a>
-                
-              </motion.div>
+
+                <h4>{course.title}</h4>
+
+                <div className="improvement-course-meta">
+                  {course.platform && <span>{course.platform}</span>}
+
+                  {course.duration && (
+                    <span>
+                      <CalendarDays size={13} />
+                      {course.duration}
+                    </span>
+                  )}
+                </div>
+
+                {course.url && course.url !== "#" && (
+                  <a
+                    href={course.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="improvement-resource-link"
+                  >
+                    View course
+                    <ExternalLink size={14} />
+                  </a>
+                )}
+              </motion.article>
             ))}
           </div>
-        </motion.div>
+        </ResourceSection>
       )}
 
-      {/* Practice Resources */}
-      {plan.practiceResources && plan.practiceResources.length > 0 && (
-        <motion.div
-          className="resources-section"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
+      {safeArray(plan.practiceResources).length > 0 && (
+        <ResourceSection
+          icon={BookOpen}
+          title="Practice resources"
+          subtitle="Use these resources to reinforce your preparation."
+          className="improvement-resources"
         >
-          <h3 className="section-title">
-            <BookOpen className="w-6 h-6" />
-            Practice Resources
-          </h3>
-          <div className="resources-list">
+          <div className="improvement-resource-list">
             {plan.practiceResources.map((resource, index) => (
-              <motion.div
-                key={index}
-                className="resource-item"
-                initial={{ opacity: 0, x: -20 }}
+              <motion.article
+                key={`${resource.title || "resource"}-${index}`}
+                className="improvement-resource"
+                initial={{ opacity: 0, x: -12 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 * index }}
-                whileHover={{ x: 5 }}
+                transition={{ delay: index * 0.08 }}
+                whileHover={{ x: 4 }}
               >
-                <div className="resource-icon">
-                  <BookOpen className="w-5 h-5" />
-                </div>
-                <div className="resource-content">
-                  <h4>{resource.title}</h4>
-                  <span className="resource-type">{resource.type}</span>
+                <span className="improvement-resource-icon">
+                  <BookOpen size={16} />
+                </span>
+
+                <div className="improvement-resource-content">
+                  <div className="improvement-resource-heading">
+                    <h4>{resource.title}</h4>
+
+                    {resource.type && (
+                      <span className="improvement-label">
+                        {resource.type}
+                      </span>
+                    )}
+                  </div>
+
                   <p>{resource.description}</p>
-                  {resource.url && (
+
+                  {resource.url && resource.url !== "#" && (
                     <a
                       href={resource.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="resource-link"
+                      className="improvement-resource-link"
                     >
-                      Access Resource <ExternalLink className="w-4 h-4" />
+                      Access resource
+                      <ExternalLink size={14} />
                     </a>
                   )}
                 </div>
-              </motion.div>
+              </motion.article>
             ))}
           </div>
-        </motion.div>
+        </ResourceSection>
       )}
-    </div>
+    </motion.section>
   );
 };
+
+function ImprovementGoal({ goal = {}, index }) {
+  const PriorityIcon =
+    priorityIcons[goal.priority] || CheckCircle;
+
+  return (
+    <motion.article
+      className="improvement-goal"
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ delay: index * 0.07 }}
+      layout
+    >
+      <div className="improvement-goal-header">
+        <div>
+          <h4>{goal.title || "Improvement goal"}</h4>
+
+          <div className="improvement-goal-meta">
+            {goal.priority && (
+              <span
+                className={`improvement-priority improvement-priority-${goal.priority}`}
+              >
+                <PriorityIcon size={13} />
+                {goal.priority}
+              </span>
+            )}
+
+            {goal.estimatedTime && (
+              <span className="improvement-time">
+                <Clock3 size={13} />
+                {goal.estimatedTime}
+              </span>
+            )}
+          </div>
+        </div>
+
+        <span className="improvement-goal-index">
+          {String(index + 1).padStart(2, "0")}
+        </span>
+      </div>
+
+      {goal.description && (
+        <p className="improvement-goal-description">
+          {goal.description}
+        </p>
+      )}
+
+      {safeArray(goal.resources).length > 0 && (
+        <div className="improvement-goal-resources">
+          <div className="improvement-goal-resources-title">
+            <BookOpen size={14} />
+            Resources
+          </div>
+
+          <ul>
+            {goal.resources.map((resource, resourceIndex) => (
+              <motion.li
+                key={`${resource}-${resourceIndex}`}
+                initial={{ opacity: 0, x: -7 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{
+                  delay: index * 0.07 + resourceIndex * 0.05,
+                }}
+              >
+                <ChevronRight size={14} />
+                <span>{resource}</span>
+              </motion.li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </motion.article>
+  );
+}
+
+function ResourceSection({
+  icon: Icon,
+  title,
+  subtitle,
+  className = "",
+  children,
+}) {
+  return (
+    <section className={`improvement-resource-section ${className}`}>
+      <div className="improvement-section-heading">
+        <div className="improvement-section-heading-title">
+          <span className="improvement-heading-icon">
+            <Icon size={16} />
+          </span>
+
+          <div>
+            <h4>{title}</h4>
+            <p>{subtitle}</p>
+          </div>
+        </div>
+      </div>
+
+      {children}
+    </section>
+  );
+}
 
 export default ImprovementPlan;

@@ -1,5 +1,6 @@
 import Interview from "../models/Interview.model.js";
 import InterviewSession from "../models/InterviewSession.js";
+import { generateCertificate } from "../utils/interviewCertificate.js";
 import User from "../models/User.model.js";
 import {
   generateInterviewQuestions,
@@ -7,6 +8,7 @@ import {
   generateNextQuestion,
   generateOverallFeedback,
 } from "../config/openai.js";
+import { calculateInterviewPlan } from "../utils/interviewConfig.js";
 
 // @desc    Generate initial questions
 // @route   POST /api/ai/generate-questions
@@ -573,16 +575,21 @@ export const updateUserStreakAndStats = async (userId) => {
 const generateEnhancedFeedback = async (session) => {
   try {
     const evaluations = session.questionEvaluations || [];
+    const answeredEvaluations = evaluations.filter(
+      (evaluation) =>
+        typeof evaluation.userAnswer === "string" &&
+        evaluation.userAnswer.trim().length > 0,
+    );
 
-    if (evaluations.length === 0) {
+    if (answeredEvaluations.length === 0) {
       return getDefaultFeedback();
     }
 
     // Calculate category scores
-    const technical = evaluations.filter((e) => e.category === "technical");
-    const behavioral = evaluations.filter((e) => e.category === "behavioral");
-    const coding = evaluations.filter((e) => e.category === "coding");
-    const problemSolving = evaluations.filter(
+    const technical = answeredEvaluations.filter((e) => e.category === "technical");
+    const behavioral = answeredEvaluations.filter((e) => e.category === "behavioral");
+    const coding = answeredEvaluations.filter((e) => e.category === "coding");
+    const problemSolving = answeredEvaluations.filter(
       (e) => e.category === "problem-solving",
     );
 
@@ -595,25 +602,28 @@ const generateEnhancedFeedback = async (session) => {
 
     // Calculate overall score (0-100)
     const overallScore = Math.round(
-      technicalScore * 10 * 0.4 +
-        communicationScore * 10 * 0.3 +
-        problemSolvingScore * 10 * 0.3,
+      (answeredEvaluations.reduce(
+        (total, evaluation) => total + (Number(evaluation.score) || 0),
+        0,
+      ) /
+        answeredEvaluations.length) *
+        10,
     );
 
     // Generate strengths (from high-scoring questions)
-    const strengths = generateStrengths(evaluations);
+    const strengths = generateStrengths(answeredEvaluations);
 
     // Generate improvements (from low-scoring questions)
-    const improvements = generateImprovements(evaluations);
+    const improvements = generateImprovements(answeredEvaluations);
 
     // Generate key highlights
-    const keyHighlights = evaluations
+    const keyHighlights = answeredEvaluations
       .filter((e) => e.score >= 8)
       .slice(0, 3)
       .map((e) => `Excellent response to: "${e.question.substring(0, 50)}..."`);
 
     // Generate areas of concern
-    const areasOfConcern = evaluations
+    const areasOfConcern = answeredEvaluations
       .filter((e) => e.score < 5)
       .slice(0, 3)
       .map((e) => `Needs improvement: "${e.question.substring(0, 50)}..."`);
@@ -652,7 +662,7 @@ const generateEnhancedFeedback = async (session) => {
 
 // Helper functions
 const calculateAverageScore = (questions) => {
-  if (questions.length === 0) return 5;
+  if (questions.length === 0) return 0;
   return Math.round(
     questions.reduce((sum, q) => sum + (q.score || 0), 0) / questions.length,
   );
@@ -761,13 +771,13 @@ const generateSummary = (overall, technical, communication, problemSolving) => {
 };
 
 const getDefaultFeedback = () => ({
-  summary: "Interview completed. Continue practicing to improve your skills!",
-  strengths: ["Completed the interview", "Showed determination"],
+  summary: "No answers were submitted, so there is no performance data to score.",
+  strengths: [],
   improvements: [
     "Practice more technical questions",
     "Work on communication clarity",
   ],
-  keyHighlights: ["Participated actively"],
+  keyHighlights: [],
   areasOfConcern: [],
   technicalAnalysis: {
     coreConcepts: "Not enough data to analyze",
@@ -781,10 +791,10 @@ const getDefaultFeedback = () => ({
     professionalism: "Not enough data to analyze",
     adaptability: "Not enough data to analyze",
   },
-  overallScore: 50,
-  technicalScore: 5,
-  communicationScore: 5,
-  problemSolvingScore: 5,
+  overallScore: 0,
+  technicalScore: 0,
+  communicationScore: 0,
+  problemSolvingScore: 0,
 });
 
 /**
@@ -832,12 +842,16 @@ export const completeInterview = async (req, res) => {
             technicalAnalysis: feedback.technicalAnalysis,
             behavioralAnalysis: feedback.behavioralAnalysis,
           },
-          "stats.totalQuestions": session.questionEvaluations.length,
-          "stats.questionsAnswered": session.questionEvaluations.filter(
-            (q) => q.userAnswer,
+          "stats.totalQuestions": calculateInterviewPlan(
+            session.interviewId,
+          ).totalQuestions,
+          "stats.questionsAnswered": (session.questionEvaluations || []).filter(
+            (q) =>
+              typeof q.userAnswer === "string" && q.userAnswer.trim().length > 0,
           ).length,
-          "stats.questionsSkipped": session.questionEvaluations.filter(
-            (q) => !q.userAnswer,
+          "stats.questionsSkipped": (session.questionEvaluations || []).filter(
+            (q) =>
+              typeof q.userAnswer !== "string" || q.userAnswer.trim().length === 0,
           ).length,
         },
       },
@@ -910,36 +924,4 @@ export const completeInterview = async (req, res) => {
       error: error.message,
     });
   }
-};
-
-// Certificate generation helper
-const generateCertificate = (session, feedback) => {
-  const certificateId = `CERT-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
-  const verificationCode = Math.random()
-    .toString(36)
-    .substr(2, 12)
-    .toUpperCase();
-  const issuedAt = new Date();
-  const validUntil = new Date();
-  validUntil.setFullYear(validUntil.getFullYear() + 1); // Valid for 1 year
-
-  return {
-    certificateId,
-    issuedAt,
-    validUntil,
-    verificationCode,
-    shareableLink: `${process.env.FRONTEND_URL}/certificates/${certificateId}`,
-    userName: session.userId.name || "Candidate",
-    interviewType: session.interviewId.difficulty.toUpperCase(),
-    domain: session.interviewId.role,
-    score: feedback.overallScore,
-    grade:
-      feedback.overallScore >= 90
-        ? "A"
-        : feedback.overallScore >= 80
-          ? "B"
-          : feedback.overallScore >= 70
-            ? "C"
-            : "D",
-  };
 };

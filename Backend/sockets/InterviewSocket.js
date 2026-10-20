@@ -1080,6 +1080,10 @@ import Interview from "../models/Interview.model.js";
 import { evaluateAnswer, generateNextQuestion } from "../config/openai.js";
 import { textToSpeech } from "../config/elevenlabs.js";
 import {
+  calculateInterviewPlan,
+  getInterviewDetails,
+} from "../utils/interviewConfig.js";
+import {
   calculateXP,
   checkAndAwardBadges,
   updateUserStreak,
@@ -1088,10 +1092,31 @@ import {
 // ============================================
 // ACTIVE SESSIONS TRACKING
 // ============================================
-// const Interview = require("../models/Interview.model.js"); // sessionId -> session data
+const activeSessions = new Map(); // sessionId -> question plan and progress
 const questionTimers = new Map(); // sessionId -> timer
 const performanceCache = new Map(); // sessionId -> performance stats
 const socketToSession = new Map(); // socket.id -> sessionId
+const pausedSessions = new Set();
+const SPEECH_TIMEOUT_MS = 2500;
+const QUESTION_GENERATION_TIMEOUT_MS = 10000;
+
+function withTimeout(promise, timeoutMs, message) {
+  let timeoutId;
+  const timeout = new Promise((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error(message)), timeoutMs);
+  });
+
+  return Promise.race([promise, timeout]).finally(() =>
+    clearTimeout(timeoutId),
+  );
+}
+
+function clearQuestionTimers(sessionId) {
+  const prefix = `${sessionId}-`;
+  for (const key of questionTimers.keys()) {
+    if (key.startsWith(prefix)) questionTimers.delete(key);
+  }
+}
 
 // ============================================
 // QUESTION GENERATION STRATEGY
@@ -1104,66 +1129,6 @@ const QUESTION_CATEGORIES = {
   PROBLEM_SOLVING: "problem-solving",
   CLOSING: "closing",
 };
-
-const DIFFICULTY_SETTINGS = {
-  easy: {
-    avgTimePerQuestion: 2.5,
-    technicalRatio: 0.4,
-    behavioralRatio: 0.3,
-    codingRatio: 0.3,
-    minQuestionsPerCategory: 2,
-  },
-  medium: {
-    avgTimePerQuestion: 3,
-    technicalRatio: 0.45,
-    behavioralRatio: 0.25,
-    codingRatio: 0.3,
-    minQuestionsPerCategory: 3,
-  },
-  hard: {
-    avgTimePerQuestion: 3.5,
-    technicalRatio: 0.5,
-    behavioralRatio: 0.2,
-    codingRatio: 0.3,
-    minQuestionsPerCategory: 3,
-  },
-};
-
-// ============================================
-// CALCULATE INTERVIEW PLAN
-// ============================================
-function calculateInterviewPlan(interview) {
-  const settings =
-    DIFFICULTY_SETTINGS[interview.difficulty] || DIFFICULTY_SETTINGS.medium;
-  const totalQuestions = Math.floor(
-    interview.duration / settings.avgTimePerQuestion,
-  );
-
-  const plan = {
-    totalQuestions,
-    technical: Math.max(
-      settings.minQuestionsPerCategory,
-      Math.floor(totalQuestions * settings.technicalRatio),
-    ),
-    behavioral: Math.max(
-      settings.minQuestionsPerCategory,
-      Math.floor(totalQuestions * settings.behavioralRatio),
-    ),
-    coding: Math.max(
-      settings.minQuestionsPerCategory,
-      Math.floor(totalQuestions * settings.codingRatio),
-    ),
-  };
-
-  const sum = plan.technical + plan.behavioral + plan.coding;
-  if (sum > totalQuestions) {
-    const diff = sum - totalQuestions;
-    plan.behavioral -= Math.floor(diff / 2);
-    plan.technical -= Math.ceil(diff / 2);
-  }
-
-  return plan;
-}
 
 // ============================================
 // PERFORMANCE TRACKING
@@ -1240,10 +1205,14 @@ async function sendAIMessage(target, data, io) {
     // Try to generate TTS audio (optional)
     try {
       if (data.message && data.message.length < 500) {
-        audioBuffer = await textToSpeech(data.message);
+        audioBuffer = await withTimeout(
+          textToSpeech(data.message),
+          SPEECH_TIMEOUT_MS,
+          "Speech generation timed out",
+        );
       }
     } catch (error) {
-      console.log("⚠️ TTS skipped");
+      console.log("⚠️ TTS skipped:", error.message);
     }
 
     const payload = audioBuffer
@@ -1283,6 +1252,8 @@ async function sendAIMessage(target, data, io) {
 
 async function askNextQuestion(socket, session, interview, io) {
   try {
+    if (pausedSessions.has(session._id.toString())) return;
+
     const sessionData = activeSessions.get(session._id.toString());
     if (!sessionData) {
       console.error("Session data not found");
@@ -1291,27 +1262,53 @@ async function askNextQuestion(socket, session, interview, io) {
 
     console.log(`❓ Generating question #${sessionData.questionsAsked + 1}...`);
 
+    const { role, difficulty, interviewType } = getInterviewDetails(interview);
     const nextCategory = determineNextCategory(sessionData);
 
     let nextQuestion;
-    try {
-      nextQuestion = await generateNextQuestion(
-        session.questionEvaluations,
-        interview.role,
-        interview.difficulty,
-      );
+    const customQuestions = interview.customQuestionsList || [];
+    if (sessionData.questionsAsked < customQuestions.length) {
+      nextQuestion = {
+        question: customQuestions[sessionData.questionsAsked],
+        type: nextCategory,
+        requiresCode: nextCategory === "coding",
+      };
+    } else {
+      try {
+        const questionRole =
+          interviewType === "system-design"
+            ? `${role} system design`
+            : interviewType === "behavioral"
+              ? `${role} behavioral interview`
+              : interviewType === "coding"
+                ? `${role} coding interview`
+                : role;
+        nextQuestion = await withTimeout(
+          generateNextQuestion(
+            session.questionEvaluations,
+            questionRole,
+            difficulty,
+          ),
+          QUESTION_GENERATION_TIMEOUT_MS,
+          "Question generation timed out",
+        );
 
-      if (nextQuestion.type !== nextCategory) {
-        nextQuestion.type = nextCategory;
+        if (!nextQuestion?.question) {
+          throw new Error("Question generation returned no question");
+        }
+
+        if (nextQuestion.type !== nextCategory) {
+          nextQuestion.type = nextCategory;
+        }
+      } catch (error) {
+        console.log("⚠️ Using fallback question");
+        nextQuestion = getFallbackQuestion(
+          sessionData.questionsAsked,
+          difficulty,
+          role,
+          nextCategory,
+        );
       }
-    } catch (error) {
-      console.log("⚠️ Using fallback question");
-      nextQuestion = getFallbackQuestion(
-        sessionData.questionsAsked,
-        interview.difficulty,
-        interview.role,
-        nextCategory,
-      );
     }
 
     sessionData.categoryCounts[nextCategory]++;
@@ -1328,7 +1325,7 @@ async function askNextQuestion(socket, session, interview, io) {
         message: questionMsg,
         questionType: nextCategory,
         questionIndex: sessionData.questionsAsked - 1,
-        requiresCode: requiresCode,
+        requiresCode,
         timestamp: new Date(),
       },
       io,
@@ -1338,6 +1335,9 @@ async function askNextQuestion(socket, session, interview, io) {
       role: "assistant",
       content: questionMsg,
       type: "question",
+      questionCategory: nextCategory,
+      questionIndex: sessionData.questionsAsked - 1,
+      requiresCode,
       timestamp: new Date(),
     });
     await session.save();
@@ -1366,8 +1366,16 @@ function determineNextCategory(sessionData) {
 
 async function completeInterview(socket, session, interview, io) {
   try {
+    if (session.sessionStatus === "completed") {
+      socket.emit("interview-ended", {
+        sessionId: session._id,
+        interviewId: interview._id,
+      });
+      return true;
+    }
+
     const closingMsg =
-      "Thank you for completing the interview! You've done an excellent job. I'm now compiling your comprehensive feedback report with detailed analysis.";
+      "Thank you for completing the interview!.";
 
     await sendAIMessage(
       socket,
@@ -1410,6 +1418,8 @@ async function completeInterview(socket, session, interview, io) {
     // Cleanup
     activeSessions.delete(session._id.toString());
     performanceCache.delete(session._id.toString());
+    pausedSessions.delete(session._id.toString());
+    clearQuestionTimers(session._id.toString());
     
     // Remove socket-to-session mapping
     for (const [socketId, sessionId] of socketToSession.entries()) {
@@ -1427,57 +1437,11 @@ async function completeInterview(socket, session, interview, io) {
     }, 4000);
 
     console.log("✅ Interview completed successfully");
+    return true;
   } catch (error) {
     console.error("❌ Error completing interview:", error);
     socket.emit("error", { message: "Failed to complete interview" });
-  }
-}
-
-function generateNaturalFeedback(evaluation) {
-  const score = evaluation.score;
-  const phrases = {
-    excellent: [
-      "Excellent answer! ",
-      "Outstanding response! ",
-      "Fantastic! ",
-      "Brilliant answer! ",
-    ],
-    great: ["Great response! ", "Very good! ", "Well done! ", "Nice work! "],
-    good: [
-      "Good start! ",
-      "That's a solid answer. ",
-      "Good thinking. ",
-      "Nicely explained. ",
-    ],
-    okay: [
-      "Thank you for sharing. ",
-      "I appreciate your response. ",
-      "Let's build on that. ",
-    ],
-  };
-
-  let prefix;
-  if (score >= 9)
-    prefix =
-      phrases.excellent[Math.floor(Math.random() * phrases.excellent.length)];
-  else if (score >= 7)
-    prefix = phrases.great[Math.floor(Math.random() * phrases.great.length)];
-  else if (score >= 5)
-    prefix = phrases.good[Math.floor(Math.random() * phrases.good.length)];
-  else prefix = phrases.okay[Math.floor(Math.random() * phrases.okay.length)];
-
-  return `${prefix}${evaluation.review}`;
-}
-
-function generateCodeReview(evaluation, language) {
-  const score = evaluation.score;
-
-  if (score >= 8) {
-    return `Impressive ${language} code! ${evaluation.review} Your implementation demonstrates strong problem-solving skills.`;
-  } else if (score >= 6) {
-    return `Nice work on this ${language} solution! ${evaluation.review}`;
-  } else {
-    return `Thanks for your ${language} solution. ${evaluation.review}`;
+    return false;
   }
 }
 
@@ -1581,9 +1545,11 @@ export default (io) => {
     // =====================================
     // START INTERVIEW - CANDIDATE READY
     // =====================================
-    socket.on("candidate-ready", async ({ sessionId, interviewId }) => {
+    socket.on("candidate-ready", async ({ sessionId, interviewId, paused }) => {
       try {
         console.log("🎬 Starting interview:", { sessionId, interviewId });
+        if (paused) pausedSessions.add(sessionId);
+        else pausedSessions.delete(sessionId);
 
         const interview = await Interview.findById(interviewId);
         const session =
@@ -1595,46 +1561,167 @@ export default (io) => {
         }
 
         const plan = calculateInterviewPlan(interview);
+        const evaluations = session.questionEvaluations || [];
+        const questionMessages = (session.conversation || []).filter(
+          (message) => message.type === "question",
+        );
+        const categoryCounts = {
+          technical: evaluations.filter((item) => item.category === "technical").length,
+          behavioral: evaluations.filter((item) => item.category === "behavioral").length,
+          coding: evaluations.filter((item) => item.category === "coding").length,
+        };
+        const scores = evaluations.map((item) => item.score || 0);
+        performanceCache.set(sessionId, {
+          scores,
+          technicalScores: evaluations
+            .filter((item) => item.category === "technical")
+            .map((item) => item.score || 0),
+          behavioralScores: evaluations
+            .filter((item) => item.category === "behavioral")
+            .map((item) => item.score || 0),
+          codingScores: evaluations
+            .filter((item) => item.category === "coding")
+            .map((item) => item.score || 0),
+          perfectAnswers: scores.filter((score) => score === 10).length,
+          streak: scores.slice().reverse().every((score) => score >= 7)
+            ? scores.length
+            : scores
+                .slice()
+                .reverse()
+                .findIndex((score) => score < 7),
+        });
+        const pendingQuestion =
+          questionMessages.length > evaluations.length
+            ? questionMessages[questionMessages.length - 1]
+            : null;
+        const pendingCategory = pendingQuestion?.questionCategory;
+
+        if (pendingQuestion && pendingCategory && categoryCounts[pendingCategory] !== undefined) {
+          categoryCounts[pendingCategory] += 1;
+        }
 
         activeSessions.set(sessionId, {
           plan,
-          questionsAsked: 0,
-          categoryCounts: {
-            technical: 0,
-            behavioral: 0,
-            coding: 0,
-          },
+          questionsAsked: questionMessages.length,
+          categoryCounts,
         });
         
         // Track socket to session mapping for cleanup
         socketToSession.set(socket.id, sessionId);
 
-        const greetingMsg = `Hello! Welcome to your ${interview.role} interview${interview.targetCompany ? ` for ${interview.targetCompany}` : ""}. I'm your AI interviewer. This is a ${interview.difficulty} level interview that will last approximately ${interview.duration} minutes with around ${plan.totalQuestions} questions. Let's have a great conversation! Are you ready to begin?`;
+        if (evaluations.length >= plan.totalQuestions) {
+          await completeInterview(socket, session, interview, io);
+          return;
+        }
 
-        await sendAIMessage(
-          socket,
-          {
+        if (pendingQuestion) {
+          const questionIndex =
+            pendingQuestion.questionIndex ?? evaluations.length;
+          const questionCategory =
+            pendingCategory ||
+            determineNextCategory(activeSessions.get(sessionId));
+
+          socket.emit("ai-message", {
+            type: "question",
+            message: pendingQuestion.content,
+            questionType: questionCategory,
+            questionIndex,
+            requiresCode: pendingQuestion.requiresCode || questionCategory === "coding",
+          });
+          questionTimers.set(`${sessionId}-${questionIndex}`, Date.now());
+          return;
+        }
+
+        if (!session.conversation?.length) {
+          const { role, difficulty, duration, targetCompany } =
+            getInterviewDetails(interview);
+          const greetingMsg = `Hello! Welcome to your ${role} interview${targetCompany ? ` for ${targetCompany}` : ""}. I'm your AI interviewer. This is a ${difficulty} level interview that will last approximately ${duration} minutes with around ${plan.totalQuestions} questions. Let's have a great conversation! Are you ready to begin?`;
+
+          await sendAIMessage(
+            socket,
+            {
+              type: "greeting",
+              message: greetingMsg,
+              timestamp: new Date(),
+            },
+            io,
+          );
+
+          session.conversation.push({
+            role: "assistant",
+            content: greetingMsg,
             type: "greeting",
-            message: greetingMsg,
             timestamp: new Date(),
-          },
-          io,
-        );
-
-        session.conversation.push({
-          role: "assistant",
-          content: greetingMsg,
-          type: "greeting",
-          timestamp: new Date(),
-        });
-        await session.save();
+          });
+          await session.save();
+        }
 
         setTimeout(async () => {
           await askNextQuestion(socket, session, interview, io);
-        }, 3000);
+        }, session.conversation?.length ? 0 : 3000);
       } catch (error) {
         console.error("❌ Candidate ready error:", error);
         socket.emit("error", { message: "Failed to start interview" });
+      }
+    });
+
+    socket.on("pause-interview", ({ sessionId }) => {
+      if (sessionId && socketToSession.get(socket.id) === sessionId) {
+        pausedSessions.add(sessionId);
+      }
+    });
+
+    socket.on("resume-interview", async ({ sessionId }) => {
+      try {
+        if (!sessionId || socketToSession.get(socket.id) !== sessionId) return;
+
+        pausedSessions.delete(sessionId);
+        const session =
+          await InterviewSession.findById(sessionId).populate("interviewId");
+        const sessionData = activeSessions.get(sessionId);
+        if (!session || !sessionData) {
+          socket.emit("error", { message: "Interview session could not be resumed." });
+          return;
+        }
+
+        const questionMessages = (session.conversation || []).filter(
+          (message) => message.type === "question",
+        );
+        const pendingQuestion =
+          questionMessages.length > (session.questionEvaluations || []).length
+            ? questionMessages[questionMessages.length - 1]
+            : null;
+
+        if (pendingQuestion) {
+          const questionCategory =
+            pendingQuestion.questionCategory ||
+            determineNextCategory(sessionData);
+          const questionIndex =
+            pendingQuestion.questionIndex ??
+            (session.questionEvaluations || []).length;
+          socket.emit("ai-message", {
+            type: "question",
+            message: pendingQuestion.content,
+            questionType: questionCategory,
+            questionIndex,
+            requiresCode:
+              pendingQuestion.requiresCode || questionCategory === "coding",
+          });
+          questionTimers.set(`${sessionId}-${questionIndex}`, Date.now());
+          return;
+        }
+
+        if (
+          (session.questionEvaluations || []).length <
+          sessionData.plan.totalQuestions
+        ) {
+          await askNextQuestion(socket, session, session.interviewId, io);
+        } else {
+          await completeInterview(socket, session, session.interviewId, io);
+        }
+      } catch (error) {
+        console.error("❌ Interview resume error:", error);
+        socket.emit("error", { message: "Failed to resume interview" });
       }
     });
 
@@ -1643,14 +1730,33 @@ export default (io) => {
     // =====================================
     socket.on(
       "candidate-answer",
-      async ({ sessionId, question, answer, questionIndex, category }) => {
+      async ({ sessionId, question, answer, questionIndex, category }, acknowledge) => {
         try {
+          if (pausedSessions.has(sessionId)) {
+            acknowledge?.({
+              success: false,
+              message: "Resume the interview before submitting your answer.",
+            });
+            return;
+          }
+
           console.log("💬 Processing answer for question", questionIndex);
 
           const session =
             await InterviewSession.findById(sessionId).populate("interviewId");
           if (!session) {
             socket.emit("error", { message: "Session not found" });
+            acknowledge?.({ success: false, message: "Session not found" });
+            return;
+          }
+
+          const evaluations = session.questionEvaluations || [];
+          if (
+            evaluations.some(
+              (evaluation) => evaluation.questionNumber === questionIndex + 1,
+            )
+          ) {
+            acknowledge?.({ success: true, duplicate: true });
             return;
           }
 
@@ -1662,6 +1768,7 @@ export default (io) => {
           const questionTimer = questionTimers.get(
             `${sessionId}-${questionIndex}`,
           );
+          questionTimers.delete(`${sessionId}-${questionIndex}`);
           const timeTaken = questionTimer
             ? Math.floor((Date.now() - questionTimer) / 1000)
             : 0;
@@ -1672,10 +1779,13 @@ export default (io) => {
             type: "answer",
             timestamp: new Date(),
           });
+          await session.save();
+          acknowledge?.({ success: true });
 
           let evaluation;
           try {
-            const context = `Role: ${session.interviewId.role}, Difficulty: ${session.interviewId.difficulty}`;
+            const details = getInterviewDetails(session.interviewId);
+            const context = `Role: ${details.role}, Difficulty: ${details.difficulty}`;
             evaluation = await evaluateAnswer(question, answer, context);
             console.log("✅ Evaluation done:", evaluation.score);
           } catch (error) {
@@ -1690,7 +1800,7 @@ export default (io) => {
             score: evaluation.score,
             feedback: evaluation.review,
             category: category || "technical",
-            difficulty: session.interviewId.difficulty,
+            difficulty: getInterviewDetails(session.interviewId).difficulty,
             strengths: evaluation.strength ? [evaluation.strength] : [],
             improvements: evaluation.improvement
               ? [evaluation.improvement]
@@ -1702,59 +1812,64 @@ export default (io) => {
           session.questionEvaluations.push(questionEval);
           await session.save();
 
-          const metrics = updatePerformanceMetrics(sessionId, {
+          updatePerformanceMetrics(sessionId, {
             score: evaluation.score,
             category: category || "technical",
           });
 
-          const feedbackMsg = generateNaturalFeedback(evaluation);
+          socket.emit("performance-update", getPerformanceStats(sessionId));
 
-          setTimeout(async () => {
-            await sendAIMessage(
-              socket,
-              {
-                type: "feedback",
-                message: feedbackMsg,
-                score: evaluation.score,
-                strength: evaluation.strength,
-                improvement: evaluation.improvement,
-                timestamp: new Date(),
+          const sessionKey = session._id.toString();
+          let sessionData =
+            activeSessions.get(sessionKey) || activeSessions.get(sessionId);
+          if (!sessionData) {
+            const plan = calculateInterviewPlan(session.interviewId);
+            const askedQuestions = (session.conversation || []).filter(
+              (message) => message.type === "question",
+            );
+            sessionData = {
+              plan,
+              questionsAsked: askedQuestions.length,
+              categoryCounts: {
+                technical: evaluations.filter(
+                  (item) => item.category === "technical",
+                ).length,
+                behavioral: evaluations.filter(
+                  (item) => item.category === "behavioral",
+                ).length,
+                coding: evaluations.filter(
+                  (item) => item.category === "coding",
+                ).length,
               },
+            };
+          }
+
+          const plan = calculateInterviewPlan(session.interviewId);
+          sessionData.plan = plan;
+          sessionData.questionsAsked = Math.max(
+            sessionData.questionsAsked,
+            (session.conversation || []).filter(
+              (message) => message.type === "question",
+            ).length,
+          );
+          activeSessions.set(sessionKey, sessionData);
+
+          if ((session.questionEvaluations || []).length < plan.totalQuestions) {
+            await askNextQuestion(socket, session, session.interviewId, io);
+          } else {
+            await completeInterview(
+              socket,
+              session,
+              session.interviewId,
               io,
             );
-
-            session.conversation.push({
-              role: "assistant",
-              content: feedbackMsg,
-              type: "feedback",
-              timestamp: new Date(),
-            });
-            await session.save();
-
-            socket.emit("performance-update", getPerformanceStats(sessionId));
-
-            const sessionData = activeSessions.get(sessionId);
-            const shouldContinue =
-              sessionData &&
-              sessionData.questionsAsked < sessionData.plan.totalQuestions;
-
-            if (shouldContinue) {
-              setTimeout(async () => {
-                await askNextQuestion(socket, session, session.interviewId, io);
-              }, 2500);
-            } else {
-              setTimeout(async () => {
-                await completeInterview(
-                  socket,
-                  session,
-                  session.interviewId,
-                  io,
-                );
-              }, 2000);
-            }
-          }, 1500);
+          }
         } catch (error) {
           console.error("❌ Answer processing error:", error);
+          acknowledge?.({
+            success: false,
+            message: "Failed to process answer",
+          });
           socket.emit("error", {
             message: "Failed to process answer",
             details: error.message,
@@ -1768,14 +1883,23 @@ export default (io) => {
     // =====================================
     socket.on(
       "submit-code",
-      async ({ sessionId, question, code, language }) => {
+      async ({ sessionId, question, code, language }, acknowledge) => {
         try {
+          if (pausedSessions.has(sessionId)) {
+            acknowledge?.({
+              success: false,
+              message: "Resume the interview before submitting your solution.",
+            });
+            return;
+          }
+
           console.log("💻 Code submission received");
 
           const session =
             await InterviewSession.findById(sessionId).populate("interviewId");
           if (!session) {
             socket.emit("error", { message: "Session not found" });
+            acknowledge?.({ success: false, message: "Session not found" });
             return;
           }
 
@@ -1784,7 +1908,15 @@ export default (io) => {
             message: "Reviewing your code...",
           });
 
-          const context = `Role: ${session.interviewId.role}, Language: ${language}`;
+          const details = getInterviewDetails(session.interviewId);
+          const context = `Role: ${details.role}, Language: ${language}`;
+          const questionIndex = session.questionEvaluations.length;
+          const questionTimerKey = `${sessionId}-${questionIndex}`;
+          const questionTimer = questionTimers.get(questionTimerKey);
+          questionTimers.delete(questionTimerKey);
+          const timeSpent = questionTimer
+            ? Math.floor((Date.now() - questionTimer) / 1000)
+            : 0;
 
           let evaluation;
           try {
@@ -1798,7 +1930,6 @@ export default (io) => {
             evaluation = getFallbackCodeEvaluation(code, language);
           }
 
-          const questionIndex = session.questionEvaluations.length;
           session.questionEvaluations.push({
             questionNumber: questionIndex + 1,
             question: question,
@@ -1806,8 +1937,9 @@ export default (io) => {
             score: evaluation.score,
             feedback: evaluation.review,
             category: "coding",
-            difficulty: session.interviewId.difficulty,
+            difficulty: details.difficulty,
             codeSubmitted: code,
+            timeSpent,
             strengths: evaluation.strength ? [evaluation.strength] : [],
             improvements: evaluation.improvement
               ? [evaluation.improvement]
@@ -1816,58 +1948,38 @@ export default (io) => {
           });
 
           await session.save();
+          acknowledge?.({ success: true });
 
-          const metrics = updatePerformanceMetrics(sessionId, {
+          updatePerformanceMetrics(sessionId, {
             score: evaluation.score,
             category: "coding",
           });
 
+          socket.emit("performance-update", getPerformanceStats(sessionId));
+
+          const sessionData = activeSessions.get(sessionId);
+          const shouldContinue =
+            sessionData &&
+            sessionData.questionsAsked < sessionData.plan.totalQuestions;
+
           setTimeout(async () => {
-            const reviewMsg = generateCodeReview(evaluation, language);
-
-            await sendAIMessage(
-              socket,
-              {
-                type: "code-review",
-                message: reviewMsg,
-                score: evaluation.score,
-                timestamp: new Date(),
-              },
-              io,
-            );
-
-            session.conversation.push({
-              role: "assistant",
-              content: reviewMsg,
-              type: "code-review",
-              timestamp: new Date(),
-            });
-            await session.save();
-
-            socket.emit("performance-update", getPerformanceStats(sessionId));
-
-            const sessionData = activeSessions.get(sessionId);
-            const shouldContinue =
-              sessionData &&
-              sessionData.questionsAsked < sessionData.plan.totalQuestions;
-
             if (shouldContinue) {
-              setTimeout(async () => {
-                await askNextQuestion(socket, session, session.interviewId, io);
-              }, 2500);
+              await askNextQuestion(socket, session, session.interviewId, io);
             } else {
-              setTimeout(async () => {
-                await completeInterview(
-                  socket,
-                  session,
-                  session.interviewId,
-                  io,
-                );
-              }, 2000);
+              await completeInterview(
+                socket,
+                session,
+                session.interviewId,
+                io,
+              );
             }
-          }, 2000);
+          }, 800);
         } catch (error) {
           console.error("❌ Code submission error:", error);
+          acknowledge?.({
+            success: false,
+            message: "Failed to process code",
+          });
           socket.emit("error", { message: "Failed to process code" });
         }
       },
@@ -1876,19 +1988,28 @@ export default (io) => {
     // =====================================
     // END INTERVIEW
     // =====================================
-    socket.on("end-interview", async ({ sessionId, interviewId }) => {
+    socket.on("end-interview", async ({ sessionId, interviewId }, acknowledge) => {
       try {
         const session = await InterviewSession.findById(sessionId);
         const interview = await Interview.findById(interviewId);
 
         if (!session || !interview) {
           socket.emit("error", { message: "Session or interview not found" });
+          acknowledge?.({
+            success: false,
+            message: "Session or interview not found",
+          });
           return;
         }
 
-        await completeInterview(socket, session, interview, io);
+        const completed = await completeInterview(socket, session, interview, io);
+        acknowledge?.({
+          success: completed,
+          message: completed ? undefined : "Failed to complete interview",
+        });
       } catch (error) {
         console.error("❌ End interview error:", error);
+        acknowledge?.({ success: false, message: "Failed to end interview" });
         socket.emit("error", { message: "Failed to end interview" });
       }
     });
@@ -1904,11 +2025,7 @@ export default (io) => {
       
       if (sessionId) {
         // Clear any pending timers
-        const timer = questionTimers.get(sessionId);
-        if (timer) {
-          clearTimeout(timer);
-          questionTimers.delete(sessionId);
-        }
+        clearQuestionTimers(sessionId);
         
         // Remove session data from memory
         activeSessions.delete(sessionId);

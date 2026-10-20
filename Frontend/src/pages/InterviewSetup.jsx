@@ -36,10 +36,11 @@ import {
 import { FaAmazon, FaGoogle, FaMicrosoft, FaApple, FaSalesforce, FaPencilAlt } from "react-icons/fa";
 import { BiLogoAdobe } from "react-icons/bi";
 import { GrOracle } from "react-icons/gr";
-import { createInterview } from "../services/operations/interviewAPI";
-import { resetInterview, setInterviewConfig } from "../slices/interviewSlice";
+import { setInterviewConfig } from "../slices/interviewSlice";
 import { ThemeContext } from "../components/shared/ThemeContext";
 import ThemeToggle from "../components/ThemeToggle";
+import { apiConnector } from "../services/apiConnector";
+import { interviewEndpoints } from "../services/apis";
 
 const INTERVIEW_SETUP_CSS = `
 .nk-setup {
@@ -1168,7 +1169,6 @@ function SetupOption({
   description,
   children,
 }) {
-  const isImage = typeof icon === "string";
   const isComponent = typeof icon === "function";
   const Icon = isComponent ? icon : null;
 
@@ -1240,6 +1240,7 @@ function InterviewSetup() {
   const [preparationProgress, setPreparationProgress] = useState(0);
   // Prevent duplicate submissions when the button is clicked multiple times
   const isSubmittingRef = React.useRef(false);
+  const uploadIntervalRef = React.useRef(null);
 
   const [config, setConfig] = useState({
     domain: "",
@@ -1266,9 +1267,12 @@ function InterviewSetup() {
   useEffect(() => {
     if (!interviewConfig) return;
 
+    const persistedConfig = Object.fromEntries(
+      Object.entries(interviewConfig).filter(([key]) => key !== "resume"),
+    );
     setConfig((previous) => ({
       ...previous,
-      ...interviewConfig,
+      ...persistedConfig,
     }));
   }, [interviewConfig]);
 
@@ -1278,8 +1282,20 @@ function InterviewSetup() {
       ...updates,
     }));
 
-    dispatch(setInterviewConfig(updates));
+    const persistedUpdates = Object.fromEntries(
+      Object.entries(updates).filter(([key]) => key !== "resume"),
+    );
+    if (Object.keys(persistedUpdates).length > 0) {
+      dispatch(setInterviewConfig(persistedUpdates));
+    }
   };
+
+  useEffect(
+    () => () => {
+      window.clearInterval(uploadIntervalRef.current);
+    },
+    [],
+  );
 
   const handleDomainSelect = (domain) => {
     updateConfig({
@@ -1320,19 +1336,18 @@ function InterviewSetup() {
     }
 
     setUploadProgress(0);
+    window.clearInterval(uploadIntervalRef.current);
+    let progress = 0;
 
-    const interval = window.setInterval(() => {
-      setUploadProgress((previous) => {
-        const next = previous + 10;
+    uploadIntervalRef.current = window.setInterval(() => {
+      progress = Math.min(progress + 10, 100);
+      setUploadProgress(progress);
 
-        if (next >= 100) {
-          window.clearInterval(interval);
-          updateConfig({ resume: file });
-          return 100;
-        }
-
-        return next;
-      });
+      if (progress === 100) {
+        window.clearInterval(uploadIntervalRef.current);
+        uploadIntervalRef.current = null;
+        updateConfig({ resume: file });
+      }
     }, 80);
   };
 
@@ -1427,18 +1442,11 @@ function InterviewSetup() {
     // Neither blocks the other – we wait for both before navigating.
     const animateProgress = async () => {
       const steps = [20, 40, 60, 80, 100];
-      const messages = [
-        "Analyzing your resume...",
-        "Generating personalized questions...",
-        "Setting up the interview environment...",
-        "Configuring your AI interviewer...",
-        "Your interview is ready.",
-      ];
 
-      for (let i = 0; i < steps.length; i++) {
+      for (const progress of steps) {
         await new Promise((resolve) => window.setTimeout(resolve, 700));
-        setPreparationProgress(steps[i]);
-        toast.loading(messages[i], { id: "interview-preparation" });
+        if (!isSubmittingRef.current) return;
+        setPreparationProgress(progress);
       }
     };
 
@@ -1447,8 +1455,8 @@ function InterviewSetup() {
       const [, createdInterview] = await Promise.all([
         animateProgress(),
         new Promise((resolve, reject) => {
-          // createInterview is a Redux thunk; we wrap it so we can get the result
-          import("../services/operations/interviewAPI").then(({ createInterview: create }) => {
+          // Forward both API failures and unsuccessful responses to the setup state.
+          Promise.resolve().then(() => {
             let headers = { Authorization: `Bearer ${token}` };
             let dataToSend = interviewData;
 
@@ -1466,28 +1474,29 @@ function InterviewSetup() {
                 targetCompany: interviewData.targetCompany,
                 customQuestions: interviewData.questions,
               };
-            } else {
-              headers["Content-Type"] = "multipart/form-data";
             }
 
-            import("../services/apiConnector").then(({ apiConnector }) => {
-              import("../services/apis").then(({ interviewEndpoints }) => {
-                apiConnector("POST", interviewEndpoints.CREATE_INTERVIEW_API, dataToSend, headers)
-                  .then((response) => {
-                    if (!response.data.success) {
-                      reject(new Error(response.data.message || "Failed to create interview"));
-                    } else {
-                      resolve(response.data.data);
-                    }
-                  })
-                  .catch(reject);
-              });
-            });
-          });
+            apiConnector(
+              "POST",
+              interviewEndpoints.CREATE_INTERVIEW_API,
+              dataToSend,
+              headers,
+            )
+              .then((response) => {
+                if (!response.data.success) {
+                  reject(
+                    new Error(
+                      response.data.message || "Failed to create interview",
+                    ),
+                  );
+                } else {
+                  resolve(response.data.data);
+                }
+              })
+              .catch(reject);
+          }).catch(reject);
         }),
       ]);
-
-      toast.dismiss("interview-preparation");
 
       if (createdInterview) {
         const interviewId = createdInterview.id || createdInterview._id || createdInterview.interviewId;
@@ -1499,7 +1508,6 @@ function InterviewSetup() {
       }
     } catch (error) {
       console.error("CREATE_INTERVIEW_API ERROR:", error);
-      toast.dismiss("interview-preparation");
       toast.error(
         error.response?.data?.message || error.message || "Failed to create interview"
       );

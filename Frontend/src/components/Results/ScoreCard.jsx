@@ -1,130 +1,178 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Trophy, CheckCircle, XCircle, MinusCircle, Clock, Lightbulb } from 'lucide-react';
+import React from "react";
+import { motion } from "framer-motion";
+import {
+  CheckCircle,
+  Clock3,
+  Lightbulb,
+  MinusCircle,
+  Trophy,
+  XCircle,
+} from "lucide-react";
 
-const ScoreCard = ({ summary }) => {
+import "../../styles/resultsComponents.css";
+
+const ScoreCard = ({ summary = {} }) => {
+  const overallScore = Number(summary.overallScore || 0);
+  const circumference = 2 * Math.PI * 52;
+  const scoreOffset =
+    circumference - (circumference * Math.max(0, Math.min(100, overallScore))) / 100;
+
   const stats = [
     {
       icon: CheckCircle,
-      label: 'Correct',
-      value: summary.correctAnswers,
-      color: 'green',
-      gradient: 'from-green-400 to-emerald-500'
+      label: "Correct",
+      value: summary.correctAnswers ?? 0,
     },
     {
       icon: MinusCircle,
-      label: 'Partial',
-      value: summary.partialAnswers,
-      color: 'yellow',
-      gradient: 'from-yellow-400 to-orange-500'
+      label: "Partial",
+      value: summary.partialAnswers ?? 0,
     },
     {
       icon: XCircle,
-      label: 'Incorrect',
-      value: summary.incorrectAnswers,
-      color: 'red',
-      gradient: 'from-red-400 to-pink-500'
+      label: "Incorrect",
+      value: summary.incorrectAnswers ?? 0,
     },
     {
-      icon: Clock,
-      label: 'Avg Time',
-      value: `${summary.averageTimePerQuestion}s`,
-      color: 'blue',
-      gradient: 'from-blue-400 to-indigo-500'
-    }
+      icon: Clock3,
+      label: "Avg. time",
+      value:
+        summary.averageTimePerQuestion !== undefined
+          ? `${summary.averageTimePerQuestion}s`
+          : "—",
+    },
   ];
 
   return (
-    <motion.div
-      className="score-card"
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
+    <motion.section
+      className="results-component"
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
+      aria-labelledby="performance-summary-heading"
     >
-      <div className="card-header">
-        <Trophy className="w-6 h-6 text-yellow-500" />
-        <h3>Performance Summary</h3>
+      <div className="results-component-header">
+        <span className="results-component-header-icon">
+          <Trophy size={18} />
+        </span>
+
+        <div>
+          <h3 id="performance-summary-heading">
+            Performance summary
+          </h3>
+          <p className="results-component-subtitle">
+            A concise view of how you performed in this interview.
+          </p>
+        </div>
       </div>
 
-      <div className="score-stats-grid">
+      <div className="results-score-stats">
         {stats.map((stat, index) => {
           const Icon = stat.icon;
+
           return (
             <motion.div
               key={stat.label}
-              className="stat-card"
-              initial={{ opacity: 0, y: 20 }}
+              className="results-stat"
+              initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              whileHover={{ scale: 1.05, y: -5 }}
+              transition={{ delay: index * 0.08 }}
+              whileHover={{ y: -4 }}
             >
-              <div className={`stat-icon bg-gradient-to-br ${stat.gradient}`}>
-                <Icon className="w-5 h-5 text-white" />
-              </div>
-              <div className="stat-info">
-                <span className="stat-value">{stat.value}</span>
-                <span className="stat-label">{stat.label}</span>
+              <span className="results-stat-icon">
+                <Icon size={17} />
+              </span>
+
+              <div>
+                <span className="results-stat-value">
+                  {stat.value}
+                </span>
+                <span className="results-stat-label">
+                  {stat.label}
+                </span>
               </div>
             </motion.div>
           );
         })}
       </div>
 
-      <div className="score-details">
-        <div className="detail-row">
-          <span>Total Questions</span>
-          <span className="detail-value">{summary.totalQuestions}</span>
-        </div>
-        <div className="detail-row">
-          <span>Questions Answered</span>
-          <span className="detail-value">{summary.questionsAnswered}</span>
-        </div>
-        <div className="detail-row">
-          <span>Questions Skipped</span>
-          <span className="detail-value">{summary.questionsSkipped}</span>
-        </div>
-        <div className="detail-row">
-          <span>Hints Used</span>
-          <span className="detail-value">
-            <Lightbulb className="w-4 h-4 inline mr-1" />
-            {summary.totalHintsUsed}
-          </span>
-        </div>
-      </div>
+      <div className="results-score-layout">
+        <div className="results-detail-list">
+          <div className="results-detail-row">
+            <span>Total questions</span>
+            <span className="results-detail-value">
+              {summary.totalQuestions ?? 0}
+            </span>
+          </div>
 
-      {/* Progress Ring */}
-      <div className="progress-ring-container">
-        <svg className="progress-ring" width="120" height="120">
-          <circle
-            className="progress-ring-circle-bg"
-            stroke="#e5e7eb"
-            strokeWidth="8"
-            fill="transparent"
-            r="52"
-            cx="60"
-            cy="60"
-          />
-          <motion.circle
-            className="progress-ring-circle"
-            stroke={summary.passed ? '#10b981' : '#ef4444'}
-            strokeWidth="8"
-            fill="transparent"
-            r="52"
-            cx="60"
-            cy="60"
-            initial={{ strokeDashoffset: 327 }}
-            animate={{ 
-              strokeDashoffset: 327 - (327 * summary.overallScore) / 100 
-            }}
-            transition={{ duration: 1.5, ease: "easeOut" }}
-          />
-        </svg>
-        <div className="progress-text1">
-          <span className="progress-score">{summary.overallScore}%</span>
-          <span className="progress-label">Score</span>
+          <div className="results-detail-row">
+            <span>Questions answered</span>
+            <span className="results-detail-value">
+              {summary.questionsAnswered ?? 0}
+            </span>
+          </div>
+
+          <div className="results-detail-row">
+            <span>Questions skipped</span>
+            <span className="results-detail-value">
+              {summary.questionsSkipped ?? 0}
+            </span>
+          </div>
+
+          <div className="results-detail-row">
+            <span>Hints used</span>
+            <span className="results-detail-value">
+              <Lightbulb size={14} />
+              {summary.totalHintsUsed ?? 0}
+            </span>
+          </div>
+        </div>
+
+        <div className="results-ring-wrap">
+          <svg
+            className="results-ring"
+            viewBox="0 0 120 120"
+            role="img"
+            aria-label={`Overall score: ${overallScore}%`}
+          >
+            <circle
+              className="results-ring-background"
+              cx="60"
+              cy="60"
+              r="52"
+              fill="none"
+              strokeWidth="8"
+            />
+
+            <motion.circle
+              className="results-ring-progress"
+              cx="60"
+              cy="60"
+              r="52"
+              fill="none"
+              strokeWidth="8"
+              strokeLinecap="round"
+              stroke={
+                summary.passed
+                  ? "var(--rc-success)"
+                  : "var(--rc-danger)"
+              }
+              strokeDasharray={circumference}
+              initial={{ strokeDashoffset: circumference }}
+              animate={{ strokeDashoffset: scoreOffset }}
+              transition={{ duration: 1.2, ease: "easeOut" }}
+            />
+          </svg>
+
+          <div className="results-ring-center">
+            <span className="results-ring-score">
+              {Math.round(overallScore)}%
+            </span>
+            <span className="results-ring-label">Score</span>
+          </div>
         </div>
       </div>
-    </motion.div>
+    </motion.section>
   );
 };
 

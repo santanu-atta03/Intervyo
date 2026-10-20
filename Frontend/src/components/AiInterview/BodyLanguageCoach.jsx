@@ -1,11 +1,19 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as faceapi from 'face-api.js';
 
-const BodyLanguageCoach = ({ videoRef, isVideoOn }) => {
+const BodyLanguageCoach = ({
+  videoRef,
+  isVideoOn,
+  onConfidenceChange,
+}) => {
   const canvasRef = useRef(null);
   const [modelLoaded, setModelLoaded] = useState(false);
   const [score, setScore] = useState(100);
   const [alert, setAlert] = useState(null); // { type: 'eye' | 'posture', message: string }
+
+  useEffect(() => {
+    onConfidenceChange?.(Math.round(score));
+  }, [onConfidenceChange, score]);
   
   // Load Models
   useEffect(() => {
@@ -66,13 +74,10 @@ const BodyLanguageCoach = ({ videoRef, isVideoOn }) => {
             if (resizedDetections.length > 0) {
                 const landmarks = resizedDetections[0].landmarks;
                 const nose = landmarks.getNose()[3]; // Tip of nose
-                const leftEye = landmarks.getLeftEye();
-                const rightEye = landmarks.getRightEye();
-                const jaw = landmarks.getJawOutline();
                 
                 // Analysis Logic
-                analyzePosture(nose, jaw, displaySize);
-                analyzeEyeContact(landmarks, displaySize);
+                analyzePosture(nose, displaySize);
+                analyzeEyeContact(landmarks);
                 
                 // Recovery: If no alerts, slowly recover score
                 setScore(prev => Math.min(100, prev + 0.1));
@@ -99,7 +104,7 @@ const BodyLanguageCoach = ({ videoRef, isVideoOn }) => {
     };
   }, [modelLoaded, videoRef, isVideoOn]);
 
-  const analyzePosture = (nose, jaw, displaySize) => {
+  const analyzePosture = (nose, displaySize) => {
       // 1. Vertical Slouching
       // Normalized Y position of nose. 0 is top, 1 is bottom.
       const noseY = nose.y / displaySize.height;
@@ -119,7 +124,7 @@ const BodyLanguageCoach = ({ videoRef, isVideoOn }) => {
       // logic moved to eye analysis or generic head pose
   };
 
-  const analyzeEyeContact = (landmarks, displaySize) => {
+  const analyzeEyeContact = (landmarks) => {
       const leftEye = landmarks.getLeftEye();
       const rightEye = landmarks.getRightEye();
       
@@ -171,20 +176,6 @@ const BodyLanguageCoach = ({ videoRef, isVideoOn }) => {
   return (
     <div className="absolute inset-0 pointer-events-none z-10">
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full object-contain" />
-      
-      {/* HUD Overlay */}
-      <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md p-3 rounded-lg border border-cyan-500/30 text-cyan-400 font-mono text-sm max-w-[200px]">
-         <div className="flex justify-between items-center mb-1">
-           <span>CONFIDENCE</span>
-           <span className={`${score < 70 ? 'text-red-500' : 'text-green-400'} font-bold`}>{Math.round(score)}</span>
-         </div>
-         <div className="w-full bg-gray-700 h-2 rounded-full overflow-hidden">
-            <div 
-                className={`h-full transition-all duration-300 ${score < 70 ? 'bg-red-500' : 'bg-green-500'}`} 
-                style={{ width: `${score}%` }}
-            />
-         </div>
-      </div>
 
       {alert && (
           <div className="absolute bottom-[20%] left-1/2 -translate-x-1/2 bg-red-500/90 text-white px-6 py-2 rounded-full font-bold animate-pulse shadow-lg border border-red-400">

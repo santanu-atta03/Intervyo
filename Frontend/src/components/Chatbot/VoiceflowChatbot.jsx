@@ -95,19 +95,32 @@ const loadChatbot = (theme) => {
   });
 };
 
+const CHATBOT_INITIALIZED_FLAG = "__intervyoVoiceflowInitialized";
+
 const VoiceflowChatbot = () => {
   const { theme } = useContext(ThemeContext);
 
   useEffect(() => {
     let cancelled = false;
-    const script = document.querySelector(
+    let script = document.querySelector(
       `script[src="${VOICEFLOW_SCRIPT_SRC}"]`
     );
 
     const initializeChatbot = () => {
-      if (cancelled || !window.voiceflow?.chat) return;
-      window.voiceflow.chat.destroy?.();
-      loadChatbot(theme);
+      if (
+        cancelled ||
+        !window.voiceflow?.chat ||
+        window[CHATBOT_INITIALIZED_FLAG]
+      ) {
+        return;
+      }
+
+      try {
+        loadChatbot(theme);
+        window[CHATBOT_INITIALIZED_FLAG] = true;
+      } catch (error) {
+        console.error("Failed to initialize Voiceflow chatbot:", error);
+      }
     };
 
     if (window.voiceflow?.chat) {
@@ -118,17 +131,11 @@ const VoiceflowChatbot = () => {
     }
 
     if (!script) {
-      const script = document.createElement("script");
+      script = document.createElement("script");
       script.type = "text/javascript";
       script.src = VOICEFLOW_SCRIPT_SRC;
       script.dataset.voiceflowWidget = "true";
-      script.addEventListener("load", initializeChatbot);
       document.body.appendChild(script);
-
-      return () => {
-        cancelled = true;
-        script.removeEventListener("load", initializeChatbot);
-      };
     }
 
     script.addEventListener("load", initializeChatbot);

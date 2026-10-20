@@ -1,386 +1,654 @@
-import React from "react";
-import { Sparkles, Zap, Trophy, Target, Brain } from "lucide-react";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  Activity,
+  BarChart3,
+  Check,
+  Clock3,
+  MessageSquare,
+  Target,
+} from "lucide-react";
 
-// ============================================
-// OPTION 1: AI Brain Pulse Loader (Recommended)
-// ============================================
-export const AIBrainLoader = () => {
+const LOADER_STYLES = `
+.intervyo-loader {
+  --loader-ink: var(--nk-ink, #111111);
+  --loader-on-ink: var(--nk-on-ink, #ffffff);
+  --loader-canvas: var(--nk-canvas, #ffffff);
+  --loader-cloud: var(--nk-cloud, #f5f5f5);
+  --loader-line: var(--nk-hairline-soft, #e5e5e5);
+  --loader-muted: var(--nk-mute, #707072);
+  --loader-ease: cubic-bezier(.22, 1, .36, 1);
+
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      circle at 50% -15%,
+      rgba(17, 17, 17, .08),
+      transparent 32rem
+    ),
+    var(--loader-canvas);
+  color: var(--loader-ink);
+  font-family:
+    "Helvetica Now Text",
+    "Helvetica Neue",
+    Inter,
+    Helvetica,
+    Arial,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.intervyo-loader *,
+.intervyo-loader *::before,
+.intervyo-loader *::after {
+  box-sizing: border-box;
+}
+
+.intervyo-loader-shell {
+  width: min(100%, 560px);
+  text-align: center;
+  animation: intervyo-loader-enter .7s var(--loader-ease) both;
+}
+
+.intervyo-loader-visual {
+  position: relative;
+  width: 190px;
+  height: 190px;
+  margin: 0 auto 34px;
+}
+
+.intervyo-loader-orbit {
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--loader-line);
+  border-radius: 50%;
+}
+
+.intervyo-loader-orbit::before {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--loader-ink);
+  box-shadow: 0 0 0 7px color-mix(
+    in srgb,
+    var(--loader-ink) 10%,
+    transparent
+  );
+  transform: translateX(-50%);
+  animation: intervyo-orbit 3.2s linear infinite;
+}
+
+.intervyo-loader-orbit-two {
+  position: absolute;
+  inset: 20px;
+  border: 1px dashed var(--loader-line);
+  border-radius: 50%;
+  animation: intervyo-orbit-reverse 8s linear infinite;
+}
+
+.intervyo-loader-orbit-two::after {
+  content: "";
+  position: absolute;
+  right: 9px;
+  bottom: 18px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--loader-muted);
+}
+
+.intervyo-loader-center {
+  position: absolute;
+  inset: 48px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--loader-line);
+  border-radius: 50%;
+  background: var(--loader-cloud);
+  box-shadow:
+    0 18px 40px rgba(17, 17, 17, .10),
+    inset 0 0 0 8px var(--loader-canvas);
+  animation: intervyo-breathe 2.6s ease-in-out infinite;
+}
+
+.intervyo-loader-center-mark {
+  position: relative;
+  width: 62px;
+  height: 62px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--loader-ink);
+  color: var(--loader-on-ink);
+}
+
+.intervyo-loader-center-mark::before,
+.intervyo-loader-center-mark::after {
+  content: "";
+  position: absolute;
+  border: 1px solid var(--loader-ink);
+  border-radius: 50%;
+  opacity: .2;
+}
+
+.intervyo-loader-center-mark::before {
+  inset: -10px;
+  animation: intervyo-ping 2.4s ease-out infinite;
+}
+
+.intervyo-loader-center-mark::after {
+  inset: -20px;
+  animation: intervyo-ping 2.4s .8s ease-out infinite;
+}
+
+.intervyo-loader-center-mark svg {
+  position: relative;
+  z-index: 1;
+}
+
+.intervyo-loader-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 28px;
+  padding: 0 12px;
+  border: 1px solid var(--loader-line);
+  border-radius: 999px;
+  color: var(--loader-muted);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.intervyo-loader-title {
+  margin: 17px 0 0;
+  font-size: clamp(28px, 5vw, 42px);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -.045em;
+  text-transform: uppercase;
+}
+
+.intervyo-loader-description {
+  max-width: 390px;
+  margin: 13px auto 0;
+  color: var(--loader-muted);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.intervyo-loader-progress {
+  position: relative;
+  height: 6px;
+  margin: 30px auto 0;
+  overflow: hidden;
+  background: var(--loader-cloud);
+}
+
+.intervyo-loader-progress-fill {
+  position: relative;
+  height: 100%;
+  background: var(--loader-ink);
+  transition: width .7s var(--loader-ease);
+}
+
+.intervyo-loader-progress-fill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 80px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, .65),
+    transparent
+  );
+  animation: intervyo-shimmer 1.3s ease-in-out infinite;
+}
+
+.intervyo-loader-progress-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 9px;
+  color: var(--loader-muted);
+  font-size: 11px;
+}
+
+.intervyo-loader-progress-meta strong {
+  color: var(--loader-ink);
+  font-weight: 500;
+}
+
+.intervyo-loader-steps {
+  display: grid;
+  gap: 6px;
+  margin-top: 28px;
+  text-align: left;
+}
+
+.intervyo-loader-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 0 13px;
+  background: var(--loader-cloud);
+  color: var(--loader-muted);
+  font-size: 13px;
+  transition:
+    background-color .35s ease,
+    color .35s ease,
+    transform .35s var(--loader-ease);
+}
+
+.intervyo-loader-step.is-active {
+  background: var(--loader-ink);
+  color: var(--loader-on-ink);
+  transform: translateX(5px);
+}
+
+.intervyo-loader-step.is-complete {
+  color: var(--loader-ink);
+}
+
+.intervyo-loader-step-icon {
+  width: 25px;
+  height: 25px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 25px;
+  border-radius: 50%;
+  background: var(--loader-canvas);
+  color: var(--loader-ink);
+}
+
+.intervyo-loader-step.is-active .intervyo-loader-step-icon {
+  background: var(--loader-on-ink);
+}
+
+.intervyo-loader-step-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.intervyo-loader-step-copy {
+  flex: 1;
+}
+
+.intervyo-loader-step-copy strong {
+  display: block;
+  font-weight: 500;
+}
+
+.intervyo-loader-step-copy small {
+  display: block;
+  margin-top: 2px;
+  opacity: .65;
+  font-size: 11px;
+}
+
+.intervyo-loader-step-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: .3;
+}
+
+.intervyo-loader-step.is-active .intervyo-loader-step-indicator {
+  opacity: 1;
+  animation: intervyo-blink 1s ease-in-out infinite;
+}
+
+.intervyo-loader-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 23px;
+  color: var(--loader-muted);
+  font-size: 11px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+@keyframes intervyo-loader-enter {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes intervyo-orbit {
+  from {
+    transform: translateX(-50%) rotate(0deg) translateX(95px)
+      rotate(0deg);
+  }
+
+  to {
+    transform: translateX(-50%) rotate(360deg) translateX(95px)
+      rotate(-360deg);
+  }
+}
+
+@keyframes intervyo-orbit-reverse {
+  from {
+    transform: rotate(360deg);
+  }
+
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes intervyo-breathe {
+  0%,
+  100% {
+    transform: scale(.96);
+  }
+
+  50% {
+    transform: scale(1);
+  }
+}
+
+@keyframes intervyo-ping {
+  0% {
+    opacity: .28;
+    transform: scale(.7);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.45);
+  }
+}
+
+@keyframes intervyo-shimmer {
+  from {
+    transform: translateX(-100px);
+  }
+
+  to {
+    transform: translateX(500px);
+  }
+}
+
+@keyframes intervyo-blink {
+  0%,
+  100% {
+    opacity: .3;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 520px) {
+  .intervyo-loader {
+    padding: 18px;
+  }
+
+  .intervyo-loader-visual {
+    width: 160px;
+    height: 160px;
+    margin-bottom: 28px;
+  }
+
+  .intervyo-loader-center {
+    inset: 40px;
+  }
+
+  .intervyo-loader-center-mark {
+    width: 54px;
+    height: 54px;
+  }
+
+  @keyframes intervyo-orbit {
+    from {
+      transform: translateX(-50%) rotate(0deg) translateX(80px)
+        rotate(0deg);
+    }
+
+    to {
+      transform: translateX(-50%) rotate(360deg) translateX(80px)
+        rotate(-360deg);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intervyo-loader *,
+  .intervyo-loader *::before,
+  .intervyo-loader *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+`;
+
+const DEFAULT_STAGES = [
+  {
+    label: "Loading interview activity",
+    description: "Collecting your recent sessions",
+    icon: Activity,
+  },
+  {
+    label: "Preparing performance data",
+    description: "Calculating your progress",
+    icon: BarChart3,
+  },
+  {
+    label: "Reviewing your goals",
+    description: "Organizing your next steps",
+    icon: Target,
+  },
+  {
+    label: "Finalizing your workspace",
+    description: "Almost ready to continue",
+    icon: MessageSquare,
+  },
+];
+
+export function IntervyoLoader({
+  title = "Preparing your dashboard",
+  description = "Your interview progress is being organized into one clear view.",
+  stages = DEFAULT_STAGES,
+  duration = 3600,
+}) {
+  const [activeStage, setActiveStage] = useState(0);
+
+  useEffect(() => {
+    if (!stages.length) return undefined;
+
+    const interval = window.setInterval(() => {
+      setActiveStage((current) =>
+        current < stages.length - 1 ? current + 1 : current,
+      );
+    }, duration / stages.length);
+
+    return () => window.clearInterval(interval);
+  }, [duration, stages.length]);
+
+  const progress = useMemo(() => {
+    if (stages.length <= 1) return 100;
+
+    return Math.round(
+      ((activeStage + 1) / stages.length) * 100,
+    );
+  }, [activeStage, stages.length]);
+
   return (
-    <div className="flex flex-col items-center justify-center gap-4">
-      <div className="relative w-24 h-24">
-        {/* Outer rotating ring */}
-        <div className="absolute inset-0 border-4 border-transparent border-t-purple-500 border-r-pink-500 rounded-full animate-spin"></div>
+    <div className="intervyo-loader" role="status" aria-live="polite">
+      <style>{LOADER_STYLES}</style>
 
-        {/* Middle rotating ring (opposite direction) */}
-        <div className="absolute inset-2 border-4 border-transparent border-b-blue-500 border-l-cyan-500 rounded-full animate-spin-reverse"></div>
+      <div className="intervyo-loader-shell">
+        <div className="intervyo-loader-visual" aria-hidden="true">
+          <div className="intervyo-loader-orbit" />
+          <div className="intervyo-loader-orbit-two" />
 
-        {/* Inner pulsing circle */}
-        <div className="absolute inset-4 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center animate-pulse">
-          <Brain className="w-8 h-8 text-white" />
+          <div className="intervyo-loader-center">
+            <div className="intervyo-loader-center-mark">
+              <BarChart3 size={25} />
+            </div>
+          </div>
         </div>
 
-        {/* Orbiting dots */}
-        {[0, 1, 2].map((i) => (
-          <div
-            key={i}
-            className="absolute top-1/2 left-1/2 w-2 h-2"
-            style={{
-              animation: `orbit 2s linear infinite`,
-              animationDelay: `${i * 0.66}s`,
-            }}
-          >
-            <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-          </div>
-        ))}
-      </div>
+        <div className="intervyo-loader-eyebrow">
+          <Clock3 size={13} />
+          Intervyo workspace
+        </div>
 
-      <div className="text-center">
-        <p className="text-white font-semibold text-lg mb-1">
-          Loading Dashboard
+        <h1 className="intervyo-loader-title">{title}</h1>
+
+        <p className="intervyo-loader-description">
+          {description}
         </p>
-        <p className="text-gray-400 text-sm">Analyzing your progress...</p>
-      </div>
-    </div>
-  );
-};
 
-// ============================================
-// OPTION 2: XP Crystal Loader
-// ============================================
-export const XPCrystalLoader = () => {
-  return (
-    <div className="flex flex-col items-center justify-center gap-4">
-      <div className="relative w-20 h-20">
-        {/* Diamond shape loader */}
-        <div className="absolute inset-0 animate-spin-slow">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-4 h-4 bg-purple-500 rotate-45"></div>
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-4 bg-pink-500 rotate-45"></div>
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-blue-500 rotate-45"></div>
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-cyan-500 rotate-45"></div>
-        </div>
-
-        {/* Center icon */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center shadow-lg animate-pulse-scale">
-            <Sparkles className="w-6 h-6 text-white" />
-          </div>
-        </div>
-
-        {/* Glow effect */}
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/30 to-pink-500/30 rounded-full blur-xl animate-pulse"></div>
-      </div>
-
-      <div className="flex items-center gap-2">
-        <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"></div>
         <div
-          className="w-2 h-2 bg-pink-500 rounded-full animate-bounce"
-          style={{ animationDelay: "0.1s" }}
-        ></div>
-        <div
-          className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"
-          style={{ animationDelay: "0.2s" }}
-        ></div>
-      </div>
-
-      <p className="text-white font-semibold">Loading your dashboard...</p>
-    </div>
-  );
-};
-
-// ============================================
-// OPTION 3: Trophy Achievement Loader
-// ============================================
-export const TrophyLoader = () => {
-  return (
-    <div className="flex flex-col items-center justify-center gap-4">
-      <div className="relative w-24 h-24">
-        {/* Rotating gradient ring */}
-        <div className="absolute inset-0">
-          <div className="w-full h-full border-8 border-transparent border-t-yellow-400 border-r-orange-400 rounded-full animate-spin"></div>
-        </div>
-
-        {/* Inner circle with trophy */}
-        <div className="absolute inset-3 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-xl animate-bounce-gentle">
-          <Trophy className="w-10 h-10 text-white" />
-        </div>
-
-        {/* Sparkle effects */}
-        {[0, 1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="absolute w-1 h-1 bg-yellow-300 rounded-full animate-sparkle"
-            style={{
-              top: `${25 + Math.sin((i * Math.PI) / 2) * 40}%`,
-              left: `${50 + Math.cos((i * Math.PI) / 2) * 40}%`,
-              animationDelay: `${i * 0.2}s`,
-            }}
-          />
-        ))}
-      </div>
-
-      <div className="text-center">
-        <p className="text-white font-semibold">Loading Dashboard</p>
-        <div className="flex items-center gap-1 justify-center mt-1">
-          <span className="text-xs text-gray-400">Calculating your stats</span>
-          <span className="text-yellow-400 animate-pulse">...</span>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ============================================
-// OPTION 4: Target Focus Loader
-// ============================================
-export const TargetFocusLoader = () => {
-  return (
-    <div className="flex flex-col items-center justify-center gap-4">
-      <div className="relative w-28 h-28">
-        {/* Concentric circles */}
-        <div className="absolute inset-0 border-4 border-blue-500/30 rounded-full animate-ping-slow"></div>
-        <div
-          className="absolute inset-3 border-4 border-purple-500/40 rounded-full animate-ping-slow"
-          style={{ animationDelay: "0.3s" }}
-        ></div>
-        <div
-          className="absolute inset-6 border-4 border-pink-500/50 rounded-full animate-ping-slow"
-          style={{ animationDelay: "0.6s" }}
-        ></div>
-
-        {/* Center target */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-2xl animate-pulse-scale">
-            <Target className="w-8 h-8 text-white animate-spin-slow" />
-          </div>
-        </div>
-      </div>
-
-      <div className="text-center">
-        <p className="text-white font-semibold text-lg">Loading Dashboard</p>
-        <div className="flex gap-1 justify-center mt-2">
-          {[0, 1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-wave"
-              style={{ animationDelay: `${i * 0.15}s` }}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ============================================
-// OPTION 5: Lightning Speed Loader
-// ============================================
-export const LightningLoader = () => {
-  return (
-    <div className="flex flex-col items-center justify-center gap-4">
-      <div className="relative w-20 h-20">
-        {/* Rotating arcs */}
-        <svg
-          className="absolute inset-0 w-full h-full animate-spin"
-          viewBox="0 0 100 100"
+          className="intervyo-loader-progress"
+          aria-label={`Loading progress ${progress}%`}
         >
-          <circle
-            cx="50"
-            cy="50"
-            r="40"
-            fill="none"
-            stroke="url(#gradient1)"
-            strokeWidth="6"
-            strokeLinecap="round"
-            strokeDasharray="60 200"
-          />
-          <defs>
-            <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#a855f7" />
-              <stop offset="100%" stopColor="#ec4899" />
-            </linearGradient>
-          </defs>
-        </svg>
-
-        {/* Lightning bolt */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Zap
-            className="w-10 h-10 text-yellow-400 animate-pulse"
-            fill="currentColor"
+          <div
+            className="intervyo-loader-progress-fill"
+            style={{ width: `${progress}%` }}
           />
         </div>
-      </div>
 
-      <div className="text-center">
-        <p className="text-white font-semibold">Loading at light speed</p>
-        <div className="h-1 w-32 bg-gray-700 rounded-full overflow-hidden mt-2">
-          <div className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-progress-bar"></div>
+        <div className="intervyo-loader-progress-meta">
+          <span>{stages[activeStage]?.label}</span>
+          <strong>{progress}%</strong>
+        </div>
+
+        <div className="intervyo-loader-steps">
+          {stages.map((stage, index) => {
+            const Icon = stage.icon;
+            const complete = index < activeStage;
+            const active = index === activeStage;
+
+            return (
+              <div
+                key={stage.label}
+                className={`intervyo-loader-step ${
+                  active ? "is-active" : ""
+                } ${complete ? "is-complete" : ""}`}
+              >
+                <span className="intervyo-loader-step-icon">
+                  {complete ? <Check /> : <Icon />}
+                </span>
+
+                <span className="intervyo-loader-step-copy">
+                  <strong>{stage.label}</strong>
+                  <small>{stage.description}</small>
+                </span>
+
+                <span className="intervyo-loader-step-indicator" />
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="intervyo-loader-footer">
+          <span>Practice</span>
+          <span>·</span>
+          <span>Perform</span>
+          <span>·</span>
+          <span>Progress</span>
         </div>
       </div>
-    </div>
-  );
-};
-
-// ============================================
-// CSS Animations
-// ============================================
-const LoaderStyles = () => (
-  <style jsx>{`
-    @keyframes spin-reverse {
-      from {
-        transform: rotate(360deg);
-      }
-      to {
-        transform: rotate(0deg);
-      }
-    }
-
-    @keyframes orbit {
-      0% {
-        transform: translate(-50%, -50%) rotate(0deg) translateX(45px)
-          rotate(0deg);
-      }
-      100% {
-        transform: translate(-50%, -50%) rotate(360deg) translateX(45px)
-          rotate(-360deg);
-      }
-    }
-
-    @keyframes spin-slow {
-      from {
-        transform: rotate(0deg);
-      }
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    @keyframes pulse-scale {
-      0%,
-      100% {
-        transform: scale(1);
-      }
-      50% {
-        transform: scale(1.1);
-      }
-    }
-
-    @keyframes bounce-gentle {
-      0%,
-      100% {
-        transform: translateY(0);
-      }
-      50% {
-        transform: translateY(-8px);
-      }
-    }
-
-    @keyframes sparkle {
-      0%,
-      100% {
-        opacity: 0;
-        transform: scale(0);
-      }
-      50% {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-
-    @keyframes ping-slow {
-      0% {
-        transform: scale(1);
-        opacity: 1;
-      }
-      100% {
-        transform: scale(1.5);
-        opacity: 0;
-      }
-    }
-
-    @keyframes wave {
-      0%,
-      100% {
-        transform: translateY(0);
-      }
-      50% {
-        transform: translateY(-8px);
-      }
-    }
-
-    @keyframes progress-bar {
-      0% {
-        transform: translateX(-100%);
-      }
-      100% {
-        transform: translateX(100%);
-      }
-    }
-
-    .animate-spin-reverse {
-      animation: spin-reverse 1.5s linear infinite;
-    }
-
-    .animate-spin-slow {
-      animation: spin-slow 3s linear infinite;
-    }
-
-    .animate-pulse-scale {
-      animation: pulse-scale 2s ease-in-out infinite;
-    }
-
-    .animate-bounce-gentle {
-      animation: bounce-gentle 2s ease-in-out infinite;
-    }
-
-    .animate-sparkle {
-      animation: sparkle 1.5s ease-in-out infinite;
-    }
-
-    .animate-ping-slow {
-      animation: ping-slow 2s cubic-bezier(0, 0, 0.2, 1) infinite;
-    }
-
-    .animate-wave {
-      animation: wave 1s ease-in-out infinite;
-    }
-
-    .animate-progress-bar {
-      animation: progress-bar 1.5s ease-in-out infinite;
-    }
-  `}</style>
-);
-
-// ============================================
-// USAGE IN YOUR DASHBOARD COMPONENT
-// ============================================
-export default function DashboardLoadingDemo() {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
-      <LoaderStyles />
-
-      {/* Choose ONE of these: */}
-
-      {/* <AIBrainLoader /> */}
-      {/* <XPCrystalLoader /> */}
-      {/* <TrophyLoader /> */}
-      {/* <TargetFocusLoader /> */}
-      <LightningLoader />
     </div>
   );
 }
 
-// ============================================
-// HOW TO USE IN YOUR DASHBOARD
-// ============================================
-
-/*
-// In Dashboard.jsx, replace the loading section:
-
-if (loading) {
+export function DashboardLoader() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
-      <AIBrainLoader />  {/* or any other loader */ /*}
-    </div>
+    <IntervyoLoader
+      title="Preparing your dashboard"
+      description="Your interview progress is being organized into one clear view."
+    />
   );
 }
-*/
+
+export function InterviewRoomLoader() {
+  return (
+    <IntervyoLoader
+      title="Preparing your interview room"
+      description="Checking your interview session and preparing the live workspace."
+      stages={[
+        {
+          label: "Loading interview session",
+          description: "Restoring your interview configuration",
+          icon: Activity,
+        },
+        {
+          label: "Preparing live workspace",
+          description: "Setting up your interview environment",
+          icon: MessageSquare,
+        },
+        {
+          label: "Checking session status",
+          description: "Connecting your interview room",
+          icon: Target,
+        },
+        {
+          label: "Almost ready",
+          description: "Your interview room is waiting",
+          icon: BarChart3,
+        },
+      ]}
+    />
+  );
+}
+
+export function ResultsLoader() {
+  return (
+    <IntervyoLoader
+      title="Analyzing your performance"
+      description="Preparing your scores, feedback, and next steps."
+      stages={[
+        {
+          label: "Reviewing your answers",
+          description: "Processing your interview responses",
+          icon: MessageSquare,
+        },
+        {
+          label: "Calculating performance",
+          description: "Comparing scores across key skills",
+          icon: BarChart3,
+        },
+        {
+          label: "Building your feedback",
+          description: "Finding strengths and focus areas",
+          icon: Target,
+        },
+        {
+          label: "Preparing your report",
+          description: "Your results are almost ready",
+          icon: Activity,
+        },
+      ]}
+    />
+  );
+}
+
+// Backward-compatible export.
+export function LightningLoader() {
+  return <DashboardLoader />;
+}
+
+export default IntervyoLoader;

@@ -2,6 +2,7 @@ import React, {
   useCallback,
   useEffect,
   useMemo,
+  useContext,
   useRef,
   useState,
 } from "react";
@@ -23,7 +24,6 @@ import {
   Maximize2,
   MessageSquare,
   Mic,
-  MicOff,
   Minimize2,
   Pause,
   Phone,
@@ -33,8 +33,6 @@ import {
   Target,
   TrendingUp,
   UserRound,
-  Video,
-  VideoOff,
   X,
   Zap,
 } from "lucide-react";
@@ -43,7 +41,9 @@ import {
   getInterviewById,
   getInterviewSession,
   startInterview,
+  completeInterview,
 } from "../../services/operations/aiInterviewApi";
+import { ThemeContext } from "../shared/ThemeContext";
 import BodyLanguageCoach from "./BodyLanguageCoach";
 
 const ROOM_CSS = `
@@ -61,7 +61,10 @@ const ROOM_CSS = `
   --ir-warning: #9a6700;
   --ir-ease: cubic-bezier(0.22, 1, 0.36, 1);
 
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
   background: var(--ir-canvas);
   color: var(--ir-ink);
   font-family: "Helvetica Now Text", "Helvetica Neue", Inter, Helvetica, Arial, sans-serif;
@@ -108,9 +111,12 @@ const ROOM_CSS = `
 }
 
 .ir-shell {
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   background: var(--ir-canvas);
 }
 
@@ -315,9 +321,22 @@ const ROOM_CSS = `
 
 .ir-stage {
   position: relative;
-  min-height: calc(100vh - 73px);
+  min-height: 0;
   overflow: hidden;
   background: #202021;
+}
+
+.ir-video-preview {
+  position: absolute;
+  top: 76px;
+  right: 24px;
+  z-index: 6;
+  width: clamp(220px, 28vw, 360px);
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, .32);
+  background: #202021;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .35);
 }
 
 .ir-video {
@@ -392,7 +411,7 @@ const ROOM_CSS = `
 .ir-interviewer-card {
   position: absolute;
   top: 76px;
-  right: 24px;
+  left: 24px;
   z-index: 5;
   width: 230px;
   padding: 18px;
@@ -647,6 +666,43 @@ const ROOM_CSS = `
   color: var(--ir-mute);
 }
 
+.ir-confidence-track {
+  height: 8px;
+  margin-top: 10px;
+  overflow: hidden;
+  background: var(--ir-hairline-soft);
+}
+
+.ir-confidence-fill {
+  height: 100%;
+  background: var(--ir-success);
+  transition: width .3s ease, background-color .3s ease;
+}
+
+.ir-countdown {
+  min-width: 190px;
+  display: grid;
+  gap: 5px;
+  padding: 9px 14px;
+  border: 1px solid rgba(255, 255, 255, .18);
+  border-radius: 18px;
+  background: rgba(17, 17, 17, .86);
+  color: #ffffff;
+  font-size: 12px;
+}
+
+.ir-countdown-track {
+  height: 4px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, .22);
+}
+
+.ir-countdown-fill {
+  height: 100%;
+  background: #ffffff;
+  transition: width 1s linear;
+}
+
 .ir-metric-list {
   display: grid;
   gap: 8px;
@@ -732,6 +788,77 @@ const ROOM_CSS = `
   background: #ffffff;
   color: #111111;
   box-shadow: 0 24px 80px rgba(0, 0, 0, .3);
+}
+
+.ir-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, .68);
+  backdrop-filter: blur(8px);
+}
+
+.ir-confirm-card {
+  width: min(440px, 100%);
+  padding: 28px;
+  border: 1px solid var(--ir-hairline-soft);
+  background: var(--ir-canvas);
+  color: var(--ir-ink);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, .35);
+}
+
+.ir-confirm-icon {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 18px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--ir-danger) 12%, var(--ir-canvas));
+  color: var(--ir-danger);
+}
+
+.ir-confirm-card h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.ir-confirm-card p {
+  margin: 10px 0 24px;
+  color: var(--ir-mute);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.ir-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.ir-confirm-button {
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid var(--ir-hairline);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ir-ink);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.ir-confirm-button-danger {
+  border-color: var(--ir-danger);
+  background: var(--ir-danger);
+  color: #ffffff;
+}
+
+.ir-confirm-button:disabled {
+  opacity: .6;
 }
 
 .ir-root[data-ir-theme="dark"] .ir-ready-card {
@@ -1037,16 +1164,12 @@ const ROOM_CSS = `
 
 @media (max-width: 850px) {
   .ir-room {
-    display: block;
-    overflow: auto;
+    grid-template-columns: minmax(0, 1fr) minmax(250px, 36%);
+    overflow: hidden;
   }
 
   .ir-stage {
-    min-height: calc(100vh - 73px);
-  }
-
-  .ir-sidebar {
-    display: none;
+    min-height: 0;
   }
 
   .ir-header-inner {
@@ -1064,9 +1187,15 @@ const ROOM_CSS = `
 
   .ir-interviewer-card {
     top: 72px;
-    right: 16px;
+    left: 16px;
     width: 185px;
     padding: 14px;
+  }
+
+  .ir-video-preview {
+    top: 72px;
+    right: 16px;
+    width: clamp(180px, 34vw, 280px);
   }
 
   .ir-stage-topbar {
@@ -1091,7 +1220,12 @@ const ROOM_CSS = `
   }
 }
 
-@media (max-width: 560px) {
+@media (max-width: 640px) {
+  .ir-room {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(200px, 42%) minmax(0, 1fr);
+  }
+
   .ir-header {
     min-height: auto;
   }
@@ -1114,21 +1248,51 @@ const ROOM_CSS = `
     flex: 1;
   }
 
+  .ir-sidebar-header {
+    padding: 10px 14px;
+  }
+
+  .ir-sidebar-content {
+    overflow-y: auto;
+    padding: 10px 12px;
+  }
+
+  .ir-sidebar-section:not(:first-child):not(.ir-confidence-section) {
+    display: none;
+  }
+
+  .ir-sidebar-label {
+    margin-bottom: 6px;
+  }
+
+  .ir-question-card {
+    padding: 12px;
+  }
+
   .ir-interviewer-card {
-    top: 122px;
+    top: 54px;
+    left: 12px;
+    width: min(44%, 160px);
+    padding: 12px;
+  }
+
+  .ir-video-preview {
+    top: 54px;
+    right: 12px;
+    width: min(44vw, 180px);
   }
 
   .ir-message {
-    bottom: 125px;
-    padding: 16px;
+    bottom: 78px;
+    padding: 12px;
   }
 
   .ir-message p {
-    font-size: 15px;
+    font-size: 13px;
   }
 
   .ir-controls {
-    bottom: 16px;
+    bottom: 8px;
     padding: 7px;
   }
 
@@ -1266,25 +1430,27 @@ function MetricRow({ label, value, progress, valueClass = "" }) {
   );
 }
 
-const InterviewRoom = () => {
+const InterviewRoom = ({ initialStream = null }) => {
   const { interviewId } = useParams();
   const navigate = useNavigate();
   const { token } = useSelector((state) => state.auth);
-  const { theme } = useSelector((state) => state.theme || {});
+  const { theme } = useContext(ThemeContext);
 
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [interview, setInterview] = useState(null);
   const [session, setSession] = useState(null);
   const [socket, setSocket] = useState(null);
   const [socketConnected, setSocketConnected] = useState(false);
+  const socketRef = useRef(null);
 
   const [interviewStarted, setInterviewStarted] = useState(false);
+  const [hasQuestionStarted, setHasQuestionStarted] = useState(false);
   const [sessionStatus, setSessionStatus] = useState("ready");
   const [currentQuestion, setCurrentQuestion] = useState(null);
   const [currentMessage, setCurrentMessage] = useState(
     "Loading interview...",
   );
-  const [conversationHistory, setConversationHistory] = useState([]);
 
   const [performanceMetrics, setPerformanceMetrics] = useState({
     averageScore: 0,
@@ -1302,9 +1468,16 @@ const InterviewRoom = () => {
   // latest value without needing timeRemaining in its own dependency array.
   const timeRemainingRef = useRef(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [isEnding, setIsEnding] = useState(false);
+  const [showEndConfirmation, setShowEndConfirmation] = useState(false);
+  const endingRef = useRef(false);
+  const isPausedRef = useRef(false);
+  const currentQuestionRef = useRef(null);
   const timerRef = useRef(null);
 
   const [stream, setStream] = useState(null);
+  const streamRef = useRef(null);
+  const mediaCleanupTimeoutRef = useRef(null);
   const [isVideoOn, setIsVideoOn] = useState(true);
   const [isAudioOn, setIsAudioOn] = useState(true);
   const videoRef = useRef(null);
@@ -1312,9 +1485,17 @@ const InterviewRoom = () => {
   const [isListening, setIsListening] = useState(false);
   const [aiSpeaking, setAiSpeaking] = useState(false);
   const [userTranscript, setUserTranscript] = useState("");
+  const userTranscriptRef = useRef("");
+  const [questionCountdown, setQuestionCountdown] = useState(null);
+  const [waitingForNextQuestion, setWaitingForNextQuestion] = useState(false);
+  const [confidenceScore, setConfidenceScore] = useState(100);
   const recognitionRef = useRef(null);
   const transcriptAccumulatorRef = useRef("");
   const shouldRestartRecognition = useRef(false);
+  const startListeningRef = useRef(null);
+  const autoListenIntervalRef = useRef(null);
+  const questionCountdownRef = useRef(null);
+  const answerSilenceTimeoutRef = useRef(null);
 
   const [showCodeEditor, setShowCodeEditor] = useState(false);
   const [code, setCode] = useState("");
@@ -1330,10 +1511,56 @@ const InterviewRoom = () => {
   const [showStats, setShowStats] = useState(false);
 
   const currentAudioRef = useRef(null);
+  const currentAudioUrlRef = useRef(null);
+  const audioQueueRef = useRef([]);
+  const audioQueueRunningRef = useRef(false);
+  const processAudioQueueRef = useRef(null);
   const questionStartTimeRef = useRef(null);
-  // Guards against duplicate initializeInterview calls (React Strict Mode fires
-  // effects twice in development; this ref ensures only the first call proceeds).
-  const initializationStartedRef = useRef(false);
+  const answerSubmissionRef = useRef(false);
+  const [isSubmittingAnswer, setIsSubmittingAnswer] = useState(false);
+  const initializationRequestRef = useRef(0);
+  const releaseCurrentAudio = useCallback((audio = currentAudioRef.current) => {
+    if (!audio || currentAudioRef.current !== audio) return;
+
+    audio.pause();
+    audio.onended = null;
+    audio.onerror = null;
+    currentAudioRef.current = null;
+
+    if (currentAudioUrlRef.current) {
+      URL.revokeObjectURL(currentAudioUrlRef.current);
+      currentAudioUrlRef.current = null;
+    }
+  }, []);
+
+  const scheduleAutoListen = useCallback(() => {
+    window.clearInterval(autoListenIntervalRef.current);
+    questionCountdownRef.current = 5;
+    setQuestionCountdown(5);
+    autoListenIntervalRef.current = window.setInterval(() => {
+      const remaining = (questionCountdownRef.current || 1) - 1;
+      questionCountdownRef.current = remaining;
+
+      if (remaining <= 0) {
+        window.clearInterval(autoListenIntervalRef.current);
+        autoListenIntervalRef.current = null;
+        questionCountdownRef.current = null;
+        setQuestionCountdown(null);
+
+        if (
+          !isPausedRef.current &&
+          currentQuestionRef.current &&
+          !currentQuestionRef.current.requiresCode &&
+          !userTranscriptRef.current.trim()
+        ) {
+          startListeningRef.current?.();
+        }
+        return;
+      }
+
+      setQuestionCountdown(remaining);
+    }, 1000);
+  }, []);
 
   const socketUrl =
     import.meta.env.VITE_BASE_URL || "http://localhost:5000";
@@ -1361,6 +1588,8 @@ const InterviewRoom = () => {
 
   const stopListening = useCallback(() => {
     shouldRestartRecognition.current = false;
+    window.clearTimeout(answerSilenceTimeoutRef.current);
+    answerSilenceTimeoutRef.current = null;
 
     try {
       recognitionRef.current?.stop();
@@ -1372,8 +1601,15 @@ const InterviewRoom = () => {
   }, []);
 
   const stopAllMedia = useCallback(() => {
-    if (stream) {
-      stream.getTracks().forEach((track) => track.stop());
+    window.clearInterval(autoListenIntervalRef.current);
+    autoListenIntervalRef.current = null;
+    questionCountdownRef.current = null;
+    window.clearTimeout(answerSilenceTimeoutRef.current);
+    audioQueueRef.current = [];
+
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
     }
 
     if (recognitionRef.current) {
@@ -1384,22 +1620,20 @@ const InterviewRoom = () => {
       }
     }
 
-    if (currentAudioRef.current) {
-      currentAudioRef.current.pause();
-      currentAudioRef.current = null;
-    }
+    releaseCurrentAudio();
 
     if (window.speechSynthesis) {
       window.speechSynthesis.cancel();
     }
-  }, [stream]);
+  }, [releaseCurrentAudio]);
 
   const disconnectSocket = useCallback(() => {
-    if (socket) {
-      socket.disconnect();
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+      socketRef.current = null;
       setSocket(null);
     }
-  }, [socket]);
+  }, []);
 
   const cleanup = useCallback(() => {
     if (timerRef.current) {
@@ -1471,35 +1705,128 @@ const InterviewRoom = () => {
     [],
   );
 
+  const finishInterview = useCallback(
+    async () => {
+      if (endingRef.current || !session) return;
+
+      endingRef.current = true;
+      setIsEnding(true);
+      setShowEndConfirmation(false);
+      stopListening();
+
+      const completeOverHttp = async () => {
+        try {
+          await completeInterview(interviewId, token);
+          setSessionStatus("completed");
+          window.localStorage.removeItem(`interview-room:${interviewId}:time`);
+          window.localStorage.removeItem(`interview-room:${interviewId}:paused`);
+          cleanup();
+          navigate(`/results/${interviewId}`);
+        } catch (error) {
+          console.error("Failed to complete interview:", error);
+          endingRef.current = false;
+          setIsEnding(false);
+          addNotification(
+            error.response?.data?.message ||
+              "Could not complete the interview. Please try again.",
+            "error",
+          );
+        }
+      };
+
+      if (!socket?.connected) {
+        await completeOverHttp();
+        return;
+      }
+
+      socket.timeout(15000).emit(
+        "end-interview",
+        { sessionId: session._id, interviewId },
+        (timeoutError, result) => {
+          if (timeoutError || !result?.success) {
+            void completeOverHttp();
+          }
+        },
+      );
+    },
+    [
+      addNotification,
+      cleanup,
+      interviewId,
+      navigate,
+      session,
+      socket,
+      stopListening,
+      token,
+    ],
+  );
+
   const handleTimeUp = useCallback(() => {
     addNotification("Time is up. Ending interview...", "info");
-
-    if (socket && session) {
-      socket.emit("end-interview", {
-        sessionId: session._id,
-        interviewId,
-      });
-    }
-  }, [addNotification, interviewId, session, socket]);
+    void finishInterview();
+  }, [addNotification, finishInterview]);
 
   const initializeInterview = useCallback(async () => {
-    // Prevent Strict Mode double-invocation and accidental re-runs from
-    // unstable useCallback dep references from causing two API calls.
-    if (initializationStartedRef.current) return;
-    initializationStartedRef.current = true;
+    const requestId = initializationRequestRef.current + 1;
+    initializationRequestRef.current = requestId;
 
     try {
       setLoading(true);
+      setLoadError("");
+      setHasQuestionStarted(false);
 
       const interviewData = await getInterviewById(interviewId, token);
+      if (requestId !== initializationRequestRef.current) return;
+      if (!interviewData) {
+        throw new Error("Interview details were not returned by the server.");
+      }
 
-      setInterview(interviewData);
-      const durationSeconds = (interviewData.duration || 0) * 60;
-      setTimeRemaining(durationSeconds);
-      timeRemainingRef.current = durationSeconds;
+      const config = interviewData.config || {};
+      const normalizedInterview = {
+        ...interviewData,
+        role:
+          interviewData.role ||
+          config.subDomain ||
+          config.domain ||
+          "Software Engineer",
+        difficulty: interviewData.difficulty || config.difficulty || "medium",
+        duration: Number(interviewData.duration ?? config.duration) || 30,
+        targetCompany:
+          interviewData.targetCompany || config.targetCompany || "",
+      };
 
-      const totalQuestions = Math.floor(
-        (interviewData.duration || 0) / 2.5,
+      setInterview(normalizedInterview);
+      const durationSeconds = normalizedInterview.duration * 60;
+      let remainingSeconds = durationSeconds;
+      if (interviewData.status === "in-progress") {
+        const savedTime = Number(
+          window.localStorage.getItem(`interview-room:${interviewId}:time`),
+        );
+        setIsPaused(
+          window.localStorage.getItem(
+            `interview-room:${interviewId}:paused`,
+          ) === "true",
+        );
+        if (Number.isFinite(savedTime) && savedTime > 0) {
+          remainingSeconds = Math.min(savedTime, durationSeconds);
+        }
+      } else {
+        window.localStorage.removeItem(`interview-room:${interviewId}:time`);
+        window.localStorage.removeItem(`interview-room:${interviewId}:paused`);
+        setIsPaused(false);
+      }
+      setTimeRemaining(remainingSeconds);
+      timeRemainingRef.current = remainingSeconds;
+
+      const averageMinutesPerQuestion =
+        normalizedInterview.difficulty === "easy"
+          ? 2.5
+          : normalizedInterview.difficulty === "hard"
+            ? 3.5
+            : 3;
+      const totalQuestions = Math.max(
+        1,
+        Math.floor(normalizedInterview.duration / averageMinutesPerQuestion),
       );
 
       setPerformanceMetrics((previous) => ({
@@ -1507,16 +1834,23 @@ const InterviewRoom = () => {
         totalQuestions,
       }));
 
+      if (interviewData.status === "completed") {
+        navigate(`/results/${interviewId}`, { replace: true });
+        return;
+      }
+
       if (interviewData.status === "in-progress") {
         const sessionData = await getInterviewSession(interviewId, token);
+        if (requestId !== initializationRequestRef.current) return;
+        if (!sessionData) {
+          throw new Error("The active interview session could not be restored.");
+        }
 
         setSession(sessionData);
         setInterviewStarted(true);
         setSessionStatus("active");
 
         if (sessionData.conversation?.length) {
-          setConversationHistory(sessionData.conversation);
-
           const lastMessage =
             sessionData.conversation[sessionData.conversation.length - 1];
 
@@ -1536,18 +1870,19 @@ const InterviewRoom = () => {
 
       setLoading(false);
     } catch (error) {
+      if (requestId !== initializationRequestRef.current) return;
+
       console.error("Interview initialization failed:", error);
-      // Allow a retry by resetting the guard
-      initializationStartedRef.current = false;
       setLoading(false);
+      setLoadError(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to load interview.",
+      );
       addNotification(
-        "Failed to load interview. Redirecting...",
+        "Failed to load interview. Check your connection and retry.",
         "error",
       );
-
-      window.setTimeout(() => {
-        navigate("/dashboard");
-      }, 2000);
     }
   }, [
     addNotification,
@@ -1558,43 +1893,53 @@ const InterviewRoom = () => {
   ]);
 
   useEffect(() => {
-    initializeInterview();
+    void initializeInterview();
 
     return () => {
+      initializationRequestRef.current += 1;
       cleanup();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    // cleanup and initializeInterview are stable after first render.
-    // Including them causes the effect to re-run when unrelated state changes.
-  }, []);  // intentionally empty — runs once on mount
+  }, [cleanup, initializeInterview]);
 
   useEffect(() => {
     let mounted = true;
-    let localStream = null;
+    if (mediaCleanupTimeoutRef.current) {
+      window.clearTimeout(mediaCleanupTimeoutRef.current);
+      mediaCleanupTimeoutRef.current = null;
+    }
 
     const setupMedia = async () => {
       try {
-        localStream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-          },
-          audio: {
-            echoCancellation: true,
-            noiseSuppression: true,
-          },
-        });
+        let localStream = initialStream;
+        const hasLiveTracks = (candidateStream) =>
+          candidateStream
+            ?.getTracks()
+            .some((track) => track.readyState === "live");
+
+        if (!hasLiveTracks(localStream)) {
+          localStream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+            },
+            audio: {
+              echoCancellation: true,
+              noiseSuppression: true,
+            },
+          });
+        }
 
         if (!mounted) {
-          localStream.getTracks().forEach((track) => track.stop());
+          if (localStream !== initialStream) {
+            localStream.getTracks().forEach((track) => track.stop());
+          }
           return;
         }
 
         setStream(localStream);
-
-        if (videoRef.current) {
-          videoRef.current.srcObject = localStream;
-        }
+        streamRef.current = localStream;
+        setIsVideoOn(localStream.getVideoTracks()[0]?.enabled ?? false);
+        setIsAudioOn(localStream.getAudioTracks()[0]?.enabled ?? false);
       } catch (error) {
         console.error("Media access failed:", error);
         addNotification(
@@ -1608,12 +1953,98 @@ const InterviewRoom = () => {
 
     return () => {
       mounted = false;
+      mediaCleanupTimeoutRef.current = window.setTimeout(() => {
+        streamRef.current?.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
+        mediaCleanupTimeoutRef.current = null;
+      }, 0);
+    };
+  }, [addNotification, initialStream]);
 
-      if (localStream) {
-        localStream.getTracks().forEach((track) => track.stop());
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !stream) return undefined;
+
+    if (video.srcObject !== stream) {
+      video.srcObject = stream;
+    }
+
+    video.play().catch((error) => {
+      console.error("Could not start candidate video preview:", error);
+      addNotification("Could not display your camera preview.", "error");
+    });
+
+    return () => {
+      if (video.srcObject === stream) {
+        video.srcObject = null;
       }
     };
-  }, [addNotification]);
+  }, [addNotification, loading, stream]);
+
+  useEffect(() => {
+    isPausedRef.current = isPaused;
+  }, [isPaused]);
+
+  useEffect(() => {
+    currentQuestionRef.current = currentQuestion;
+  }, [currentQuestion]);
+
+  useEffect(() => {
+    if (!interviewId || sessionStatus !== "active") return;
+
+    window.localStorage.setItem(
+      `interview-room:${interviewId}:time`,
+      String(timeRemaining),
+    );
+    window.localStorage.setItem(
+      `interview-room:${interviewId}:paused`,
+      String(isPaused),
+    );
+  }, [interviewId, isPaused, sessionStatus, timeRemaining]);
+
+  const togglePause = useCallback(() => {
+    const nextPaused = !isPaused;
+    isPausedRef.current = nextPaused;
+    setIsPaused(nextPaused);
+    if (nextPaused) {
+      window.clearInterval(autoListenIntervalRef.current);
+      autoListenIntervalRef.current = null;
+      questionCountdownRef.current = null;
+      setQuestionCountdown(null);
+      stopListening();
+      currentAudioRef.current?.pause();
+      window.speechSynthesis?.pause();
+      socket?.emit("pause-interview", { sessionId: session?._id });
+      return;
+    }
+
+    if (currentAudioRef.current) {
+      currentAudioRef.current.play().catch((error) => {
+        console.error("Failed to resume interviewer audio:", error);
+        addNotification("Could not resume interviewer audio.", "error");
+      });
+    } else {
+      window.speechSynthesis?.resume();
+      if (
+        audioQueueRef.current.length === 0 &&
+        !audioQueueRunningRef.current &&
+        currentQuestionRef.current &&
+        !currentQuestionRef.current.requiresCode &&
+        !userTranscriptRef.current.trim()
+      ) {
+        scheduleAutoListen();
+      }
+    }
+    processAudioQueueRef.current?.();
+    socket?.emit("resume-interview", { sessionId: session?._id });
+  }, [
+    addNotification,
+    isPaused,
+    session,
+    scheduleAutoListen,
+    socket,
+    stopListening,
+  ]);
 
   // Keep the ref in sync on every render so the interval closure always reads
   // the current value without timeRemaining being a dep of this effect.
@@ -1628,7 +2059,13 @@ const InterviewRoom = () => {
       timerRef.current = null;
     }
 
-    if (sessionStatus !== "active" || isPaused || timeRemainingRef.current <= 0) {
+    if (
+      sessionStatus !== "active" ||
+      isPaused ||
+      isSubmittingAnswer ||
+      !hasQuestionStarted ||
+      timeRemainingRef.current <= 0
+    ) {
       return undefined;
     }
 
@@ -1655,7 +2092,13 @@ const InterviewRoom = () => {
       }
     };
     // timeRemaining deliberately excluded — reads via ref instead
-  }, [handleTimeUp, isPaused, sessionStatus]);
+  }, [
+    hasQuestionStarted,
+    handleTimeUp,
+    isPaused,
+    isSubmittingAnswer,
+    sessionStatus,
+  ]);
 
   useEffect(() => {
     const SpeechRecognition =
@@ -1675,8 +2118,6 @@ const InterviewRoom = () => {
 
     recognition.onstart = () => {
       setIsListening(true);
-      transcriptAccumulatorRef.current = "";
-      setUserTranscript("");
     };
 
     recognition.onresult = (event) => {
@@ -1704,6 +2145,17 @@ const InterviewRoom = () => {
       setUserTranscript(
         `${transcriptAccumulatorRef.current}${interim}`,
       );
+      userTranscriptRef.current =
+        `${transcriptAccumulatorRef.current}${interim}`;
+
+      const transcript =
+        `${transcriptAccumulatorRef.current}${interim}`.trim();
+      if (transcript.length >= 5) {
+        window.clearTimeout(answerSilenceTimeoutRef.current);
+        answerSilenceTimeoutRef.current = window.setTimeout(() => {
+          stopListening();
+        }, 2500);
+      }
     };
 
     recognition.onerror = (event) => {
@@ -1720,6 +2172,8 @@ const InterviewRoom = () => {
     recognition.onend = () => {
       if (shouldRestartRecognition.current) {
         window.setTimeout(() => {
+          if (!shouldRestartRecognition.current) return;
+
           try {
             recognition.start();
           } catch {
@@ -1743,29 +2197,35 @@ const InterviewRoom = () => {
         // Recognition may already be stopped.
       }
     };
-  }, [addNotification]);
+  }, [addNotification, stopListening]);
 
-  const speakText = useCallback((text) => {
+  const speakText = useCallback((text, onComplete) => {
     if (!window.speechSynthesis || !text) {
       setAiSpeaking(false);
+      onComplete?.();
       return;
     }
-
-    window.speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
 
     utterance.rate = 0.9;
     utterance.pitch = 1;
 
-    utterance.onend = () => setAiSpeaking(false);
-    utterance.onerror = () => setAiSpeaking(false);
+    utterance.onend = () => {
+      setAiSpeaking(false);
+      onComplete?.();
+    };
+    utterance.onerror = () => {
+      setAiSpeaking(false);
+      onComplete?.();
+    };
 
     window.speechSynthesis.speak(utterance);
   }, []);
 
   const playAudioFromBase64 = useCallback((base64Data) => {
     return new Promise((resolve, reject) => {
+      let audio;
       try {
         const byteCharacters = window.atob(base64Data);
         const byteNumbers = new Array(byteCharacters.length);
@@ -1777,93 +2237,127 @@ const InterviewRoom = () => {
         const byteArray = new Uint8Array(byteNumbers);
         const blob = new Blob([byteArray], { type: "audio/mpeg" });
         const url = URL.createObjectURL(blob);
-        const audio = new Audio(url);
+        audio = new Audio(url);
 
+        releaseCurrentAudio();
         currentAudioRef.current = audio;
+        currentAudioUrlRef.current = url;
 
         audio.onended = () => {
           setAiSpeaking(false);
-          URL.revokeObjectURL(url);
+          releaseCurrentAudio(audio);
           resolve();
         };
 
         audio.onerror = () => {
           setAiSpeaking(false);
-          URL.revokeObjectURL(url);
+          releaseCurrentAudio(audio);
           reject(new Error("Audio playback failed."));
         };
 
-        audio.play().catch(reject);
+        audio.play().catch((error) => {
+          releaseCurrentAudio(audio);
+          reject(error);
+        });
       } catch (error) {
+        if (audio) releaseCurrentAudio(audio);
         reject(error);
       }
     });
-  }, []);
+  }, [releaseCurrentAudio]);
+
+  const processAudioQueue = useCallback(() => {
+    if (audioQueueRunningRef.current || isPausedRef.current) return;
+
+    audioQueueRunningRef.current = true;
+    void (async () => {
+      try {
+        while (audioQueueRef.current.length && !isPausedRef.current) {
+          const data = audioQueueRef.current.shift();
+          if (!data) continue;
+
+          setAiSpeaking(true);
+          try {
+            if (data.hasAudio && data.audioBase64) {
+              await playAudioFromBase64(data.audioBase64);
+            } else {
+              await new Promise((resolve) => speakText(data.message, resolve));
+            }
+          } catch (error) {
+            console.warn("Interviewer audio playback failed; using speech synthesis.", error);
+            await new Promise((resolve) => speakText(data.message, resolve));
+          }
+
+          if (data.type === "question" && !data.requiresCode) {
+            scheduleAutoListen();
+          }
+        }
+      } finally {
+        audioQueueRunningRef.current = false;
+        if (audioQueueRef.current.length && !isPausedRef.current) {
+          processAudioQueueRef.current?.();
+        } else if (!currentAudioRef.current) {
+          setAiSpeaking(false);
+        }
+      }
+    })();
+  }, [playAudioFromBase64, scheduleAutoListen, speakText]);
+
+  useEffect(() => {
+    processAudioQueueRef.current = processAudioQueue;
+    return () => {
+      processAudioQueueRef.current = null;
+    };
+  }, [processAudioQueue]);
 
   const handleAIMessage = useCallback(
-    async (data) => {
+    (data) => {
+      if (data.type === "feedback" || data.type === "code-review") {
+        return;
+      }
+
       setCurrentMessage(data.message);
-      setAiSpeaking(true);
-
-      if (currentAudioRef.current) {
-        currentAudioRef.current.pause();
-        currentAudioRef.current = null;
-      }
-
-      if (window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-      }
-
-      setConversationHistory((previous) => [
-        ...previous,
-        {
-          role: "assistant",
-          content: data.message,
-          type: data.type,
-          timestamp: new Date(),
-        },
-      ]);
-
-      if (data.hasAudio && data.audioBase64) {
-        try {
-          await playAudioFromBase64(data.audioBase64);
-        } catch {
-          speakText(data.message);
-        }
-      } else {
-        speakText(data.message);
-      }
 
       if (data.type === "question") {
-        setCurrentQuestion({
+        window.clearInterval(autoListenIntervalRef.current);
+        autoListenIntervalRef.current = null;
+        questionCountdownRef.current = null;
+        setQuestionCountdown(null);
+        setWaitingForNextQuestion(false);
+        setHasQuestionStarted(true);
+        const nextQuestion = {
           message: data.message,
           type: data.questionType,
           requiresCode: data.requiresCode,
           questionIndex: data.questionIndex,
-        });
+        };
+        const sameQuestion =
+          currentQuestionRef.current?.questionIndex ===
+            nextQuestion.questionIndex &&
+          currentQuestionRef.current?.message === nextQuestion.message;
+        currentQuestionRef.current = nextQuestion;
+        setCurrentQuestion(nextQuestion);
 
         questionStartTimeRef.current = Date.now();
-        setUserTranscript("");
-        transcriptAccumulatorRef.current = "";
+        if (!sameQuestion) {
+          setUserTranscript("");
+          userTranscriptRef.current = "";
+          transcriptAccumulatorRef.current = "";
+        }
 
         if (data.requiresCode) {
           setTimeout(() => {
             setShowCodeEditor(true);
-            // Read via ref — avoids making codeLanguage a dep of this callback
-            // which would in turn make it a dep of the socket effect, causing
-            // the socket to disconnect/reconnect every time the user changes language.
             setCode(getStarterCode(codeLanguageRef.current));
           }, 1200);
         }
       }
 
-      if (data.type === "feedback" || data.type === "code-review") {
-        setCurrentQuestion(null);
-        setShowCodeEditor(false);
-      }
+      audioQueueRef.current.push(data);
+      processAudioQueue();
     },
     // codeLanguage intentionally excluded — reads via codeLanguageRef instead
-    [playAudioFromBase64, speakText],
+    [processAudioQueue],
   );
 
   useEffect(() => {
@@ -1888,12 +2382,21 @@ const InterviewRoom = () => {
         newSocket.emit("candidate-ready", {
           sessionId: session._id,
           interviewId,
+          paused: isPausedRef.current,
         });
       }, 800);
     });
 
     newSocket.on("disconnect", () => {
       setSocketConnected(false);
+    });
+
+    newSocket.io.on("reconnect_failed", () => {
+      setSocketConnected(false);
+      addNotification(
+        "Could not reconnect to the interview server. Try reconnecting from the room controls.",
+        "error",
+      );
     });
 
     newSocket.on("ai-message", handleAIMessage);
@@ -1922,7 +2425,11 @@ const InterviewRoom = () => {
     });
 
     newSocket.on("interview-ended", () => {
+      endingRef.current = true;
+      setIsEnding(true);
       setSessionStatus("completed");
+      window.localStorage.removeItem(`interview-room:${interviewId}:time`);
+      window.localStorage.removeItem(`interview-room:${interviewId}:paused`);
       cleanup();
 
       addNotification(
@@ -1942,10 +2449,14 @@ const InterviewRoom = () => {
       );
     });
 
+    socketRef.current = newSocket;
     setSocket(newSocket);
 
     return () => {
       newSocket.disconnect();
+      if (socketRef.current === newSocket) {
+        socketRef.current = null;
+      }
     };
   }, [
     addNotification,
@@ -1974,7 +2485,14 @@ const InterviewRoom = () => {
 
       setSession(result.session);
       setInterviewStarted(true);
+      setHasQuestionStarted(false);
       setSessionStatus("active");
+      const initialTime =
+        Number(result.timeRemaining) || (interview?.duration || 30) * 60;
+      setTimeRemaining(initialTime);
+      timeRemainingRef.current = initialTime;
+      window.localStorage.removeItem(`interview-room:${interviewId}:time`);
+      window.localStorage.removeItem(`interview-room:${interviewId}:paused`);
       // Ensure loading is cleared after a successful start
       setLoading(false);
 
@@ -1990,7 +2508,13 @@ const InterviewRoom = () => {
   };
 
   const startListening = useCallback(() => {
-    if (!currentQuestion || isListening || aiSpeaking || !isAudioOn) {
+    if (
+      !currentQuestion ||
+      isListening ||
+      aiSpeaking ||
+      !isAudioOn ||
+      isPausedRef.current
+    ) {
       return;
     }
 
@@ -2005,6 +2529,8 @@ const InterviewRoom = () => {
     try {
       transcriptAccumulatorRef.current = "";
       setUserTranscript("");
+      userTranscriptRef.current = "";
+      window.clearTimeout(answerSilenceTimeoutRef.current);
       shouldRestartRecognition.current = true;
       recognitionRef.current.start();
     } catch (error) {
@@ -2019,7 +2545,13 @@ const InterviewRoom = () => {
     isListening,
   ]);
 
+  useEffect(() => {
+    startListeningRef.current = startListening;
+  }, [startListening]);
+
   const handleSubmitAnswer = useCallback(() => {
+    if (answerSubmissionRef.current) return;
+
     const answer =
       transcriptAccumulatorRef.current.trim() ||
       userTranscript.trim();
@@ -2038,31 +2570,41 @@ const InterviewRoom = () => {
     }
 
     stopListening();
-
-    setConversationHistory((previous) => [
-      ...previous,
-      {
-        role: "user",
-        content: answer,
-        type: "answer",
-        timestamp: new Date(),
-      },
-    ]);
-
-    socket.emit("candidate-answer", {
-      sessionId: session._id,
-      question: currentQuestion.message,
-      answer,
-      questionIndex: currentQuestion.questionIndex,
-      category: currentQuestion.type,
-    });
-
+    answerSubmissionRef.current = true;
+    setIsSubmittingAnswer(true);
     setCurrentMessage("Processing your answer...");
-    setUserTranscript("");
-    transcriptAccumulatorRef.current = "";
-    setCurrentQuestion(null);
 
-    addNotification("Answer submitted.", "success");
+    socket.timeout(20000).emit(
+      "candidate-answer",
+      {
+        sessionId: session._id,
+        question: currentQuestion.message,
+        answer,
+        questionIndex: currentQuestion.questionIndex,
+        category: currentQuestion.type,
+      },
+      (timeoutError, response) => {
+        answerSubmissionRef.current = false;
+        setIsSubmittingAnswer(false);
+
+        if (timeoutError || !response?.success) {
+          addNotification(
+            response?.message ||
+              "Answer could not be saved. Your response is still available; try submitting again.",
+            "error",
+          );
+          return;
+        }
+
+        setUserTranscript("");
+        userTranscriptRef.current = "";
+        transcriptAccumulatorRef.current = "";
+        currentQuestionRef.current = null;
+        setCurrentQuestion(null);
+        setWaitingForNextQuestion(true);
+        addNotification("Answer saved.", "success");
+      },
+    );
   }, [
     addNotification,
     currentQuestion,
@@ -2081,6 +2623,8 @@ const InterviewRoom = () => {
   }, [addNotification]);
 
   const handleSubmitCode = useCallback(() => {
+    if (answerSubmissionRef.current) return;
+
     if (!code.trim()) {
       addNotification("Please write some code first.", "error");
       return;
@@ -2091,19 +2635,37 @@ const InterviewRoom = () => {
       return;
     }
 
-    socket.emit("submit-code", {
-      sessionId: session._id,
-      question: currentQuestion.message,
-      code,
-      language: codeLanguage,
-    });
+    answerSubmissionRef.current = true;
+    setIsSubmittingAnswer(true);
+    socket.timeout(20000).emit(
+      "submit-code",
+      {
+        sessionId: session._id,
+        question: currentQuestion.message,
+        code,
+        language: codeLanguage,
+      },
+      (timeoutError, response) => {
+        answerSubmissionRef.current = false;
+        setIsSubmittingAnswer(false);
 
-    setShowCodeEditor(false);
-    setCode("");
-    setCodeOutput("");
-    setCurrentQuestion(null);
+        if (timeoutError || !response?.success) {
+          addNotification(
+            response?.message ||
+              "Your solution could not be saved. Please retry.",
+            "error",
+          );
+          return;
+        }
 
-    addNotification("Solution submitted.", "success");
+        setShowCodeEditor(false);
+        setCode("");
+        setCodeOutput("");
+        currentQuestionRef.current = null;
+        setCurrentQuestion(null);
+        addNotification("Solution saved.", "success");
+      },
+    );
   }, [
     addNotification,
     code,
@@ -2113,42 +2675,10 @@ const InterviewRoom = () => {
     socket,
   ]);
 
-  const handleEndInterview = useCallback(() => {
-    if (!window.confirm("Are you sure you want to end the interview?")) {
-      return;
-    }
-
-    stopListening();
-
-    if (socket && session) {
-      socket.emit("end-interview", {
-        sessionId: session._id,
-        interviewId,
-      });
-    }
-  }, [interviewId, session, socket, stopListening]);
-
-  const toggleVideo = useCallback(() => {
-    if (!stream) return;
-
-    const track = stream.getVideoTracks()[0];
-
-    if (!track) return;
-
-    track.enabled = !track.enabled;
-    setIsVideoOn(track.enabled);
-  }, [stream]);
-
-  const toggleAudio = useCallback(() => {
-    if (!stream) return;
-
-    const track = stream.getAudioTracks()[0];
-
-    if (!track) return;
-
-    track.enabled = !track.enabled;
-    setIsAudioOn(track.enabled);
-  }, [stream]);
+  const handleEndInterview = useCallback(
+    () => setShowEndConfirmation(true),
+    [],
+  );
 
   const timerClass = useMemo(
     () => getTimerClass(timeRemaining, interview),
@@ -2179,6 +2709,49 @@ const InterviewRoom = () => {
       </div>
     );
   }
+
+  if (loadError) {
+    return (
+      <div className="ir-root" data-ir-theme={themeValue}>
+        <style>{ROOM_CSS}</style>
+        <div className="ir-loading">
+          <div className="ir-loading-inner" role="alert">
+            <div className="ir-loading-mark">
+              <AlertCircle size={24} />
+            </div>
+            <h1>Could not load interview</h1>
+            <p>{loadError}</p>
+            <div className="ir-inline" style={{ justifyContent: "center", gap: 10 }}>
+              <button
+                type="button"
+                className="ir-btn ir-btn-primary"
+                onClick={() => {
+                  void initializeInterview();
+                }}
+              >
+                Retry
+              </button>
+              <button
+                type="button"
+                className="ir-btn ir-btn-secondary"
+                onClick={() => navigate("/dashboard")}
+              >
+                Back to dashboard
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const cameraReady = stream?.getVideoTracks().some(
+    (track) => track.readyState === "live",
+  );
+  const microphoneReady = stream?.getAudioTracks().some(
+    (track) => track.readyState === "live",
+  );
+  const mediaReady = cameraReady && microphoneReady;
 
   return (
     <div className="ir-root" data-ir-theme={themeValue}>
@@ -2233,7 +2806,8 @@ const InterviewRoom = () => {
                   <button
                     type="button"
                     className="ir-btn ir-btn-secondary"
-                    onClick={() => setIsPaused((previous) => !previous)}
+                    onClick={togglePause}
+                    aria-pressed={isPaused}
                   >
                     {isPaused ? (
                       <>
@@ -2247,6 +2821,15 @@ const InterviewRoom = () => {
                       </>
                     )}
                   </button>
+                  {!socketConnected && (
+                    <button
+                      type="button"
+                      className="ir-btn ir-btn-secondary"
+                      onClick={() => socket?.connect()}
+                    >
+                      Reconnect
+                    </button>
+                  )}
                 </>
               )}
 
@@ -2264,8 +2847,9 @@ const InterviewRoom = () => {
                   type="button"
                   className="ir-btn ir-btn-danger"
                   onClick={handleEndInterview}
+                  disabled={isEnding || isSubmittingAnswer}
                 >
-                  End interview
+                  {isEnding ? "Ending..." : "End interview"}
                 </button>
               )}
             </div>
@@ -2274,29 +2858,32 @@ const InterviewRoom = () => {
 
         <main className="ir-room">
           <section className="ir-stage">
-            <video
-              ref={videoRef}
-              autoPlay
-              muted
-              playsInline
-              className="ir-video"
-              style={{ opacity: isVideoOn ? 1 : 0 }}
-            />
+            <div className="ir-video-preview" aria-label="Your camera preview">
+              <video
+                ref={videoRef}
+                autoPlay
+                muted
+                playsInline
+                className="ir-video"
+                style={{ opacity: isVideoOn && cameraReady ? 1 : 0 }}
+              />
 
-            <BodyLanguageCoach
-              videoRef={videoRef}
-              isVideoOn={isVideoOn}
-            />
+              <BodyLanguageCoach
+                videoRef={videoRef}
+                isVideoOn={isVideoOn && cameraReady}
+                onConfidenceChange={setConfidenceScore}
+              />
 
-            {!isVideoOn && (
-              <div className="ir-video-placeholder">
-                <div className="ir-video-placeholder-inner">
-                  {interview?.role?.charAt(0)?.toUpperCase() || (
-                    <UserRound size={42} />
-                  )}
+              {(!isVideoOn || !cameraReady) && (
+                <div className="ir-video-placeholder">
+                  <div className="ir-video-placeholder-inner">
+                    {interview?.role?.charAt(0)?.toUpperCase() || (
+                      <UserRound size={42} />
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
             <div className="ir-stage-scrim" />
 
@@ -2308,12 +2895,20 @@ const InterviewRoom = () => {
                   }`}
                 />
                 <span>
-                  {sessionStatus === "active" ? "Live session" : "Waiting"}
+                  {isPaused
+                    ? "Paused"
+                    : sessionStatus === "active"
+                      ? "Live session"
+                      : "Waiting"}
                 </span>
               </div>
 
               <div className="ir-stage-label">
-                {isVideoOn ? "Camera on" : "Camera off"}
+                {!cameraReady
+                  ? "Camera unavailable"
+                  : isVideoOn
+                    ? "Camera on"
+                    : "Camera off"}
               </div>
             </div>
 
@@ -2466,7 +3061,8 @@ const InterviewRoom = () => {
                     className="ir-btn ir-btn-primary"
                     style={{ width: "100%" }}
                     onClick={handleStartInterview}
-                    disabled={loading}
+                    disabled={loading || !mediaReady}
+                    aria-label="Start interview"
                   >
                     <Play size={17} />
                     {loading ? "Starting..." : "Start interview"}
@@ -2665,7 +3261,7 @@ const InterviewRoom = () => {
                       type="button"
                       className="ir-btn ir-btn-primary"
                       onClick={handleSubmitCode}
-                      disabled={!code.trim()}
+                      disabled={!code.trim() || isSubmittingAnswer || isPaused}
                     >
                       <Send size={15} />
                       Submit solution
@@ -2677,72 +3273,62 @@ const InterviewRoom = () => {
 
             {sessionStatus === "active" && !showCodeEditor && (
               <div className="ir-controls">
-                <button
-                  type="button"
-                  className={`ir-control ${
-                    !isAudioOn ? "is-off" : ""
-                  }`}
-                  onClick={toggleAudio}
-                  disabled={isListening}
-                  title={isAudioOn ? "Mute microphone" : "Unmute microphone"}
-                >
-                  {isAudioOn ? (
-                    <Mic size={19} />
-                  ) : (
-                    <MicOff size={19} />
-                  )}
-                </button>
-
-                <button
-                  type="button"
-                  className={`ir-control ${
-                    !isVideoOn ? "is-off" : ""
-                  }`}
-                  onClick={toggleVideo}
-                  title={isVideoOn ? "Turn camera off" : "Turn camera on"}
-                >
-                  {isVideoOn ? (
-                    <Video size={19} />
-                  ) : (
-                    <VideoOff size={19} />
-                  )}
-                </button>
-
-                {!aiSpeaking &&
-                  currentQuestion &&
-                  !isListening && (
-                    <button
-                      type="button"
-                      className="ir-action"
-                      onClick={startListening}
+                {questionCountdown !== null && (
+                  <div
+                    className="ir-countdown"
+                    role="status"
+                    aria-live="polite"
+                    aria-label={`Recording starts in ${questionCountdown} seconds`}
+                  >
+                    <span>
+                      Recording starts in <strong>{questionCountdown}</strong>
+                    </span>
+                    <div
+                      className="ir-countdown-track"
+                      aria-hidden="true"
                     >
-                      <Mic size={17} />
-                      Start answering
-                    </button>
-                  )}
+                      <div
+                        className="ir-countdown-fill"
+                        style={{
+                          width: `${((5 - questionCountdown) / 5) * 100}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {waitingForNextQuestion && !currentQuestion && (
+                  <div className="ir-action" role="status">
+                    <Activity size={16} />
+                    Waiting for next question...
+                  </div>
+                )}
 
                 {isListening && (
-                  <>
-                    <button
-                      type="button"
-                      className="ir-action ir-action-pause"
-                      onClick={stopListening}
-                    >
-                      <Pause size={16} />
-                      Pause
-                    </button>
+                  <button
+                    type="button"
+                    className="ir-action ir-action-pause"
+                    onClick={stopListening}
+                    disabled={isSubmittingAnswer || isPaused}
+                  >
+                    <Pause size={16} />
+                    Finish answer
+                  </button>
+                )}
 
+                {!isListening &&
+                  currentQuestion &&
+                  userTranscript.trim().length >= 5 && (
                     <button
                       type="button"
                       className="ir-action ir-action-submit"
                       onClick={handleSubmitAnswer}
-                      disabled={userTranscript.trim().length < 5}
+                      disabled={isSubmittingAnswer || isPaused}
                     >
                       <Send size={16} />
-                      Submit answer
+                      {isSubmittingAnswer ? "Saving..." : "Submit answer"}
                     </button>
-                  </>
-                )}
+                  )}
 
                 {aiSpeaking && (
                   <div className="ir-action" style={{ cursor: "default" }}>
@@ -2751,11 +3337,20 @@ const InterviewRoom = () => {
                   </div>
                 )}
 
+                {!aiSpeaking && isListening && (
+                  <div className="ir-action" style={{ cursor: "default" }}>
+                    <Mic size={16} />
+                    Recording answer
+                  </div>
+                )}
+
                 <button
                   type="button"
                   className="ir-control ir-control-end"
                   onClick={handleEndInterview}
                   title="End interview"
+                  aria-label="End interview"
+                  disabled={isEnding || isSubmittingAnswer}
                 >
                   <Phone size={18} />
                 </button>
@@ -2840,28 +3435,29 @@ const InterviewRoom = () => {
                 />
               </section>
 
-              <section className="ir-sidebar-section">
-                <div className="ir-sidebar-label">Score breakdown</div>
-
-                <div className="ir-metric-list">
-                  <MetricRow
-                    label="Technical"
-                    value={`${performanceMetrics.technicalScore}/10`}
-                  />
-
-                  <MetricRow
-                    label="Communication"
-                    value={`${performanceMetrics.communicationScore}/10`}
-                  />
-
-                  <MetricRow
-                    label="Problem solving"
-                    value={`${performanceMetrics.problemSolvingScore}/10`}
-                  />
-
-                  <MetricRow
-                    label="Perfect answers"
-                    value={performanceMetrics.perfectAnswers}
+              <section className="ir-sidebar-section ir-confidence-section">
+                <div className="ir-sidebar-label">Body language confidence</div>
+                <div className="ir-metric">
+                  <span className="ir-metric-label">Confidence score</span>
+                  <span className="ir-metric-value">{confidenceScore}%</span>
+                </div>
+                <div
+                  className="ir-confidence-track"
+                  role="progressbar"
+                  aria-label="Body language confidence"
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={confidenceScore}
+                >
+                  <div
+                    className="ir-confidence-fill"
+                    style={{
+                      width: `${confidenceScore}%`,
+                      background:
+                        confidenceScore < 70
+                          ? "var(--ir-danger)"
+                          : "var(--ir-success)",
+                    }}
                   />
                 </div>
               </section>
@@ -2921,6 +3517,57 @@ const InterviewRoom = () => {
             </div>
           ))}
         </div>
+
+        {showEndConfirmation && (
+          <div
+            className="ir-confirm-overlay"
+            onKeyDown={(event) => {
+              if (event.key === "Escape" && !isEnding) {
+                setShowEndConfirmation(false);
+              }
+            }}
+            onClick={() => {
+              if (!isEnding) setShowEndConfirmation(false);
+            }}
+          >
+            <section
+              className="ir-confirm-card"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="ir-end-confirm-title"
+              aria-describedby="ir-end-confirm-description"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="ir-confirm-icon">
+                <AlertCircle size={22} />
+              </div>
+              <h2 id="ir-end-confirm-title">End this interview?</h2>
+              <p id="ir-end-confirm-description">
+                Your interview will be submitted and you will leave the room.
+                You cannot resume this session afterward.
+              </p>
+              <div className="ir-confirm-actions">
+                <button
+                  type="button"
+                  className="ir-confirm-button"
+                  autoFocus
+                  onClick={() => setShowEndConfirmation(false)}
+                  disabled={isEnding}
+                >
+                  Keep interviewing
+                </button>
+                <button
+                  type="button"
+                  className="ir-confirm-button ir-confirm-button-danger"
+                  onClick={() => void finishInterview()}
+                  disabled={isEnding}
+                >
+                  {isEnding ? "Ending..." : "End interview"}
+                </button>
+              </div>
+            </section>
+          </div>
+        )}
       </div>
     </div>
   );

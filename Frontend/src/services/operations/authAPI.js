@@ -1,5 +1,9 @@
 import { toast } from "react-hot-toast";
-import { setLoading, setToken, setSignupData } from "../../slices/authSlice";
+import {
+  setAuthUser,
+  setLoading,
+  setToken,
+} from "../../slices/authSlice";
 import { setUser } from "../../slices/profileSlice";
 import { authEndpoints } from "../apis.js";
 import { customToast } from "../../utils/toast";
@@ -89,6 +93,7 @@ export function signup(
       const { token, user } = response.data;
 
       dispatch(setToken(token));
+      dispatch(setAuthUser(user));
       dispatch(setUser(user));
 
       localStorage.setItem("token", token);
@@ -135,6 +140,7 @@ export function login(email, password, navigate) {
       const { token, user } = response.data;
 
       dispatch(setToken(token));
+      dispatch(setAuthUser(user));
       dispatch(setUser(user));
 
       localStorage.setItem("token", token);
@@ -171,6 +177,7 @@ export function logout(navigate) {
     const toastId = customToast.loading("Logging out...");
     try {
       dispatch(setToken(null));
+      dispatch(setAuthUser(null));
       dispatch(setUser(null));
       localStorage.removeItem("token");
       localStorage.removeItem("user");

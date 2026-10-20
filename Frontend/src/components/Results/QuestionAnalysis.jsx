@@ -1,219 +1,477 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import {
-  HelpCircle, CheckCircle, XCircle, AlertCircle, ChevronDown,
-  Clock, Lightbulb, TrendingUp, TrendingDown, Award, Tag
-} from 'lucide-react';
+  AlertCircle,
+  Award,
+  CheckCircle,
+  ChevronDown,
+  Clock3,
+  HelpCircle,
+  XCircle,
+} from "lucide-react";
 
-// --- Skeleton Component for Loading State ---
-const AnalysisSkeleton = () => (
-  <div className="animate-pulse space-y-8">
-    <div className="flex items-center space-x-4">
-      <div className="rounded-full bg-slate-200 h-12 w-12"></div>
-      <div className="space-y-2">
-        <div className="h-4 bg-slate-200 rounded w-48"></div>
-        <div className="h-3 bg-slate-200 rounded w-64"></div>
-      </div>
-    </div>
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-      {[1, 2, 3, 4, 5, 6].map((i) => (
-        <div key={i} className="h-24 bg-slate-100 rounded-xl"></div>
-      ))}
-    </div>
-    <div className="space-y-4">
-      {[1, 2, 3].map((i) => (
-        <div key={i} className="h-20 bg-slate-100 rounded-lg w-full"></div>
-      ))}
-    </div>
-  </div>
-);
+import "../../styles/resultsComponents.css";
 
-const QuestionAnalysis = ({ questions, isLoading }) => {
+const SCORE_FILTERS = [
+  { id: "all", label: "All" },
+  { id: "excellent", label: "Excellent" },
+  { id: "good", label: "Good" },
+  { id: "fair", label: "Fair" },
+  { id: "needs-improvement", label: "Needs work" },
+];
+
+const safeNumber = (value) => Number(value) || 0;
+
+const getScoreCategory = (score) => {
+  const value = safeNumber(score);
+
+  if (value >= 80) return "excellent";
+  if (value >= 60) return "good";
+  if (value >= 40) return "fair";
+  return "needs-improvement";
+};
+
+const getScoreIcon = (score) => {
+  const category = getScoreCategory(score);
+
+  if (category === "excellent") return CheckCircle;
+  if (category === "good") return Award;
+  if (category === "fair") return AlertCircle;
+  return XCircle;
+};
+
+const getScoreLabel = (score) => {
+  const category = getScoreCategory(score);
+
+  return {
+    excellent: "Excellent",
+    good: "Good",
+    fair: "Fair",
+    "needs-improvement": "Needs work",
+  }[category];
+};
+
+const QuestionAnalysis = ({
+  questions = [],
+  isLoading = false,
+}) => {
   const [expandedQuestion, setExpandedQuestion] = useState(null);
-  const [filterScore, setFilterScore] = useState('all');
+  const [filterScore, setFilterScore] = useState("all");
 
-  // Handle Loading State
+  const normalizedQuestions = useMemo(
+    () =>
+      (Array.isArray(questions) ? questions : []).map(
+        (question, index) => ({
+          ...question,
+          questionNumber:
+            question.questionNumber || index + 1,
+          score: safeNumber(question.score),
+          timeTaken: safeNumber(
+            question.timeTaken ?? question.timeSpent,
+          ),
+          question:
+            question.question || "Question unavailable",
+          yourAnswer:
+            question.yourAnswer || "Not answered",
+          feedback:
+            question.feedback || "No feedback available.",
+        }),
+      ),
+    [questions],
+  );
+
+  const filteredQuestions = useMemo(() => {
+    if (filterScore === "all") {
+      return normalizedQuestions;
+    }
+
+    return normalizedQuestions.filter(
+      (question) =>
+        getScoreCategory(question.score) === filterScore,
+    );
+  }, [filterScore, normalizedQuestions]);
+
+  const stats = useMemo(() => {
+    const total = normalizedQuestions.length;
+
+    if (!total) {
+      return {
+        total: 0,
+        excellent: 0,
+        good: 0,
+        fair: 0,
+        poor: 0,
+        averageScore: 0,
+        averageTime: 0,
+      };
+    }
+
+    const totalTime = normalizedQuestions.reduce(
+      (sum, question) => sum + question.timeTaken,
+      0,
+    );
+
+    const totalScore = normalizedQuestions.reduce(
+      (sum, question) => sum + question.score,
+      0,
+    );
+
+    return {
+      total,
+      excellent: normalizedQuestions.filter(
+        (question) => question.score >= 80,
+      ).length,
+      good: normalizedQuestions.filter(
+        (question) =>
+          question.score >= 60 && question.score < 80,
+      ).length,
+      fair: normalizedQuestions.filter(
+        (question) =>
+          question.score >= 40 && question.score < 60,
+      ).length,
+      poor: normalizedQuestions.filter(
+        (question) => question.score < 40,
+      ).length,
+      averageScore: Math.round(totalScore / total),
+      averageTime: Math.round(totalTime / total),
+    };
+  }, [normalizedQuestions]);
+
   if (isLoading) {
-    return (
-      <div className="question-analysis p-6">
-        <AnalysisSkeleton />
-      </div>
-    );
+    return <QuestionAnalysisSkeleton />;
   }
 
-  // Handle Empty State
-  if (!questions || questions.length === 0) {
+  if (!normalizedQuestions.length) {
     return (
-      <div className="text-center py-20">
-        <HelpCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-        <p className="text-gray-500">No interview data found.</p>
-      </div>
+      <section className="results-component question-analysis">
+        <div className="question-empty-state">
+          <span className="question-empty-icon">
+            <HelpCircle size={28} />
+          </span>
+          <h3>No interview data found</h3>
+          <p>
+            Complete an interview to see your question-by-question analysis.
+          </p>
+        </div>
+      </section>
     );
   }
-
-  const getScoreCategory = (score) => {
-    if (score >= 80) return 'excellent';
-    if (score >= 60) return 'good';
-    if (score >= 40) return 'fair';
-    return 'needs-improvement';
-  };
-
-  const getScoreIcon = (score) => {
-    if (score >= 80) return CheckCircle;
-    if (score >= 60) return Award;
-    if (score >= 40) return AlertCircle;
-    return XCircle;
-  };
-
-  const getScoreColor = (score) => {
-    if (score >= 80) return '#10b981';
-    if (score >= 60) return '#3b82f6';
-    if (score >= 40) return '#f59e0b';
-    return '#ef4444';
-  };
-
-  const filterQuestions = () => {
-    if (filterScore === 'all') return questions;
-    return questions.filter(q => {
-      const category = getScoreCategory(q.score);
-      return category === filterScore;
-    });
-  };
-
-  const filteredQuestions = filterQuestions();
-
-  const stats = {
-    total: questions.length,
-    excellent: questions.filter(q => q.score >= 80).length,
-    good: questions.filter(q => q.score >= 60 && q.score < 80).length,
-    fair: questions.filter(q => q.score >= 40 && q.score < 60).length,
-    poor: questions.filter(q => q.score < 40).length,
-    avgTime: Math.round(
-      questions.reduce((sum, q) => sum + q.timeTaken, 0) / questions.length
-    ),
-  };
 
   return (
-    <div className="question-analysis">
-      {/* Header */}
-      <motion.div 
-        className="analysis-header flex items-center gap-4 mb-8"
-        initial={{ opacity: 0 }} 
-        animate={{ opacity: 1 }}
-      >
-        <div className="p-3 bg-blue-50 rounded-full">
-            <HelpCircle className="w-8 h-8 text-blue-500" />
-        </div>
-        <div>
-          <h2 className="text-2xl font-bold text-slate-800">Question-by-Question Analysis</h2>
-          <p className="text-slate-500">Detailed breakdown of your answers and performance</p>
-        </div>
-      </motion.div>
+    <motion.section
+      className="results-component question-analysis"
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      aria-labelledby="question-analysis-heading"
+    >
+      <div className="results-component-header">
+        <span className="results-component-header-icon">
+          <HelpCircle size={18} />
+        </span>
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-        {[
-            { label: 'Total', value: stats.total, icon: HelpCircle, color: 'text-slate-500', bg: 'bg-slate-50' },
-            { label: 'Excellent', value: stats.excellent, icon: CheckCircle, color: 'text-green-500', bg: 'bg-green-50' },
-            { label: 'Good', value: stats.good, icon: Award, color: 'text-blue-500', bg: 'bg-blue-50' },
-            { label: 'Fair', value: stats.fair, icon: AlertCircle, color: 'text-amber-500', bg: 'bg-amber-50' },
-            { label: 'Needs Work', value: stats.poor, icon: XCircle, color: 'text-red-500', bg: 'bg-red-50' },
-            { label: 'Avg Time', value: `${stats.avgTime}s`, icon: Clock, color: 'text-purple-500', bg: 'bg-purple-50' },
-        ].map((item, idx) => (
-            <motion.div 
-                key={idx}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.1 }}
-                className={`${item.bg} p-4 rounded-xl border border-slate-100 flex flex-col items-center justify-center text-center`}
-            >
-                <item.icon className={`w-5 h-5 ${item.color} mb-2`} />
-                <span className="text-xl font-bold text-slate-800">{item.value}</span>
-                <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">{item.label}</span>
-            </motion.div>
-        ))}
+        <div>
+          <h3 id="question-analysis-heading">
+            Question-by-question analysis
+          </h3>
+          <p className="results-component-subtitle">
+            Review each answer, score, timing, and feedback.
+          </p>
+        </div>
       </div>
 
-      {/* ... Rest of your filtering and mapping logic remains the same ... */}
-      
-      {/* Filtering UI */}
-      <div className="flex flex-wrap items-center gap-3 mb-6">
-        <span className="text-sm font-medium text-slate-600">Filter by performance:</span>
-        <div className="flex bg-slate-100 p-1 rounded-lg">
-          {['all', 'excellent', 'good', 'fair', 'needs-improvement'].map((option) => (
+      <div className="question-stats-grid">
+        <QuestionStat
+          label="Total"
+          value={stats.total}
+          icon={HelpCircle}
+        />
+
+        <QuestionStat
+          label="Excellent"
+          value={stats.excellent}
+          icon={CheckCircle}
+        />
+
+        <QuestionStat
+          label="Good"
+          value={stats.good}
+          icon={Award}
+        />
+
+        <QuestionStat
+          label="Fair"
+          value={stats.fair}
+          icon={AlertCircle}
+        />
+
+        <QuestionStat
+          label="Needs work"
+          value={stats.poor}
+          icon={XCircle}
+        />
+
+        <QuestionStat
+          label="Avg. time"
+          value={`${stats.averageTime}s`}
+          icon={Clock3}
+        />
+      </div>
+
+      <div className="question-summary-row">
+        <span>
+          Average score: <strong>{stats.averageScore}%</strong>
+        </span>
+        <span>
+          Showing <strong>{filteredQuestions.length}</strong> of{" "}
+          <strong>{normalizedQuestions.length}</strong>
+        </span>
+      </div>
+
+      <div className="question-filter">
+        <span className="question-filter-label">
+          Filter performance
+        </span>
+
+        <div className="question-filter-buttons">
+          {SCORE_FILTERS.map((filter) => (
             <button
-              key={option}
-              onClick={() => setFilterScore(option)}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                filterScore === option 
-                ? 'bg-white text-blue-600 shadow-sm' 
-                : 'text-slate-500 hover:text-slate-700'
+              key={filter.id}
+              type="button"
+              className={`question-filter-button ${
+                filterScore === filter.id ? "is-active" : ""
               }`}
+              onClick={() => {
+                setFilterScore(filter.id);
+                setExpandedQuestion(null);
+              }}
+              aria-pressed={filterScore === filter.id}
             >
-              {option.charAt(0).toUpperCase() + option.slice(1).replace('-', ' ')}
+              {filter.label}
             </button>
           ))}
         </div>
       </div>
 
-      <div className="space-y-4">
-        {filteredQuestions.map((question, index) => {
-            const isExpanded = expandedQuestion === index;
-            const ScoreIcon = getScoreIcon(question.score);
-            const scoreColor = getScoreColor(question.score);
-
-            return (
-                <div key={index} className="border border-slate-200 rounded-xl overflow-hidden bg-white">
-                    <button 
-                        onClick={() => setExpandedQuestion(isExpanded ? null : index)}
-                        className="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition-colors"
-                    >
-                        <div className="flex items-center gap-4">
-                            <span className="w-8 h-8 flex items-center justify-center bg-slate-100 rounded-full text-sm font-bold text-slate-600">
-                                {index + 1}
-                            </span>
-                            <h3 className="font-semibold text-slate-800 text-left line-clamp-1">{question.question}</h3>
-                        </div>
-                        <div className="flex items-center gap-4">
-                             <div className="px-3 py-1 rounded-full flex items-center gap-2" style={{ backgroundColor: `${scoreColor}15`, color: scoreColor }}>
-                                <ScoreIcon className="w-4 h-4" />
-                                <span className="text-sm font-bold">{question.score}%</span>
-                             </div>
-                             <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
-                        </div>
-                    </button>
-                    
-                    <AnimatePresence>
-                        {isExpanded && (
-                            <motion.div 
-                                initial={{ height: 0 }}
-                                animate={{ height: 'auto' }}
-                                exit={{ height: 0 }}
-                                className="overflow-hidden border-t border-slate-100"
-                            >
-                                <div className="p-6 bg-slate-50/50 space-y-6">
-                                    <div className="grid md:grid-cols-2 gap-6">
-                                        <div className="space-y-2">
-                                            <h4 className="text-sm font-bold text-slate-700 uppercase tracking-tight">Your Answer</h4>
-                                            <div className="p-4 bg-white rounded-lg border border-slate-200 text-slate-600 text-sm italic">
-                                                "{question.yourAnswer}"
-                                            </div>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <h4 className="text-sm font-bold text-slate-700 uppercase tracking-tight">AI Feedback</h4>
-                                            <p className="text-sm text-slate-600 leading-relaxed">{question.feedback}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
-            );
-        })}
+      <div className="question-list">
+        <AnimatePresence mode="popLayout">
+          {filteredQuestions.length > 0 ? (
+            filteredQuestions.map((question, index) => (
+              <QuestionRow
+                key={question.questionId || `${question.question}-${index}`}
+                question={question}
+                index={index}
+                expanded={
+                  expandedQuestion ===
+                  (question.questionId || index)
+                }
+                onToggle={() =>
+                  setExpandedQuestion((current) =>
+                    current ===
+                    (question.questionId || index)
+                      ? null
+                      : question.questionId || index,
+                  )
+                }
+              />
+            ))
+          ) : (
+            <motion.div
+              className="question-filter-empty"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <AlertCircle size={25} />
+              <strong>No questions match this filter</strong>
+              <span>Try selecting another performance category.</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-    </div>
+    </motion.section>
   );
 };
+
+function QuestionRow({
+  question,
+  index,
+  expanded,
+  onToggle,
+}) {
+  const ScoreIcon = getScoreIcon(question.score);
+  const scoreCategory = getScoreCategory(question.score);
+
+  return (
+    <motion.article
+      className={`question-row ${
+        expanded ? "is-expanded" : ""
+      }`}
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      transition={{ delay: index * 0.04 }}
+      layout
+    >
+      <button
+        type="button"
+        className="question-row-toggle"
+        onClick={onToggle}
+        aria-expanded={expanded}
+        aria-controls={`question-detail-${index}`}
+      >
+        <span className="question-number">
+          {String(question.questionNumber).padStart(2, "0")}
+        </span>
+
+        <span className="question-row-title">
+          <strong>{question.question}</strong>
+
+          <small>
+            {question.category &&
+              question.category !== "general" &&
+              `${question.category} · `}
+            {question.timeTaken > 0
+              ? `${question.timeTaken}s`
+              : "Timing unavailable"}
+          </small>
+        </span>
+
+        <span className={`question-score question-score-${scoreCategory}`}>
+          <ScoreIcon size={15} />
+          {Math.round(question.score)}%
+        </span>
+
+        <ChevronDown
+          size={18}
+          className={`question-chevron ${
+            expanded ? "is-rotated" : ""
+          }`}
+        />
+      </button>
+
+      <AnimatePresence initial={false}>
+        {expanded && (
+          <motion.div
+            id={`question-detail-${index}`}
+            className="question-detail"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="question-detail-grid">
+              <div className="question-answer-block">
+                <div className="question-detail-label">
+                  Your answer
+                </div>
+
+                <div className="question-answer">
+                  {question.yourAnswer}
+                </div>
+              </div>
+
+              <div className="question-feedback-block">
+                <div className="question-detail-label">
+                  Interview feedback
+                </div>
+
+                <p>{question.feedback}</p>
+              </div>
+            </div>
+
+            {(question.strengths?.length > 0 ||
+              question.improvements?.length > 0) && (
+              <div className="question-insights">
+                {question.strengths?.length > 0 && (
+                  <InsightList
+                    title="Strengths"
+                    items={question.strengths}
+                    type="strength"
+                  />
+                )}
+
+                {question.improvements?.length > 0 && (
+                  <InsightList
+                    title="Improvements"
+                    items={question.improvements}
+                    type="improvement"
+                  />
+                )}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.article>
+  );
+}
+
+function InsightList({ title, items, type }) {
+  return (
+    <div className="question-insight">
+      <div className="question-insight-title">
+        {type === "strength" ? (
+          <CheckCircle size={14} />
+        ) : (
+          <TrendingDownIcon size={14} />
+        )}
+        {title}
+      </div>
+
+      <ul>
+        {items.map((item, index) => (
+          <li key={`${item}-${index}`}>{item}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function TrendingDownIcon(props) {
+  return <AlertCircle {...props} />;
+}
+
+function QuestionStat({ label, value, icon: Icon }) {
+  return (
+    <motion.div
+      className="question-stat"
+      whileHover={{ y: -3 }}
+    >
+      <span className="question-stat-icon">
+        <Icon size={16} />
+      </span>
+
+      <strong>{value}</strong>
+      <small>{label}</small>
+    </motion.div>
+  );
+}
+
+function QuestionAnalysisSkeleton() {
+  return (
+    <section className="results-component question-analysis">
+      <div className="question-skeleton-header">
+        <span />
+        <div>
+          <span />
+          <span />
+        </div>
+      </div>
+
+      <div className="question-stats-grid">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div className="question-skeleton-stat" key={index} />
+        ))}
+      </div>
+
+      <div className="question-skeleton-list">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div className="question-skeleton-row" key={index} />
+        ))}
+      </div>
+    </section>
+  );
+}
 
 export default QuestionAnalysis;

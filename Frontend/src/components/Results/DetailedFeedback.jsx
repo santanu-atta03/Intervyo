@@ -1,171 +1,206 @@
-// components/results/DetailedFeedback.jsx
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { 
-  Lightbulb, TrendingUp, AlertTriangle, Star, 
-  Code, MessageSquare, Briefcase, Zap, ChevronDown 
-} from 'lucide-react';
+import React, { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  AlertTriangle,
+  BriefcaseBusiness,
+  CheckCircle,
+  ChevronDown,
+  Code2,
+  Lightbulb,
+  MessageSquare,
+  ShieldAlert,
+  Star,
+  TrendingUp,
+  Zap,
+} from "lucide-react";
 
-const DetailedFeedback = ({ feedback }) => {
-  const [expandedSection, setExpandedSection] = useState('overall');
+import "../../styles/resultsComponents.css";
+
+const safeArray = (value) => (Array.isArray(value) ? value : []);
+
+const DetailedFeedback = ({ feedback = {} }) => {
+  const [expandedSection, setExpandedSection] = useState("overall");
+
+  const strengths = safeArray(feedback.strengths);
+  const weaknesses = safeArray(feedback.weaknesses);
+  const keyHighlights = safeArray(feedback.keyHighlights);
+  const areasOfConcern = safeArray(feedback.areasOfConcern);
+
+  const technicalAnalysis = feedback.technicalAnalysis || {};
+  const behavioralAnalysis = feedback.behavioralAnalysis || {};
 
   const sections = [
     {
-      id: 'overall',
-      title: 'Overall Assessment',
+      id: "overall",
+      title: "Overall assessment",
       icon: Star,
       content: feedback.overallAssessment,
-      color: '#6366f1'
+      items: [],
     },
     {
-      id: 'technical',
-      title: 'Technical Analysis',
-      icon: Code,
+      id: "technical",
+      title: "Technical analysis",
+      icon: Code2,
+      content: "",
       items: [
-        { label: 'Core Concepts', value: feedback.technicalAnalysis.coreConcepts },
-        { label: 'Problem Solving', value: feedback.technicalAnalysis.problemSolvingApproach },
-        { label: 'Code Quality', value: feedback.technicalAnalysis.codeQuality },
-        { label: 'Best Practices', value: feedback.technicalAnalysis.bestPractices }
+        {
+          label: "Core concepts",
+          value: technicalAnalysis.coreConcepts,
+        },
+        {
+          label: "Problem-solving approach",
+          value: technicalAnalysis.problemSolvingApproach,
+        },
+        {
+          label: "Code quality",
+          value: technicalAnalysis.codeQuality,
+        },
+        {
+          label: "Best practices",
+          value: technicalAnalysis.bestPractices,
+        },
       ],
-      color: '#8b5cf6'
     },
     {
-      id: 'behavioral',
-      title: 'Behavioral Analysis',
+      id: "behavioral",
+      title: "Behavioral analysis",
       icon: MessageSquare,
+      content: "",
       items: [
-        { label: 'Communication', value: feedback.behavioralAnalysis.communication },
-        { label: 'Confidence', value: feedback.behavioralAnalysis.confidence },
-        { label: 'Professionalism', value: feedback.behavioralAnalysis.professionalism },
-        { label: 'Adaptability', value: feedback.behavioralAnalysis.adaptability }
+        {
+          label: "Communication",
+          value: behavioralAnalysis.communication,
+        },
+        {
+          label: "Confidence",
+          value: behavioralAnalysis.confidence,
+        },
+        {
+          label: "Professionalism",
+          value: behavioralAnalysis.professionalism,
+        },
+        {
+          label: "Adaptability",
+          value: behavioralAnalysis.adaptability,
+        },
       ],
-      color: '#10b981'
-    }
+    },
   ];
 
+  const toggleSection = (sectionId) => {
+    setExpandedSection((current) =>
+      current === sectionId ? null : sectionId,
+    );
+  };
+
   return (
-    <div className="detailed-feedback">
-      <motion.div
-        className="feedback-header"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <Lightbulb className="w-8 h-8 text-yellow-500" />
-        <h2>Detailed Performance Analysis</h2>
-      </motion.div>
+    <motion.section
+      className="results-component detailed-feedback"
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      aria-labelledby="detailed-feedback-heading"
+    >
+      <div className="results-component-header">
+        <span className="results-component-header-icon">
+          <Lightbulb size={18} />
+        </span>
 
-      {/* Strengths & Weaknesses */}
-      <div className="feedback-grid">
-        <motion.div
-          className="feedback-box strengths"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <div className="box-header">
-            <TrendingUp className="w-6 h-6" />
-            <h3>Key Strengths</h3>
-          </div>
-          <ul className="feedback-list">
-            {feedback.strengths.map((strength, index) => (
-              <motion.li
-                key={index}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 * index }}
-              >
-                <Star className="w-4 h-4 text-green-500" />
-                {strength}
-              </motion.li>
-            ))}
-          </ul>
-        </motion.div>
+        <div>
+          <h3 id="detailed-feedback-heading">
+            Detailed performance analysis
+          </h3>
 
-        <motion.div
-          className="feedback-box weaknesses"
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <div className="box-header">
-            <AlertTriangle className="w-6 h-6" />
-            <h3>Areas for Improvement</h3>
-          </div>
-          <ul className="feedback-list">
-            {feedback.weaknesses.map((weakness, index) => (
-              <motion.li
-                key={index}
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 * index }}
-              >
-                <Zap className="w-4 h-4 text-orange-500" />
-                {weakness}
-              </motion.li>
-            ))}
-          </ul>
-        </motion.div>
+          <p className="results-component-subtitle">
+            Review what went well and where your next improvement can come from.
+          </p>
+        </div>
       </div>
 
-      {/* Key Highlights */}
-      <motion.div
-        className="highlights-section"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-      >
-        <h3 className="section-title">
-          <Star className="w-5 h-5" />
-          Key Highlights
-        </h3>
-        <div className="highlights-grid">
-          {feedback.keyHighlights.map((highlight, index) => (
-            <motion.div
-              key={index}
-              className="highlight-card"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.1 * index }}
-              whileHover={{ scale: 1.02 }}
-            >
-              <div className="highlight-icon">✨</div>
-              <p>{highlight}</p>
-            </motion.div>
-          ))}
-        </div>
-      </motion.div>
+      <div className="feedback-summary-grid">
+        <FeedbackListCard
+          title="Key strengths"
+          icon={TrendingUp}
+          items={strengths}
+          type="strength"
+          delay={0.1}
+        />
 
-      {/* Areas of Concern */}
-      {feedback.areasOfConcern && feedback.areasOfConcern.length > 0 && (
-        <motion.div
-          className="concerns-section"
-          initial={{ opacity: 0, y: 20 }}
+        <FeedbackListCard
+          title="Areas for improvement"
+          icon={AlertTriangle}
+          items={weaknesses}
+          type="improvement"
+          delay={0.18}
+        />
+      </div>
+
+      {keyHighlights.length > 0 && (
+        <motion.section
+          className="feedback-section-block"
+          initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
+          transition={{ delay: 0.26 }}
         >
-          <h3 className="section-title">
-            <AlertTriangle className="w-5 h-5" />
-            Critical Areas Needing Attention
-          </h3>
-          <div className="concerns-list">
-            {feedback.areasOfConcern.map((concern, index) => (
+          <SectionHeading
+            icon={Star}
+            title="Key highlights"
+          />
+
+          <div className="feedback-highlight-grid">
+            {keyHighlights.map((highlight, index) => (
               <motion.div
-                key={index}
-                className="concern-item"
+                key={`${highlight}-${index}`}
+                className="feedback-highlight"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.08 * index }}
+                whileHover={{ y: -3 }}
+              >
+                <span className="feedback-highlight-number">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+
+                <p>{highlight}</p>
+              </motion.div>
+            ))}
+          </div>
+        </motion.section>
+      )}
+
+      {areasOfConcern.length > 0 && (
+        <motion.section
+          className="feedback-section-block"
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.34 }}
+        >
+          <SectionHeading
+            icon={ShieldAlert}
+            title="Critical areas needing attention"
+          />
+
+          <div className="feedback-concerns">
+            {areasOfConcern.map((concern, index) => (
+              <motion.div
+                key={`${concern}-${index}`}
+                className="feedback-concern"
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 * index }}
+                transition={{ delay: 0.08 * index }}
               >
-                <div className="concern-marker">{index + 1}</div>
+                <span className="feedback-concern-number">
+                  {index + 1}
+                </span>
+
                 <p>{concern}</p>
               </motion.div>
             ))}
           </div>
-        </motion.div>
+        </motion.section>
       )}
 
-      {/* Detailed Sections */}
-      <div className="analysis-sections">
+      <section className="feedback-analysis">
         {sections.map((section, index) => {
           const Icon = section.icon;
           const isExpanded = expandedSection === section.id;
@@ -173,52 +208,155 @@ const DetailedFeedback = ({ feedback }) => {
           return (
             <motion.div
               key={section.id}
-              className={`analysis-section ${isExpanded ? 'expanded' : ''}`}
-              initial={{ opacity: 0, y: 20 }}
+              className={`feedback-analysis-section ${
+                isExpanded ? "is-expanded" : ""
+              }`}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 * index }}
             >
               <button
-                className="section-toggle"
-                onClick={() => setExpandedSection(isExpanded ? null : section.id)}
-                style={{ borderLeft: `4px solid ${section.color}` }}
+                type="button"
+                className="feedback-section-toggle"
+                onClick={() => toggleSection(section.id)}
+                aria-expanded={isExpanded}
+                aria-controls={`feedback-section-${section.id}`}
               >
-                <div className="toggle-left">
-                  <Icon style={{ color: section.color }} className="w-6 h-6" />
-                  <h3>{section.title}</h3>
-                </div>
+                <span className="feedback-section-toggle-left">
+                  <span className="feedback-section-icon">
+                    <Icon size={17} />
+                  </span>
+
+                  <span>
+                    <strong>{section.title}</strong>
+
+                    <small>
+                      {section.id === "overall"
+                        ? "Summary of your interview performance"
+                        : section.id === "technical"
+                          ? "Technical capability and execution"
+                          : "Communication and professional presence"}
+                    </small>
+                  </span>
+                </span>
+
                 <ChevronDown
-                  className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                  size={18}
+                  className={`feedback-chevron ${
+                    isExpanded ? "is-rotated" : ""
+                  }`}
                 />
               </button>
 
-              {isExpanded && (
-                <motion.div
-                  className="section-content"
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                >
-                  {section.content ? (
-                    <p className="analysis-text">{section.content}</p>
-                  ) : (
-                    <div className="analysis-items">
-                      {section.items.map((item, idx) => (
-                        <div key={idx} className="analysis-item">
-                          <h4>{item.label}</h4>
-                          <p>{item.value}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </motion.div>
-              )}
+              <AnimatePresence initial={false}>
+                {isExpanded && (
+                  <motion.div
+                    id={`feedback-section-${section.id}`}
+                    className="feedback-section-content"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.28 }}
+                  >
+                    {section.content ? (
+                      <p className="feedback-analysis-text">
+                        {section.content}
+                      </p>
+                    ) : (
+                      <div className="feedback-analysis-grid">
+                        {section.items.map((item) => (
+                          <div
+                            key={item.label}
+                            className="feedback-analysis-item"
+                          >
+                            <div className="feedback-analysis-label">
+                              {item.label}
+                            </div>
+
+                            <p>
+                              {item.value || "Not available"}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
           );
         })}
-      </div>
-    </div>
+      </section>
+    </motion.section>
   );
 };
+
+function SectionHeading({ icon: Icon, title }) {
+  return (
+    <div className="feedback-section-heading">
+      <span className="feedback-heading-icon">
+        <Icon size={16} />
+      </span>
+
+      <h4>{title}</h4>
+    </div>
+  );
+}
+
+function FeedbackListCard({
+  title,
+  icon: Icon,
+  items,
+  type,
+  delay,
+}) {
+  const isStrength = type === "strength";
+
+  return (
+    <motion.div
+      className={`feedback-list-card ${
+        isStrength ? "is-strength" : "is-improvement"
+      }`}
+      initial={{ opacity: 0, x: isStrength ? -14 : 14 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay }}
+    >
+      <div className="feedback-list-card-header">
+        <span className="feedback-heading-icon">
+          <Icon size={16} />
+        </span>
+
+        <h4>{title}</h4>
+      </div>
+
+      {items.length > 0 ? (
+        <ul className="feedback-list">
+          {items.map((item, index) => (
+            <motion.li
+              key={`${item}-${index}`}
+              initial={{ opacity: 0, x: isStrength ? -8 : 8 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: delay + index * 0.07 }}
+            >
+              <span className="feedback-list-marker">
+                {isStrength ? (
+                  <CheckCircle size={14} />
+                ) : (
+                  <Zap size={14} />
+                )}
+              </span>
+
+              <span>{item}</span>
+            </motion.li>
+          ))}
+        </ul>
+      ) : (
+        <p className="feedback-empty">
+          No specific items were provided for this section.
+        </p>
+      )}
+    </motion.div>
+  );
+}
 
 export default DetailedFeedback;

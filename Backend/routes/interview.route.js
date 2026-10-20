@@ -14,6 +14,10 @@ router.use(authenticate);
 // Create new interview
 router.post("/create", aiLimiter, interviewController.createInterview);
 
+// Static collection routes must precede /:interviewId.
+router.get("/all", interviewController.getAllInterviews);
+router.get("/history", interviewController.getInterviewHistory);
+
 // Start regular interview (non-conversational)
 router.post(
   "/:interviewId/start",
@@ -85,9 +89,5 @@ router.get(
   "/:interviewId/detailed-results",
   interviewController.getDetailedResults,
 );
-
-// ==================== HISTORY ====================
-// Get interview history
-router.get("/history", interviewController.getInterviewHistory);
 
 export default router;

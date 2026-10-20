@@ -1940,7 +1940,46 @@ Be encouraging but honest. Provide specific, actionable feedback.`,
     }
   }
 
-  // Get Interview History
+  // Get all interviews owned by the current user
+  async getAllInterviews(req, res) {
+    try {
+      const interviews = await Interview.find({ userId: req.user.id })
+        .select(
+          "config status performance role difficulty duration overallScore completedAt startTime endTime createdAt",
+        )
+        .sort({ createdAt: -1 })
+        .lean()
+        .exec();
+
+      res.json({
+        success: true,
+        data: interviews.map((interview) => ({
+          ...interview,
+          role:
+            interview.role ||
+            interview.config?.subDomain ||
+            interview.config?.domain ||
+            "Interview",
+          difficulty:
+            interview.difficulty || interview.config?.difficulty || "medium",
+          duration:
+            interview.duration || interview.config?.duration || 30,
+          overallScore:
+            interview.overallScore ?? interview.performance?.overallScore ?? 0,
+          completedAt: interview.completedAt || interview.endTime || null,
+        })),
+      });
+    } catch (error) {
+      console.error("Get all interviews error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to get interviews",
+        error: error.message,
+      });
+    }
+  }
+
+  // Get paginated interview history
   async getInterviewHistory(req, res) {
     try {
       const userId = req.user.id;

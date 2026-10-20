@@ -10,7 +10,6 @@ import Landing from "./pages/Landing";
 import InterviewSetup from "./pages/InterviewSetup";
 import VerifyEmail from "./pages/VerifyEmail";
 import DomainSelection from "./pages/DomainSelection";
-import InterviewRoom from "./components/AiInterview/InterviewRoom";
 import Results from "./pages/Results";
 import Settings from "./components/Dashboard/Settings";
 import InterviewWrapper from "./components/Interview/InterviewWrapper";
@@ -50,7 +49,8 @@ function App() {
   const hideNavbarRoutes = ["/dashboard", "/settings", "/pricing", "/career", "/terms", "/privacy", "/cookie-policy", "/interview-setup", "/auth/callback"];
   const hideNavbar =
     hideNavbarRoutes.includes(location.pathname) ||
-    location.pathname.startsWith("/interview-room");
+    location.pathname.startsWith("/interview-room") ||
+    location.pathname.startsWith("/results/");
 
   // Initialize smooth scrolling with Lenis
   useEffect(() => {
@@ -205,7 +205,11 @@ function App() {
 
         <Route
           path="/interview-room/:interviewId"
-          element={<InterviewRoom />}
+          element={
+            <ProtectedRoute>
+              <InterviewWrapper />
+            </ProtectedRoute>
+          }
         />
 
         <Route
@@ -222,7 +226,9 @@ function App() {
         <Route path="*" element={<NotFound />} />
       </Routes>
 
-      <VoiceflowChatbot />
+      {!location.pathname.startsWith("/interview-room") && (
+        <VoiceflowChatbot />
+      )}
 
       {!hideFooter && <Footer />}
     </>

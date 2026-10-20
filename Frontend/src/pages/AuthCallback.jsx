@@ -1,8 +1,12 @@
 import { useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { setAuthUser, setToken } from "../slices/authSlice";
+import { setUser } from "../slices/profileSlice";
 
 const API_URL_LOGIN = "https://intervyo.onrender.com";
 export default function AuthCallback() {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -28,13 +32,20 @@ export default function AuthCallback() {
         return res.json();
       })
       .then((data) => {
+        if (!data.success || !data.user) {
+          throw new Error("The account profile was not returned.");
+        }
+
+        dispatch(setToken(token));
+        dispatch(setAuthUser(data.user));
+        dispatch(setUser(data.user));
         localStorage.setItem("user", JSON.stringify(data.user));
         navigate("/dashboard");
       })
       .catch(() => {
         navigate("/login?error=auth_failed");
       });
-  }, [navigate]);
+  }, [dispatch, navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center">

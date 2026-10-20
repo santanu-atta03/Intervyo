@@ -321,8 +321,9 @@ function ProgressBar({ value, label, large = false, success = false }) {
 function Dashboard() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { user } = useSelector((state) => state.profile);
-  const { token } = useSelector((state) => state.auth);
+  const { user: profileUser } = useSelector((state) => state.profile);
+  const { token, user: authUser } = useSelector((state) => state.auth);
+  const user = profileUser || authUser;
   const {
     notifications,
     unreadCount,

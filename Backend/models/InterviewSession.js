@@ -188,6 +188,9 @@ const interviewSessionSchema = new mongoose.Schema(
             "transition",
           ],
         },
+        questionCategory: String,
+        questionIndex: Number,
+        requiresCode: Boolean,
       },
     ],
 
