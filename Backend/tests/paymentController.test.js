@@ -16,6 +16,12 @@ jest.unstable_mockModule("../models/Payment.model.js", () => ({
     updateOne: jest.fn(),
   },
 }));
+const notificationFindOneAndUpdate = jest.fn();
+jest.unstable_mockModule("../models/Notification.model.js", () => ({
+  default: {
+    findOneAndUpdate: (...args) => notificationFindOneAndUpdate(...args),
+  },
+}));
 jest.unstable_mockModule("../models/User.model.js", () => ({
   default: {
     findById: jest.fn(),
@@ -43,6 +49,7 @@ describe("Payment controller", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    notificationFindOneAndUpdate.mockResolvedValue({});
     process.env.RAZORPAY_KEY_ID = "rzp_test_key";
     process.env.RAZORPAY_KEY_SECRET = "test-secret";
   });
@@ -190,6 +197,19 @@ describe("Payment controller", () => {
     );
     expect(response.json).toHaveBeenCalledWith(
       expect.objectContaining({ success: true, user: updatedUser }),
+    );
+    expect(notificationFindOneAndUpdate).toHaveBeenCalledWith(
+      { dedupeKey: "pro-purchase:order_123" },
+      {
+        $setOnInsert: expect.objectContaining({
+          userId: "user-1",
+          type: "subscription",
+          title: "Welcome to the Pro family!",
+          message: expect.stringContaining("25 interviews each month"),
+          dedupeKey: "pro-purchase:order_123",
+        }),
+      },
+      { upsert: true, new: true, setDefaultsOnInsert: true },
     );
   });
 

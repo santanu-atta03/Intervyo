@@ -37,6 +37,11 @@ const notificationSchema = new mongoose.Schema(
       type: String, // URL to navigate when clicked
       default: null,
     },
+    dedupeKey: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
     isRead: {
       type: Boolean,
       default: false,

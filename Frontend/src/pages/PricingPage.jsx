@@ -10,6 +10,7 @@ import { setAuthUser } from "../slices/authSlice";
 import { setUser } from "../slices/profileSlice";
 import { apiConnector } from "../services/apiConnector";
 import { BASE_URL } from "../services/apis";
+import { useNotifications } from "../components/shared/NotificationContext";
 
 const RAZORPAY_CHECKOUT_URL =
   "https://checkout.razorpay.com/v1/checkout.js";
@@ -73,6 +74,7 @@ export default function PricingPage() {
   const dispatch = useDispatch();
   const { token } = useSelector((state) => state.auth);
   const { user } = useSelector((state) => state.profile);
+  const { refreshNotifications } = useNotifications();
   const [billingCycle, setBillingCycle] = useState("monthly");
   const [purchasing, setPurchasing] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
@@ -198,7 +200,10 @@ export default function PricingPage() {
         });
         checkout.open();
       }).then((purchased) => {
-        if (purchased) toast.success("Pro access is active.");
+        if (purchased) {
+          toast.success("Pro access is active.");
+          refreshNotifications();
+        }
       });
     } catch (error) {
       toast.error(

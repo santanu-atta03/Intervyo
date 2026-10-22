@@ -1,6 +1,7 @@
 import { createHmac, timingSafeEqual, randomUUID } from "crypto";
 import axios from "axios";
 import Payment from "../models/Payment.model.js";
+import Notification from "../models/Notification.model.js";
 import User from "../models/User.model.js";
 import {
   PRO_MONTHLY_INTERVIEW_LIMIT,
@@ -140,7 +141,35 @@ async function applyPaidEntitlement(payment) {
     },
   );
 
+  await ensureProPurchaseNotification(payment, accessEnd);
+
   return updatedUser;
+}
+
+async function ensureProPurchaseNotification(payment, accessEnd) {
+  const billingLabel =
+    payment.billingCycle === "yearly" ? "yearly" : "monthly";
+  const notification = {
+    userId: payment.userId,
+    type: "subscription",
+    title: "Welcome to the Pro family!",
+    message: `Welcome to the Pro family! Your ${billingLabel} plan is active with 25 interviews each month.`,
+    icon: "👑",
+    link: "/dashboard",
+    dedupeKey: `pro-purchase:${payment.orderId}`,
+    metadata: {
+      plan: "pro",
+      billingCycle: payment.billingCycle,
+      accessEnd,
+      orderId: payment.orderId,
+    },
+  };
+
+  await Notification.findOneAndUpdate(
+    { dedupeKey: notification.dedupeKey },
+    { $setOnInsert: notification },
+    { upsert: true, new: true, setDefaultsOnInsert: true },
+  );
 }
 
 async function claimPayment(payment, paymentId) {
@@ -302,6 +331,10 @@ export const verifyPayment = async (req, res) => {
     }
 
     if (payment.status === "paid") {
+      await ensureProPurchaseNotification(
+        payment,
+        payment.accessEnd,
+      );
       const user = await User.findById(req.user.id)
         .select("-password -resetPasswordToken -resetPasswordExpire")
         .lean();
@@ -315,6 +348,10 @@ export const verifyPayment = async (req, res) => {
     if (!claimedPayment) {
       const latestPayment = await Payment.findById(payment._id);
       if (latestPayment?.status === "paid") {
+        await ensureProPurchaseNotification(
+          latestPayment,
+          latestPayment.accessEnd,
+        );
         const user = await User.findById(req.user.id)
           .select("-password -resetPasswordToken -resetPasswordExpire")
           .lean();
@@ -372,7 +409,13 @@ export const handleRazorpayWebhook = async (req, res) => {
 
     const payment = await Payment.findOne({ orderId });
     if (!payment) return res.json({ success: true, message: "Unknown order ignored." });
-    if (payment.status === "paid") return res.json({ success: true });
+    if (payment.status === "paid") {
+      await ensureProPurchaseNotification(
+        payment,
+        payment.accessEnd,
+      );
+      return res.json({ success: true });
+    }
 
     if (
       providerPayment.amount !== payment.amount ||
