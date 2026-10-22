@@ -271,7 +271,7 @@ export default function LandingPage() {
               AI
             </motion.span>
             <br />
-            <span className="bg-gradient-to-r from-violet-500 via-purple-500 to-pink-500 dark:from-violet-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 dark:from-emerald-400 dark:via-teal-400 dark:to-cyan-400 bg-clip-text text-transparent">
               Coaching
             </span>
           </motion.h1>
