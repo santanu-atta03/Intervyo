@@ -11,6 +11,17 @@ import { apiConnector } from "../apiConnector.js";
 
 const { SEND_OTP_API, REGISTER_API, LOGIN_API } = authEndpoints;
 
+export async function warmUpAuthService() {
+  try {
+    const response = await fetch(authEndpoints.HEALTH_CHECK_API);
+    if (!response.ok) {
+      throw new Error(`Backend health check returned ${response.status}`);
+    }
+  } catch (error) {
+    console.warn("Auth service warm-up failed:", error);
+  }
+}
+
 // Send OTP
 export function sendOtp(email, navigate) {
   return async (dispatch) => {

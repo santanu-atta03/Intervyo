@@ -8,6 +8,7 @@ export const authEndpoints = {
   LOGIN_API: `${BASE_URL}/auth/login`,
   LOGOUT_API: `${BASE_URL}/auth/logout`,
   GET_CURRENT_USER_API: `${BASE_URL}/auth/me`,
+  HEALTH_CHECK_API: `${BASE_URL}/health`,
 };
 
 export const contactEndpoints = {

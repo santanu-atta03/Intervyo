@@ -3,13 +3,24 @@
 import Interview from "../models/Interview.model.js";
 import groqService from "../services/groqService.js";
 import questionGenerator from "../services/questionGenerator.js";
+import {
+  consumeCreditForInterview,
+  InterviewQuotaExceededError,
+  InterviewStartConflictError,
+  releaseInterviewCredit,
+} from "../utils/interviewQuota.js";
 
 class RealTimeAiInterviewController {
   // Start conversation with greeting
   async startConversation(req, res) {
+    let reservedQuota;
+    let interviewStarted = false;
+    let interviewId;
+    let userId;
+
     try {
-      const { interviewId } = req.params;
-      const userId = req.user.id;
+      interviewId = req.params.interviewId;
+      userId = req.user.id;
 
       const interview = await Interview.findOne({ _id: interviewId, userId });
       if (!interview) {
@@ -18,10 +29,36 @@ class RealTimeAiInterviewController {
           .json({ success: false, message: "Interview not found" });
       }
 
+      if (interview.status !== "pending") {
+        return res.status(400).json({
+          success: false,
+          message: "Interview already started or completed",
+        });
+      }
+
+      reservedQuota = await consumeCreditForInterview(
+        Interview,
+        interviewId,
+        userId,
+      );
+
       // Generate questions
       const questions = await questionGenerator.generateQuestions(
         interview.config,
       );
+      if (!questions?.length) {
+        await releaseInterviewCredit(
+          Interview,
+          interviewId,
+          userId,
+          reservedQuota,
+        );
+        reservedQuota = null;
+        return res.status(500).json({
+          success: false,
+          message: "Failed to generate interview questions.",
+        });
+      }
 
       // Generate AI greeting
       const greetingPrompt = `You are an expert interviewer conducting a ${interview.config.interviewType} interview for ${interview.config.domain} - ${interview.config.subDomain} position at ${interview.config.targetCompany}.
@@ -46,8 +83,13 @@ Return ONLY valid JSON:
         { role: "user", content: greetingPrompt },
       ]);
 
-      const updated = await Interview.findByIdAndUpdate(
-        interviewId,
+      const updated = await Interview.findOneAndUpdate(
+        {
+          _id: interviewId,
+          userId,
+          status: "pending",
+          quotaConsumed: true,
+        },
         {
           $set: {
             rounds: [
@@ -73,6 +115,21 @@ Return ONLY valid JSON:
         { new: true }, // Return the updated document
       );
 
+      if (!updated) {
+        await releaseInterviewCredit(
+          Interview,
+          interviewId,
+          userId,
+          reservedQuota,
+        );
+        reservedQuota = null;
+        return res.status(409).json({
+          success: false,
+          message: "Interview could not be started. Please try again.",
+        });
+      }
+      interviewStarted = true;
+
       return res.json({
         success: true,
         data: {
@@ -81,12 +138,44 @@ Return ONLY valid JSON:
           shouldSpeak: true,
           interviewStarted: true,
           totalQuestions: questions.length,
+          quota: {
+            plan: reservedQuota.plan,
+            limit: reservedQuota.limit,
+            remaining: reservedQuota.remaining,
+            resetAt: reservedQuota.periodStart,
+          },
           currentQuestionIndex: 0,
           showQuestion: false,
           config: updated.config,
         },
       });
     } catch (error) {
+      if (reservedQuota && !interviewStarted) {
+        try {
+          await releaseInterviewCredit(
+            Interview,
+            interviewId,
+            userId,
+            reservedQuota,
+          );
+        } catch (releaseError) {
+          console.error("Failed to restore interview quota:", releaseError);
+        }
+      }
+
+      if (error instanceof InterviewQuotaExceededError) {
+        return res.status(403).json({
+          success: false,
+          message: error.message,
+          quota: error.quota,
+        });
+      }
+      if (error instanceof InterviewStartConflictError) {
+        return res.status(409).json({
+          success: false,
+          message: error.message,
+        });
+      }
       console.error("Start conversation error:", error);
       return res.status(500).json({
         success: false,

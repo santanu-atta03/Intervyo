@@ -1,16 +1,84 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import SEO from "../components/shared/SEO";
-import { Link, useNavigate } from "react-router-dom";
-import { Check, Zap, Users, BarChart, Sparkles, Crown, Building2, ChevronDown } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Check, ChevronDown } from "lucide-react";
 import Lenis from "@studio-freight/lenis";
 import Navbar from "../components/Navbar";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-hot-toast";
+import { setAuthUser } from "../slices/authSlice";
+import { setUser } from "../slices/profileSlice";
+import { apiConnector } from "../services/apiConnector";
+import { BASE_URL } from "../services/apis";
+
+const RAZORPAY_CHECKOUT_URL =
+  "https://checkout.razorpay.com/v1/checkout.js";
+
+function loadRazorpayCheckout() {
+  if (window.Razorpay) return Promise.resolve();
+
+  return new Promise((resolve, reject) => {
+    const existingScript = document.querySelector(
+      `script[src="${RAZORPAY_CHECKOUT_URL}"]`,
+    );
+    if (existingScript) {
+      existingScript.addEventListener("load", resolve, { once: true });
+      existingScript.addEventListener(
+        "error",
+        () => reject(new Error("Could not load the payment checkout.")),
+        { once: true },
+      );
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = RAZORPAY_CHECKOUT_URL;
+    script.async = true;
+    script.onload = resolve;
+    script.onerror = () => {
+      script.remove();
+      reject(new Error("Could not load the payment checkout."));
+    };
+    document.body.appendChild(script);
+  });
+}
+
+function Arrow({ className = "" }) {
+  return (
+    <span className={`inline-block text-lg leading-none ${className}`}>
+      ↗
+    </span>
+  );
+}
+
+function SectionLabel({ children, light = false }) {
+  return (
+    <div className="flex items-center gap-3">
+      <span
+        className={`h-px w-8 ${light ? "bg-[#403F3C]" : "bg-[#878377]"}`}
+      />
+      <span
+        className={`nk-caption-sm uppercase tracking-[0.22em] ${
+          light ? "text-[#8D8A82]" : "text-[#69665F]"
+        }`}
+      >
+        {children}
+      </span>
+    </div>
+  );
+}
 
 export default function PricingPage() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { token } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.profile);
   const [billingCycle, setBillingCycle] = useState("monthly");
+  const [purchasing, setPurchasing] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
   const lenisRef = useRef(null);
 
+  // Lenis smooth scroll
   useEffect(() => {
     const lenis = new Lenis({
       duration: 1.2,
@@ -42,467 +110,548 @@ export default function PricingPage() {
     setOpenFaq(openFaq === index ? null : index);
   };
 
+  const handleProPurchase = async () => {
+    if (!token) {
+      toast.error("Please sign in before purchasing Pro.");
+      navigate("/login");
+      return;
+    }
+    if (purchasing) return;
+
+    setPurchasing(true);
+    try {
+      const orderResponse = await apiConnector(
+        "POST",
+        `${BASE_URL}/payments/orders`,
+        { billingCycle },
+        { Authorization: `Bearer ${token}` },
+      );
+      const order = orderResponse.data?.data;
+      if (!orderResponse.data?.success || !order?.orderId || !order?.keyId) {
+        throw new Error(
+          orderResponse.data?.message || "Could not start payment checkout.",
+        );
+      }
+
+      await loadRazorpayCheckout();
+      await new Promise((resolve, reject) => {
+        let settled = false;
+        const finish = (callback, value) => {
+          if (settled) return;
+          settled = true;
+          callback(value);
+        };
+
+        const checkout = new window.Razorpay({
+          key: order.keyId,
+          amount: order.amount,
+          currency: order.currency,
+          name: "Intervyo",
+          description: order.description,
+          order_id: order.orderId,
+          prefill: {
+            name: order.name || user?.name || "",
+            email: order.email || user?.email || "",
+          },
+          theme: { color: "#724133" },
+          handler: async (paymentResponse) => {
+            try {
+              const verificationResponse = await apiConnector(
+                "POST",
+                `${BASE_URL}/payments/verify`,
+                paymentResponse,
+                { Authorization: `Bearer ${token}` },
+              );
+              const verification = verificationResponse.data;
+              if (!verification.success || !verification.user) {
+                throw new Error(
+                  verification.message || "Payment could not be verified.",
+                );
+              }
+
+              dispatch(setAuthUser(verification.user));
+              dispatch(setUser(verification.user));
+              finish(resolve, true);
+            } catch (verificationError) {
+              finish(
+                reject,
+                new Error(
+                  verificationError.response?.data?.message ||
+                    verificationError.message ||
+                    "Payment completed, but access could not be confirmed. Please retry.",
+                ),
+              );
+            }
+          },
+          modal: {
+            ondismiss: () => finish(resolve, false),
+          },
+        });
+
+        checkout.on("payment.failed", (event) => {
+          finish(
+            reject,
+            new Error(
+              event.error?.description || "Payment failed. Please try again.",
+            ),
+          );
+        });
+        checkout.open();
+      }).then((purchased) => {
+        if (purchased) toast.success("Pro access is active.");
+      });
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          error.message ||
+          "Payment could not be completed. Please try again.",
+      );
+    } finally {
+      setPurchasing(false);
+    }
+  };
+
+  const faqItems = [
+    {
+      q: "Can I switch plans anytime?",
+      a: "Pro is a one-time purchase with no automatic renewal. If you purchase more Pro access while your current access is active, the new period is added after your current expiry date.",
+    },
+    {
+      q: "Do you offer refunds?",
+      a: "We offer a 7-day money-back guarantee on all paid plans. If you are not satisfied within your first week, reach out directly to our team for a full refund.",
+    },
+    {
+      q: "What payment methods do you accept?",
+      a: "We accept all major credit cards, debit cards, UPI, net banking, and digital wallets. All transactions are processed securely through industry-standard encryption protocols.",
+    },
+    {
+      q: "Does Pro renew automatically?",
+      a: "No. Monthly Pro access lasts one calendar month and yearly access lasts one calendar year from activation. You can purchase again when you want to renew.",
+    },
+    {
+      q: "How does Enterprise pricing work?",
+      a: "Enterprise pricing is tailored to team size, volume usage, custom ATS/interview question integrations, and dedicated mentorship requirements. Contact our team for an exact configuration.",
+    },
+  ];
+
   return (
-    <div className="bg-white text-gray-900 min-h-screen">
-      <SEO 
-        title="Pricing Plans" 
-        description="Choose the perfect plan for your interview success. Start free or upgrade for unlimited AI interviews, advanced analytics, and 50+ tech roles."
+    <main className="min-h-screen overflow-hidden bg-[#191A1C] text-[#E8E3D8] nk-root">
+      <SEO
+        title="Pricing Plans"
+        description="Choose the perfect plan for your interview success. Start free with 3 monthly interviews or upgrade to Pro for 25 monthly interviews, advanced analytics, and 50+ tech roles."
         canonical="/pricing"
       />
-      <Navbar tone="light" />
+      <Navbar tone="dark" />
 
-      {/* Hero Section */}
-      <section className="pt-40 pb-20 px-6 relative overflow-hidden bg-gray-950">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `linear-gradient(to right, rgba(55, 65, 81, 0.3) 1px, transparent 1px), linear-gradient(to bottom, rgba(55, 65, 81, 0.3) 1px, transparent 1px)`,
-          backgroundSize: "60px 60px",
-        }} />
-        <div className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent blur-3xl" style={{ animation: "sweepGlow 8s ease-in-out infinite" }} />
-        <div className="absolute inset-0 w-1/3 bg-gradient-to-r from-transparent via-emerald-400/20 to-transparent blur-2xl" style={{ animation: "sweepGlow 8s ease-in-out infinite 0.5s" }} />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-gray-950/50 to-gray-950 pointer-events-none" />
+      <style>{`
+        @import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&display=swap");
 
-        <div className="max-w-6xl mx-auto text-center relative z-10">
-          <div className="inline-flex items-center gap-2 bg-emerald-500/10 px-4 py-2 rounded-full mb-6 border border-emerald-500/20">
-            <Sparkles className="w-4 h-4 text-emerald-500" />
-            <span className="text-emerald-400 font-medium">Transparent Pricing</span>
-          </div>
+        .nk-root {
+          font-family: "Helvetica Now Text", "Helvetica Neue", "Inter", Helvetica, Arial, sans-serif;
+          -webkit-font-smoothing: antialiased;
+        }
 
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight text-white">
-            Choose the Perfect Plan
-            <br />
-            for Your <span className="text-emerald-500">Interview Success</span>
-          </h1>
+        .nk-display {
+          font-family: "Nike Futura ND", "Bebas Neue", Anton, Impact, "Helvetica Neue", sans-serif;
+          letter-spacing: -0.01em;
+          text-transform: uppercase;
+        }
 
-          <p className="text-xl text-gray-400 mb-10 max-w-3xl mx-auto">
-            Start free, upgrade when you're ready. All plans include AI-powered feedback
-            <br />
-            and role-specific questions to help you land your dream job.
-          </p>
+        .nk-h-xl {
+          font-family: "Helvetica Now Display", "Helvetica Neue", "Inter", sans-serif;
+          font-weight: 500;
+          letter-spacing: -0.02em;
+        }
 
-          {/* Billing Toggle */}
-          <div className="flex items-center justify-center gap-4 mb-12">
-            <span className={`text-lg font-medium ${billingCycle === 'monthly' ? 'text-white' : 'text-gray-500'}`}>Monthly</span>
-            <button onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'yearly' : 'monthly')} className="relative w-16 h-8 bg-gray-700 rounded-full transition-colors">
-              <div className={`absolute top-1 left-1 w-6 h-6 bg-emerald-500 rounded-full transition-transform ${billingCycle === 'yearly' ? 'translate-x-8' : ''}`} />
-            </button>
-            <span className={`text-lg font-medium ${billingCycle === 'yearly' ? 'text-white' : 'text-gray-500'}`}>
-              Yearly <span className="text-emerald-500 text-sm">(Save 20%)</span>
-            </span>
-          </div>
-        </div>
-      </section>
+        .nk-caption-sm {
+          font-family: "Inter", -apple-system, sans-serif;
+          font-size: 11px;
+          font-weight: 500;
+        }
 
-      {/* Pricing Cards */}
-      <section className="py-24 px-6 bg-gray-950">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Free Plan */}
-            <div className="bg-white rounded-2xl p-10 shadow-2xl border-4 border-gray-900 flex flex-col hover:scale-105 transition-transform duration-300">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-gray-900 rounded-xl flex items-center justify-center">
-                  <Zap className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-4xl font-bold text-gray-900">Free</h3>
-              </div>
+        @keyframes editorialReveal {
+          from {
+            opacity: 0;
+            transform: translateY(22px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
 
-              <p className="text-gray-600 text-lg mb-8 pb-6 border-b border-gray-300">
-                Perfect for getting started with interview prep
-              </p>
+        .editorial-reveal {
+          animation: editorialReveal 900ms cubic-bezier(.2,.7,.2,1) both;
+        }
 
-              <div className="mb-8">
-                <div className="text-6xl font-bold text-gray-900">₹0</div>
-                <p className="text-gray-500 text-lg mt-2">Forever free</p>
-              </div>
+        @media (prefers-reduced-motion: reduce) {
+          *,
+          *::before,
+          *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+          }
+        }
+      `}</style>
 
-              <div className="space-y-4 mb-10 flex-grow">
-                <div className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-1" strokeWidth={3} />
-                  <p className="text-gray-700 text-base">2 AI-powered interviews per month</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-1" strokeWidth={3} />
-                  <p className="text-gray-700 text-base">Basic performance analytics</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-1" strokeWidth={3} />
-                  <p className="text-gray-700 text-base">Access to 10+ tech roles</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-1" strokeWidth={3} />
-                  <p className="text-gray-700 text-base">Community support forum</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-1" strokeWidth={3} />
-                  <p className="text-gray-700 text-base">Email support (48hr response)</p>
-                </div>
-              </div>
+      {/* ── Top Hero Section (Dark Editorial) ── */}
+      <section className="border-b border-[#3B3B39] bg-[#242526]">
+        <div className="mx-auto max-w-[1500px] px-5 py-24 sm:px-8 lg:px-12 lg:py-32">
+          <div className="max-w-5xl editorial-reveal">
+            <SectionLabel light>Membership & Pricing</SectionLabel>
 
-              <button onClick={() => navigate("/register")} className="w-full py-4 bg-gray-900 hover:bg-gray-800 text-white font-bold text-lg rounded-xl transition-colors mt-auto">
-                Get Started Free
+            <h1 className="mt-7 max-w-5xl nk-display text-5xl leading-[0.92] text-[#F1EEE6] sm:text-7xl lg:text-[7.5rem]">
+              Invest in your interview mastery.
+            </h1>
+
+            <p className="mt-8 max-w-2xl text-base leading-8 text-[#B5B3AC] sm:text-lg">
+              Start free, upgrade when you are ready. Precision AI feedback,
+              deep role-specific rubrics, and real-time behavioral insights engineered
+              to land senior offers.
+            </p>
+
+            {/* Billing Toggle Switch */}
+            <div className="mt-12 inline-flex items-center gap-6 border border-[#3B3B39] bg-[#191A1C] p-2">
+              <button
+                type="button"
+                onClick={() => setBillingCycle("monthly")}
+                className={`px-5 py-2.5 nk-caption-sm uppercase tracking-[0.16em] transition ${
+                  billingCycle === "monthly"
+                    ? "bg-[#E8E3D8] text-[#1D1E20] font-semibold"
+                    : "text-[#8D8A82] hover:text-[#E8E3D8]"
+                }`}
+              >
+                Monthly
               </button>
-            </div>
-
-            {/* Pro Plan - Most Popular */}
-            <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-10 shadow-2xl border-4 border-emerald-400 relative flex flex-col hover:scale-105 transition-transform duration-300">
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-gray-900 px-6 py-2 rounded-full font-bold text-sm shadow-lg">
-                MOST POPULAR
-              </div>
-
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
-                  <Crown className="w-6 h-6 text-emerald-600" />
-                </div>
-                <h3 className="text-4xl font-bold text-white">Pro</h3>
-              </div>
-
-              <p className="text-emerald-50 text-lg mb-8 pb-6 border-b border-emerald-400">
-                Everything you need to ace any tech interview
-              </p>
-
-              <div className="mb-8">
-                <div className="text-6xl font-bold text-white">
-                  ₹{billingCycle === 'monthly' ? '999' : '799'}
-                </div>
-                <p className="text-emerald-100 text-lg mt-2">
-                  per month, billed {billingCycle}
-                </p>
-                {billingCycle === 'yearly' && (
-                  <p className="text-yellow-300 text-sm mt-1 font-semibold">Save ₹2,400/year</p>
-                )}
-              </div>
-
-              <div className="space-y-4 mb-10 flex-grow">
-                <div className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-white flex-shrink-0 mt-1" strokeWidth={3} />
-                  <p className="text-white text-base font-medium">Unlimited AI-powered interviews</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-white flex-shrink-0 mt-1" strokeWidth={3} />
-                  <p className="text-white text-base font-medium">Advanced analytics & progress tracking</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-white flex-shrink-0 mt-1" strokeWidth={3} />
-                  <p className="text-white text-base font-medium">50+ specialized tech roles</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-white flex-shrink-0 mt-1" strokeWidth={3} />
-                  <p className="text-white text-base font-medium">Voice & video practice mode</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-white flex-shrink-0 mt-1" strokeWidth={3} />
-                  <p className="text-white text-base font-medium">Custom interview questions</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-white flex-shrink-0 mt-1" strokeWidth={3} />
-                  <p className="text-white text-base font-medium">Detailed performance reports</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-white flex-shrink-0 mt-1" strokeWidth={3} />
-                  <p className="text-white text-base font-medium">Priority email support (24hr)</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-white flex-shrink-0 mt-1" strokeWidth={3} />
-                  <p className="text-white text-base font-medium">Interview history & playback</p>
-                </div>
-              </div>
-
-              <button onClick={() => navigate("/register")} className="w-full py-4 bg-white hover:bg-gray-100 text-emerald-600 font-bold text-lg rounded-xl transition-colors mt-auto shadow-lg">
-                Start 7-Day Free Trial
-              </button>
-              <p className="text-emerald-100 text-sm text-center mt-3">No credit card required</p>
-            </div>
-
-            {/* Enterprise Plan */}
-            <div className="bg-white rounded-2xl p-10 shadow-2xl border-4 border-gray-900 flex flex-col hover:scale-105 transition-transform duration-300">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-gray-900 rounded-xl flex items-center justify-center">
-                  <Building2 className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-4xl font-bold text-gray-900">Enterprise</h3>
-              </div>
-
-              <p className="text-gray-600 text-lg mb-8 pb-6 border-b border-gray-300">
-                Tailored solutions for organizations and teams
-              </p>
-
-              <div className="mb-8">
-                <div className="text-5xl font-bold text-gray-900">Custom</div>
-                <p className="text-gray-500 text-lg mt-2">Contact us for pricing</p>
-              </div>
-
-              <div className="space-y-4 mb-10 flex-grow">
-                <div className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-1" strokeWidth={3} />
-                  <p className="text-gray-700 text-base">Everything in Pro plan</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-1" strokeWidth={3} />
-                  <p className="text-gray-700 text-base">Unlimited team members</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-1" strokeWidth={3} />
-                  <p className="text-gray-700 text-base">Custom branding & white-label</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-1" strokeWidth={3} />
-                  <p className="text-gray-700 text-base">SSO & advanced security</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-1" strokeWidth={3} />
-                  <p className="text-gray-700 text-base">Team analytics dashboard</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-1" strokeWidth={3} />
-                  <p className="text-gray-700 text-base">Dedicated account manager</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-1" strokeWidth={3} />
-                  <p className="text-gray-700 text-base">Custom integrations & API access</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-1" strokeWidth={3} />
-                  <p className="text-gray-700 text-base">Priority phone & chat support</p>
-                </div>
-              </div>
-
-              <button className="w-full py-4 bg-gray-900 hover:bg-gray-800 text-white font-bold text-lg rounded-xl transition-colors mt-auto">
-                Contact Sales Team
+              <button
+                type="button"
+                onClick={() => setBillingCycle("yearly")}
+                className={`px-5 py-2.5 nk-caption-sm uppercase tracking-[0.16em] transition ${
+                  billingCycle === "yearly"
+                    ? "bg-[#E8E3D8] text-[#1D1E20] font-semibold"
+                    : "text-[#8D8A82] hover:text-[#E8E3D8]"
+                }`}
+              >
+                Yearly <span className="text-emerald-400 font-bold ml-1.5">(Save 20%)</span>
               </button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Feature Comparison Table */}
-      <section className="py-20 px-6 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">
-              Compare All <span className="text-emerald-500">Features</span>
+      {/* ── Main Tier Cards Section (Warm Cream Palette) ── */}
+      <section className="border-b border-[#D7D1C5]/20 bg-[#E8E3D8] text-[#1D1E20]">
+        <div className="mx-auto max-w-[1500px] px-5 py-20 sm:px-8 lg:px-12 lg:py-28">
+          <div className="mb-14">
+            <SectionLabel>Tiers & Commitments</SectionLabel>
+            <h2 className="mt-6 max-w-2xl nk-display text-4xl leading-[0.95] text-[#1D1E20] sm:text-6xl">
+              Transparent, scalable plans.
             </h2>
-            <p className="text-xl text-gray-600">See what's included in each plan</p>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          <div className="grid gap-8 lg:grid-cols-3 items-stretch">
+            {/* Free Plan Tile */}
+            <div className="flex flex-col justify-between border border-[#B6B0A4] bg-[#F1EEE6] p-8 sm:p-10 transition hover:-translate-y-1 duration-300">
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="nk-caption-sm uppercase tracking-[0.18em] text-[#77736B]">
+                    Starter
+                  </span>
+                </div>
+                <h3 className="mt-4 nk-display text-4xl text-[#1D1E20]">Free</h3>
+                <p className="mt-3 text-sm leading-6 text-[#68655E]">
+                  Essential AI-powered sessions for foundational practice and skill check.
+                </p>
+
+                <div className="my-8 border-y border-[#D7D1C5] py-6">
+                  <span className="nk-display text-5xl font-bold text-[#1D1E20]">₹0</span>
+                  <span className="ml-2 text-xs uppercase tracking-wider text-[#77736B]">/ Forever</span>
+                </div>
+
+                <ul className="space-y-4 mb-8">
+                  {[
+                    "3 AI-powered interviews per month",
+                    "Basic performance analytics & scoring",
+                    "Access to 10+ core tech tracks",
+                    "Community discussion & support",
+                    "Email support (48hr turnaround)",
+                  ].map((feat, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm text-[#3A3834]">
+                      <Check className="w-4 h-4 text-[#1D1E20] flex-shrink-0 mt-0.5" strokeWidth={2.5} />
+                      <span>{feat}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => navigate("/register")}
+                className="group mt-auto flex w-full items-center justify-between border border-[#1D1E20] bg-transparent px-6 py-4 nk-caption-sm font-semibold uppercase tracking-[0.16em] text-[#1D1E20] transition hover:bg-[#1D1E20] hover:text-[#E8E3D8]"
+              >
+                <span>Get Started Free</span>
+                <Arrow className="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" />
+              </button>
+            </div>
+
+            {/* Pro Plan - Warm Terracotta Featured Card */}
+            <div className="relative flex flex-col justify-between border border-[#B6B0A4] bg-[#724133] p-8 sm:p-10 text-[#F1EEE6] shadow-[0_20px_45px_rgba(0,0,0,0.3)] transition hover:-translate-y-1.5 duration-300">
+              <div className="absolute top-0 right-0 bg-[#E8E3D8] text-[#1D1E20] px-4 py-1 nk-caption-sm font-semibold uppercase tracking-[0.18em]">
+                Most Popular
+              </div>
+
+              <div>
+                <span className="nk-caption-sm uppercase tracking-[0.18em] text-[#E8DFD2]">
+                  Full Access
+                </span>
+                <h3 className="mt-4 nk-display text-4xl text-[#F1EEE6]">Pro Member</h3>
+                <p className="mt-3 text-sm leading-6 text-[#E8DFD2]">
+                  Up to 25 interviews each month, voice/video analysis, and deep metrics.
+                </p>
+
+                <div className="my-8 border-y border-[#A98F82] py-6">
+                  <span className="nk-display text-5xl font-bold text-[#F1EEE6]">
+                    ₹{billingCycle === "monthly" ? "399" : "299"}
+                  </span>
+                  <span className="ml-2 text-xs uppercase tracking-wider text-[#E8DFD2]">
+                    / month, billed {billingCycle}
+                  </span>
+                  {billingCycle === "yearly" && (
+                    <div className="mt-2 text-xs font-semibold uppercase tracking-wider text-amber-200">
+                      Save ₹1,200 annually
+                    </div>
+                  )}
+                </div>
+
+                <ul className="space-y-4 mb-8">
+                  {[
+                    "25 AI-powered interviews per month",
+                    "Advanced analytics & progress tracking",
+                    "50+ specialized engineering & product roles",
+                    "Voice & video real-time simulation",
+                    "Custom tailored questions & company formats",
+                    "Priority 24-hour response support",
+                    "Complete replay history & audio playback",
+                  ].map((feat, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm text-[#F3EDE3]">
+                      <Check className="w-4 h-4 text-[#F1EEE6] flex-shrink-0 mt-0.5" strokeWidth={2.5} />
+                      <span>{feat}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div>
+                <button
+                  type="button"
+                  onClick={handleProPurchase}
+                  disabled={purchasing}
+                  className="group flex w-full items-center justify-between bg-[#1D1E20] px-6 py-4 nk-caption-sm font-semibold uppercase tracking-[0.16em] text-[#E8E3D8] transition hover:bg-[#2b2c2e] disabled:cursor-wait disabled:opacity-70"
+                >
+                  <span>
+                    {purchasing
+                      ? "Processing..."
+                      : `Buy Pro · ₹${billingCycle === "monthly" ? "399" : "3,588"}`}
+                  </span>
+                  <Arrow className="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" />
+                </button>
+                <p className="mt-3 text-center text-xs tracking-wider text-[#E8DFD2]/70 uppercase">
+                  One-time payment · No automatic renewal
+                </p>
+              </div>
+            </div>
+
+            {/* Enterprise Plan Tile */}
+            <div className="flex flex-col justify-between border border-[#B6B0A4] bg-[#F1EEE6] p-8 sm:p-10 transition hover:-translate-y-1 duration-300">
+              <div>
+                <span className="nk-caption-sm uppercase tracking-[0.18em] text-[#77736B]">
+                  Organizations
+                </span>
+                <h3 className="mt-4 nk-display text-4xl text-[#1D1E20]">Enterprise</h3>
+                <p className="mt-3 text-sm leading-6 text-[#68655E]">
+                  Tailored cohorts, custom question banks, and dedicated integration.
+                </p>
+
+                <div className="my-8 border-y border-[#D7D1C5] py-6">
+                  <span className="nk-display text-5xl font-bold text-[#1D1E20]">Custom</span>
+                  <span className="ml-2 text-xs uppercase tracking-wider text-[#77736B]">/ Volume pricing</span>
+                </div>
+
+                <ul className="space-y-4 mb-8">
+                  {[
+                    "Everything included in the Pro tier",
+                    "Unlimited team seats & member cohorts",
+                    "Custom branding & white-label assessments",
+                    "SSO & enterprise-grade compliance",
+                    "Team leadership performance dashboard",
+                    "Dedicated account success manager",
+                    "Custom ATS integrations & webhook API",
+                  ].map((feat, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm text-[#3A3834]">
+                      <Check className="w-4 h-4 text-[#1D1E20] flex-shrink-0 mt-0.5" strokeWidth={2.5} />
+                      <span>{feat}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <a
+                href="mailto:support@intervyo.com?subject=Enterprise%20Plan%20Inquiry"
+                className="group mt-auto flex w-full items-center justify-between border border-[#1D1E20] bg-transparent px-6 py-4 nk-caption-sm font-semibold uppercase tracking-[0.16em] text-[#1D1E20] transition hover:bg-[#1D1E20] hover:text-[#E8E3D8]"
+              >
+                <span>Contact Enterprise Sales</span>
+                <Arrow className="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" />
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Feature Comparison Matrix (Dark Editorial Table) ── */}
+      <section className="border-b border-[#3B3B39] bg-[#1E1F21] py-20 px-5 sm:px-8 lg:px-12 lg:py-28">
+        <div className="mx-auto max-w-[1500px]">
+          <div className="mb-14">
+            <SectionLabel light>Detailed Matrix</SectionLabel>
+            <h2 className="mt-6 nk-display text-4xl text-[#F1EEE6] sm:text-6xl">
+              Compare all features.
+            </h2>
+          </div>
+
+          <div className="w-full max-w-full overflow-x-auto overscroll-x-contain">
+            <table className="w-full min-w-[760px] table-fixed text-left border-collapse">
+              <colgroup>
+                <col className="w-[40%]" />
+                <col className="w-[20%]" />
+                <col className="w-[20%]" />
+                <col className="w-[20%]" />
+              </colgroup>
               <thead>
-                <tr className="border-b-2 border-gray-200">
-                  <th className="text-left py-6 px-4 text-lg font-bold text-gray-900">Features</th>
-                  <th className="text-center py-6 px-4 text-lg font-bold text-gray-900">Free</th>
-                  <th className="text-center py-6 px-4 text-lg font-bold text-emerald-600">Pro</th>
-                  <th className="text-center py-6 px-4 text-lg font-bold text-gray-900">Enterprise</th>
+                <tr className="border-b border-[#403F3C]">
+                  <th className="py-5 px-4 nk-caption-sm uppercase tracking-[0.16em] text-[#8D8A82]">Feature</th>
+                  <th className="py-5 px-4 text-center nk-caption-sm uppercase tracking-[0.16em] text-[#8D8A82]">Free</th>
+                  <th className="py-5 px-4 text-center nk-caption-sm uppercase tracking-[0.16em] text-[#E8DFD2] font-semibold bg-[#2A2B2D]">Pro</th>
+                  <th className="py-5 px-4 text-center nk-caption-sm uppercase tracking-[0.16em] text-[#8D8A82]">Enterprise</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr className="border-b border-gray-200">
-                  <td className="py-4 px-4 text-gray-700">Interviews per month</td>
-                  <td className="py-4 px-4 text-center text-gray-700">2</td>
-                  <td className="py-4 px-4 text-center text-emerald-600 font-semibold">Unlimited</td>
-                  <td className="py-4 px-4 text-center text-gray-700">Unlimited</td>
-                </tr>
-                <tr className="border-b border-gray-200">
-                  <td className="py-4 px-4 text-gray-700">AI feedback & scoring</td>
-                  <td className="py-4 px-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
-                  <td className="py-4 px-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
-                  <td className="py-4 px-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
-                </tr>
-                <tr className="border-b border-gray-200">
-                  <td className="py-4 px-4 text-gray-700">Tech roles available</td>
-                  <td className="py-4 px-4 text-center text-gray-700">10+</td>
-                  <td className="py-4 px-4 text-center text-emerald-600 font-semibold">50+</td>
-                  <td className="py-4 px-4 text-center text-gray-700">50+</td>
-                </tr>
-                <tr className="border-b border-gray-200">
-                  <td className="py-4 px-4 text-gray-700">Voice practice</td>
-                  <td className="py-4 px-4 text-center text-gray-400">—</td>
-                  <td className="py-4 px-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
-                  <td className="py-4 px-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
-                </tr>
-                <tr className="border-b border-gray-200">
-                  <td className="py-4 px-4 text-gray-700">Video recording</td>
-                  <td className="py-4 px-4 text-center text-gray-400">—</td>
-                  <td className="py-4 px-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
-                  <td className="py-4 px-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
-                </tr>
-                <tr className="border-b border-gray-200">
-                  <td className="py-4 px-4 text-gray-700">Custom questions</td>
-                  <td className="py-4 px-4 text-center text-gray-400">—</td>
-                  <td className="py-4 px-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
-                  <td className="py-4 px-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
-                </tr>
-                <tr className="border-b border-gray-200">
-                  <td className="py-4 px-4 text-gray-700">Progress analytics</td>
-                  <td className="py-4 px-4 text-center text-gray-700">Basic</td>
-                  <td className="py-4 px-4 text-center text-emerald-600 font-semibold">Advanced</td>
-                  <td className="py-4 px-4 text-center text-gray-700">Advanced + Team</td>
-                </tr>
-                <tr className="border-b border-gray-200">
-                  <td className="py-4 px-4 text-gray-700">Interview history</td>
-                  <td className="py-4 px-4 text-center text-gray-700">7 days</td>
-                  <td className="py-4 px-4 text-center text-emerald-600 font-semibold">Unlimited</td>
-                  <td className="py-4 px-4 text-center text-gray-700">Unlimited</td>
-                </tr>
-                <tr className="border-b border-gray-200">
-                  <td className="py-4 px-4 text-gray-700">Team management</td>
-                  <td className="py-4 px-4 text-center text-gray-400">—</td>
-                  <td className="py-4 px-4 text-center text-gray-400">—</td>
-                  <td className="py-4 px-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
-                </tr>
-                <tr className="border-b border-gray-200">
-                  <td className="py-4 px-4 text-gray-700">SSO integration</td>
-                  <td className="py-4 px-4 text-center text-gray-400">—</td>
-                  <td className="py-4 px-4 text-center text-gray-400">—</td>
-                  <td className="py-4 px-4 text-center"><Check className="w-5 h-5 text-emerald-500 mx-auto" /></td>
-                </tr>
-                <tr className="border-b border-gray-200">
-                  <td className="py-4 px-4 text-gray-700">Support</td>
-                  <td className="py-4 px-4 text-center text-gray-700">Email (48hr)</td>
-                  <td className="py-4 px-4 text-center text-emerald-600 font-semibold">Priority (24hr)</td>
-                  <td className="py-4 px-4 text-center text-gray-700">Dedicated Manager</td>
-                </tr>
+              <tbody className="divide-y divide-[#333436] text-sm">
+                {[
+                  ["Interviews per month", "3", "25", "Unlimited"],
+                  ["AI feedback & scoring", true, true, true],
+                  ["Tech roles available", "10+", "50+", "50+"],
+                  ["Voice practice mode", "—", true, true],
+                  ["Video analysis", "—", true, true],
+                  ["Custom questions", "—", true, true],
+                  ["Progress analytics", "Basic", "Advanced", "Advanced + Team"],
+                  ["Interview history", "7 days", "Unlimited", "Unlimited"],
+                  ["Team dashboard", "—", "—", true],
+                  ["SSO & Security", "—", "—", true],
+                  ["Support", "Email (48hr)", "Priority (24hr)", "Dedicated Manager"],
+                ].map(([name, free, pro, enterprise], idx) => (
+                  <tr key={idx} className="transition hover:bg-[#252628]">
+                    <td className="py-4 px-4 text-[#D8D3C8] font-medium">{name}</td>
+                    <td className="py-4 px-4 text-center text-[#8D8A82]">
+                      {free === true ? <Check className="w-4 h-4 text-emerald-400 mx-auto" /> : free}
+                    </td>
+                    <td className="py-4 px-4 text-center text-[#F1EEE6] bg-[#242527] font-medium">
+                      {pro === true ? <Check className="w-4 h-4 text-emerald-400 mx-auto" /> : pro}
+                    </td>
+                    <td className="py-4 px-4 text-center text-[#8D8A82]">
+                      {enterprise === true ? <Check className="w-4 h-4 text-emerald-400 mx-auto" /> : enterprise}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section className="py-20 px-6 bg-gradient-to-br from-emerald-600 to-emerald-500">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-16">
-            Pricing Questions?
+      {/* ── FAQ Section (Editorial Accordion) ── */}
+      <section className="border-b border-[#3B3B39] bg-[#242526] py-20 px-5 sm:px-8 lg:px-12 lg:py-28">
+        <div className="mx-auto max-w-[1200px]">
+          <SectionLabel light>Common Inquiries</SectionLabel>
+          <h2 className="mt-6 mb-12 nk-display text-4xl text-[#F1EEE6] sm:text-6xl">
+            Frequently asked questions.
           </h2>
 
           <div className="space-y-4">
-            <div className="border-b-4 border-white pb-6">
-              <button onClick={() => toggleFaq(0)} className="w-full flex items-center justify-between text-left group">
-                <h3 className="text-2xl font-bold text-white pr-8">Can I switch plans anytime?</h3>
-                <ChevronDown className={`w-8 h-8 text-white flex-shrink-0 transition-transform duration-300 ${openFaq === 0 ? "rotate-180" : ""}`} strokeWidth={3} />
-              </button>
-              {openFaq === 0 && (
-                <p className="mt-4 text-lg text-white/90 leading-relaxed">
-                  Yes! You can upgrade or downgrade your plan at any time. When upgrading, you'll get immediate access to new features. When downgrading, changes take effect at the end of your current billing cycle.
-                </p>
-              )}
-            </div>
-
-            <div className="border-b-4 border-white pb-6">
-              <button onClick={() => toggleFaq(1)} className="w-full flex items-center justify-between text-left group">
-                <h3 className="text-2xl font-bold text-white pr-8">Do you offer refunds?</h3>
-                <ChevronDown className={`w-8 h-8 text-white flex-shrink-0 transition-transform duration-300 ${openFaq === 1 ? "rotate-180" : ""}`} strokeWidth={3} />
-              </button>
-              {openFaq === 1 && (
-                <p className="mt-4 text-lg text-white/90 leading-relaxed">
-                  We offer a 7-day money-back guarantee on all paid plans. If you're not satisfied within the first 7 days, contact our support team for a full refund, no questions asked.
-                </p>
-              )}
-            </div>
-
-            <div className="border-b-4 border-white pb-6">
-              <button onClick={() => toggleFaq(2)} className="w-full flex items-center justify-between text-left group">
-                <h3 className="text-2xl font-bold text-white pr-8">What payment methods do you accept?</h3>
-                <ChevronDown className={`w-8 h-8 text-white flex-shrink-0 transition-transform duration-300 ${openFaq === 2 ? "rotate-180" : ""}`} strokeWidth={3} />
-              </button>
-              {openFaq === 2 && (
-                <p className="mt-4 text-lg text-white/90 leading-relaxed">
-                  We accept all major credit cards (Visa, MasterCard, American Express), debit cards, UPI, net banking, and digital wallets. All payments are processed securely through industry-standard encryption.
-                </p>
-              )}
-            </div>
-
-            <div className="border-b-4 border-white pb-6">
-              <button onClick={() => toggleFaq(3)} className="w-full flex items-center justify-between text-left group">
-                <h3 className="text-2xl font-bold text-white pr-8">Is the free trial really free?</h3>
-                <ChevronDown className={`w-8 h-8 text-white flex-shrink-0 transition-transform duration-300 ${openFaq === 3 ? "rotate-180" : ""}`} strokeWidth={3} />
-              </button>
-              {openFaq === 3 && (
-                <p className="mt-4 text-lg text-white/90 leading-relaxed">
-                  Yes! The 7-day free trial for the Pro plan requires no credit card. You'll have full access to all Pro features during the trial. After 7 days, you can choose to upgrade or continue with the free plan.
-                </p>
-              )}
-            </div>
-
-            <div className="border-b-4 border-white pb-6">
-              <button onClick={() => toggleFaq(4)} className="w-full flex items-center justify-between text-left group">
-                <h3 className="text-2xl font-bold text-white pr-8">How does Enterprise pricing work?</h3>
-                <ChevronDown className={`w-8 h-8 text-white flex-shrink-0 transition-transform duration-300 ${openFaq === 4 ? "rotate-180" : ""}`} strokeWidth={3} />
-              </button>
-              {openFaq === 4 && (
-                <p className="mt-4 text-lg text-white/90 leading-relaxed">
-                  Enterprise pricing is customized based on your team size, usage requirements, and specific needs. Contact our sales team for a tailored quote. We offer volume discounts for larger organizations.
-                </p>
-              )}
-            </div>
+            {faqItems.map((item, index) => (
+              <div
+                key={index}
+                className="border-b border-[#3B3B39] pb-6 transition"
+              >
+                <button
+                  type="button"
+                  onClick={() => toggleFaq(index)}
+                  className="w-full flex items-center justify-between text-left group cursor-pointer"
+                >
+                  <h3 className="nk-h-xl text-xl sm:text-2xl text-[#F1EEE6] transition group-hover:text-[#D8D3C8]">
+                    {item.q}
+                  </h3>
+                  <ChevronDown
+                    className={`w-6 h-6 text-[#8D8A82] flex-shrink-0 transition-transform duration-300 ${
+                      openFaq === index ? "rotate-180 text-[#F1EEE6]" : ""
+                    }`}
+                  />
+                </button>
+                {openFaq === index && (
+                  <p className="mt-4 text-base leading-7 text-[#B5B3AC] max-w-3xl">
+                    {item.a}
+                  </p>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Trust Section */}
-      <section className="py-20 px-6 bg-gray-100">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">
-              Trusted by <span className="text-emerald-500">5,000+</span> Job Seekers
+      {/* ── Bottom Outcome / Metric Bar ── */}
+      <section className="bg-[#191A1C]">
+        <div className="mx-auto grid max-w-[1500px] gap-10 px-5 py-20 sm:px-8 lg:grid-cols-[1fr_0.7fr] lg:px-12 lg:py-28">
+          <div>
+            <SectionLabel light>Empowering Aspirants</SectionLabel>
+            <h2 className="mt-7 max-w-3xl nk-display text-4xl leading-[0.95] text-[#F1EEE6] sm:text-6xl">
+              Ready to ace your upcoming interviews?
             </h2>
-            <p className="text-xl text-gray-600">Join thousands preparing for their dream roles</p>
-          </div>
-
-          <div className="grid md:grid-cols-4 gap-8">
-            <div className="bg-white rounded-2xl p-8 shadow-sm text-center">
-              <div className="text-4xl font-bold text-emerald-600 mb-2">87%</div>
-              <p className="text-gray-600">Success Rate</p>
-            </div>
-            <div className="bg-white rounded-2xl p-8 shadow-sm text-center">
-              <div className="text-4xl font-bold text-emerald-600 mb-2">50K+</div>
-              <p className="text-gray-600">Interviews Completed</p>
-            </div>
-            <div className="bg-white rounded-2xl p-8 shadow-sm text-center">
-              <div className="text-4xl font-bold text-emerald-600 mb-2">4.9/5</div>
-              <p className="text-gray-600">User Rating</p>
-            </div>
-            <div className="bg-white rounded-2xl p-8 shadow-sm text-center">
-              <div className="text-4xl font-bold text-emerald-600 mb-2">12K</div>
-              <p className="text-gray-600">Active Users</p>
+            <div className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-6 border-t border-[#3B3B39] pt-8">
+              <div>
+                <span className="nk-display text-4xl text-[#F1EEE6]">87%</span>
+                <p className="nk-caption-sm text-[#8D8A82] uppercase mt-1">Success Rate</p>
+              </div>
+              <div>
+                <span className="nk-display text-4xl text-[#F1EEE6]">50K+</span>
+                <p className="nk-caption-sm text-[#8D8A82] uppercase mt-1">Completed</p>
+              </div>
+              <div>
+                <span className="nk-display text-4xl text-[#F1EEE6]">4.9/5</span>
+                <p className="nk-caption-sm text-[#8D8A82] uppercase mt-1">User Rating</p>
+              </div>
+              <div>
+                <span className="nk-display text-4xl text-[#F1EEE6]">12K</span>
+                <p className="nk-caption-sm text-[#8D8A82] uppercase mt-1">Active Users</p>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* CTA Section */}
-      <section className="py-20 px-6 bg-gray-900 text-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-12">
-            <div className="flex-1">
-              <h2 className="text-4xl md:text-5xl font-bold mb-4">
-                Ready to <span className="bg-emerald-500 px-3 py-1 rounded">ace</span> your
-                <br />
-                next interview?
-              </h2>
-              <p className="text-xl text-gray-300">
-                Start practicing today with our AI-powered interview coach.
-                <br />
-                No credit card required.
-              </p>
-            </div>
-            <div className="flex-shrink-0">
-              <button onClick={() => navigate("/register")} className="px-8 py-4 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 font-semibold text-lg flex items-center gap-2 shadow-lg">
-                Get Started Free <span>→</span>
-              </button>
-            </div>
+          <div className="border-t border-[#41423F] pt-6 flex flex-col justify-between">
+            <p className="text-base leading-8 text-[#96938B]">
+              Experience simulated real-world rounds before speaking with recruiters.
+              Instant analysis, voice modulation feedback, and actionable rubrics.
+            </p>
+
+            <button
+              type="button"
+              onClick={() => navigate("/register")}
+              className="mt-8 inline-flex items-center gap-4 border-b border-[#8E8B83]/50 pb-1 nk-caption-sm font-semibold uppercase tracking-[0.16em] text-[#D8D3C8] transition hover:border-[#E8E3D8] hover:text-[#E8E3D8] cursor-pointer"
+            >
+              Begin Free Trial
+              <Arrow />
+            </button>
           </div>
         </div>
       </section>
-
-      <style>{`
-        @keyframes sweepGlow {
-          0%, 100% {
-            transform: translateX(-100%);
-          }
-          50% {
-            transform: translateX(200%);
-          }
-        }
-      `}</style>
-    </div>
+    </main>
   );
 }

@@ -1,7 +1,7 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { login } from '../services/operations/authAPI';
+import { login, warmUpAuthService } from '../services/operations/authAPI';
 import SEO from '../components/SEO';
 import { authEndpoints } from '../services/apis';
 
@@ -31,6 +31,10 @@ export default function Login() {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    warmUpAuthService();
+  }, []);
 
   const handleEmailLogin = (e) => {
     e.preventDefault();

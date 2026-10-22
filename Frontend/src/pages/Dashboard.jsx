@@ -130,6 +130,9 @@ export const NIKE_CSS = `
 .nk-badge-dot { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; border-radius: 9999px; background: var(--nk-sale); }
 .nk-badge-dot::after { content: ""; position: absolute; inset: 0; border-radius: 9999px; background: var(--nk-sale); animation: nk-ping 1.8s ease-out infinite; }
 .nk-avatar { width: 32px; height: 32px; border-radius: 9999px; background: var(--nk-ink); color: var(--nk-on-ink); display: inline-flex; align-items: center; justify-content: center; overflow: hidden; font-size: 14px; font-weight: 500; }
+.nk-pro-avatar-wrap { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; padding: 2px; border-radius: 9999px; background: linear-gradient(135deg, #fff2bd, #c08b35 48%, #fff2bd); box-shadow: 0 0 0 1px rgba(192,139,53,.35); animation: nk-pro-glow  infinite; }
+.nk-pro-avatar-crown { position: absolute; top: -4px; right: -4px; width: 15px; height: 15px; padding: 2px; border: 1px solid var(--nk-canvas); border-radius: 9999px; background: #d7ad58; color: #21190a; }
+@keyframes nk-pro-glow { 0%, 100% { box-shadow: 0 0 0 1px rgba(192,139,53,.35), 0 0 6px rgba(192,139,53,.25); } 50% { box-shadow: 0 0 0 2px rgba(255,224,150,.75), 0 0 14px rgba(192,139,53,.62); } }
 
 /* Campaign hero (flat ink block; photography slot) */
 .nk-campaign { position: relative; background: #111111; color: #ffffff;  display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; }
@@ -719,22 +722,25 @@ function Dashboard() {
   }, []);
 
   const nkTheme = theme === "dark" ? "dark" : "light";
-  const planLimit =
-    user?.subscription?.plan === "pro"
+  const isEnterprise = user?.subscription?.plan === "enterprise";
+  const isProUser =
+    user?.subscription?.plan === "pro" &&
+    new Date(user?.subscription?.endDate) > new Date();
+  const planLimit = isEnterprise
+    ? Infinity
+    : user?.subscription?.plan === "pro"
       ? 25
-      : user?.subscription?.plan === "enterprise"
-        ? Infinity
-        : 2;
-  const planLimitLabel =
-    user?.subscription?.plan === "pro"
-      ? "25"
-      : user?.subscription?.plan === "enterprise"
-        ? "∞"
-        : "2";
-  const planProgress =
-    user?.subscription?.plan === "enterprise"
-      ? 100
-      : ((user?.subscription?.interviewsRemaining || 0) / planLimit) * 100;
+      : 3;
+  const planLimitLabel = isEnterprise ? "∞" : String(planLimit);
+  const interviewsRemaining = isEnterprise
+    ? -1
+    : Math.max(
+        0,
+        Number(user?.subscription?.interviewsRemaining ?? planLimit) || 0,
+      );
+  const planProgress = isEnterprise
+    ? 100
+    : (interviewsRemaining / planLimit) * 100;
 
   if (loading) {
     return (
@@ -833,7 +839,7 @@ function Dashboard() {
         <div className="nk-container">
           <Link to="/blog">Blog</Link>
           <Link to="/settings">Settings</Link>
-          <Link to="/subscription">Subscription</Link>
+          <Link to="/pricing">Pricing</Link>
           <button onClick={() => dispatch(logout(navigate))}>Logout</button>
         </div>
       </div>
@@ -894,16 +900,29 @@ function Dashboard() {
                 }}
                 aria-haspopup="menu"
                 aria-expanded={showProfileMenu}
-                aria-label="Account menu"
+                aria-label={`Account menu${isProUser ? ", Pro member" : ""}`}
                 style={{ width: "auto", padding: "0 8px 0 4px", gap: 6 }}
               >
-                <span className="nk-avatar">
-                  {user?.profilePicture ? (
-                    <img src={user.profilePicture} className="h-full w-full object-cover" alt="Profile" />
-                  ) : (
-                    user?.name?.charAt(0) || "U"
-                  )}
-                </span>
+                {isProUser ? (
+                  <span className="nk-pro-avatar-wrap" title="Pro member">
+                    <span className="nk-avatar">
+                      {user?.profilePicture ? (
+                        <img src={user.profilePicture} className="h-full w-full object-cover" alt="Profile" />
+                      ) : (
+                        user?.name?.charAt(0) || "U"
+                      )}
+                    </span>
+                    <Crown className="nk-pro-avatar-crown" aria-hidden="true" />
+                  </span>
+                ) : (
+                  <span className="nk-avatar">
+                    {user?.profilePicture ? (
+                      <img src={user.profilePicture} className="h-full w-full object-cover" alt="Profile" />
+                    ) : (
+                      user?.name?.charAt(0) || "U"
+                    )}
+                  </span>
+                )}
                 <ChevronDown
                   size={16}
                   style={{ transition: "transform .3s var(--nk-ease)", transform: showProfileMenu ? "rotate(180deg)" : "none" }}
@@ -1276,14 +1295,25 @@ function Dashboard() {
                 <div className="nk-caption mb-1" style={{ color: "#9e9ea0" }}>Interviews this month</div>
                 <div className="mb-4 flex items-baseline gap-2">
                   <span className="nk-display" style={{ fontSize: 64 }}>
-                    <CountUp end={user?.subscription?.interviewsRemaining || 0} duration={900} />
+                    {isEnterprise ? "∞" : <CountUp end={interviewsRemaining} duration={900} />}
                   </span>
-                  <span className="nk-caption" style={{ color: "#9e9ea0" }}>of {planLimitLabel} left</span>
+                  <span className="nk-caption" style={{ color: "#9e9ea0" }}>
+                    {isEnterprise
+                      ? "Unlimited interviews"
+                      : interviewsRemaining === 0
+                        ? "No interviews remaining this month"
+                        : `of ${planLimitLabel} left this month`}
+                  </span>
                 </div>
+                {!isEnterprise && interviewsRemaining === 0 && (
+                  <p className="nk-caption-sm mb-4" style={{ color: "#d7ad58" }}>
+                    Your interviews renew on the 1st.
+                  </p>
+                )}
                 <div className="mb-6">
                   <ProgressBar value={planProgress} label="Interviews remaining this month" />
                 </div>
-                <button onClick={() => navigate("/subscription")} className="nk-btn nk-btn-onimage w-full">
+                <button onClick={() => navigate("/pricing")} className="nk-btn nk-btn-onimage w-full">
                   Manage plan
                 </button>
               </Reveal>

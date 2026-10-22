@@ -1,45 +1,284 @@
-import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import React, { useState, useEffect, useContext } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { useNavigate, Link } from "react-router-dom";
 import {
+  Bell,
+  Menu,
+  X,
+  Crown,
+  Settings,
+  LogOut,
   Search,
+  ArrowUpRight,
+  ChevronDown,
   BookOpen,
-  Clock,
-  TrendingUp,
-  CheckCircle,
-  Play,
-  ChevronRight,
-  Sparkles,
-  Brain,
-  Target,
-  AlertCircle,
-  ArrowLeft,
-  FileText,
-  Code,
-  HelpCircle,
-  Bookmark,
-  Share2,
-  Download,
-  Eye,
+  Globe,
+  Code2,
+  Server,
+  Layers,
+  Network,
   BarChart3,
-  MessageSquare,
-  Lightbulb,
-  Lock,
+  Rocket,
+  Smartphone,
+  BrainCircuit,
 } from "lucide-react";
+import {
+  siDiagramsdotnet,
+  siDocker,
+  siExpress,
+  siJavascript,
+  siKubernetes,
+  siLeetcode,
+  siMongodb,
+  siMysql,
+  siNodedotjs,
+  siPytorch,
+  siPython,
+  siReact,
+  siTensorflow,
+  siTypescript,
+} from "simple-icons";
 import ModuleContentPage from "./ModuleContentPage";
 import { TopicDetailPage } from "./TopicDetailPage";
+import { logout } from "../../services/operations/authAPI";
+import ThemeToggle from "../ThemeToggle";
+import { ThemeContext } from "../shared/ThemeContext";
+import logo from "../../assets/intervyologo.png";
+import { BASE_URL } from "../../services/apis.js";
 
-const API_BASE_URL = "https://intervyo.onrender.com/api";
+const API_BASE_URL = `${BASE_URL}/learning-hub`;
+
+async function getResponseError(response, fallback) {
+  try {
+    const data = await response.json();
+    return data.message || fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+/* ─── Nike Design System ─────────────────────────────────────────── */
+const NIKE_CSS = `
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500&display=swap");
+
+.nk-root {
+  --nk-ink: #111111;
+  --nk-on-ink: #ffffff;
+  --nk-canvas: #ffffff;
+  --nk-cloud: #f5f5f5;
+  --nk-hairline: #cacacb;
+  --nk-hairline-soft: #e5e5e5;
+  --nk-charcoal: #39393b;
+  --nk-mute: #707072;
+  --nk-stone: #9e9ea0;
+  --nk-success: #007d48;
+  --nk-sale: #d30005;
+  --nk-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  font-family: "Helvetica Now Text", "Helvetica Neue", "Inter", Helvetica, Arial, sans-serif;
+  font-size: 16px; font-weight: 400; line-height: 1.5; letter-spacing: 0;
+  background: var(--nk-canvas); color: var(--nk-ink);
+  -webkit-font-smoothing: antialiased; min-height: 100vh; overflow-x: hidden;
+}
+.nk-root[data-nk-theme="dark"] {
+  --nk-ink: #ffffff; --nk-on-ink: #111111; --nk-canvas: #111111; --nk-cloud: #1f1f21;
+  --nk-hairline: #39393b; --nk-hairline-soft: #2a2a2c; --nk-charcoal: #cacacb;
+  --nk-mute: #9e9ea0; --nk-success: #1eaa52;
+}
+.nk-root *, .nk-root *::before, .nk-root *::after { box-sizing: border-box; }
+.nk-root button { font: inherit; color: inherit; cursor: pointer; }
+.nk-root a { color: inherit; text-decoration: none; }
+
+/* Typography */
+.nk-h-xl { font-family: "Helvetica Now Display", "Helvetica Neue", "Inter", sans-serif; font-size: 32px; font-weight: 500; line-height: 1.2; text-transform: uppercase; }
+.nk-h-lg { font-size: 24px; font-weight: 500; line-height: 1.2; }
+.nk-h-md { font-size: 16px; font-weight: 500; line-height: 1.75; }
+.nk-body-strong { font-size: 16px; font-weight: 500; line-height: 1.5; }
+.nk-caption { font-size: 14px; font-weight: 500; line-height: 1.5; }
+.nk-caption-sm { font-size: 12px; font-weight: 500; line-height: 1.5; }
+.nk-mute { color: var(--nk-mute); }
+
+/* Layout */
+.nk-container { width: 100%; max-width: 1440px; margin: 0 auto; padding: 0 48px; }
+.nk-section { padding-top: 48px; }
+.nk-section-last { padding-bottom: 80px; }
+.nk-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+
+/* Utility bar */
+.nk-utility { background: var(--nk-cloud); height: 36px; font-size: 12px; font-weight: 500; }
+.nk-utility .nk-container { height: 100%; display: flex; align-items: center; justify-content: flex-end; gap: 16px; }
+.nk-utility a, .nk-utility button { background: none; border: 0; padding: 0; font-size: 12px; font-weight: 500; }
+.nk-utility a:hover, .nk-utility button:hover { color: var(--nk-mute); }
+
+/* Nav */
+.nk-nav { position: sticky; top: 0; z-index: 60; height: 60px; background: var(--nk-canvas); transition: box-shadow .3s ease; }
+.nk-nav[data-scrolled="true"] { box-shadow: inset 0 -1px 0 var(--nk-hairline-soft); }
+.nk-nav .nk-container { height: 100%; display: flex; align-items: center; justify-content: space-between; }
+.nk-nav-links { display: flex; align-items: center; gap: 28px; height: 100%; }
+.nk-nav-link { position: relative; height: 100%; display: inline-flex; align-items: center; font-size: 16px; font-weight: 500; }
+.nk-nav-link::after { content: ""; position: absolute; left: 0; right: 0; bottom: 8px; height: 2px; background: var(--nk-ink); transform: scaleX(0); transform-origin: left; transition: transform .35s var(--nk-ease); }
+.nk-nav-link:hover::after, .nk-nav-link[aria-current="page"]::after { transform: scaleX(1); }
+.nk-nav-right { display: flex; align-items: center; gap: 8px; }
+
+/* Buttons */
+.nk-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 48px; padding: 0 32px; border-radius: 30px; border: 0; font-size: 16px; font-weight: 500; line-height: 1.5; white-space: nowrap; transition: transform .18s var(--nk-ease), opacity .18s ease, background-color .25s ease; }
+.nk-btn-primary { background: var(--nk-ink); color: var(--nk-on-ink) !important; }
+.nk-btn-secondary { background: var(--nk-cloud); color: var(--nk-ink); }
+.nk-btn-sm { height: 40px; padding: 0 20px; font-size: 14px; }
+.nk-btn:hover { opacity: 0.88; }
+.nk-btn-primary:hover { background: var(--nk-charcoal); opacity: 1; }
+.nk-btn-secondary:hover { background: var(--nk-hairline-soft); opacity: 1; }
+.nk-btn:active { transform: scale(0.96); }
+.nk-icon-btn { position: relative; width: 40px; height: 40px; border-radius: 9999px; border: 0; background: transparent; display: inline-flex; align-items: center; justify-content: center; transition: background-color .25s ease, transform .18s var(--nk-ease); }
+.nk-icon-btn:hover { background: var(--nk-cloud); }
+.nk-icon-btn:active { transform: scale(0.85); }
+.nk-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--nk-canvas); border: 1px solid var(--nk-hairline); border-radius: 30px; padding: 4px 12px; font-size: 12px; font-weight: 500; line-height: 1.5; color: var(--nk-ink); }
+.nk-avatar { width: 32px; height: 32px; border-radius: 9999px; background: var(--nk-ink); color: var(--nk-on-ink); display: inline-flex; align-items: center; justify-content: center; overflow: hidden; font-size: 14px; font-weight: 500; }
+
+/* Tiles */
+.nk-tile { background: var(--nk-cloud); padding: 24px; display: flex; flex-direction: column; transition: background-color .3s ease, transform .25s var(--nk-ease); border: 1px solid var(--nk-hairline); }
+.nk-tile:hover { background: var(--nk-hairline-soft); }
+.nk-stat-card { background: var(--nk-cloud); padding: 24px; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid var(--nk-hairline); transition: background-color .25s ease; }
+.nk-stat-card:hover { background: var(--nk-hairline-soft); }
+
+/* Search & Select */
+.nk-search-wrap { position: relative; }
+.nk-search-wrap input { width: 100%; height: 48px; padding: 0 20px 0 48px; border: 1px solid var(--nk-hairline); border-radius: 30px; background: var(--nk-canvas); color: var(--nk-ink); font: inherit; font-size: 15px; outline: none; transition: border-color .25s ease; }
+.nk-search-wrap input::placeholder { color: var(--nk-stone); }
+.nk-search-wrap input:focus { border-color: var(--nk-ink); }
+.nk-search-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--nk-mute); }
+
+/* Menus & Drawer */
+.nk-menu { position: absolute; right: 0; top: calc(100% + 8px); width: 340px; max-height: 440px; overflow-y: auto; background: var(--nk-canvas); border: 1px solid var(--nk-hairline); z-index: 80; animation: nk-menu-in .28s var(--nk-ease) both; transform-origin: top right; }
+.nk-menu-item { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 16px; font-size: 14px; font-weight: 500; background: none; border: 0; text-align: left; transition: background-color .2s ease; }
+.nk-menu-item:hover { background: var(--nk-cloud); }
+.nk-drawer-scrim { position: fixed; inset: 0; background: rgba(17,17,17,0.5); z-index: 90; animation: nk-fade .3s ease both; }
+.nk-drawer { position: fixed; top: 0; bottom: 0; left: 0; width: min(88vw, 360px); background: var(--nk-canvas); z-index: 95; overflow-y: auto; padding: 16px 24px 48px; animation: nk-drawer-in .4s var(--nk-ease) both; }
+.nk-drawer a, .nk-drawer .nk-drawer-item { display: flex; align-items: center; gap: 12px; width: 100%; padding: 24px 0 0; background: none; border: 0; text-align: left; font-size: 24px; font-weight: 500; line-height: 1.2; }
+
+/* Reveal */
+.nk-reveal { opacity: 0; transform: translateY(24px); transition: opacity .75s var(--nk-ease), transform .75s var(--nk-ease); }
+.nk-reveal.is-in { opacity: 1; transform: none; }
+
+@keyframes nk-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes nk-menu-in { from { opacity: 0; transform: translateY(-8px) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes nk-drawer-in { from { transform: translateX(-100%); } to { transform: none; } }
+@keyframes nk-spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 960px) { .nk-nav-links { display: none; } }
+@media (min-width: 961px) { .nk-hamburger { display: none; } }
+@media (max-width: 640px) {
+  .nk-container { padding-left: 20px; padding-right: 20px; }
+  .nk-head { align-items: flex-start; }
+}
+`;
+
+/* ─── Reveal hook ────────────────────────────────────────────────── */
+function useInView(threshold = 0.12) {
+  const ref = React.useRef(null);
+  const [inView, setInView] = React.useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (!("IntersectionObserver" in window)) { setInView(true); return; }
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setInView(true); io.disconnect(); } }, { threshold, rootMargin: "0px 0px -40px 0px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [threshold]);
+  return [ref, inView];
+}
+function Reveal({ as: Tag = "div", delay = 0, className = "", children, ...rest }) {
+  const [ref, inView] = useInView();
+  return React.createElement(
+    Tag,
+    {
+      ref,
+      className: `nk-reveal ${inView ? "is-in" : ""} ${className}`,
+      style: { transitionDelay: `${delay}ms` },
+      ...rest,
+    },
+    children,
+  );
+}
+
+function getCourseIcons(topic) {
+  const searchableText = [
+    topic.title,
+    topic.domain,
+    ...(Array.isArray(topic.tags) ? topic.tags : []),
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  if (/react[\s.-]*native/.test(searchableText)) return [siReact];
+  if (/docker/.test(searchableText) && /kubernetes|k8s/.test(searchableText)) {
+    return [siDocker, siKubernetes];
+  }
+  if (/machine[\s-]*learning|\bml\b/.test(searchableText)) {
+    return [siTensorflow, siPytorch];
+  }
+  if (/full[\s-]*stack|\bmern\b/.test(searchableText)) {
+    return [siReact, siNodedotjs, siMongodb];
+  }
+  if (/node(?:\.js|js)?/.test(searchableText) && /express/.test(searchableText)) {
+    return [siNodedotjs, siExpress];
+  }
+  if (/system[\s-]*design/.test(searchableText)) return [siDiagramsdotnet];
+  if (/mongo(?:db)?/.test(searchableText)) return [siMongodb];
+  if (/\breact\b/.test(searchableText)) return [siReact];
+  if (/typescript/.test(searchableText)) return [siTypescript];
+  if (/javascript|\bes6\b/.test(searchableText)) return [siJavascript];
+  if (/python/.test(searchableText)) return [siPython];
+  if (/docker/.test(searchableText)) return [siDocker];
+  if (/kubernetes|\bk8s\b/.test(searchableText)) return [siKubernetes];
+  if (/leetcode|data[\s-]*structures|algorithms|\bdsa\b/.test(searchableText)) {
+    return [siLeetcode];
+  }
+  if (/\bsql\b|database/.test(searchableText)) return [siMysql];
+
+  return [];
+}
+
+function CourseBrandIcons({ topic }) {
+  const icons = getCourseIcons(topic);
+
+  if (icons.length === 0) {
+    return <BookOpen size={24} aria-label={`${topic.title} course`} />;
+  }
+
+  return icons.map((icon) => (
+    <svg
+      key={icon.slug}
+      role="img"
+      aria-label={icon.title}
+      viewBox="0 0 24 24"
+      width="24"
+      height="24"
+      fill={`#${icon.hex}`}
+      focusable="false"
+    >
+      <path d={icon.path} />
+    </svg>
+  ));
+}
 
 export default function LearningHub() {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { user } = useSelector((s) => s.profile);
   const { token } = useSelector((state) => state.auth);
-  const [currentView, setCurrentView] = useState("hub"); // 'hub', 'topic', 'module'
+  const { theme } = useContext(ThemeContext);
+  const nkTheme = theme === "dark" ? "dark" : "light";
+
+  const [currentView, setCurrentView] = useState("hub");
   const [selectedTopicId, setSelectedTopicId] = useState(null);
   const [selectedModuleId, setSelectedModuleId] = useState(null);
-  const [isEnrolled, setIsEnrolled] = useState(false);
 
   const [topics, setTopics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [notice, setNotice] = useState(null);
+  const [enrollingTopicId, setEnrollingTopicId] = useState(null);
+  const [statsRefreshKey, setStatsRefreshKey] = useState(0);
   const [activeTab, setActiveTab] = useState("all");
   const [selectedDomain, setSelectedDomain] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -50,184 +289,160 @@ export default function LearningHub() {
     totalTimeSpent: 0,
   });
 
-  // Topic Detail State
-  const [topic, setTopic] = useState(null);
-  const [modules, setModules] = useState([]);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const profileMenuRef = React.useRef(null);
 
-  // Module Content State
-  const [module, setModule] = useState(null);
-  const [showNotes, setShowNotes] = useState(false);
-  const [note, setNote] = useState("");
-  const [completing, setCompleting] = useState(false);
-  const [startTime] = useState(Date.now());
+  const subscriptionLabel = user?.subscription?.plan?.toUpperCase() || "FREE";
 
   const domains = [
-    { name: "All Topics", value: "all", icon: "🌐" },
-    { name: "Frontend", value: "Frontend", icon: "⚛️" },
-    { name: "Backend", value: "Backend", icon: "🔧" },
-    { name: "Fullstack", value: "Fullstack", icon: "🌟" },
-    { name: "System Design", value: "System Design", icon: "🏗️" },
-    { name: "Data Science", value: "Data Science", icon: "📊" },
-    { name: "DevOps", value: "DevOps", icon: "🚀" },
-    { name: "Mobile", value: "Mobile", icon: "📱" },
-    { name: "ML", value: "ML", icon: "🤖" },
+    { name: "All Topics", value: "all", icon: Globe },
+    { name: "Frontend", value: "Frontend", icon: Code2 },
+    { name: "Backend", value: "Backend", icon: Server },
+    { name: "Fullstack", value: "Fullstack", icon: Layers },
+    { name: "System Design", value: "System Design", icon: Network },
+    { name: "Data Science", value: "Data Science", icon: BarChart3 },
+    { name: "DevOps", value: "DevOps", icon: Rocket },
+    { name: "Mobile", value: "Mobile", icon: Smartphone },
+    { name: "ML", value: "ML", icon: BrainCircuit },
   ];
 
-  // ==========================================
-  // FETCH FUNCTIONS
-  // ==========================================
-  React.useEffect(() => {
-    if (currentView === "hub") {
-      fetchTopics();
-      fetchStats();
-    }
-  }, [currentView, selectedDomain, activeTab, searchQuery]);
+  useEffect(() => {
+    const onScroll = () => setIsScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
-  React.useEffect(() => {
-    if (currentView === "topic" && selectedTopicId) {
-      fetchTopicData();
-    }
-  }, [currentView, selectedTopicId]);
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === "Escape") { setShowProfileMenu(false); setShowNotifications(false); setIsMobileMenuOpen(false); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
-  React.useEffect(() => {
-    if (currentView === "module" && selectedModuleId) {
-      fetchModuleData();
-    }
-  }, [currentView, selectedModuleId]);
-
-  const fetchTopics = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const params = new URLSearchParams();
-      if (selectedDomain !== "all") params.append("domain", selectedDomain);
-      if (searchQuery) params.append("search", searchQuery);
-
-      const response = await fetch(
-        `${API_BASE_URL}/learning-hub/topics?${params}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
-
-      if (!response.ok) throw new Error("Failed to fetch topics");
-      const data = await response.json();
-
-      let filteredTopics = data.data || [];
-      if (activeTab === "enrolled") {
-        filteredTopics = filteredTopics.filter((t) => t.isEnrolled);
-      }
-      setTopics(filteredTopics);
-    } catch (err) {
-      console.error("Error fetching topics:", err);
-      setError(err.message);
-    } finally {
+  useEffect(() => {
+    if (currentView !== "hub") return undefined;
+    if (!token) {
+      setError("Please sign in to view the Learning Hub.");
       setLoading(false);
+      return undefined;
     }
-  };
 
-  const fetchStats = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/learning-hub/stats`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setStats(data.data);
-      }
-    } catch (err) {
-      console.error("Error fetching stats:", err);
-    }
-  };
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(async () => {
+      setLoading(true);
+      setError(null);
 
-  const fetchTopicData = async () => {
-    setLoading(true);
-    setError(null);
+      try {
+        const params = new URLSearchParams();
+        if (selectedDomain !== "all") params.set("domain", selectedDomain);
+        if (searchQuery.trim()) params.set("search", searchQuery.trim());
 
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/learning-hub/topics/${selectedTopicId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
-
-      if (!response.ok) throw new Error("Failed to fetch topic");
-      const data = await response.json();
-      setIsEnrolled(data.data.isEnrolled);
-      setTopic(data.data.topic);
-      setModules(data.data.modules || []);
-
-      if (
-        data.data.isEnrolled &&
-        (!data.data.modules || data.data.modules.length === 0)
-      ) {
-        setError(
-          "AI is generating your course content. Please refresh in a moment...",
-        );
-      }
-    } catch (err) {
-      console.error("Error fetching topic:", err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchModuleData = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/learning-hub/modules/${selectedModuleId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
-
-      if (!response.ok) throw new Error("Failed to fetch module");
-      const data = await response.json();
-      setModule(data.data);
-    } catch (err) {
-      console.error("Error fetching module:", err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // ==========================================
-  // ACTION HANDLERS
-  // ==========================================
-  const handleEnroll = async (topicId) => {
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/learning-hub/topics/${topicId}/enroll`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
+        const response = await fetch(
+          `${API_BASE_URL}/topics?${params.toString()}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            signal: controller.signal,
           },
-        },
-      );
+        );
+        if (!response.ok) {
+          throw new Error(await getResponseError(response, "Failed to fetch topics."));
+        }
 
-      if (response.ok) {
         const data = await response.json();
-        alert(`✅ ${data.message}\n🎉 You earned ${data.data.xpAwarded} XP!`);
-        fetchTopics();
-        fetchStats();
-      } else {
-        const error = await response.json();
-        alert(error.message || "Failed to enroll");
+        if (!data.success || !Array.isArray(data.data)) {
+          throw new Error(data.message || "The server returned invalid topic data.");
+        }
+        setTopics(data.data);
+      } catch (fetchError) {
+        if (fetchError.name !== "AbortError") {
+          setError(fetchError.message || "Failed to fetch topics.");
+        }
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
       }
-    } catch (err) {
-      console.error("Error enrolling:", err);
-      alert("Failed to enroll. Please try again.");
+    }, searchQuery ? 300 : 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      controller.abort();
+    };
+  }, [currentView, selectedDomain, searchQuery, token]);
+
+  useEffect(() => {
+    if (currentView !== "hub" || !token) return undefined;
+
+    const controller = new AbortController();
+    const fetchStats = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/stats`, {
+          headers: { Authorization: `Bearer ${token}` },
+          signal: controller.signal,
+        });
+        if (!response.ok) {
+          throw new Error(await getResponseError(response, "Failed to fetch learning stats."));
+        }
+
+        const data = await response.json();
+        if (!data.success || !data.data) {
+          throw new Error(data.message || "The server returned invalid learning stats.");
+        }
+        setStats((currentStats) => ({ ...currentStats, ...data.data }));
+      } catch (fetchError) {
+        if (fetchError.name !== "AbortError") {
+          setError(fetchError.message || "Failed to fetch learning stats.");
+        }
+      }
+    };
+
+    fetchStats();
+    return () => controller.abort();
+  }, [currentView, token, statsRefreshKey]);
+
+  const handleEnroll = async (topicId) => {
+    if (!token || enrollingTopicId) return;
+    setEnrollingTopicId(topicId);
+    setError(null);
+    setNotice(null);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/topics/${topicId}/enroll`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) {
+        throw new Error(await getResponseError(response, "Failed to enroll. Please try again."));
+      }
+
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.message || "Failed to enroll. Please try again.");
+      }
+
+      setNotice(`${data.message || "Successfully enrolled."} You earned ${data.data?.xpAwarded || 0} XP.`);
+      setStatsRefreshKey((key) => key + 1);
+      setTopics((currentTopics) =>
+        currentTopics.map((topic) =>
+          topic._id === topicId
+            ? { ...topic, isEnrolled: true, userProgress: data.data?.progress || null }
+            : topic,
+        ),
+      );
+    } catch (enrollError) {
+      setError(enrollError.message || "Failed to enroll. Please try again.");
+    } finally {
+      setEnrollingTopicId(null);
     }
   };
+
+  const visibleTopics =
+    activeTab === "enrolled" ? topics.filter((topic) => topic.isEnrolled) : topics;
 
   const handleTopicSelect = (topicId) => {
     setSelectedTopicId(topicId);
@@ -241,420 +456,312 @@ export default function LearningHub() {
     window.scrollTo(0, 0);
   };
 
-  const handleBackToHub = () => {
-    setCurrentView("hub");
-    setSelectedTopicId(null);
-    setSelectedModuleId(null);
-    window.scrollTo(0, 0);
-  };
-
-  const handleBackToTopic = () => {
-    setCurrentView("topic");
-    setSelectedModuleId(null);
-    window.scrollTo(0, 0);
-  };
-
-  const handleNextModule = (moduleId) => {
-    setSelectedModuleId(moduleId);
-    window.scrollTo(0, 0);
-  };
-
-  const handlePrevModule = (moduleId) => {
-    setSelectedModuleId(moduleId);
-    window.scrollTo(0, 0);
-  };
-
-  const handleComplete = async () => {
-    setCompleting(true);
-    const timeSpent = Math.floor((Date.now() - startTime) / 60000);
-
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/learning-hub/modules/${selectedModuleId}/complete`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ timeSpent: Math.max(timeSpent, 1) }),
-        },
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        alert(`✅ ${data.message}\n🎉 You earned ${data.data.xpAwarded} XP!`);
-        await fetchModuleData();
-      }
-    } catch (err) {
-      console.error("Error marking complete:", err);
-    } finally {
-      setCompleting(false);
-    }
-  };
-
-  const getDifficultyColor = (difficulty) => {
-    if (difficulty === "Beginner")
-      return "bg-green-500/20 text-green-400 border-green-500/30";
-    if (difficulty === "Intermediate")
-      return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
-    return "bg-red-500/20 text-red-400 border-red-500/30";
-  };
-
-  const getStatusColor = (status) => {
-    if (status === "completed") return "bg-emerald-500/20 text-emerald-400";
-    if (status === "in_progress") return "bg-blue-500/20 text-blue-400";
-    return "bg-gray-500/20 text-gray-400";
-  };
-
-  // if (currentView === 'module' && module) {
-  //   const content = module.content?.content || module.content || '';
-  //   const isCompleted = module.isCompleted || false;
-
-  //   return (
-  //     // <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-  //     //   <div className="bg-gray-900/80 backdrop-blur-xl border-b border-gray-700/50 sticky top-0 z-50">
-  //     //     <div className="max-w-6xl mx-auto px-6 py-4">
-  //     //       <div className="flex items-center justify-between">
-  //     //         <div className="flex items-center gap-4">
-  //     //           <button onClick={handleBackToTopic} className="text-gray-400 hover:text-white">
-  //     //             <ArrowLeft className="w-6 h-6" />
-  //     //           </button>
-  //     //           <h1 className="text-xl font-bold text-white">{module.title}</h1>
-  //     //         </div>
-  //     //         <div className="flex items-center gap-3">
-  //     //           <button
-  //     //             onClick={() => setShowNotes(!showNotes)}
-  //     //             className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg"
-  //     //           >
-  //     //             <MessageSquare className="w-5 h-5" />
-  //     //           </button>
-  //     //           {!isCompleted && (
-  //     //             <button
-  //     //               onClick={handleComplete}
-  //     //               disabled={completing}
-  //     //               className="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-semibold"
-  //     //             >
-  //     //               Mark Complete
-  //     //             </button>
-  //     //           )}
-  //     //         </div>
-  //     //       </div>
-  //     //     </div>
-  //     //   </div>
-
-  //     //   <div className="max-w-4xl mx-auto px-6 py-8">
-  //     //     <div className="bg-gray-800/50 backdrop-blur-xl rounded-2xl border border-gray-700/50 p-8">
-  //     //       <div className="prose prose-invert prose-lg max-w-none">
-  //     //         <div className="text-gray-300 whitespace-pre-wrap">{content}</div>
-  //     //       </div>
-  //     //     </div>
-
-  //     //     {module.nextModule && (
-  //     //       <button
-  //     //         onClick={() => handleModuleSelect(module.nextModule._id)}
-  //     //         className="mt-6 w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold"
-  //     //       >
-  //     //         Next: {module.nextModule.title}
-  //     //         <ChevronRight className="w-5 h-5" />
-  //     //       </button>
-  //     //     )}
-  //     //   </div>
-  //     // </div>
-  //     <ModuleContentPage content={content}/>
-  //   );
-  // }
+  const renderNotifications = () => (
+    <div className="nk-menu" role="region" aria-label="Notifications">
+      <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid var(--nk-hairline)" }}>
+        <h3 className="nk-body-strong">Notifications</h3>
+      </div>
+      <div className="px-4 py-10 text-center">
+        <Bell className="mx-auto mb-2 nk-mute" size={28} />
+        <p className="nk-caption nk-mute">No notifications yet</p>
+      </div>
+    </div>
+  );
 
   if (currentView === "module" && selectedModuleId) {
     return (
       <ModuleContentPage
         moduleId={selectedModuleId}
         token={token}
-        onBack={handleBackToTopic}
-        onNextModule={handleNextModule}
-        onPrevModule={handlePrevModule}
+        onBack={() => setCurrentView("topic")}
+        onNextModule={handleModuleSelect}
+        onPrevModule={handleModuleSelect}
       />
     );
   }
-
-  // if (currentView === 'topic' && topic) {
-  //   const userProgress = topic.userProgress;
-
-  //   return (
-  //     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6">
-  //       <div className="max-w-7xl mx-auto">
-  //         <button
-  //           onClick={handleBackToHub}
-  //           className="flex items-center gap-2 text-gray-400 hover:text-white mb-6"
-  //         >
-  //           <ArrowLeft className="w-5 h-5" />
-  //           Back to Learning Hub
-  //         </button>
-
-  //         {error && (
-  //           <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 mb-6">
-  //             <p className="text-yellow-300 text-sm">{error}</p>
-  //           </div>
-  //         )}
-
-  //         <div className="bg-gray-800/50 backdrop-blur-xl rounded-2xl border border-gray-700/50 p-8 mb-6">
-  //           <div className="flex items-start gap-6 mb-6">
-  //             <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-5xl">
-  //               {topic.icon}
-  //             </div>
-  //             <div className="flex-1">
-  //               <h1 className="text-4xl font-bold text-white mb-3">{topic.title}</h1>
-  //               <p className="text-gray-300 text-lg">{topic.description}</p>
-  //             </div>
-  //           </div>
-
-  //           {isEnrolled && userProgress && (
-  //             <div className="mb-6">
-  //               <div className="flex justify-between mb-2">
-  //                 <span className="text-sm text-gray-400">Progress</span>
-  //                 <span className="text-sm font-bold text-purple-400">{userProgress.progressPercentage || 0}%</span>
-  //               </div>
-  //               <div className="h-3 bg-gray-700/50 rounded-full overflow-hidden">
-  //                 <div
-  //                   className="h-full bg-gradient-to-r from-purple-500 to-pink-500"
-  //                   style={{ width: `${userProgress.progressPercentage || 0}%` }}
-  //                 ></div>
-  //               </div>
-  //             </div>
-  //           )}
-
-  //           {!isEnrolled && (
-  //             <button
-  //               onClick={() => handleEnroll(topic._id)}
-  //               className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-4 rounded-xl font-bold text-lg"
-  //             >
-  //               ✨ Enroll Now & Start Learning
-  //             </button>
-  //           )}
-  //         </div>
-
-  //         {modules.length > 0 && (
-  //           <div className="bg-gray-800/50 backdrop-blur-xl rounded-2xl border border-gray-700/50 p-6">
-  //             <h2 className="text-2xl font-bold text-white mb-6">Course Curriculum ({modules.length} modules)</h2>
-  //             <div className="space-y-3">
-  //               {modules.map((mod, index) => {
-  //                 const isCompleted = userProgress?.completedModules?.some(cm => cm.moduleId === mod._id);
-  //                 const isLocked = !isEnrolled;
-
-  //                 return (
-  //                   // <div
-  //                   //   key={mod._id}
-  //                   //   className="bg-gray-700/30 rounded-xl border border-gray-700/30 p-4"
-  //                   // >
-  //                   //   <div className="flex items-center justify-between">
-  //                   //     <div className="flex items-center gap-4 flex-1">
-  //                   //       <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-  //                   //         isCompleted ? 'bg-emerald-500/20 text-emerald-400' : 'bg-gray-700/50 text-gray-400'
-  //                   //       }`}>
-  //                   //         {isCompleted ? <CheckCircle className="w-6 h-6" /> : isLocked ? <Lock className="w-5 h-5" /> : <BookOpen className="w-5 h-5" />}
-  //                   //       </div>
-  //                   //       <div className="flex-1">
-  //                   //         <h3 className="text-white font-semibold">{mod.title}</h3>
-  //                   //         <p className="text-sm text-gray-400">{mod.description}</p>
-  //                   //       </div>
-  //                   //     </div>
-  //                   //     <div className="flex items-center gap-4">
-  //                   //       <span className="text-sm text-gray-400">{mod.estimatedMinutes} min</span>
-  //                   //       {!isLocked && (
-  //                   //         <button
-  //                   //           onClick={() => handleModuleSelect(mod._id)}
-  //                   //           className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-semibold"
-  //                   //         >
-  //                   //           {isCompleted ? 'Review' : 'Start'}
-  //                   //         </button>
-  //                   //       )}
-  //                   //     </div>
-  //                   //   </div>
-  //                   // </div>
-  //                   <ModuleContentPage moduleId={mod._id} />
-  //                 );
-  //               })}
-  //             </div>
-  //           </div>
-  //         )}
-  //       </div>
-  //     </div>
-  //   );
-  // }
 
   if (currentView === "topic" && selectedTopicId) {
     return (
       <TopicDetailPage
         topicId={selectedTopicId}
         token={token}
-        onBack={handleBackToHub}
+        onBack={() => setCurrentView("hub")}
         onModuleSelect={handleModuleSelect}
       />
     );
   }
 
-  if (loading) {
+  if (loading && topics.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading...</p>
+      <div className="nk-root flex items-center justify-center" data-nk-theme={nkTheme} style={{ minHeight: "100vh" }}>
+        <style>{NIKE_CSS}</style>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ width: 40, height: 40, border: "3px solid var(--nk-hairline)", borderTopColor: "var(--nk-ink)", borderRadius: "50%", animation: "nk-spin .8s linear infinite", margin: "0 auto 16px" }} />
+          <p className="nk-caption nk-mute">Loading learning hub…</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-              <BookOpen className="w-8 h-8 text-white" />
+    <div className="nk-root" data-nk-theme={nkTheme}>
+      <style>{NIKE_CSS}</style>
+
+      {/* ── Utility bar ── */}
+      <div className="nk-utility">
+        <div className="nk-container">
+          <Link to="/blog">Blog</Link>
+          <Link to="/settings">Settings</Link>
+          <Link to="/subscription">Subscription</Link>
+          <button onClick={() => dispatch(logout(navigate))}>Logout</button>
+        </div>
+      </div>
+
+      {/* ── Primary nav ── */}
+      <header className="nk-nav" data-scrolled={isScrolled}>
+        <div className="nk-container">
+          <div className="flex items-center gap-2">
+            <button className="nk-icon-btn nk-hamburger" onClick={() => setIsMobileMenuOpen(true)} aria-label="Open menu">
+              <Menu size={22} />
+            </button>
+            <Link to="/" aria-label="Intervyo home" className="flex items-center gap-2">
+              <img src={logo} alt="" style={{ width: 32, height: 32, objectFit: "contain" }} />
+              <span className="nk-h-md hidden sm:inline" style={{ textTransform: "uppercase" }}>Intervyo</span>
+            </Link>
+          </div>
+
+          <nav className="nk-nav-links" aria-label="Primary">
+            <Link to="/dashboard" className="nk-nav-link">Dashboard</Link>
+            <Link to="/interview-setup" className="nk-nav-link">Interview</Link>
+            <Link to="/analytics" className="nk-nav-link">Analytics</Link>
+            <Link to="/history" className="nk-nav-link">History</Link>
+            <Link to="/leaderboard" className="nk-nav-link">Leaderboard</Link>
+          </nav>
+
+          <div className="nk-nav-right">
+            <ThemeToggle />
+            <div className="relative">
+              <button className="nk-icon-btn" onClick={() => { setShowNotifications(!showNotifications); setShowProfileMenu(false); }} aria-label="Notifications" aria-expanded={showNotifications}>
+                <Bell size={20} />
+              </button>
+              {showNotifications && renderNotifications()}
             </div>
+            <div ref={profileMenuRef} className="relative hidden sm:block">
+              <button className="nk-icon-btn" onClick={(e) => { e.stopPropagation(); setShowProfileMenu((p) => !p); setShowNotifications(false); }} aria-haspopup="menu" aria-expanded={showProfileMenu} aria-label="Account menu" style={{ width: "auto", padding: "0 8px 0 4px", gap: 6 }}>
+                <span className="nk-avatar">
+                  {user?.profilePicture ? <img src={user.profilePicture} className="h-full w-full object-cover" alt="Profile" /> : user?.name?.charAt(0) || "U"}
+                </span>
+                <ChevronDown size={16} style={{ transition: "transform .3s var(--nk-ease)", transform: showProfileMenu ? "rotate(180deg)" : "none" }} />
+              </button>
+              {showProfileMenu && (
+                <div className="nk-menu" role="menu" style={{ width: 260 }}>
+                  <div className="px-4 py-3" style={{ borderBottom: "1px solid var(--nk-hairline)" }}>
+                    <div className="nk-body-strong">{user?.name || "User"}</div>
+                    <div className="nk-caption-sm nk-mute truncate">{user?.email || ""}</div>
+                    <span className="nk-chip mt-2"><Crown size={12} /> {subscriptionLabel}</span>
+                  </div>
+                  <button role="menuitem" className="nk-menu-item" onClick={() => { navigate("/settings"); setShowProfileMenu(false); }}>
+                    <Settings size={16} /> Profile Settings
+                  </button>
+                  <button role="menuitem" className="nk-menu-item" onClick={() => { navigate("/subscription"); setShowProfileMenu(false); }}>
+                    <Crown size={16} /> Subscription
+                  </button>
+                  <button role="menuitem" className="nk-menu-item" style={{ borderTop: "1px solid var(--nk-hairline)" }} onClick={() => dispatch(logout(navigate))}>
+                    <LogOut size={16} /> Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* ── Mobile drawer ── */}
+      {isMobileMenuOpen && (
+        <>
+          <div className="nk-drawer-scrim" onClick={() => setIsMobileMenuOpen(false)} />
+          <aside className="nk-drawer" aria-label="Menu">
+            <div className="flex items-center justify-between">
+              <span className="nk-h-md" style={{ textTransform: "uppercase" }}>Intervyo</span>
+              <button className="nk-icon-btn" onClick={() => setIsMobileMenuOpen(false)} aria-label="Close menu"><X size={22} /></button>
+            </div>
+            {["/dashboard", "/interview-setup", "/analytics", "/history", "/leaderboard", "/blog", "/settings", "/subscription"].map((href, i) => (
+              <Link key={href} to={href} onClick={() => setIsMobileMenuOpen(false)}>
+                {["Dashboard","Interview","Analytics","History","Leaderboard","Blog","Profile Settings","Subscription"][i]}
+              </Link>
+            ))}
+            <button className="nk-drawer-item" onClick={() => dispatch(logout(navigate))}>Logout</button>
+          </aside>
+        </>
+      )}
+
+      {/* ── Main Content ── */}
+      <main className="nk-container nk-section nk-section-last">
+        <Reveal>
+          <div className="nk-head" style={{ marginBottom: 32 }}>
             <div>
-              <h1 className="text-4xl font-bold text-white">Learning Hub</h1>
-              <p className="text-gray-400">
-                Expand your skills with AI-powered courses
-              </p>
+              <h1 className="nk-h-xl">Learning Hub</h1>
+              <p className="nk-mute mt-1">Expand your skills with AI-powered courses and modules</p>
             </div>
           </div>
+        </Reveal>
 
-          {error && (
-            <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mb-6">
-              <p className="text-red-400 text-sm">{error}</p>
-            </div>
-          )}
-
-          <div className="grid grid-cols-4 gap-4 mb-6">
-            <div className="bg-gray-800/50 rounded-xl p-5 border border-gray-700/50">
-              <Brain className="w-8 h-8 text-purple-400 mb-2" />
-              <div className="text-2xl font-bold text-white">
-                {stats.enrolledCount}
-              </div>
-              <p className="text-sm text-gray-400">Enrolled</p>
-            </div>
-            <div className="bg-gray-800/50 rounded-xl p-5 border border-gray-700/50">
-              <CheckCircle className="w-8 h-8 text-emerald-400 mb-2" />
-              <div className="text-2xl font-bold text-white">
-                {stats.completedCount}
-              </div>
-              <p className="text-sm text-gray-400">Completed</p>
-            </div>
-            <div className="bg-gray-800/50 rounded-xl p-5 border border-gray-700/50">
-              <TrendingUp className="w-8 h-8 text-blue-400 mb-2" />
-              <div className="text-2xl font-bold text-white">
-                {stats.inProgressCount}
-              </div>
-              <p className="text-sm text-gray-400">In Progress</p>
-            </div>
-            <div className="bg-gray-800/50 rounded-xl p-5 border border-gray-700/50">
-              <Clock className="w-8 h-8 text-orange-400 mb-2" />
-              <div className="text-2xl font-bold text-white">
-                {Math.floor(stats.totalTimeSpent / 60)}h
-              </div>
-              <p className="text-sm text-gray-400">Time Invested</p>
-            </div>
+        {error && (
+          <div className="nk-tile mb-6" style={{ borderColor: "var(--nk-sale)" }}>
+            <p className="nk-caption" style={{ color: "var(--nk-sale)" }}>{error}</p>
           </div>
+        )}
+        {notice && (
+          <div className="nk-tile mb-6" role="status" style={{ borderColor: "var(--nk-success)" }}>
+            <p className="nk-caption" style={{ color: "var(--nk-success)" }}>{notice}</p>
+          </div>
+        )}
 
-          <div className="flex gap-4 mb-6">
-            <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+        {/* Stats Strip */}
+        <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12, marginBottom: 32 }}>
+          {[
+            { label: "Enrolled", value: stats.enrolledCount },
+            { label: "Completed", value: stats.completedCount },
+            { label: "In Progress", value: stats.inProgressCount },
+            { label: "Time Invested", value: `${Math.floor(stats.totalTimeSpent / 60)}h` },
+          ].map((s, i) => (
+            <Reveal key={s.label} delay={i * 60} className="nk-stat-card" style={{ borderRadius: 0 }}>
+              <span className="nk-caption-sm nk-mute" style={{ textTransform: "uppercase", letterSpacing: "0.08em" }}>{s.label}</span>
+              <span className="nk-h-xl" style={{ marginTop: 12, textTransform: "none", fontSize: 28 }}>{s.value}</span>
+            </Reveal>
+          ))}
+        </section>
+
+        {/* Search & Tabs */}
+        <Reveal>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 16, alignItems: "center", marginBottom: 24 }}>
+            <div className="nk-search-wrap" style={{ flex: "1 1 300px" }}>
+              <Search size={16} className="nk-search-icon" />
               <input
                 type="text"
                 placeholder="Search topics..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-gray-800/50 border border-gray-700/50 rounded-xl pl-12 pr-4 py-3 text-white"
               />
             </div>
-            <button
-              onClick={() => setActiveTab("all")}
-              className={`px-6 py-3 rounded-xl font-semibold ${activeTab === "all" ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white" : "bg-gray-800/50 text-gray-400"}`}
-            >
-              All Topics
-            </button>
-            <button
-              onClick={() => setActiveTab("enrolled")}
-              className={`px-6 py-3 rounded-xl font-semibold ${activeTab === "enrolled" ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white" : "bg-gray-800/50 text-gray-400"}`}
-            >
-              My Learning
-            </button>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button
+                onClick={() => setActiveTab("all")}
+                className={`nk-btn nk-btn-sm ${activeTab === "all" ? "nk-btn-primary" : "nk-btn-secondary"}`}
+              >
+                All Topics
+              </button>
+              <button
+                onClick={() => setActiveTab("enrolled")}
+                className={`nk-btn nk-btn-sm ${activeTab === "enrolled" ? "nk-btn-primary" : "nk-btn-secondary"}`}
+              >
+                My Learning
+              </button>
+            </div>
           </div>
 
-          <div className="flex gap-3 mb-6 overflow-x-auto">
+          {/* Domain Chips */}
+          <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 8, marginBottom: 40 }} className="no-scrollbar">
             {domains.map((domain) => (
               <button
                 key={domain.value}
                 onClick={() => setSelectedDomain(domain.value)}
-                className={`px-4 py-2 rounded-xl whitespace-nowrap ${
-                  selectedDomain === domain.value
-                    ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
-                    : "bg-gray-800/30 text-gray-400"
-                }`}
+                className="nk-chip"
+                aria-pressed={selectedDomain === domain.value}
+                style={{
+                  cursor: "pointer",
+                  borderColor: selectedDomain === domain.value ? "var(--nk-ink)" : "var(--nk-hairline)",
+                  background: selectedDomain === domain.value ? "var(--nk-ink)" : "var(--nk-canvas)",
+                  color: selectedDomain === domain.value ? "var(--nk-on-ink)" : "var(--nk-ink)",
+                }}
               >
-                {domain.icon} {domain.name}
+                <domain.icon size={14} aria-hidden="true" />
+                <span>{domain.name}</span>
               </button>
             ))}
           </div>
-        </div>
+        </Reveal>
 
-        <div className="grid grid-cols-3 gap-6">
-          {topics.map((topic) => (
-            <div
-              key={topic._id}
-              onClick={() => handleTopicSelect(topic._id)}
-              className="bg-gray-800/50 rounded-xl border border-gray-700/50 p-6 cursor-pointer hover:border-gray-600/50"
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-3xl">
-                  {topic.icon}
+        {/* Topics Grid */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 320px), 1fr))", gap: 24 }}>
+          {visibleTopics.map((topic, idx) => (
+            <Reveal key={topic._id} delay={idx * 50}>
+              <div
+                onClick={() => handleTopicSelect(topic._id)}
+                className="nk-tile"
+                style={{ cursor: "pointer", height: "100%", justifyContent: "space-between" }}
+              >
+                <div>
+                  <div className="flex items-start justify-between mb-4">
+                    <div
+                      aria-label={`${topic.title} course logo`}
+                      style={{
+                        width: 48,
+                        height: 48,
+                        background: "var(--nk-cloud)",
+                        border: "1px solid var(--nk-hairline)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 2,
+                      }}
+                    >
+                      <CourseBrandIcons topic={topic} />
+                    </div>
+                    <span className="nk-chip" style={{ textTransform: "capitalize" }}>
+                      {topic.difficulty || "All Levels"}
+                    </span>
+                  </div>
+                  <h3 className="nk-h-lg mb-2">{topic.title}</h3>
+                  <p className="nk-caption nk-mute mb-6" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                    {topic.description}
+                  </p>
                 </div>
-                <span
-                  className={`text-xs px-3 py-1 rounded-full border ${getDifficultyColor(topic.difficulty)}`}
-                >
-                  {topic.difficulty}
-                </span>
+
+                <div>
+                  <div className="flex items-center gap-4 nk-caption-sm nk-mute mb-4" style={{ borderTop: "1px solid var(--nk-hairline)", paddingTop: 12 }}>
+                    <span>{topic.estimatedHours || 10}h curriculum</span>
+                    <span>•</span>
+                    <span>{topic.domain || "General"}</span>
+                  </div>
+                  {topic.isEnrolled ? (
+                    <button className="nk-btn nk-btn-secondary w-full nk-btn-sm" style={{ width: "100%" }}>
+                      Continue Learning <ArrowUpRight size={16} />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEnroll(topic._id);
+                      }}
+                      className="nk-btn nk-btn-primary w-full nk-btn-sm"
+                      style={{ width: "100%" }}
+                      disabled={Boolean(enrollingTopicId)}
+                    >
+                      {enrollingTopicId === topic._id ? "Enrolling..." : "Enroll Now"} <ArrowUpRight size={16} />
+                    </button>
+                  )}
+                </div>
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">
-                {topic.title}
-              </h3>
-              <p className="text-sm text-gray-400 mb-4">{topic.description}</p>
-              <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
-                <span>
-                  <Clock className="w-4 h-4 inline" /> {topic.estimatedHours}h
-                </span>
-                <span>{topic.domain}</span>
-              </div>
-              {topic.isEnrolled ? (
-                <button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-xl font-semibold">
-                  Continue Learning
-                </button>
-              ) : (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleEnroll(topic._id);
-                  }}
-                  className="w-full bg-gray-700/50 hover:bg-gradient-to-r hover:from-purple-500 hover:to-pink-500 text-white py-3 rounded-xl font-semibold"
-                >
-                  Enroll Now
-                </button>
-              )}
-            </div>
+            </Reveal>
           ))}
         </div>
 
-        {topics.length === 0 && (
-          <div className="text-center py-16">
-            <div className="text-6xl mb-4">📚</div>
-            <h3 className="text-2xl font-bold text-white mb-2">
-              No topics found
-            </h3>
-            <p className="text-gray-400">Try adjusting your filters</p>
-          </div>
+        {visibleTopics.length === 0 && !loading && (
+          <Reveal>
+            <div className="nk-tile" style={{ alignItems: "center", textAlign: "center", padding: "80px 24px" }}>
+              <h3 className="nk-h-xl mb-3">No topics found</h3>
+              <p className="nk-mute mb-6">Try adjusting your search terms or domain filters.</p>
+              <button
+                className="nk-btn nk-btn-primary"
+                onClick={() => { setSearchQuery(""); setSelectedDomain("all"); setActiveTab("all"); }}
+              >
+                Reset Filters
+              </button>
+            </div>
+          </Reveal>
         )}
-      </div>
+      </main>
     </div>
   );
 }

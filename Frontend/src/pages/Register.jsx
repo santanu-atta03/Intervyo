@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { setSignupData } from "../slices/authSlice";
-import { sendOtp } from "../services/operations/authAPI";
+import { sendOtp, warmUpAuthService } from "../services/operations/authAPI";
 
 const PASSWORD_REQUIREMENTS = [
   { id: "length", label: "8+ Characters", test: (p) => p.length >= 8 },
@@ -18,6 +18,10 @@ const getStrength = (password) =>
 
 
 export default function Register() {
+  useEffect(() => {
+    warmUpAuthService();
+  }, []);
+
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     name: "",

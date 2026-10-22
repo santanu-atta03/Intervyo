@@ -121,8 +121,13 @@ const userSchema = new mongoose.Schema({
     endDate: Date,
     interviewsRemaining: {
       type: Number,
-      default: 2,
+      default: 3,
     },
+    interviewsLimit: {
+      type: Number,
+      default: 3,
+    },
+    quotaResetAt: Date,
   },
 
   // ========================================

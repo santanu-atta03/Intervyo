@@ -4,8 +4,11 @@ import mongoose from "mongoose";
 import cors from "cors";
 import helmet from "helmet";
 import dotenv from "dotenv";
+import { fileURLToPath } from "node:url";
 import passport from "./config/Passport.js";
 import authRoutes from "./routes/User.route.js";
+import paymentRoutes from "./routes/payment.routes.js";
+import { handleRazorpayWebhook } from "./controllers/Payment.controller.js";
 
 import interviewRoute from "./routes/interview.route.js";
 import learningHubRoutes from "./routes/learningHub.routes.js";
@@ -39,7 +42,7 @@ import { Server } from "socket.io";
 import cookieParser from "cookie-parser";
 import os from "os";
 
-dotenv.config();
+dotenv.config({ path: fileURLToPath(new URL("./.env", import.meta.url)) });
 
 const app = express();
 app.set("trust proxy", 1);
@@ -90,6 +93,12 @@ app.use(
   }),
 );
 
+app.post(
+  "/api/payments/webhook",
+  express.raw({ type: "application/json" }),
+  handleRazorpayWebhook,
+);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(apiLimiter);
@@ -111,6 +120,7 @@ dbConnect();
 
 app.use('/api/contact', contactRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/payments", paymentRoutes);
 app.use("/api/interview", interviewRoute);
 app.use("/api/interviews", interviewRoute); // Allow plural for compatibility, but use the same route file
 app.use("/api/ai", aiRoutes);

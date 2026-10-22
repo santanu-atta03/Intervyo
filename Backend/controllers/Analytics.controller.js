@@ -1,12 +1,17 @@
 import Interview from "../models/Interview.model.js";
-import InterviewSession from "../models/InterviewSession.js";
 import User from "../models/User.model.js";
 
 // Get comprehensive analytics for a user
 export const getUserAnalytics = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { timeRange = "30" } = req.query; // days
+    const timeRangeDays = Number.parseInt(req.query.timeRange || "30", 10);
+    if (!Number.isInteger(timeRangeDays) || timeRangeDays <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: "timeRange must be a positive number of days",
+      });
+    }
 
     const user = await User.findById(userId).lean();
     const gamification = user?.stats || {
@@ -17,59 +22,47 @@ export const getUserAnalytics = async (req, res) => {
     };
 
     const dateFilter = new Date();
-    dateFilter.setDate(dateFilter.getDate() - parseInt(timeRange));
+    dateFilter.setDate(dateFilter.getDate() - timeRangeDays);
 
-    // Get all completed interviews
+    // Completed interviews are timestamped with endTime in the current schema.
+    // Include legacy completedAt documents and createdAt as a fallback.
     const interviewsRaw = await Interview.find({
       userId,
       status: "completed",
-      completedAt: { $gte: dateFilter },
+      $or: [
+        { endTime: { $gte: dateFilter } },
+        { completedAt: { $gte: dateFilter } },
+        { endTime: null, completedAt: null, createdAt: { $gte: dateFilter } },
+      ],
     })
-      .sort({ completedAt: -1 })
+      .sort({ endTime: -1, completedAt: -1, createdAt: -1 })
       .lean();
 
-    // Normalize interviews
-    const interviews = interviewsRaw.map((i) => ({
-      ...i,
-      performance: i.performance || {
-        overallScore: i.overallScore || 0,
-        categoryScores: {},
-      },
-      config: i.config || {
-        domain: i.role || "General",
-        difficulty: i.difficulty || "medium",
-      },
-      totalDuration: i.totalDuration || i.duration || 0,
-    }));
+    const interviews = interviewsRaw.map(normalizeInterview);
 
     // Calculate performance trends
     const performanceTrend = interviews.map((interview) => ({
-      date: interview.completedAt,
-      score: interview.performance?.overallScore || 0,
+      date: interview.analyticsDate,
+      score: interview.analyticsScores.overall,
       domain: interview.config?.domain || "General",
       difficulty: interview.config?.difficulty || "medium",
     }));
 
     // Calculate category averages
     const categoryScores = {
-      technical: [],
-      communication: [],
-      problemSolving: [],
-      confidence: [],
+      technical: interviews.map(
+        (interview) => interview.analyticsScores.technical,
+      ),
+      communication: interviews.map(
+        (interview) => interview.analyticsScores.communication,
+      ),
+      problemSolving: interviews.map(
+        (interview) => interview.analyticsScores.problemSolving,
+      ),
+      confidence: interviews.map(
+        (interview) => interview.analyticsScores.confidence,
+      ),
     };
-
-    interviews.forEach((interview) => {
-      const scores = interview.performance?.categoryScores;
-      if (scores) {
-        if (scores.technical) categoryScores.technical.push(scores.technical);
-        if (scores.communication)
-          categoryScores.communication.push(scores.communication);
-        if (scores.problemSolving)
-          categoryScores.problemSolving.push(scores.problemSolving);
-        if (scores.confidence)
-          categoryScores.confidence.push(scores.confidence);
-      }
-    });
 
     const avgCategoryScores = {
       technical: average(categoryScores.technical),
@@ -86,9 +79,8 @@ export const getUserAnalytics = async (req, res) => {
         domainStats[domain] = { count: 0, totalScore: 0, scores: [] };
       }
       domainStats[domain].count++;
-      domainStats[domain].totalScore +=
-        interview.performance?.overallScore || 0;
-      domainStats[domain].scores.push(interview.performance?.overallScore || 0);
+      domainStats[domain].totalScore += interview.analyticsScores.overall;
+      domainStats[domain].scores.push(interview.analyticsScores.overall);
     });
 
     const domainBreakdown = Object.entries(domainStats).map(
@@ -104,7 +96,9 @@ export const getUserAnalytics = async (req, res) => {
     const difficultyStats = { easy: 0, medium: 0, hard: 0 };
     interviews.forEach((interview) => {
       const diff = interview.config?.difficulty || "medium";
-      difficultyStats[diff]++;
+      if (Object.prototype.hasOwnProperty.call(difficultyStats, diff)) {
+        difficultyStats[diff]++;
+      }
     });
 
     // Weekly activity
@@ -124,15 +118,13 @@ export const getUserAnalytics = async (req, res) => {
       data: {
         summary: {
           totalInterviews: interviews.length,
-          avgScore: Math.round(
-            average(interviews.map((i) => i.performance?.overallScore || 0)),
-          ),
+          avgScore: average(interviews.map((i) => i.analyticsScores.overall)),
           bestScore: Math.max(
-            ...interviews.map((i) => i.performance?.overallScore || 0),
+            ...interviews.map((i) => i.analyticsScores.overall),
             0,
           ),
           totalTime: interviews.reduce(
-            (sum, i) => sum + (i.totalDuration || 0),
+            (sum, i) => sum + i.analyticsDuration,
             0,
           ),
         },
@@ -162,18 +154,10 @@ export const getSkillRadar = async (req, res) => {
     const userId = req.user.id;
 
     const interviewsRaw = await Interview.find({ userId, status: "completed" })
-      .sort({ completedAt: -1 })
+      .sort({ endTime: -1, completedAt: -1, createdAt: -1 })
       .limit(20)
       .lean();
-    
-    const interviews = interviewsRaw.map((i) => ({
-        ...i,
-        performance: i.performance || {
-          overallScore: i.overallScore || 0,
-          categoryScores: {},
-        },
-        config: i.config || { interviewType: i.type || "technical" },
-      }));
+    const interviews = interviewsRaw.map(normalizeInterview);
 
     const skills = {
       "Technical Knowledge": [],
@@ -185,22 +169,22 @@ export const getSkillRadar = async (req, res) => {
     };
 
     interviews.forEach((interview) => {
-      const scores = interview.performance?.categoryScores;
-      const type = interview.config?.interviewType;
+      const scores = interview.analyticsScores;
+      const type = interview.config?.interviewType || interview.type;
 
-      if (scores?.technical)
+      if (scores.technical > 0)
         skills["Technical Knowledge"].push(scores.technical);
-      if (scores?.communication)
+      if (scores.communication > 0)
         skills["Communication"].push(scores.communication);
-      if (scores?.problemSolving)
+      if (scores.problemSolving > 0)
         skills["Problem Solving"].push(scores.problemSolving);
 
       if (type === "coding")
-        skills["Code Quality"].push(interview.performance?.overallScore || 0);
+        skills["Code Quality"].push(scores.overall);
       if (type === "system-design")
-        skills["System Design"].push(interview.performance?.overallScore || 0);
+        skills["System Design"].push(scores.overall);
       if (type === "behavioral")
-        skills["Behavioral"].push(interview.performance?.overallScore || 0);
+        skills["Behavioral"].push(scores.overall);
     });
 
     const radarData = Object.entries(skills).map(([skill, scores]) => ({
@@ -225,6 +209,56 @@ function average(arr) {
   return Math.round(arr.reduce((a, b) => a + b, 0) / arr.length);
 }
 
+function firstAvailableScore(...values) {
+  const numericValues = values.filter(
+    (value) => typeof value === "number" && Number.isFinite(value),
+  );
+  return numericValues.find((value) => value > 0) ?? numericValues[0] ?? 0;
+}
+
+function normalizeInterview(interview) {
+  const categories = interview.performance?.categoryScores || {};
+  const resultCategories = interview.results?.categoryBreakdown || {};
+  const overall = firstAvailableScore(
+    interview.performance?.overallScore,
+    interview.results?.summary?.overallScore,
+    interview.overallScore,
+  );
+
+  return {
+    ...interview,
+    config: interview.config || {
+      domain: interview.role || "General",
+      difficulty: interview.difficulty || "medium",
+      interviewType: interview.type,
+    },
+    analyticsDate:
+      interview.endTime || interview.completedAt || interview.createdAt,
+    analyticsDuration:
+      interview.totalDuration ?? interview.duration ?? 0,
+    analyticsScores: {
+      overall,
+      technical: firstAvailableScore(
+        categories.technical,
+        resultCategories.technical?.score,
+      ),
+      communication: firstAvailableScore(
+        categories.communication,
+        resultCategories.communication?.score,
+        resultCategories.communication?.clarity,
+      ),
+      problemSolving: firstAvailableScore(
+        categories.problemSolving,
+        resultCategories.problemSolving?.score,
+      ),
+      confidence: firstAvailableScore(
+        categories.confidence,
+        resultCategories.communication?.confidence,
+      ),
+    },
+  };
+}
+
 function calculateTrend(scores) {
   if (scores.length < 2) return 0;
   const recent = scores.slice(0, Math.ceil(scores.length / 2));
@@ -237,8 +271,8 @@ function getWeeklyActivity(interviews) {
   const activity = days.map((day) => ({ day, count: 0 }));
 
   interviews.forEach((interview) => {
-    if (interview.completedAt) {
-      const dayIndex = new Date(interview.completedAt).getDay();
+    if (interview.analyticsDate) {
+      const dayIndex = new Date(interview.analyticsDate).getDay();
       activity[dayIndex].count++;
     }
   });

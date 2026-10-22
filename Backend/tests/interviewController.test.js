@@ -45,6 +45,7 @@ jest.unstable_mockModule("../config/email.js", () => ({
 const interviewCreateMock = jest.fn();
 const interviewFindMock = jest.fn();
 const interviewFindOneMock = jest.fn();
+const interviewFindOneAndUpdateMock = jest.fn();
 const interviewFindByIdAndUpdateMock = jest.fn();
 const interviewFindOneAndDeleteMock = jest.fn();
 
@@ -52,12 +53,19 @@ const sessionCreateMock = jest.fn();
 const sessionFindOneMock = jest.fn();
 const sessionFindByIdAndUpdateMock = jest.fn();
 const sessionDeleteOneMock = jest.fn();
+const consumeCreditForInterviewMock = jest.fn();
+const releaseInterviewCreditMock = jest.fn();
+const generateQuestionsMock = jest.fn();
+
+class MockInterviewQuotaExceededError extends Error {}
+class MockInterviewStartConflictError extends Error {}
 
 jest.unstable_mockModule("../models/Interview.model.js", () => ({
   default: {
     create: (...args) => interviewCreateMock(...args),
     find: (...args) => interviewFindMock(...args),
     findOne: (...args) => interviewFindOneMock(...args),
+    findOneAndUpdate: (...args) => interviewFindOneAndUpdateMock(...args),
     findByIdAndUpdate: (...args) => interviewFindByIdAndUpdateMock(...args),
     findOneAndDelete: (...args) => interviewFindOneAndDeleteMock(...args),
   },
@@ -72,6 +80,28 @@ jest.unstable_mockModule("../models/InterviewSession.js", () => ({
   },
 }));
 
+jest.unstable_mockModule("../services/questionGenerator.js", () => ({
+  default: {
+    generateQuestions: (...args) => generateQuestionsMock(...args),
+  },
+}));
+
+jest.unstable_mockModule("../utils/interviewQuota.js", () => ({
+  consumeCreditForInterview: (...args) =>
+    consumeCreditForInterviewMock(...args),
+  releaseInterviewCredit: (...args) => releaseInterviewCreditMock(...args),
+  InterviewQuotaExceededError: MockInterviewQuotaExceededError,
+  InterviewStartConflictError: MockInterviewStartConflictError,
+  rollbackStartedInterviewCredit: jest.fn(),
+  refreshInterviewQuota: jest.fn(),
+  refundInterviewCredit: jest.fn(),
+  consumeInterviewCredit: jest.fn(),
+  getQuotaResetDate: (date = new Date()) =>
+    new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1)),
+  FREE_MONTHLY_INTERVIEW_LIMIT: 3,
+  PRO_MONTHLY_INTERVIEW_LIMIT: 25,
+}));
+
 // Import app after setting up module mocks
 const { app, server } = await import("../index.js");
 
@@ -83,6 +113,16 @@ describe("InterviewController routes", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    consumeCreditForInterviewMock.mockResolvedValue({
+      plan: "free",
+      limit: 3,
+      remaining: 2,
+      periodStart: new Date("2026-10-01T00:00:00.000Z"),
+    });
+    releaseInterviewCreditMock.mockResolvedValue(undefined);
+    generateQuestionsMock.mockResolvedValue([
+      { questionId: "question-1", question: "Sample question" },
+    ]);
   });
 
   test("GET /api/interviews/all returns the authenticated user's interviews", async () => {
@@ -227,37 +267,69 @@ describe("InterviewController routes", () => {
     expect(res.body.message).toMatch(/resume file is required/i);
   });
 
-  test("POST /api/interviews/:id/start should transition scheduled interview to in-progress", async () => {
+  test("POST /api/interviews/:id/start consumes one quota and starts a pending interview", async () => {
     const interviewDoc = {
       _id: "int2",
       userId: "user1",
-      role: "Software Engineer",
-      status: "scheduled",
-      startedAt: undefined,
-      save: jest.fn(async () => {}),
+      config: {
+        interviewType: "technical",
+        duration: 30,
+      },
+      status: "pending",
+    };
+    const updatedInterview = {
+      ...interviewDoc,
+      status: "in-progress",
+      config: { ...interviewDoc.config, duration: 30 },
+      rounds: [{ questions: [] }],
+      performance: {},
     };
 
     interviewFindOneMock.mockResolvedValue(interviewDoc);
-    sessionCreateMock.mockResolvedValue({
+    interviewFindOneAndUpdateMock.mockResolvedValue(updatedInterview);
+    sessionFindOneMock.mockResolvedValue({
       _id: "sess1",
       interviewId: "int2",
       userId: "user1",
-      conversation: [
-        {
-          speaker: "ai",
-          type: "greeting",
-          message: "Hello! Welcome to your interview.",
-        },
-      ],
+      conversation: [],
     });
 
     const res = await request(app).post("/api/interviews/int2/start");
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty("success", true);
-    expect(interviewDoc.status).toBe("in-progress");
-    expect(interviewDoc.save).toHaveBeenCalled();
-    expect(sessionCreateMock).toHaveBeenCalled();
+    expect(res.body.data.quota.remaining).toBe(2);
+    expect(consumeCreditForInterviewMock).toHaveBeenCalledWith(
+      expect.any(Object),
+      "int2",
+      "user1",
+    );
+    expect(interviewFindOneAndUpdateMock.mock.calls[0][0]).toMatchObject({
+      _id: "int2",
+      userId: "user1",
+      status: "pending",
+      quotaConsumed: true,
+    });
+  });
+
+  test("POST /api/interviews/:id/start blocks users with no monthly quota", async () => {
+    interviewFindOneMock.mockResolvedValue({
+      _id: "int3",
+      userId: "user1",
+      status: "pending",
+      config: { interviewType: "technical" },
+    });
+    consumeCreditForInterviewMock.mockRejectedValue(
+      new MockInterviewQuotaExceededError(
+        "No interviews remaining this month. Your 3 interviews renew on the 1st.",
+      ),
+    );
+
+    const res = await request(app).post("/api/interviews/int3/start");
+
+    expect(res.statusCode).toBe(403);
+    expect(res.body.message).toMatch(/no interviews remaining this month/i);
+    expect(interviewFindOneAndUpdateMock).not.toHaveBeenCalled();
   });
 
   describe("GET /api/ai/:interviewId/results", () => {

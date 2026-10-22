@@ -7,7 +7,7 @@ import React, {
   useState,
 } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import io from "socket.io-client";
 import Editor from "@monaco-editor/react";
 import {
@@ -45,6 +45,7 @@ import {
 } from "../../services/operations/aiInterviewApi";
 import { ThemeContext } from "../shared/ThemeContext";
 import BodyLanguageCoach from "./BodyLanguageCoach";
+import { setUser } from "../../slices/profileSlice";
 
 const ROOM_CSS = `
 .ir-root {
@@ -1433,7 +1434,9 @@ function MetricRow({ label, value, progress, valueClass = "" }) {
 const InterviewRoom = ({ initialStream = null }) => {
   const { interviewId } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { token } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.profile);
   const { theme } = useContext(ThemeContext);
 
   const [loading, setLoading] = useState(true);
@@ -2481,6 +2484,21 @@ const InterviewRoom = ({ initialStream = null }) => {
 
       if (!result || !result.session) {
         throw new Error("Server did not return a valid session");
+      }
+
+      if (result.quota && user) {
+        dispatch(
+          setUser({
+            ...user,
+            subscription: {
+              ...user.subscription,
+              plan: result.quota.plan,
+              interviewsLimit: result.quota.limit,
+              interviewsRemaining: result.quota.remaining,
+              quotaResetAt: result.quota.resetAt,
+            },
+          }),
+        );
       }
 
       setSession(result.session);

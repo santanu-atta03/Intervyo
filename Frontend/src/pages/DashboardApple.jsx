@@ -132,6 +132,17 @@ export default function DashboardApple() {
 
   const { user } = useSelector((state) => state.profile);
   const { token } = useSelector((state) => state.auth);
+  const quotaPlan = user?.subscription?.plan || "free";
+  const quotaLimit = quotaPlan === "pro" ? 25 : 3;
+  const interviewsRemaining =
+    quotaPlan === "enterprise"
+      ? -1
+      : Math.max(
+          0,
+          Number(user?.subscription?.interviewsRemaining ?? quotaLimit) || 0,
+        );
+  const isProUser =
+    quotaPlan === "pro" && new Date(user?.subscription?.endDate) > new Date();
 
   const { notifications, unreadCount, setNotifications, setUnreadCount } = useNotifications();
 
@@ -481,6 +492,10 @@ export default function DashboardApple() {
         .apple-card-light{ background: rgba(255,255,255,0.66); border:1px solid rgba(0,0,0,0.08); }
         .apple-card-dark{ background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.10); }
         .apple-action-row{ display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; }
+        .apple-pro-avatar{ position:relative; display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; padding:2px; border-radius:50%; background:linear-gradient(135deg,#fff2bd,#c08b35 48%,#fff2bd); animation:apple-pro-glow 2.8s ease-in-out infinite; }
+        .apple-pro-avatar-crown{ position:absolute; top:-4px; right:-5px; width:14px; height:14px; padding:2px; border:1px solid #111; border-radius:50%; background:#d7ad58; color:#21190a; }
+        @keyframes apple-pro-glow{0%,100%{box-shadow:0 0 0 1px rgba(192,139,53,.35),0 0 6px rgba(192,139,53,.25)}50%{box-shadow:0 0 0 2px rgba(255,224,150,.75),0 0 14px rgba(192,139,53,.62)}}
+        @media(prefers-reduced-motion:reduce){.apple-pro-avatar{animation:none}}
       `}</style>
 
       {/* Global nav */}
@@ -602,7 +617,7 @@ export default function DashboardApple() {
             <div ref={profileMenuRef} style={{ position: "relative" }} className="hidden sm:block">
               <button
                 type="button"
-                aria-label="Profile"
+                aria-label={`Profile${isProUser ? ", Pro member" : ""}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   setShowProfileMenu((v) => !v);
@@ -621,7 +636,16 @@ export default function DashboardApple() {
                   padding: 0,
                 }}
               >
-                {user?.profilePicture ? (
+                {isProUser ? (
+                  <span className="apple-pro-avatar" title="Pro member">
+                    {user?.profilePicture ? (
+                      <img src={user.profilePicture} alt="Profile" style={{ width: 22, height: 22, borderRadius: "50%", objectFit: "cover" }} />
+                    ) : (
+                      <span style={{ fontWeight: 900, fontSize: 12 }}>{user?.name?.charAt(0) || "U"}</span>
+                    )}
+                    <Crown className="apple-pro-avatar-crown" aria-hidden="true" />
+                  </span>
+                ) : user?.profilePicture ? (
                   <img src={user.profilePicture} alt="Profile" style={{ width: 22, height: 22, borderRadius: 10, objectFit: "cover" }} />
                 ) : (
                   <span style={{ fontWeight: 900, fontSize: 12 }}>{user?.name?.charAt(0) || "U"}</span>
@@ -1074,20 +1098,31 @@ export default function DashboardApple() {
                 <div style={{ marginTop: 16, opacity: 0.7, fontSize: 13, fontWeight: 800 }}>Interviews This Month</div>
 
                 <div style={{ marginTop: 10, display: "flex", alignItems: "baseline", gap: 10 }}>
-                  <div style={{ fontSize: 42, fontWeight: 900, letterSpacing: "-0.02em" }}>{user?.subscription?.interviewsRemaining || 0}</div>
+                  <div style={{ fontSize: 42, fontWeight: 900, letterSpacing: "-0.02em" }}>
+                    {interviewsRemaining === -1 ? "∞" : interviewsRemaining}
+                  </div>
                   <div style={{ fontSize: 14, opacity: 0.78, fontWeight: 800 }}>
-                    of {user?.subscription?.plan === "pro" ? "25" : user?.subscription?.plan === "enterprise" ? "∞" : "2"} left
+                    {interviewsRemaining === -1
+                      ? "Unlimited interviews"
+                      : interviewsRemaining <= 0
+                        ? "No interviews remaining this month"
+                        : `of ${quotaLimit} left this month`}
                   </div>
                 </div>
+                {interviewsRemaining !== -1 && interviewsRemaining <= 0 && (
+                  <div style={{ marginTop: 8, color: "#d7ad58", fontSize: 12, fontWeight: 700 }}>
+                    Your interviews renew on the 1st.
+                  </div>
+                )}
 
                 <div style={{ height: 10, borderRadius: 999, background: "rgba(255,255,255,0.10)", overflow: "hidden", marginTop: 14 }}>
                   <div
                     style={{
                       height: "100%",
                       width: `${
-                        user?.subscription?.plan === "enterprise"
+                        interviewsRemaining === -1
                           ? 100
-                          : ((user?.subscription?.interviewsRemaining || 0) / (user?.subscription?.plan === "pro" ? 25 : 2)) * 100
+                          : (interviewsRemaining / quotaLimit) * 100
                       }%`,
                       background: APPLE.primary,
                     }}

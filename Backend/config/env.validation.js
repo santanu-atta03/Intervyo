@@ -88,6 +88,23 @@ const requiredEnvVars = {
     sensitive: true
   },
 
+  // Optional payments
+  RAZORPAY_KEY_ID: {
+    required: false,
+    description: 'Razorpay public key ID',
+    sensitive: false
+  },
+  RAZORPAY_KEY_SECRET: {
+    required: false,
+    description: 'Razorpay API key secret',
+    sensitive: true
+  },
+  RAZORPAY_WEBHOOK_SECRET: {
+    required: false,
+    description: 'Razorpay webhook signing secret',
+    sensitive: true
+  },
+
   // Optional Email
   EMAIL_USER: {
     required: false,
@@ -263,6 +280,7 @@ export function printValidationResults(result) {
       Frontend: ['CLIENT_URL', 'FRONTEND_URL'],
       AI: ['GROQ_API_KEY', 'OPENAI_API_KEY', 'HUGGINGFACE_API_KEY'],
       OAuth: ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'GITHUB_CLIENT_ID', 'GITHUB_CLIENT_SECRET'],
+      Payments: ['RAZORPAY_KEY_ID', 'RAZORPAY_KEY_SECRET', 'RAZORPAY_WEBHOOK_SECRET'],
       Email: ['EMAIL_USER', 'EMAIL_PASS', 'EMAIL_FROM'],
       Storage: ['CLOUDINARY_CLOUD_NAME', 'CLOUDINARY_API_KEY', 'CLOUDINARY_API_SECRET']
     };

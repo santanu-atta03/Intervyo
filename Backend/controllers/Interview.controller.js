@@ -674,6 +674,13 @@ import emotionAnalyzer from "../services/emotionAnalyzer.js";
 import resultsGenerator from "../services/resultsGenerator.js";
 import mongoose from "mongoose";
 import groqService from "../services/groqService.js";
+import {
+  consumeCreditForInterview,
+  InterviewQuotaExceededError,
+  InterviewStartConflictError,
+  releaseInterviewCredit,
+  rollbackStartedInterviewCredit,
+} from "../utils/interviewQuota.js";
 
 // Helper function to safely get number
 function safeNumber(value, defaultValue = 0) {
@@ -882,10 +889,15 @@ class InterviewController {
 
   // Start Interview
   async startInterview(req, res) {
+    let interviewId;
+    let userId;
+    let reservedQuota;
+    let interviewMarkedStarted = false;
+    let interviewStarted = false;
+
     try {
-      const { interviewId } = req.params;
-      const userId = req.user.id;
-      const objectUserId = new mongoose.Types.ObjectId(userId);
+      interviewId = req.params.interviewId;
+      userId = req.user.id;
 
       // Find interview
       const interview = await Interview.findOne({ _id: interviewId, userId });
@@ -903,6 +915,12 @@ class InterviewController {
           message: "Interview already started or completed",
         });
       }
+
+      reservedQuota = await consumeCreditForInterview(
+        Interview,
+        interviewId,
+        userId,
+      );
 
       // Generate questions - handle "mixed" type
       console.log("Generating questions for:", interview.config);
@@ -923,6 +941,13 @@ class InterviewController {
         await questionGenerator.generateQuestions(configForGeneration);
 
       if (!questions || questions.length === 0) {
+        await releaseInterviewCredit(
+          Interview,
+          interviewId,
+          userId,
+          reservedQuota,
+        );
+        reservedQuota = null;
         return res.status(500).json({
           success: false,
           message: "Failed to generate questions",
@@ -931,7 +956,12 @@ class InterviewController {
 
       // Use findOneAndUpdate with atomic operation
       const updatedInterview = await Interview.findOneAndUpdate(
-        { _id: interviewId },
+        {
+          _id: interviewId,
+          userId,
+          status: "pending",
+          quotaConsumed: true,
+        },
         {
           $set: {
             rounds: [
@@ -954,18 +984,29 @@ class InterviewController {
       );
 
       if (!updatedInterview) {
+        await releaseInterviewCredit(
+          Interview,
+          interviewId,
+          userId,
+          reservedQuota,
+        );
+        reservedQuota = null;
         return res.status(400).json({
           success: false,
           message: "Failed to start interview. Please try again.",
         });
       }
+      interviewMarkedStarted = true;
 
       // Create or update InterviewSession
-      let session = await InterviewSession.findOne({ interviewId: updatedInterview._id, userId: objectUserId });
+      let session = await InterviewSession.findOne({
+        interviewId: updatedInterview._id,
+        userId,
+      });
       if (!session) {
         session = new InterviewSession({
           interviewId: updatedInterview._id,
-          userId: objectUserId,
+          userId,
           sessionStatus: "active",
           conversation: [],
           questionEvaluations: [],
@@ -979,6 +1020,7 @@ class InterviewController {
         });
         await session.save();
       }
+      interviewStarted = true;
 
       // Calculate time remaining
       const timeRemaining = updatedInterview.config.duration * 60;
@@ -990,6 +1032,12 @@ class InterviewController {
           session,
           config: updatedInterview.config,
           rounds: updatedInterview.rounds,
+          quota: {
+            plan: reservedQuota.plan,
+            limit: reservedQuota.limit,
+            remaining: reservedQuota.remaining,
+            resetAt: reservedQuota.periodStart,
+          },
           currentQuestion: questions[0],
           totalQuestions: questions.length,
           timeRemaining,
@@ -1010,6 +1058,41 @@ class InterviewController {
         },
       });
     } catch (error) {
+      if (reservedQuota && !interviewStarted) {
+        try {
+          if (interviewMarkedStarted) {
+            await rollbackStartedInterviewCredit(
+              Interview,
+              interviewId,
+              userId,
+              reservedQuota,
+            );
+          } else {
+            await releaseInterviewCredit(
+              Interview,
+              interviewId,
+              userId,
+              reservedQuota,
+            );
+          }
+        } catch (releaseError) {
+          console.error("Failed to restore interview quota:", releaseError);
+        }
+      }
+
+      if (error instanceof InterviewQuotaExceededError) {
+        return res.status(403).json({
+          success: false,
+          message: error.message,
+          quota: error.quota,
+        });
+      }
+      if (error instanceof InterviewStartConflictError) {
+        return res.status(409).json({
+          success: false,
+          message: error.message,
+        });
+      }
       console.error("Start interview error:", error);
       res.status(500).json({
         success: false,

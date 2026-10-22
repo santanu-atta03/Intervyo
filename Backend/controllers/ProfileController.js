@@ -1,9 +1,11 @@
 import User from "../models/User.model.js";
 import Profile from "../models/Profile.model.js";
 import { deleteFromCloudinary } from "../config/cloudinary.js";
+import { refreshInterviewQuota } from "../utils/interviewQuota.js";
 
 export const getProfile = async (req, res) => {
   try {
+    await refreshInterviewQuota(req.user.id);
     const user = await User.findById(req.user.id)
       .populate("profile")
       .select("-password")

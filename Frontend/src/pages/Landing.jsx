@@ -1508,7 +1508,7 @@ export default function LandingPage() {
                     </svg>
                   </div>
                   <p className="text-gray-700 dark:text-gray-300 text-lg font-medium">
-                    2 interviews/month
+                    3 interviews/month
                   </p>
                 </div>
 
@@ -1617,7 +1617,7 @@ export default function LandingPage() {
                     </svg>
                   </div>
                   <p className="text-gray-700 dark:text-gray-300 text-lg font-medium">
-                    Unlimited interviews
+                    Up to 25 interviews each month on Pro
                   </p>
                 </div>
 

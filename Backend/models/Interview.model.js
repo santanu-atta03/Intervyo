@@ -30,6 +30,10 @@ const InterviewSchema = new mongoose.Schema({
     enum: ["pending", "in-progress", "completed", "abandoned"],
     default: "pending",
   },
+  quotaConsumed: {
+    type: Boolean,
+    default: false,
+  },
   rounds: [
     {
       roundNumber: Number,

@@ -5,7 +5,8 @@ import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcryptjs";
 import User from "../models/User.model.js";
 import dotenv from "dotenv";
-dotenv.config();
+import { fileURLToPath } from "node:url";
+dotenv.config({ path: fileURLToPath(new URL("../.env", import.meta.url)) });
 const generateAvatarGoogle = (seed) =>
   `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(seed)}`;
 const generateAvatarGithub = (seed) =>
