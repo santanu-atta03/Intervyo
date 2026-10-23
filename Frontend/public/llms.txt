@@ -1,0 +1,17 @@
+# Intervyo AI-Powered Mock Interview Platform
+
+Intervyo is an advanced AI-powered mock interview and technical practice platform designed to help software engineers, product managers, and professionals master their job interviews.
+
+## Core Features
+- **AI Mock Interviews**: Realistic technical and behavioral mock interviews with real-time AI feedback.
+- **Speech & Emotion Analysis**: Live video & audio sentiment analysis powered by TensorFlow.js and face-api.js.
+- **Code Practice Lab**: Integrated Monaco code editor for live coding problems with instant automated evaluation.
+- **Detailed Analytics**: Comprehensive scoring reports on communication clarity, technical depth, and pacing.
+
+## Public Resources & Documentation
+- [Homepage](https://intervyo.xyz/)
+- [Pricing Plans](https://intervyo.xyz/pricing)
+- [FAQ](https://intervyo.xyz/faq)
+- [Blog & Guides](https://intervyo.xyz/blog)
+- [About Us](https://intervyo.xyz/about)
+- [Contact Support](https://intervyo.xyz/contact)

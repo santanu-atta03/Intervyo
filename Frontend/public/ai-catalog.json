@@ -1,0 +1,29 @@
+{
+  "name": "Intervyo AI Catalog",
+  "description": "Catalog of public AI capabilities, interactive practice endpoints, and resources available on Intervyo.",
+  "version": "1.0.0",
+  "url": "https://intervyo.xyz",
+  "capabilities": [
+    {
+      "id": "ai-mock-interview",
+      "name": "AI Mock Interview",
+      "description": "Simulate technical and behavioral interviews with real-time AI agents.",
+      "endpoint": "https://intervyo.xyz/interview-setup",
+      "type": "interactive-tool"
+    },
+    {
+      "id": "coding-practice-lab",
+      "name": "Coding Practice Lab",
+      "description": "Solve algorithm and system design questions in an interactive code editor.",
+      "endpoint": "https://intervyo.xyz/practice-lab",
+      "type": "interactive-tool"
+    },
+    {
+      "id": "interview-resources",
+      "name": "Interview Preparation Guides",
+      "description": "Comprehensive guides, top coding questions, and FAAG preparation strategies.",
+      "endpoint": "https://intervyo.xyz/blog",
+      "type": "documentation"
+    }
+  ]
+}
