@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Menu, X } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
-import logo from "../assets/intervyologo.png";
+import BrandLogo from "./shared/BrandLogo";
 
 const NAV_TONES = {
   landing: {
@@ -12,7 +12,7 @@ const NAV_TONES = {
     mobileMenu: "bg-white backdrop-blur-md rounded-2xl shadow-xl border border-gray-200",
     mobileLink: "text-gray-600 hover:text-gray-900",
     menuButton: "text-gray-900 hover:bg-gray-100",
-    logoPrimary: "text-white-800",
+    logoPrimary: "text-white",
     logoSecondary: "text-emerald-500",
     activeLink: "text-emerald-400",
     activeMobile: "text-emerald-500 bg-emerald-50",
@@ -101,16 +101,11 @@ export default function Navbar({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16 sm:h-20">
             <div className="flex items-center gap-2 sm:gap-3">
-              <div className="relative">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center ">
-                  <img src={logo} alt="logo" />
-                </div>
-
-              </div>
               <div>
-                <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                  Intervyo
-                </span>
+                <BrandLogo
+                  className="text-2xl sm:text-2xl"
+                  primaryClassName="text-skin-primary"
+                />
                 <div className="text-xs text-gray-500 font-medium hidden sm:block">
                   AI-Powered Practice
                 </div>
@@ -125,9 +120,12 @@ export default function Navbar({
   return (
     <nav className={styles.nav}>
       <div className="px-4 md:px-8 py-4 flex items-center justify-between">
-        <Link to="/" className="text-xl md:text-2xl font-bold">
-          <span className={styles.logoPrimary}>Interv</span>
-          <span className={styles.logoSecondary}>yo</span>
+        <Link to="/" aria-label="Intervyo home">
+          <BrandLogo
+            className="text-xl md:text-2xl"
+            primaryClassName={styles.logoPrimary}
+            secondaryClassName={styles.logoSecondary}
+          />
         </Link>
 
         <div className="hidden lg:flex items-center gap-8">

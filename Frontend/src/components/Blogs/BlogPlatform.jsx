@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   Search, Plus, TrendingUp, Clock, Eye, Heart, MessageCircle,
   Tag, User, Calendar, Edit, Trash2, Share2, Bookmark, Filter,
-  ChevronRight, Sparkles, X, ArrowLeft, Send, MoreVertical, Star
+  ChevronRight, Sparkles, X, ArrowLeft, Send, MoreVertical, Star,
+  BookOpen
 } from 'lucide-react';
 import { motion, useScroll, useSpring, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';

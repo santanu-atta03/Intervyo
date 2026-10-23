@@ -9,8 +9,8 @@ import {
 } from "../utils/interviewQuota.js";
 
 const PAYMENT_OPTIONS = {
-  monthly: { amount: 99900, label: "Pro monthly access" },
-  yearly: { amount: 958800, label: "Pro yearly access" },
+  monthly: { amount: 39900, label: "Pro monthly access" },
+  yearly: { amount: 358800, label: "Pro yearly access" },
 };
 
 const razorpayCredentials = () => ({

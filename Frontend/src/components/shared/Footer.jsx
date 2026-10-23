@@ -2,6 +2,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { TelegramIcon } from "@hugeicons/core-free-icons";
 import { Twitter, Linkedin, Github, Youtube, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
+import BrandLogo from "./BrandLogo";
 
 export default function Footer() {
   return (
@@ -29,12 +30,10 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-16">
           
           <div className="lg:col-span-2">
-            <div className="text-3xl font-bold mb-4">
-              <span className="text-skin-primary">Interv</span>
-              <span className="bg-gradient-to-r from-emerald-400 to-emerald-600 bg-clip-text text-transparent">
-                yo
-              </span>
-            </div>
+            <BrandLogo
+              className="text-3xl mb-4"
+              primaryClassName="text-skin-primary"
+            />
 
             <p className="text-skin-secondary mb-6 max-w-sm leading-relaxed">
               Empowering tech professionals with AI-driven interview preparation.

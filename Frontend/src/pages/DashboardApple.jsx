@@ -38,7 +38,7 @@ import {
 } from "../services/operations/notificationAPI";
 
 import { ThemeContext } from "../components/shared/ThemeContext";
-import logo from "../assets/intervyologo.png";
+import BrandLogo from "../components/shared/BrandLogo";
 
 const APPLE = {
   primary: "#0066cc",
@@ -502,10 +502,10 @@ export default function DashboardApple() {
       <nav className="apple-global-nav" aria-label="Global navigation" style={{ opacity: isScrolled ? 1 : 1 }}>
         <div style={{ height: "100%", maxWidth: 1200, margin: "0 auto", padding: "0 18px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ width: 30, height: 30, borderRadius: 12, background: "rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <img src={logo} alt="logo" style={{ width: 22, height: 22 }} />
-            </div>
-            <span style={{ color: "#fff", fontWeight: 800, fontSize: 14, letterSpacing: "-0.12px" }}>Intervyo</span>
+            <BrandLogo
+              className="text-sm"
+              primaryClassName="text-white"
+            />
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>

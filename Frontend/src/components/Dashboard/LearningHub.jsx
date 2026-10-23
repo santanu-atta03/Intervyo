@@ -43,7 +43,7 @@ import { TopicDetailPage } from "./TopicDetailPage";
 import { logout } from "../../services/operations/authAPI";
 import ThemeToggle from "../ThemeToggle";
 import { ThemeContext } from "../shared/ThemeContext";
-import logo from "../../assets/intervyologo.png";
+import BrandLogo from "../shared/BrandLogo";
 import { BASE_URL } from "../../services/apis.js";
 
 const API_BASE_URL = `${BASE_URL}/learning-hub`;
@@ -524,9 +524,11 @@ export default function LearningHub() {
             <button className="nk-icon-btn nk-hamburger" onClick={() => setIsMobileMenuOpen(true)} aria-label="Open menu">
               <Menu size={22} />
             </button>
-            <Link to="/" aria-label="Intervyo home" className="flex items-center gap-2">
-              <img src={logo} alt="" style={{ width: 32, height: 32, objectFit: "contain" }} />
-              <span className="nk-h-md hidden sm:inline" style={{ textTransform: "uppercase" }}>Intervyo</span>
+            <Link to="/" aria-label="Intervyo home" className="flex items-center">
+              <BrandLogo
+                className="hidden sm:inline text-2xl"
+                primaryClassName="text-inherit"
+              />
             </Link>
           </div>
 
@@ -582,7 +584,10 @@ export default function LearningHub() {
           <div className="nk-drawer-scrim" onClick={() => setIsMobileMenuOpen(false)} />
           <aside className="nk-drawer" aria-label="Menu">
             <div className="flex items-center justify-between">
-              <span className="nk-h-md" style={{ textTransform: "uppercase" }}>Intervyo</span>
+              <BrandLogo
+                className="text-base"
+                primaryClassName="text-inherit"
+              />
               <button className="nk-icon-btn" onClick={() => setIsMobileMenuOpen(false)} aria-label="Close menu"><X size={22} /></button>
             </div>
             {["/dashboard", "/interview-setup", "/analytics", "/history", "/leaderboard", "/blog", "/settings", "/subscription"].map((href, i) => (

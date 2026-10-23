@@ -42,7 +42,7 @@ import {
   deleteNotification,
   clearReadNotifications,
 } from "../services/operations/notificationAPI";
-import logo from "../assets/intervyologo.png";
+import BrandLogo from "../components/shared/BrandLogo";
 
 /* ------------------------------------------------------------------ */
 /*  Nike design system – tokens, components and motion                 */
@@ -856,11 +856,11 @@ function Dashboard() {
             >
               <Menu size={22} />
             </button>
-            <Link to="/" aria-label="Intervyo home" className="flex items-center gap-2">
-              <img src={logo} alt="" style={{ width: 32, height: 32, objectFit: "contain" }} />
-              <span className="nk-h-md hidden sm:inline" style={{ textTransform: "uppercase" }}>
-                Intervyo
-              </span>
+            <Link to="/" aria-label="Intervyo home" className="flex items-center">
+              <BrandLogo
+                className="hidden sm:inline text-2xl"
+                primaryClassName="text-inherit"
+              />
             </Link>
           </div>
 
@@ -976,7 +976,10 @@ function Dashboard() {
           <div className="nk-drawer-scrim" onClick={() => setIsMobileMenuOpen(false)} />
           <aside className="nk-drawer" aria-label="Menu">
             <div className="flex items-center justify-between">
-              <span className="nk-h-md" style={{ textTransform: "uppercase" }}>Intervyo</span>
+              <BrandLogo
+                className="text-base"
+                primaryClassName="text-inherit"
+              />
               <button className="nk-icon-btn" onClick={() => setIsMobileMenuOpen(false)} aria-label="Close menu">
                 <X size={22} />
               </button>
