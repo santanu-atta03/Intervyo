@@ -25,7 +25,7 @@
   ],
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/((?!sitemap\\.xml$|robots\\.txt$|llms\\.txt$|ai-catalog\\.json$).*)",
       "destination": "/index.html"
     }
   ]
