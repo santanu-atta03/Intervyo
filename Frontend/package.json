@@ -17,6 +17,9 @@
     "fetch-models": "node scripts/download-face-models.js"
   },
   "dependencies": {
+    "@clerk/clerk-react": "^5.61.11",
+    "@clerk/react": "^6.18.0",
+    "@clerk/themes": "^2.4.57",
     "@hugeicons/core-free-icons": "^3.1.1",
     "@hugeicons/react": "^1.1.4",
     "@monaco-editor/react": "^4.7.0",

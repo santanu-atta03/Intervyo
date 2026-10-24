@@ -1,10 +1,105 @@
+
+import { Link } from "react-router-dom";
+import SEO from "../components/SEO";
+// import BrandLogo from "../components/shared/BrandLogo";
+
+// export default function Login() {
+//   const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
+//   return (
+//     <div className="relative min-h-screen overflow-hidden bg-[#09090b] text-white flex flex-col justify-center items-center px-4 py-16 selection:bg-emerald-500/30">
+//       <SEO
+//         title="Sign In – Intervyo"
+//         description="Sign in to your Intervyo account to practice AI-driven mock interviews and track your progress."
+//         url="https://intervyo.xyz/login"
+//       />
+
+//       {/* Futuristic Background Accents */}
+//       <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_45%,#000_70%,transparent_100%)] pointer-events-none" />
+//       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-b from-emerald-500/20 via-emerald-500/5 to-transparent rounded-full blur-[110px] pointer-events-none" />
+//       <div className="absolute -bottom-20 right-10 w-[400px] h-[300px] bg-emerald-600/10 rounded-full blur-[100px] pointer-events-none" />
+
+//       {/* Main Centered Content */}
+//       <div className="relative z-10 w-full max-w-[460px] flex flex-col items-center">
+//         {/* Brand Header */}
+//         <Link to="/" className="inline-flex items-center gap-2 mb-6 group transition-transform hover:scale-[1.02]">
+//           <BrandLogo
+//             className="text-3xl tracking-tight"
+//             primaryClassName="text-white group-hover:text-emerald-400 transition-colors"
+//             secondaryClassName="text-emerald-400"
+//           />
+//         </Link>
+
+//         {/* Missing Key Notification */}
+//         {!publishableKey && (
+//           <div className="mb-6 w-full bg-amber-500/10 border border-amber-500/30 text-amber-300 p-4 rounded-2xl text-center backdrop-blur-xl shadow-lg">
+//             <p className="font-semibold text-sm">Clerk Publishable Key Required</p>
+//             <p className="text-xs text-amber-200/80 mt-1">
+//               Add <code className="bg-black/50 px-1.5 py-0.5 rounded font-mono text-amber-300">VITE_CLERK_PUBLISHABLE_KEY</code> to your <code className="bg-black/50 px-1.5 py-0.5 rounded font-mono text-amber-300">Frontend/.env</code> file.
+//             </p>
+//           </div>
+//         )}
+
+//         {/* Clerk Sign In Component with Custom Theme */}
+//         <div className="w-full">
+//           <SignIn
+//             routing="path"
+//             path="/login"
+//             signUpUrl="/register"
+//             fallbackRedirectUrl="/dashboard"
+//             appearance={{
+//               baseTheme: dark,
+//               variables: {
+//                 colorPrimary: "#10b981",
+//                 colorBackground: "#131316",
+//                 colorInputBackground: "#1e1e24",
+//                 colorInputText: "#ffffff",
+//                 colorTextSecondary: "#a1a1aa",
+//                 colorText: "#ffffff",
+//                 borderRadius: "0.875rem",
+//                 fontFamily: "inherit",
+//               },
+//               elements: {
+//                 rootBox: "w-full",
+//                 card: "bg-zinc-900/90 backdrop-blur-2xl border border-white/10 shadow-[0_0_50px_rgba(16,185,129,0.12),0_25px_50px_rgba(0,0,0,0.7)] rounded-3xl p-6 sm:p-8",
+//                 headerTitle: "text-2xl font-bold text-white tracking-tight text-center",
+//                 headerSubtitle: "text-zinc-400 text-sm text-center mt-1.5",
+//                 socialButtonsBlockButton: "bg-zinc-800/90 hover:bg-zinc-750 border border-zinc-700/80 hover:border-emerald-500/50 text-white rounded-xl py-2.5 transition-all duration-200 shadow-sm",
+//                 socialButtonsBlockButtonText: "font-medium text-zinc-200 text-sm",
+//                 dividerLine: "bg-zinc-800",
+//                 dividerText: "text-zinc-500 text-xs font-semibold uppercase tracking-wider px-2",
+//                 formFieldLabel: "text-zinc-300 text-xs font-semibold uppercase tracking-wider mb-1.5",
+//                 formFieldInput: "bg-zinc-800/90 border border-zinc-700/80 rounded-xl px-4 py-2.5 text-white placeholder-zinc-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm",
+//                 formButtonPrimary: "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-black font-bold rounded-xl py-3 shadow-[0_0_20px_rgba(16,185,129,0.35)] hover:shadow-[0_0_30px_rgba(16,185,129,0.55)] transition-all duration-200 active:scale-[0.98] text-sm",
+//                 footer: "bg-transparent border-t border-zinc-800/80 mt-5 pt-4",
+//                 footerActionText: "text-zinc-400 text-sm",
+//                 footerActionLink: "text-emerald-400 hover:text-emerald-300 font-semibold transition-colors",
+//                 identityPreviewText: "text-white font-medium",
+//                 identityPreviewEditButton: "text-emerald-400 hover:text-emerald-300",
+//                 formFieldAction: "text-emerald-400 hover:text-emerald-300 text-xs font-medium",
+//                 formResendCodeLink: "text-emerald-400 hover:text-emerald-300 font-semibold",
+//                 otpCodeFieldInput: "border-zinc-700 bg-zinc-800 text-white rounded-xl focus:border-emerald-500",
+//                 phoneInputBox: "bg-zinc-800/90 border border-zinc-700/80 rounded-xl text-white",
+//                 formFieldSuccessText: "text-emerald-400 text-xs",
+//                 formFieldErrorText: "text-rose-400 text-xs",
+//                 alertText: "text-zinc-200 text-sm",
+//               },
+//             }}
+//           />
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+// =====================================================
+// PREVIOUS LOGIN COMPONENT (COMMENTED OUT AS REQUESTED)
+// =====================================================
 import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { login, warmUpAuthService } from '../services/operations/authAPI';
-import SEO from '../components/SEO';
 import { authEndpoints } from '../services/apis';
-
 const PASSWORD_REQUIREMENTS = [
   { id: 'length', label: '8+ Characters', test: (p) => p.length >= 8 },
   { id: 'uppercase', label: 'Upper Case', test: (p) => /[A-Z]/.test(p) },
@@ -226,3 +321,4 @@ export default function Login() {
     </div>
   );
 }
+

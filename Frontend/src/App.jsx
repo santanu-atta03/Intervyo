@@ -1,44 +1,51 @@
-// frontend/src/App.jsx
+import { Suspense, lazy, useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
+import { ClerkProvider } from "@clerk/react";
 
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import AuthCallback from "./pages/AuthCallback";
-import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
-import Landing from "./pages/Landing";
-import InterviewSetup from "./pages/InterviewSetup";
-import VerifyEmail from "./pages/VerifyEmail";
-import DomainSelection from "./pages/DomainSelection";
-import Results from "./pages/Results";
-import Settings from "./components/Dashboard/Settings";
-import InterviewWrapper from "./components/Interview/InterviewWrapper";
-import Leaderboard from "./pages/Leaderboard";
-import ReviewHistory from "./components/Dashboard/ReviewHistory";
-import LearningHub from "./components/Dashboard/LearningHub";
-import BlogPlatform from "./components/Blogs/BlogPlatform";
-import Achievements from "./components/Dashboard/Achievements";
-import VoiceflowChatbot from "./components/Chatbot/VoiceflowChatbot";
-import NotFound from "./pages/NotFound";
-import FAQ from "./pages/FAQ";
-import Analytics from "./pages/Analytics";
-import AdvancedFeaturesDashboard from "./pages/AdvancedFeaturesDashboard";
 import ScrollToTop from "./components/shared/ScrollToTopButton";
 import Footer from "./components/shared/Footer";
-import TermsAndConditions from "./pages/Terms";
-import PrivacyPolicy from "./pages/Privacy";
-import AboutUs from "./pages/AboutUs";
-import ContactUs from "./pages/ContactUs";
-import PracticeLab from "./pages/PracticeLab";
-import Career from "./pages/Career";
-import PricingPage from "./pages/PricingPage";
-import QuizPage from "./pages/QuizPage";
-import CookiePolicy from "./pages/CookiePolicy";
 import ScrollToTopOnRouteChange from "./components/shared/ScrollToTopOnRouteChange";
 import Navbar from "./components/Navbar";
-import { useEffect } from "react";
-import Lenis from "@studio-freight/lenis";
-import DashboardApple from "./pages/Dashboard";
+import VoiceflowChatbot from "./components/Chatbot/VoiceflowChatbot";
+
+const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
+const Landing = lazy(() => import("./pages/Landing"));
+const Login = lazy(() => import("./pages/Login"));
+const Register = lazy(() => import("./pages/Register"));
+const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
+const AuthCallback = lazy(() => import("./pages/AuthCallback"));
+const FAQ = lazy(() => import("./pages/FAQ"));
+const PrivacyPolicy = lazy(() => import("./pages/Privacy"));
+const TermsAndConditions = lazy(() => import("./pages/Terms"));
+const AboutUs = lazy(() => import("./pages/AboutUs"));
+const ContactUs = lazy(() => import("./pages/ContactUs"));
+const Career = lazy(() => import("./pages/Career"));
+const PricingPage = lazy(() => import("./pages/PricingPage"));
+const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
+const DomainSelection = lazy(() => import("./pages/DomainSelection"));
+const Leaderboard = lazy(() => import("./pages/Leaderboard"));
+const BlogPlatform = lazy(() => import("./components/Blogs/BlogPlatform"));
+const DashboardPage = lazy(() => import("./pages/Dashboard"));
+const Analytics = lazy(() => import("./pages/Analytics"));
+const AdvancedFeaturesDashboard = lazy(() => import("./pages/AdvancedFeaturesDashboard"));
+const PracticeLab = lazy(() => import("./pages/PracticeLab"));
+const ReviewHistory = lazy(() => import("./components/Dashboard/ReviewHistory"));
+const LearningHub = lazy(() => import("./components/Dashboard/LearningHub"));
+const Settings = lazy(() => import("./components/Dashboard/Settings"));
+const Achievements = lazy(() => import("./components/Dashboard/Achievements"));
+const InterviewSetup = lazy(() => import("./pages/InterviewSetup"));
+const InterviewWrapper = lazy(() => import("./components/Interview/InterviewWrapper"));
+const Results = lazy(() => import("./pages/Results"));
+const QuizPage = lazy(() => import("./pages/QuizPage"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
+const routeFallback = (
+  <div className="flex min-h-screen items-center justify-center bg-[#09090b] text-sm text-zinc-300">
+    Loading...
+  </div>
+);
 
 function App() {
   const location = useLocation();
@@ -52,187 +59,161 @@ function App() {
     location.pathname.startsWith("/interview-room") ||
     location.pathname.startsWith("/results/");
 
-  // Initialize smooth scrolling with Lenis
-  useEffect(() => {
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      direction: "vertical",
-      gestureDirection: "vertical",
-      smooth: true,
-      smoothTouch: false,
-      touchMultiplier: 2,
-    });
-
-    let rafId;
-
-    function raf(time) {
-      lenis.raf(time);
-      rafId = requestAnimationFrame(raf);
-    }
-
-    rafId = requestAnimationFrame(raf);
-
-    return () => {
-      lenis.destroy();
-      cancelAnimationFrame(rafId);
-    };
-  }, []);
-
-
-
   useEffect(() => {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js");
     }
   }, []);
 
-  return (
+  const appContent = (
     <>
-
       <ScrollToTop />
       <ScrollToTopOnRouteChange />
       {!hideNavbar && <Navbar />}
 
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/verify-email" element={<VerifyEmail />} />
-        <Route path="/auth/callback" element={<AuthCallback />} />
-        <Route path="/faq" element={<FAQ />} />
-        <Route path="/privacy" element={<PrivacyPolicy />} />
-        <Route path="/terms" element={<TermsAndConditions />} />
-        <Route path="/about" element={<AboutUs />} />
-        <Route path="/contact" element={<ContactUs />} />
-        <Route path="/career" element={<Career />} />
-        <Route path="/pricing" element={<PricingPage />} />
-        <Route path="/cookie-policy" element={<CookiePolicy />} />
-        <Route path="/domain-selection" element={<DomainSelection />} />
-        <Route path="/leaderboard" element={<Leaderboard />} />
-        <Route path="/blog" element={<BlogPlatform />} />
-        <Route path="/blog/:slug" element={<BlogPlatform />} />
+      <Suspense fallback={routeFallback}>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsAndConditions />} />
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="/contact" element={<ContactUs />} />
+          <Route path="/career" element={<Career />} />
+          <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/cookie-policy" element={<CookiePolicy />} />
+          <Route path="/domain-selection" element={<DomainSelection />} />
+          <Route path="/leaderboard" element={<Leaderboard />} />
+          <Route path="/blog" element={<BlogPlatform />} />
+          <Route path="/blog/:slug" element={<BlogPlatform />} />
 
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <DashboardApple />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/analytics"
-          element={
-            <ProtectedRoute>
-              <Analytics />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/analytics"
+            element={
+              <ProtectedRoute>
+                <Analytics />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/advanced-features"
-          element={
-            <ProtectedRoute>
-              <AdvancedFeaturesDashboard />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/advanced-features"
+            element={
+              <ProtectedRoute>
+                <AdvancedFeaturesDashboard />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/practice-lab"
-          element={
-            <ProtectedRoute>
-              <PracticeLab />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/practice-lab"
+            element={
+              <ProtectedRoute>
+                <PracticeLab />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/history"
-          element={
-            <ProtectedRoute>
-              <ReviewHistory />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/history"
+            element={
+              <ProtectedRoute>
+                <ReviewHistory />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/resources"
-          element={
-            <ProtectedRoute>
-              <LearningHub />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/resources"
+            element={
+              <ProtectedRoute>
+                <LearningHub />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/settings"
-          element={
-            <ProtectedRoute>
-              <Settings />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/achievements"
-          element={
-            <ProtectedRoute>
-              <Achievements />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/achievements"
+            element={
+              <ProtectedRoute>
+                <Achievements />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/interview-setup"
-          element={
-            <ProtectedRoute>
-              <InterviewSetup />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/interview-setup"
+            element={
+              <ProtectedRoute>
+                <InterviewSetup />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/interview/:interviewId"
-          element={
-            <ProtectedRoute>
-              <InterviewWrapper />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/interview/:interviewId"
+            element={
+              <ProtectedRoute>
+                <InterviewWrapper />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/interview-room/:interviewId"
-          element={
-            <ProtectedRoute>
-              <InterviewWrapper />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/interview-room/:interviewId"
+            element={
+              <ProtectedRoute>
+                <InterviewWrapper />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/results/:interviewId"
-          element={
-            <ProtectedRoute>
-              <Results />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/results/:interviewId"
+            element={
+              <ProtectedRoute>
+                <Results />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route path="/quiz" element={<QuizPage />} />
+          <Route path="/quiz" element={<QuizPage />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
 
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-
-      {!location.pathname.startsWith("/interview-room") && (
-        <VoiceflowChatbot />
-      )}
-
+      {!location.pathname.startsWith("/interview-room") && <VoiceflowChatbot />}
       {!hideFooter && <Footer />}
     </>
   );
+
+  if (!CLERK_PUBLISHABLE_KEY) {
+    return appContent;
+  }
+
+  return <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY}>{appContent}</ClerkProvider>;
 }
 
 export default App;
