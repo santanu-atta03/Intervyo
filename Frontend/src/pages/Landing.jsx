@@ -1,7 +1,5 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { motion } from "framer-motion";
 import {
   Globe,
   MessageSquare,
@@ -12,54 +10,9 @@ import {
   Play,
   ChevronDown,
 } from "lucide-react";
-import Lenis from "@studio-freight/lenis";
-import Navbar from "../components/Navbar";
 import SEO from "../components/shared/SEO";
 
-// Animation variants
-const fadeInUp = {
-  hidden: { opacity: 0, y: 60 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
-};
-
-const fadeInDown = {
-  hidden: { opacity: 0, y: -40 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
-};
-
-const fadeInLeft = {
-  hidden: { opacity: 0, x: -60 },
-  visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: "easeOut" } },
-};
-
-const fadeInRight = {
-  hidden: { opacity: 0, x: 60 },
-  visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: "easeOut" } },
-};
-
-const scaleIn = {
-  hidden: { opacity: 0, scale: 0.8 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: { duration: 0.5, ease: "easeOut" },
-  },
-};
-
-const staggerContainer = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1, delayChildren: 0.2 },
-  },
-};
-
-const staggerItem = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
-};
-
-// Hover card component with magnetic effect
+// Hover card component
 const HoverCard = ({ children, className, glowColor = "emerald" }) => {
   const glowColors = {
     emerald: "hover:shadow-[0_0_40px_rgba(16,185,129,0.4)]",
@@ -71,17 +24,11 @@ const HoverCard = ({ children, className, glowColor = "emerald" }) => {
   };
 
   return (
-    <motion.div
+    <div
       className={`${className} ${glowColors[glowColor]} transition-all duration-500`}
-      whileHover={{
-        scale: 1.03,
-        y: -12,
-        boxShadow: "0 30px 60px -15px rgba(0, 0, 0, 0.3)",
-      }}
-      whileTap={{ scale: 0.98 }}
     >
       {children}
-    </motion.div>
+    </div>
   );
 };
 
@@ -103,82 +50,21 @@ const AnimatedButton = ({
   };
 
   return (
-    <motion.button
+    <button
       onClick={onClick}
       className={`${variants[variant]} ${className} relative overflow-hidden group transition-all duration-300`}
-      whileHover={{
-        scale: 1.05,
-        boxShadow: "0 25px 50px -12px rgba(34, 197, 94, 0.5)",
-      }}
-      whileTap={{ scale: 0.95 }}
     >
-      <motion.span
-        className="absolute inset-0 bg-gradient-to-r from-white/30 via-white/10 to-transparent"
-        initial={{ x: "-100%", opacity: 0 }}
-        whileHover={{ x: "100%", opacity: 1 }}
-        transition={{ duration: 0.6 }}
-      />
       {children}
-    </motion.button>
+    </button>
   );
 };
-
-// Floating animation for decorative elements
-const FloatingElement = ({ children, delay = 0 }) => (
-  <motion.div
-    animate={{ y: [0, -10, 0] }}
-    transition={{ duration: 3, repeat: Infinity, delay, ease: "easeInOut" }}
-  >
-    {children}
-  </motion.div>
-);
 
 export default function LandingPage() {
   const navigate = useNavigate();
   const [openFaq, setOpenFaq] = useState(null);
-  const lenisRef = useRef(null);
-
-  // Initialize Lenis smooth scroll
-  useEffect(() => {
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: "vertical",
-      gestureOrientation: "vertical",
-      smoothWheel: true,
-      wheelMultiplier: 1,
-      smoothTouch: false,
-      touchMultiplier: 2,
-      infinite: false,
-    });
-
-    lenisRef.current = lenis;
-
-    function raf(time) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-
-    requestAnimationFrame(raf);
-
-    return () => {
-      lenis.destroy();
-    };
-  }, []);
 
   const toggleFaq = (index) => {
     setOpenFaq(openFaq === index ? null : index);
-  };
-
-  const scrollToSection = (e, sectionId) => {
-    e.preventDefault();
-    const element = document.querySelector(sectionId);
-    if (element && lenisRef.current) {
-      lenisRef.current.scrollTo(element, {
-        offset: -100,
-        duration: 1.5,
-      });
-    }
   };
 
   return (
@@ -215,37 +101,27 @@ export default function LandingPage() {
         />
 
         {/* Animated sweep glow - Multiple layers for intensity */}
-        <motion.div
+        <div
           className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-emerald-500/20 dark:via-emerald-500/40 to-transparent blur-3xl"
-          animate={{ x: ["-50%", "150%"] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+
+
         />
-        <motion.div
+        <div
           className="absolute inset-0 w-1/3 bg-gradient-to-r from-transparent via-violet-500/10 dark:via-violet-500/20 to-transparent blur-2xl"
-          animate={{ x: ["-50%", "150%"] }}
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 2,
-          }}
+
+
         />
 
         {/* Floating orbs */}
-        <motion.div
+        <div
           className="absolute top-20 left-10 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl"
-          animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
-          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+
+
         />
-        <motion.div
+        <div
           className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"
-          animate={{ scale: [1.2, 1, 1.2], opacity: [0.2, 0.4, 0.2] }}
-          transition={{
-            duration: 5,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 1,
-          }}
+
+
         />
 
         {/* Gradient Overlay */}
@@ -253,38 +129,38 @@ export default function LandingPage() {
 
         <div className="max-w-6xl mx-auto text-center relative z-10">
 
-          <motion.h1
+          <h1
             className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight text-gray-900 dark:text-white"
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
+
+
+
           >
             Ace Your Next Tech
             <br />
             Interview with{" "}
-            <motion.span
+            <span
               className="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 dark:from-emerald-400 dark:via-teal-400 dark:to-cyan-400 bg-clip-text text-transparent"
-              animate={{ backgroundPosition: ["0%", "100%", "0%"] }}
-              transition={{ duration: 3, repeat: Infinity }}
+
+
               style={{ backgroundSize: "200% auto" }}
             >
               AI
-            </motion.span>
+            </span>
             <br />
             <span className="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 dark:from-emerald-400 dark:via-teal-400 dark:to-cyan-400 bg-clip-text text-transparent">
               Coaching
             </span>
-          </motion.h1>
-          <motion.p className="text-gray-600 dark:text-gray-400 text-xl">
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 text-xl">
             <br />
             and receive instant, actionable feedback to boost your confidence.
-          </motion.p>
+          </p>
 
-          <motion.div
+          <div
             className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
+
+
+
           >
             <AnimatedButton
               onClick={() => navigate("/dashboard")}
@@ -292,12 +168,12 @@ export default function LandingPage() {
               variant="primary"
             >
               Start Practicing Free{" "}
-              <motion.span
-                animate={{ x: [0, 5, 0] }}
-                transition={{ duration: 1, repeat: Infinity }}
+              <span
+
+
               >
                 {"->"}
-              </motion.span>
+              </span>
             </AnimatedButton>
             <AnimatedButton
               onClick={() => navigate("/dashboard")}
@@ -306,19 +182,19 @@ export default function LandingPage() {
             >
               <Play className="w-5 h-5" /> Try Now
             </AnimatedButton>
-          </motion.div>
+          </div>
 
           {/* Mockup */}
-          <motion.div
+          <div
             className="relative max-w-5xl mx-auto"
-            initial={{ opacity: 0, y: 60, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.8, ease: "easeOut" }}
+
+
+
           >
-            <motion.div
+            <div
               className="absolute -inset-4 bg-gradient-to-r from-emerald-500/20 via-purple-500/20 to-pink-500/20 rounded-3xl blur-2xl"
-              animate={{ opacity: [0.5, 0.8, 0.5] }}
-              transition={{ duration: 3, repeat: Infinity }}
+
+
             />
             <div className="bg-gray-800 dark:bg-gray-900 rounded-t-2xl p-3 relative shadow-2xl">
               <div className="flex gap-2 mb-4">
@@ -401,7 +277,7 @@ export default function LandingPage() {
                 </div>
               </div>
             </div>
-          </motion.div>
+          </div>
 
           {/* Trust Badge */}
           <div className="mt-16 px-4">
@@ -490,19 +366,19 @@ export default function LandingPage() {
         className="py-20 px-6 bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 transition-colors duration-500"
       >
         <div className="max-w-7xl mx-auto">
-          <motion.div
+          <div
             className="text-center mb-16"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={fadeInUp}
+
+
+
+
           >
-            <motion.div
+            <div
               className="inline-block bg-gradient-to-r from-emerald-100 to-teal-100 dark:from-emerald-900/30 dark:to-teal-900/30 text-emerald-700 dark:text-emerald-300 px-6 py-2 rounded-full mb-4 font-semibold border border-emerald-200 dark:border-emerald-800"
-              whileHover={{ scale: 1.05 }}
+
             >
               Features
-            </motion.div>
+            </div>
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900 dark:text-white">
               Everything you need to
               <br />
@@ -516,52 +392,52 @@ export default function LandingPage() {
               <br />
               and interview with confidence.
             </p>
-          </motion.div>
+          </div>
 
           {/* Bento Grid Layout */}
-          <motion.div
+          <div
             className="grid grid-cols-1 md:grid-cols-3 gap-4"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
-            variants={staggerContainer}
+
+
+
+
           >
             {/* AI-Powered Questions - Emerald Green Card */}
             <HoverCard
               className="bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-600 rounded-3xl p-10 shadow-lg border-4 border-transparent dark:border-gray-900 min-h-[280px] flex flex-col justify-center cursor-pointer"
               glowColor="emerald"
             >
-              <motion.div variants={staggerItem}>
-                <motion.div
+              <div>
+                <div
                   className="text-yellow-200 text-6xl font-bold mb-3"
-                  initial={{ scale: 0 }}
-                  whileInView={{ scale: 1 }}
-                  transition={{ type: "spring", delay: 0.2 }}
+
+
+
                 >
                   50K+
-                </motion.div>
+                </div>
                 <h3 className="text-yellow-100 text-xl font-medium">
                   Questions Asked
                 </h3>
                 <p className="text-emerald-100 mt-2">last month</p>
-              </motion.div>
+              </div>
             </HoverCard>
 
             {/* Realistic Scenarios - Gray Card */}
             <HoverCard className="bg-gradient-to-br from-slate-100 via-gray-100 to-zinc-200 dark:from-slate-600 dark:via-gray-600 dark:to-zinc-700 rounded-3xl p-10 shadow-lg border-4 border-transparent dark:border-gray-900 text-gray-900 dark:text-white min-h-[280px] flex flex-col justify-center cursor-pointer">
-              <motion.div variants={staggerItem}>
+              <div>
                 <h3 className="text-amber-600 dark:text-amber-300 text-2xl font-semibold mb-4">
                   Active Users
                 </h3>
-                <motion.div
+                <div
                   className="text-amber-500 dark:text-amber-200 text-7xl font-bold mb-6"
-                  initial={{ scale: 0 }}
-                  whileInView={{ scale: 1 }}
-                  transition={{ type: "spring", delay: 0.3 }}
+
+
+
                 >
                   12K
-                </motion.div>
-              </motion.div>
+                </div>
+              </div>
             </HoverCard>
 
             {/* Instant Feedback - Yellow Lime Card */}
@@ -569,21 +445,21 @@ export default function LandingPage() {
               className="bg-gradient-to-br from-yellow-300 via-amber-300 to-orange-300 rounded-3xl p-10 shadow-lg border-4 border-transparent dark:border-gray-900 min-h-[280px] flex flex-col justify-center cursor-pointer"
               glowColor="yellow"
             >
-              <motion.div variants={staggerItem}>
-                <motion.div
+              <div>
+                <div
                   className="bg-gradient-to-br from-yellow-400 to-orange-400 rounded-2xl p-4 inline-block mb-6 shadow-lg"
-                  whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
-                  transition={{ duration: 0.5 }}
+
+
                 >
                   <Zap className="w-8 h-8 text-sky-600" />
-                </motion.div>
+                </div>
                 <h3 className="text-2xl font-bold mb-3 text-sky-800">
                   Instant Feedback
                 </h3>
                 <p className="text-gray-900 leading-relaxed">
                   Real-time AI analysis of your responses
                 </p>
-              </motion.div>
+              </div>
             </HoverCard>
 
             {/* Large Purple Card with Chart */}
@@ -591,33 +467,33 @@ export default function LandingPage() {
               className="md:col-span-2 bg-gradient-to-br from-purple-100 via-violet-100 to-fuchsia-100 dark:from-purple-200 dark:via-violet-200 dark:to-fuchsia-200 rounded-3xl p-10 shadow-lg border-4 border-transparent dark:border-gray-900 cursor-pointer"
               glowColor="purple"
             >
-              <motion.div variants={staggerItem}>
-                <motion.div
+              <div>
+                <div
                   className="bg-gradient-to-r from-purple-200 to-violet-200 dark:from-purple-300 dark:to-violet-300 rounded-2xl px-6 py-2 inline-block mb-4"
-                  whileHover={{ scale: 1.05 }}
+
                 >
                   <h3 className="text-xl font-bold text-purple-900">
                     Interview Success Rate
                   </h3>
-                </motion.div>
-                <motion.div
+                </div>
+                <div
                   className="text-6xl font-bold mb-2 bg-gradient-to-r from-purple-700 to-violet-700 bg-clip-text text-transparent"
-                  initial={{ scale: 0 }}
-                  whileInView={{ scale: 1 }}
-                  transition={{ type: "spring", delay: 0.4 }}
+
+
+
                 >
                   87%
-                </motion.div>
+                </div>
                 <div className="flex items-center gap-2 text-purple-700 mb-6"></div>
-                <motion.div className="h-32 bg-gradient-to-r from-purple-300/50 to-violet-300/50 rounded-xl overflow-hidden relative">
-                  <motion.div
+                <div className="h-32 bg-gradient-to-r from-purple-300/50 to-violet-300/50 rounded-xl overflow-hidden relative">
+                  <div
                     className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-purple-500 to-transparent"
-                    initial={{ height: 0 }}
-                    whileInView={{ height: "87%" }}
-                    transition={{ duration: 1.5, delay: 0.5 }}
+
+
+
                   />
-                </motion.div>
-              </motion.div>
+                </div>
+              </div>
             </HoverCard>
 
             {/* Skill Assessment - Pink Card */}
@@ -625,18 +501,18 @@ export default function LandingPage() {
               className="bg-gradient-to-br from-pink-200 via-rose-200 to-red-200 rounded-3xl p-10 shadow-lg border-4 border-transparent dark:border-gray-900 cursor-pointer"
               glowColor="pink"
             >
-              <motion.div variants={staggerItem}>
-                <motion.div
+              <div>
+                <div
                   className="flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-pink-300 to-rose-400 mb-6 shadow-lg"
-                  whileHover={{ rotate: 360 }}
-                  transition={{ duration: 0.6 }}
+
+
                 >
                   <div className="text-4xl">🎯</div>
-                </motion.div>
+                </div>
                 <h3 className="text-2xl font-bold mb-2 text-rose-900">
                   Assessment
                 </h3>
-              </motion.div>
+              </div>
             </HoverCard>
 
             {/* Progress Tracking - Yellow Card */}
@@ -644,20 +520,20 @@ export default function LandingPage() {
               className="bg-gradient-to-br from-yellow-300 via-amber-300 to-orange-300 rounded-3xl p-10 shadow-lg border-4 border-transparent dark:border-gray-900 cursor-pointer"
               glowColor="yellow"
             >
-              <motion.div variants={staggerItem}>
+              <div>
                 <h3 className="text-2xl font-bold mb-3 text-amber-900">
                   Practice Sessions
                 </h3>
-                <motion.div
+                <div
                   className="text-5xl font-bold mb-2 text-amber-800"
-                  initial={{ scale: 0 }}
-                  whileInView={{ scale: 1 }}
-                  transition={{ type: "spring", delay: 0.5 }}
+
+
+
                 >
                   2.4K
-                </motion.div>
+                </div>
                 <p className="text-gray-900 mb-4">Completed this week</p>
-              </motion.div>
+              </div>
             </HoverCard>
 
             {/* Industry Insights - Emerald Card - Wide */}
@@ -665,7 +541,7 @@ export default function LandingPage() {
               className="md:col-span-2 bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-600 rounded-3xl p-10 shadow-lg border-4 border-transparent dark:border-gray-900 text-white flex items-center justify-between cursor-pointer"
               glowColor="emerald"
             >
-              <motion.div className="flex-1" variants={staggerItem}>
+              <div className="flex-1">
                 <h3 className="text-3xl font-bold mb-3 text-amber-200">
                   We Build Future of
                 </h3>
@@ -675,16 +551,16 @@ export default function LandingPage() {
                 <p className="text-emerald-100">
                   Crafting Meaningful AI-Driven Experience
                 </p>
-              </motion.div>
-              <motion.div
+              </div>
+              <div
                 className="w-32 h-32 rounded-full border-4 border-amber-200 flex items-center justify-center bg-gradient-to-br from-emerald-400/20 to-teal-400/20"
-                whileHover={{ rotate: 180, scale: 1.1 }}
-                transition={{ duration: 0.5 }}
+
+
               >
                 <div className="text-6xl text-amber-200">⊕</div>
-              </motion.div>
+              </div>
             </HoverCard>
-          </motion.div>
+          </div>
         </div>
       </section>
 
@@ -988,19 +864,19 @@ export default function LandingPage() {
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-purple-200/20 to-pink-200/20 dark:from-purple-900/10 dark:to-pink-900/10 rounded-full blur-3xl" />
 
         <div className="max-w-6xl mx-auto relative z-10">
-          <motion.div
+          <div
             className="text-center mb-16"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={fadeInUp}
+
+
+
+
           >
-            <motion.div
+            <div
               className="inline-block bg-gradient-to-r from-emerald-100 to-teal-100 dark:from-emerald-900/30 dark:to-teal-900/30 text-emerald-700 dark:text-emerald-300 px-6 py-2 rounded-full mb-6 font-semibold text-sm tracking-wide border border-emerald-200 dark:border-emerald-800"
-              whileHover={{ scale: 1.05 }}
+
             >
               How It Works
-            </motion.div>
+            </div>
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900 dark:text-white">
               Four steps to
               <br />
@@ -1012,14 +888,14 @@ export default function LandingPage() {
               Our streamlined process makes interview prep efficient and
               effective.
             </p>
-          </motion.div>
+          </div>
 
-          <motion.div
+          <div
             className="space-y-6"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
-            variants={staggerContainer}
+
+
+
+
           >
             {[
               "Choose Your Role",
@@ -1041,25 +917,20 @@ export default function LandingPage() {
               ];
 
               return (
-                <motion.div
+                <div
                   key={index}
                   className="flex flex-col md:flex-row gap-6 items-start bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-8 shadow-sm border border-gray-200 dark:border-gray-700 group cursor-pointer"
-                  variants={staggerItem}
-                  whileHover={{
-                    scale: 1.02,
-                    x: 10,
-                    boxShadow: "0 20px 40px -15px rgba(0, 0, 0, 0.1)",
-                    borderColor: "rgb(16, 185, 129)",
-                  }}
-                  transition={{ duration: 0.3 }}
+
+
+
                 >
-                  <motion.div
+                  <div
                     className={`flex-shrink-0 w-16 h-16 bg-gradient-to-br ${gradients[index]} rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-lg`}
-                    whileHover={{ rotate: 360, scale: 1.1 }}
-                    transition={{ duration: 0.5 }}
+
+
                   >
                     0{index + 1}
-                  </motion.div>
+                  </div>
                   <div className="flex-1">
                     <h3 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                       {title}
@@ -1068,41 +939,41 @@ export default function LandingPage() {
                       {descriptions[index]}
                     </p>
                   </div>
-                  <motion.div
+                  <div
                     className="text-gray-300 dark:text-gray-600 group-hover:text-emerald-500 text-4xl hidden md:block"
-                    animate={{ x: [0, 5, 0] }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
+
+
                   >
                     →
-                  </motion.div>
-                </motion.div>
+                  </div>
+                </div>
               );
             })}
-          </motion.div>
+          </div>
         </div>
       </section>
 
       {/* Testimonials Section */}
       <section className="py-20 px-6 bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 relative overflow-hidden transition-colors duration-500">
         {/* Background effects */}
-        <motion.div
+        <div
           className="absolute top-20 left-10 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl"
-          animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0.5, 0.3] }}
-          transition={{ duration: 5, repeat: Infinity }}
+
+
         />
-        <motion.div
+        <div
           className="absolute bottom-20 right-10 w-80 h-80 bg-purple-500/5 rounded-full blur-3xl"
-          animate={{ scale: [1.2, 1, 1.2], opacity: [0.2, 0.4, 0.2] }}
-          transition={{ duration: 6, repeat: Infinity, delay: 1 }}
+
+
         />
 
         <div className="max-w-7xl mx-auto relative z-10">
-          <motion.div
+          <div
             className="text-center mb-16"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={fadeInUp}
+
+
+
+
           >
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900 dark:text-white">
               We don't gossip but some
@@ -1113,37 +984,33 @@ export default function LandingPage() {
                 some things...
               </span>
             </h2>
-          </motion.div>
+          </div>
 
-          <motion.div
+          <div
             className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
-            variants={staggerContainer}
+
+
+
+
           >
             {/* Testimonial 1 */}
-            <motion.div
+            <div
               className="bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700/50 group cursor-pointer"
-              variants={staggerItem}
-              whileHover={{
-                scale: 1.03,
-                y: -5,
-                borderColor: "rgb(16, 185, 129)",
-              }}
-              transition={{ duration: 0.3 }}
+
+
+
             >
               <p className="text-gray-600 dark:text-gray-300 mb-4">
                 "Just landed my dream job at Google! The AI feedback was
                 incredibly accurate and helped me improve my answers."
               </p>
               <div className="flex items-center gap-2">
-                <motion.div
+                <div
                   className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg"
-                  whileHover={{ scale: 1.2, rotate: 10 }}
+
                 >
                   PS
-                </motion.div>
+                </div>
                 <div>
                   <p className="text-gray-900 dark:text-white text-sm font-medium">
                     Priya Sharma
@@ -1153,30 +1020,26 @@ export default function LandingPage() {
                   </p>
                 </div>
               </div>
-            </motion.div>
+            </div>
 
             {/* Testimonial 2 */}
-            <motion.div
+            <div
               className="bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700/50 group cursor-pointer"
-              variants={staggerItem}
-              whileHover={{
-                scale: 1.03,
-                y: -5,
-                borderColor: "rgb(139, 92, 246)",
-              }}
-              transition={{ duration: 0.3 }}
+
+
+
             >
               <p className="text-gray-600 dark:text-gray-300 mb-4">
                 "The mock interviews felt so realistic! I was actually nervous
                 practicing, which helped me perform better in the real thing."
               </p>
               <div className="flex items-center gap-2">
-                <motion.div
+                <div
                   className="w-8 h-8 bg-gradient-to-br from-violet-400 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg"
-                  whileHover={{ scale: 1.2, rotate: 10 }}
+
                 >
                   RK
-                </motion.div>
+                </div>
                 <div>
                   <p className="text-gray-900 dark:text-white text-sm font-medium">
                     Rahul Kumar
@@ -1186,30 +1049,26 @@ export default function LandingPage() {
                   </p>
                 </div>
               </div>
-            </motion.div>
+            </div>
 
             {/* Testimonial 3 */}
-            <motion.div
+            <div
               className="bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700/50 group cursor-pointer"
-              variants={staggerItem}
-              whileHover={{
-                scale: 1.03,
-                y: -5,
-                borderColor: "rgb(251, 191, 36)",
-              }}
-              transition={{ duration: 0.3 }}
+
+
+
             >
               <p className="text-gray-600 dark:text-gray-300 mb-4">
                 "I went from failing interviews to getting 3 offers in 2 weeks.
                 The AI coaching is next level!"
               </p>
               <div className="flex items-center gap-2">
-                <motion.div
+                <div
                   className="w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg"
-                  whileHover={{ scale: 1.2, rotate: 10 }}
+
                 >
                   AP
-                </motion.div>
+                </div>
                 <div>
                   <p className="text-gray-900 dark:text-white text-sm font-medium">
                     Aisha Patel
@@ -1219,30 +1078,26 @@ export default function LandingPage() {
                   </p>
                 </div>
               </div>
-            </motion.div>
+            </div>
 
             {/* Testimonial 4 */}
-            <motion.div
+            <div
               className="bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700/50 group cursor-pointer"
-              variants={staggerItem}
-              whileHover={{
-                scale: 1.03,
-                y: -5,
-                borderColor: "rgb(236, 72, 153)",
-              }}
-              transition={{ duration: 0.3 }}
+
+
+
             >
               <p className="text-gray-600 dark:text-gray-300 mb-4">
                 "The role-specific questions were spot on. Got asked almost the
                 exact same questions in my Amazon interview!"
               </p>
               <div className="flex items-center gap-2">
-                <motion.div
+                <div
                   className="w-8 h-8 bg-gradient-to-br from-pink-400 to-rose-500 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg"
-                  whileHover={{ scale: 1.2, rotate: 10 }}
+
                 >
                   AS
-                </motion.div>
+                </div>
                 <div>
                   <p className="text-gray-900 dark:text-white text-sm font-medium">
                     Arjun Singh
@@ -1252,60 +1107,56 @@ export default function LandingPage() {
                   </p>
                 </div>
               </div>
-            </motion.div>
+            </div>
 
             {/* Testimonial 5 - Highlighted */}
-            <motion.div
+            <div
               className="bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 rounded-2xl p-6 shadow-lg cursor-pointer relative overflow-hidden"
-              variants={staggerItem}
-              whileHover={{ scale: 1.05, y: -8 }}
-              transition={{ duration: 0.3 }}
+
+
+
             >
-              <motion.div
+              <div
                 className="absolute inset-0 bg-white/10"
-                animate={{ x: ["-100%", "200%"] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+
+
               />
               <p className="text-white mb-4 relative z-10">
                 "Best $0 I ever spent! The free tier alone got me
                 interview-ready. Now I'm at Microsoft!"
               </p>
               <div className="flex items-center gap-2 relative z-10">
-                <motion.div
+                <div
                   className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-emerald-600 text-sm font-bold shadow-lg"
-                  whileHover={{ scale: 1.2, rotate: 10 }}
+
                 >
                   AD
-                </motion.div>
+                </div>
                 <div>
                   <p className="text-white text-sm font-medium">Ananya Desai</p>
                   <p className="text-emerald-100 text-xs">Frontend Developer</p>
                 </div>
               </div>
-            </motion.div>
+            </div>
 
             {/* Testimonial 6 */}
-            <motion.div
+            <div
               className="bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700/50 group cursor-pointer"
-              variants={staggerItem}
-              whileHover={{
-                scale: 1.03,
-                y: -5,
-                borderColor: "rgb(34, 211, 238)",
-              }}
-              transition={{ duration: 0.3 }}
+
+
+
             >
               <p className="text-gray-600 dark:text-gray-300 mb-4">
                 "The instant feedback saved me so much time. No more wondering
                 if my answers were good enough!"
               </p>
               <div className="flex items-center gap-2">
-                <motion.div
+                <div
                   className="w-8 h-8 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg"
-                  whileHover={{ scale: 1.2, rotate: 10 }}
+
                 >
                   VR
-                </motion.div>
+                </div>
                 <div>
                   <p className="text-gray-900 dark:text-white text-sm font-medium">
                     Vikram Reddy
@@ -1315,30 +1166,26 @@ export default function LandingPage() {
                   </p>
                 </div>
               </div>
-            </motion.div>
+            </div>
 
             {/* Testimonial 7 */}
-            <motion.div
+            <div
               className="bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700/50 group cursor-pointer"
-              variants={staggerItem}
-              whileHover={{
-                scale: 1.03,
-                y: -5,
-                borderColor: "rgb(16, 185, 129)",
-              }}
-              transition={{ duration: 0.3 }}
+
+
+
             >
               <p className="text-gray-600 dark:text-gray-300 mb-4">
                 "Practiced 50+ questions and got detailed feedback on each. My
                 confidence went through the roof!"
               </p>
               <div className="flex items-center gap-2">
-                <motion.div
+                <div
                   className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-green-500 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg"
-                  whileHover={{ scale: 1.2, rotate: 10 }}
+
                 >
                   SG
-                </motion.div>
+                </div>
                 <div>
                   <p className="text-gray-900 dark:text-white text-sm font-medium">
                     Sneha Gupta
@@ -1348,30 +1195,26 @@ export default function LandingPage() {
                   </p>
                 </div>
               </div>
-            </motion.div>
+            </div>
 
             {/* Testimonial 8 */}
-            <motion.div
+            <div
               className="bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700/50 group cursor-pointer"
-              variants={staggerItem}
-              whileHover={{
-                scale: 1.03,
-                y: -5,
-                borderColor: "rgb(168, 85, 247)",
-              }}
-              transition={{ duration: 0.3 }}
+
+
+
             >
               <p className="text-gray-600 dark:text-gray-300 mb-4">
                 "The analytics dashboard showed me exactly where I was weak.
                 Improved my technical depth score from 3 to 5 stars!"
               </p>
               <div className="flex items-center gap-2">
-                <motion.div
+                <div
                   className="w-8 h-8 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg"
-                  whileHover={{ scale: 1.2, rotate: 10 }}
+
                 >
                   RM
-                </motion.div>
+                </div>
                 <div>
                   <p className="text-gray-900 dark:text-white text-sm font-medium">
                     Rohan Mehta
@@ -1381,30 +1224,26 @@ export default function LandingPage() {
                   </p>
                 </div>
               </div>
-            </motion.div>
+            </div>
 
             {/* Testimonial 9 */}
-            <motion.div
+            <div
               className="bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700/50 group cursor-pointer"
-              variants={staggerItem}
-              whileHover={{
-                scale: 1.03,
-                y: -5,
-                borderColor: "rgb(244, 114, 182)",
-              }}
-              transition={{ duration: 0.3 }}
+
+
+
             >
               <p className="text-gray-600 dark:text-gray-300 mb-4">
                 "Voice practice feature is a game changer. Finally got
                 comfortable speaking my answers out loud!"
               </p>
               <div className="flex items-center gap-2">
-                <motion.div
+                <div
                   className="w-8 h-8 bg-gradient-to-br from-pink-400 to-fuchsia-500 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg"
-                  whileHover={{ scale: 1.2, rotate: 10 }}
+
                 >
                   NV
-                </motion.div>
+                </div>
                 <div>
                   <p className="text-gray-900 dark:text-white text-sm font-medium">
                     Neha Verma
@@ -1414,8 +1253,8 @@ export default function LandingPage() {
                   </p>
                 </div>
               </div>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -1425,58 +1264,54 @@ export default function LandingPage() {
         className="py-24 px-6 bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 relative overflow-hidden transition-colors duration-500"
       >
         {/* Background decorations */}
-        <motion.div
+        <div
           className="absolute top-40 -left-20 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl"
-          animate={{ scale: [1, 1.2, 1] }}
-          transition={{ duration: 6, repeat: Infinity }}
+
+
         />
-        <motion.div
+        <div
           className="absolute bottom-20 -right-20 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl"
-          animate={{ scale: [1.2, 1, 1.2] }}
-          transition={{ duration: 5, repeat: Infinity, delay: 2 }}
+
+
         />
 
         <div className="max-w-7xl mx-auto relative z-10">
-          <motion.div
+          <div
             className="text-center mb-16"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={fadeInUp}
+
+
+
+
           >
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
               Down to business.
               <br />
               Pick your plan{" "}
-              <motion.span
+              <span
                 className="inline-block"
-                animate={{ y: [0, 10, 0] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
+
+
               >
                 ↓
-              </motion.span>
+              </span>
             </h2>
-          </motion.div>
+          </div>
 
-          <motion.div
+          <div
             className="grid md:grid-cols-3 gap-8"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
-            variants={staggerContainer}
+
+
+
+
           >
             {/* Free Plan */}
-            <motion.div
+            <div
               className="bg-white dark:bg-gray-900 rounded-lg p-10 shadow-2xl border-8 border-gray-100 dark:border-gray-800 hover:border-sky-400 dark:hover:border-sky-600 flex flex-col relative overflow-hidden group cursor-pointer transition-colors duration-300"
-              variants={staggerItem}
-              whileHover={{
-                scale: 1.03,
-                y: -10,
-                boxShadow: "0 0 50px rgba(56, 189, 248, 0.3)",
-              }}
-              transition={{ duration: 0.3 }}
+
+
+
             >
-              <motion.div className="absolute inset-0 bg-gradient-to-br from-sky-400/10 via-blue-400/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute inset-0 bg-gradient-to-br from-sky-400/10 via-blue-400/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <h3 className="text-4xl font-bold text-sky-600 mb-6">Free</h3>
 
               <p className="text-gray-600 dark:text-gray-400 text-lg mb-8 pb-6 border-b border-gray-200 dark:border-gray-700">
@@ -1562,28 +1397,24 @@ export default function LandingPage() {
               >
                 Get Started
               </AnimatedButton>
-            </motion.div>
+            </div>
 
             {/* Pro Plan - Most Popular */}
-            <motion.div
+            <div
               className="bg-white dark:bg-gray-900 rounded-lg p-10 shadow-2xl border-8 border-sky-400 hover:border-sky-300 relative flex flex-col overflow-hidden group cursor-pointer transition-colors duration-300"
-              variants={staggerItem}
-              whileHover={{
-                scale: 1.05,
-                y: -15,
-                boxShadow: "0 0 60px rgba(56, 189, 248, 0.4)",
-              }}
-              transition={{ duration: 0.3 }}
+
+
+
             >
-              <motion.div
+              <div
                 className="absolute -top-1 -right-1 bg-gradient-to-r from-sky-400 to-blue-500 text-white text-xs font-bold px-4 py-1 rounded-bl-lg"
-                initial={{ x: 100 }}
-                whileInView={{ x: 0 }}
-                transition={{ delay: 0.5 }}
+
+
+
               >
                 POPULAR
-              </motion.div>
-              <motion.div className="absolute inset-0 bg-gradient-to-br from-sky-400/15 via-blue-400/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-br from-sky-400/15 via-blue-400/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="absolute -top-5 left-1/2 transform -translate-x-1/2"></div>
 
               <h3 className="text-4xl font-bold text-sky-600 mb-6">Pro</h3>
@@ -1713,20 +1544,16 @@ export default function LandingPage() {
               >
                 Start Free Trial
               </AnimatedButton>
-            </motion.div>
+            </div>
 
             {/* Enterprise Plan */}
-            <motion.div
+            <div
               className="bg-white dark:bg-gray-900 rounded-lg p-10 shadow-2xl border-8 border-gray-100 dark:border-gray-800 hover:border-sky-400 dark:hover:border-sky-600 flex flex-col relative overflow-hidden group cursor-pointer transition-colors duration-300"
-              variants={staggerItem}
-              whileHover={{
-                scale: 1.03,
-                y: -10,
-                boxShadow: "0 0 50px rgba(56, 189, 248, 0.3)",
-              }}
-              transition={{ duration: 0.3 }}
+
+
+
             >
-              <motion.div className="absolute inset-0 bg-gradient-to-br from-sky-400/10 via-blue-400/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute inset-0 bg-gradient-to-br from-sky-400/10 via-blue-400/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <h3 className="text-4xl font-bold text-sky-600 mb-6">
                 Enterprise
               </h3>
@@ -1850,8 +1677,8 @@ export default function LandingPage() {
               >
                 Contact Sales
               </AnimatedButton>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -2020,32 +1847,32 @@ export default function LandingPage() {
       {/* CTA Section */}
       <section className="py-20 px-6 bg-gradient-to-b from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 text-gray-900 dark:text-white relative overflow-hidden transition-colors duration-500">
         {/* Animated background */}
-        <motion.div
+        <div
           className="absolute inset-0 opacity-30"
           style={{
             backgroundImage: `radial-gradient(circle at 20% 50%, rgba(16, 185, 129, 0.15) 0%, transparent 50%),
                               radial-gradient(circle at 80% 50%, rgba(139, 92, 246, 0.15) 0%, transparent 50%)`,
           }}
-          animate={{ opacity: [0.2, 0.4, 0.2] }}
-          transition={{ duration: 4, repeat: Infinity }}
+
+
         />
 
         <div className="max-w-7xl mx-auto relative z-10">
-          <motion.div
+          <div
             className="flex flex-col md:flex-row items-center justify-between gap-12"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={fadeInUp}
+
+
+
+
           >
             <div className="flex-1">
               <h2 className="text-4xl md:text-5xl font-bold mb-4">
-                <motion.span
+                <span
                   className="bg-gradient-to-r from-emerald-500 to-teal-500 px-3 py-1 rounded inline-block text-white"
-                  whileHover={{ scale: 1.05 }}
+
                 >
                   Intervyo
-                </motion.span>{" "}
+                </span>{" "}
                 is the only
                 <br />
                 prep tool you'll ever need
@@ -2056,19 +1883,19 @@ export default function LandingPage() {
                 tech jobs.
               </p>
             </div>
-            <motion.div className="flex-shrink-0" whileHover={{ scale: 1.05 }}>
+            <div className="flex-shrink-0">
               <AnimatedButton
                 onClick={() => navigate("/register")}
                 className="px-8 py-4 bg-gray-900 dark:bg-white text-white dark:text-sky-900 rounded-xl font-semibold text-lg flex items-center gap-2"
               >
                 Get Started{" "}
-                <motion.span
-                  animate={{ x: [0, 5, 0] }}
-                  transition={{ duration: 1, repeat: Infinity }}
-                ></motion.span>
+                <span
+
+
+                ></span>
               </AnimatedButton>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         </div>
       </section>
       {/* Close bg-skin-primary wrapper */}

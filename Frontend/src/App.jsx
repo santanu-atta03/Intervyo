@@ -1,6 +1,5 @@
 import { Suspense, lazy, useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
-import { ClerkProvider } from "@clerk/react";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import ScrollToTop from "./components/shared/ScrollToTopButton";
@@ -8,8 +7,6 @@ import Footer from "./components/shared/Footer";
 import ScrollToTopOnRouteChange from "./components/shared/ScrollToTopOnRouteChange";
 import Navbar from "./components/Navbar";
 import VoiceflowChatbot from "./components/Chatbot/VoiceflowChatbot";
-
-const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 const Landing = lazy(() => import("./pages/Landing"));
 const Login = lazy(() => import("./pages/Login"));
@@ -209,11 +206,7 @@ function App() {
     </>
   );
 
-  if (!CLERK_PUBLISHABLE_KEY) {
-    return appContent;
-  }
-
-  return <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY}>{appContent}</ClerkProvider>;
+  return appContent;
 }
 
 export default App;
