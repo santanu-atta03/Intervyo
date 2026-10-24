@@ -1,24 +1,4 @@
 User-agent: *
 Allow: /
-Allow: /blog/
-Allow: /about
-Allow: /faq
-Allow: /pricing
-Allow: /contact
-
-# Disallow private and protected routes
-Disallow: /dashboard/
-Disallow: /settings/
-Disallow: /analytics/
-Disallow: /history/
-Disallow: /achievements/
-Disallow: /interview-setup/
-Disallow: /interview/
-Disallow: /results/
-Disallow: /advanced-features/
-Disallow: /practice-lab/
-Disallow: /resources/
-Disallow: /auth/callback
-Disallow: /verify-email
 
 Sitemap: https://intervyo.xyz/sitemap.xml

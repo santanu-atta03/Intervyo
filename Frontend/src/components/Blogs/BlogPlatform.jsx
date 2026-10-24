@@ -6,7 +6,7 @@ import {
   ChevronRight, Sparkles, X, ArrowLeft, Send, MoreVertical, Star,
   BookOpen
 } from 'lucide-react';
-import { motion, useScroll, useSpring, AnimatePresence } from 'framer-motion';
+import { useScroll, useSpring, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { BLOG_DATA } from '../../data/blogData';
 
@@ -911,6 +911,7 @@ export default function BlogPlatform() {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(slug ? "detail" : "list");
   const [selectedBlog, setSelectedBlog] = useState(null);
+  const [blogNotFound, setBlogNotFound] = useState(false);
   const [blogs, setBlogs] = useState([]);
   const [featuredBlogs, setFeaturedBlogs] = useState([]);
   const [popularTags, setPopularTags] = useState([]);
@@ -937,10 +938,12 @@ const blogTheme = theme === "dark" ? "dark" : "light";
     fetchPopularTags();
     
     if (slug) {
+      setBlogNotFound(false);
       viewBlog(slug);
     } else {
       setCurrentPage("list");
       setSelectedBlog(null);
+      setBlogNotFound(false);
     }
   }, [searchQuery, selectedTag, sortBy, currentPageNum, slug]);
 
@@ -1044,6 +1047,8 @@ const blogTheme = theme === "dark" ? "dark" : "light";
         if (foundBlog) {
           setSelectedBlog(foundBlog);
           setCurrentPage("detail");
+        } else {
+          setBlogNotFound(true);
         }
       }
     } catch (error) {
@@ -1053,6 +1058,8 @@ const blogTheme = theme === "dark" ? "dark" : "light";
       if (foundBlog) {
         setSelectedBlog(foundBlog);
         setCurrentPage("detail");
+      } else {
+        setBlogNotFound(true);
       }
     }
   };
@@ -1060,6 +1067,12 @@ const blogTheme = theme === "dark" ? "dark" : "light";
   return (
   <div className="blog-root" data-blog-theme={blogTheme}>
     <style>{BLOG_CSS}</style>
+    <Helmet>
+      <meta
+        name="robots"
+        content={slug && !selectedBlog && !blogNotFound ? "noindex, follow" : "index, follow"}
+      />
+    </Helmet>
 
     <BlogHeader
       onCreateBlog={() => setCurrentPage("create")}
@@ -1100,6 +1113,25 @@ const blogTheme = theme === "dark" ? "dark" : "light";
         }}
         onEdit={() => setCurrentPage("edit")}
       />
+    )}
+
+    {currentPage === "detail" && blogNotFound && (
+      <main className="blog-main">
+        <div className="blog-container">
+          <h1>Article not found</h1>
+          <p>This article may have been removed or the address may be incorrect.</p>
+          <button
+            type="button"
+            className="blog-btn blog-btn-secondary"
+            onClick={() => {
+              setCurrentPage("list");
+              navigate("/blog");
+            }}
+          >
+            Back to articles
+          </button>
+        </div>
+      </main>
     )}
 
     {currentPage === "create" && (
@@ -1528,12 +1560,20 @@ function BlogDetail({ blog, currentUser, onBack, onEdit }) {
   return (
     <main className="blog-detail">
       <Helmet>
-        <title>{blog.title} | Intervyo Blog</title>
+        <title>{blog.title} | Intervyo</title>
         <meta
           name="description"
           content={
             blog.excerpt || blog.content?.substring(0, 160)
           }
+        />
+        <link
+          rel="canonical"
+          href={`https://intervyo.xyz/blog/${blog.slug}`}
+        />
+        <meta
+          property="og:url"
+          content={`https://intervyo.xyz/blog/${blog.slug}`}
         />
       </Helmet>
 

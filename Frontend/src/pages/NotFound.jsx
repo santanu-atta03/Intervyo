@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { Helmet } from "react-helmet-async";
 
 const NotFound = () => {
   const [animate, setAnimate] = useState(false);
@@ -139,6 +140,11 @@ const NotFound = () => {
   };
 
   return (
+    <>
+      <Helmet>
+        <title>Page not found | Intervyo</title>
+        <meta name="robots" content="noindex, follow" />
+      </Helmet>
     <div style={styles.container}>
       {/* Subtle gradient background */}
       <div style={styles.gradientBg}></div>
@@ -305,6 +311,7 @@ const NotFound = () => {
         © {new Date().getFullYear()} Intervyo. All rights reserved.
       </div>
     </div>
+    </>
   );
 };
 

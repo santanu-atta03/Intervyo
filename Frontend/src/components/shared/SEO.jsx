@@ -17,14 +17,14 @@ const SEO = ({ title, description, canonical, ogType, ogImage, twitterHandle }) 
       <meta property="og:type" content={ogType || "website"} />
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={description || defaultDescription} />
-      <meta property="og:image" content={ogImage || `${siteUrl}/og-image.png`} />
+      <meta property="og:image" content={ogImage || `${siteUrl}/intervyologo.png`} />
       <meta property="og:url" content={`${siteUrl}${canonical || ""}`} />
 
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={description || defaultDescription} />
-      <meta name="twitter:image" content={ogImage || `${siteUrl}/og-image.png`} />
+      <meta name="twitter:image" content={ogImage || `${siteUrl}/intervyologo.png`} />
       {twitterHandle && <meta name="twitter:site" content={twitterHandle} />}
     </Helmet>
   );
