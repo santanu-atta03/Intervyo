@@ -90,9 +90,111 @@ export default function LandingPage() {
   const [selectedTrack, setSelectedTrack] = useState("pro");
   const [openFaq, setOpenFaq] = useState(null);
 
-  const toggleFaq = (index) => {
-    setOpenFaq(openFaq === index ? null : index);
-  };
+  const reducedMotion = useMemo(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    []
+  );
+
+  useEffect(() => {
+    if (reducedMotion) {
+      return undefined;
+    }
+
+    const ctx = gsap.context(() => {
+      const heroText = gsap.utils.toArray(".hero-reveal");
+      gsap.from(heroText, {
+        y: 42,
+        opacity: 0,
+        duration: 0.95,
+        stagger: 0.14,
+        ease: Ease,
+      });
+
+      gsap.from(".hero-image", {
+        scale: 1.08,
+        opacity: 0,
+        duration: 1.15,
+        ease: Ease,
+      });
+
+      gsap.to(".hero-image", {
+        yPercent: 8,
+        ease: "none",
+        scrollTrigger: {
+          trigger: heroRef.current,
+          start: "top top",
+          end: "bottom top",
+          scrub: true,
+        },
+      });
+
+      const localSteps = gsap.utils.toArray(".timeline-step");
+      if (pinRef.current && localSteps.length > 0) {
+        ScrollTrigger.create({
+          trigger: pinRef.current,
+          start: "top top",
+          end: "+=220%",
+          pin: true,
+          scrub: 1,
+          onUpdate: (self) => {
+            const idx = Math.min(
+              localSteps.length - 1,
+              Math.floor(self.progress * localSteps.length)
+            );
+            setStepIndex(idx);
+          },
+        });
+
+        gsap.from(localSteps, {
+          opacity: 0,
+          y: 32,
+          stagger: 0.2,
+          duration: 0.9,
+          ease: Ease,
+          scrollTrigger: {
+            trigger: pinRef.current,
+            start: "top 60%",
+          },
+        });
+      }
+
+      if (horizontalRef.current && trackRef.current) {
+        const cards = gsap.utils.toArray(".story-card");
+        if (cards.length > 1) {
+          gsap.to(trackRef.current, {
+            xPercent: -100 * (cards.length - 1),
+            ease: "none",
+            scrollTrigger: {
+              trigger: horizontalRef.current,
+              start: "top top",
+              end: () => `+=${cards.length * 420}`,
+              scrub: 1,
+              pin: true,
+              anticipatePin: 1,
+            },
+          });
+        }
+      }
+
+      gsap.from(".fade-up", {
+        y: 35,
+        opacity: 0,
+        duration: 0.9,
+        stagger: 0.1,
+        ease: Ease,
+        scrollTrigger: {
+          trigger: ".fade-up-wrap",
+          start: "top 70%",
+        },
+      });
+    }, rootRef);
+
+    return () => ctx.revert();
+  }, [reducedMotion]);
+
+  const currentStep = steps[stepIndex] || steps[0];
 
   const highlights = [
     {
