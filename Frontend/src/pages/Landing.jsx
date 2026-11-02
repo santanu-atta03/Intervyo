@@ -1,1315 +1,2041 @@
-import { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  ChevronDown,
   ArrowRight,
+  Play,
   Check,
+  ChevronDown,
   ChevronRight,
-  Sparkles,
+  X,
+  Search,
+  ExternalLink,
+  Mic,
+  ArrowLeft,
 } from "lucide-react";
-import {
-  motion,
-  useScroll,
-  useTransform,
-  useSpring,
-  useInView,
-  AnimatePresence,
-} from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import Lenis from "@studio-freight/lenis";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import SEO from "../components/shared/SEO";
-import LaptopScrollStage from "../components/Landing/LaptopScrollStage";
+import "../pages/Landing.css";
+gsap.registerPlugin(ScrollTrigger);
 
-// ─── Shared animation variants ───────────────────────────────────────────────
-const fadeUp = {
-  hidden: { opacity: 0, y: 32 },
-  show: (delay = 0) => ({
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.75, delay, ease: [0.16, 1, 0.3, 1] },
-  }),
+
+// ─── Visual Assets ─────────────────────────────────────────────────────────────
+const ASSETS = {
+  heroPoster: "https://cdn.ploy.ai/d21bf4ad-2458-43ee-9561-54c28ab0e85f/user/7193d190-pasted-image-1775832091224.webp",
+  announcementThumb: "https://i.ytimg.com/vi/NONVS2IoDQE/mqdefault.jpg",
+  balloonGreen: "https://cdn.ploy.ai/d21bf4ad-2458-43ee-9561-54c28ab0e85f/user/dda2ec24-green-balloon-poster.webp",
+  balloonPink: "https://cdn.ploy.ai/d21bf4ad-2458-43ee-9561-54c28ab0e85f/user/f7d53b84-pink-balloon-poster.webp",
+  balloonYellow: "https://cdn.ploy.ai/d21bf4ad-2458-43ee-9561-54c28ab0e85f/user/d3abd16c-yellow-balloon-poster.webp",
+  balloonBlue: "https://cdn.ploy.ai/d21bf4ad-2458-43ee-9561-54c28ab0e85f/user/0666fd88-blue-balloon-poster.webp",
+  macbookMockup: "/intervyo-macbook.jpg",
+  micImage: "/podcast_mic_clean.png",
+  logos: [
+    { name: "Google" },
+    { name: "Meta" },
+    { name: "Stripe" },
+    { name: "Amazon" },
+    { name: "Apple" },
+    { name: "Netflix" },
+    { name: "OpenAI" },
+    { name: "Uber" },
+    { name: "Datadog" },
+    { name: "Microsoft" },
+    { name: "Hex" },
+    { name: "CodeCrafters" },
+  ],
 };
 
-const staggerContainer = {
-  hidden: {},
-  show: {
-    transition: {
-      staggerChildren: 0.12,
-      delayChildren: 0.05,
-    },
+// ─── IntervyoBooks (Curated Interview Playbooks) ───────────────────────────────
+const INTERVYO_BOOKS = [
+  {
+    title: "Meta E5 System Design Blitz",
+    author: "Bryant Chou",
+    role: "Former Webflow CTO & Systems Architect",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&h=120&q=80",
+    desc: "A composition-obsessed workflow for defending high-throughput systems under real interviewer pushback — partition strategies, write-through caches, and failure isolation.",
+    accent: "bg-[#D1F48C] text-[#273416]",
+    badge: "System Design",
   },
-};
+  {
+    title: "Google L5 AST Hard Gauntlet",
+    author: "Corey Haines",
+    role: "Algorithm & Optimization Lead",
+    avatar: "https://cdn.ploy.ai/d21bf4ad-2458-43ee-9561-54c28ab0e85f/user/87f82a81-corey-haines.webp",
+    desc: "Two-phase workflow for shipping production-grade algorithmic code. Automatically evaluates cyclomatic AST complexity, boundary fuzzing, and hidden edge cases.",
+    accent: "bg-[#C3DBFF] text-[#0A0D27]",
+    badge: "Algorithms",
+  },
+  {
+    title: "Stripe Idempotent API Architecture",
+    author: "Julian Shapiro",
+    role: "Systems & Conversion Specialist",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&h=120&q=80",
+    desc: "Audit and defend critical financial state machines. Single-flight request coalescing, distributed lock leases, and webhook delivery guarantees.",
+    accent: "bg-[#FFFA64] text-[#441F16]",
+    badge: "Financial APIs",
+  },
+  {
+    title: "Amazon 16 Leadership Principles & STAR",
+    author: "Eliana Atia",
+    role: "Executive Talent Bar Raiser",
+    avatar: "https://cdn.ploy.ai/d21bf4ad-2458-43ee-9561-54c28ab0e85f/user/12c26ff8-ployee-eliana-atia.webp",
+    desc: "Turn messy work history into structured, executive-grade STAR answers. Measures vocal brevity, inflection, and cadence without fluff.",
+    accent: "bg-[#FFB8FC] text-[#9A0103]",
+    badge: "Behavioral",
+  },
+  {
+    title: "Executive Brevity & Communication",
+    author: "Lorenzo Gentile",
+    role: "Staff Engineering Director",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=120&h=120&q=80",
+    desc: "Learn to answer Staff+ tradeoff questions in 45 seconds or less. Eliminates rambling, circular explanations, and unprompted monologues.",
+    accent: "bg-[#D1F48C] text-[#273416]",
+    badge: "Communication",
+  },
+  {
+    title: "Staff+ Architecture & Tradeoff Defense",
+    author: "Neel Murthy",
+    role: "Principal Infrastructure Lead",
+    avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=120&h=120&q=80",
+    desc: "The full architectural review gauntlet — multi-region disaster recovery, CAP concessions, and justifying tech debt to hiring committees.",
+    accent: "bg-[#C3DBFF] text-[#0A0D27]",
+    badge: "Principal",
+  },
+  {
+    title: "Distributed Consensus: Raft vs Paxos",
+    author: "Omid Ghiam",
+    role: "Distributed Storage Architect",
+    avatar: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=120&h=120&q=80",
+    desc: "Deep-dive drill covering leader election failures, log compaction, network partitions, and quorum leases with simulated split-brain attacks.",
+    accent: "bg-[#FFB8FC] text-[#9A0103]",
+    badge: "Consensus",
+  },
+  {
+    title: "High-Concurrency Deadlock Defense",
+    author: "Emre Kavaloglu",
+    role: "Senior Performance Engineer",
+    avatar: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=120&h=120&q=80",
+    desc: "Live code debugging session exposing race conditions, thread starvation, lock contention, and optimistic concurrency ceilings under load.",
+    accent: "bg-[#FFFA64] text-[#441F16]",
+    badge: "Concurrency",
+  },
+  {
+    title: "Event-Driven Microservices at Scale",
+    author: "Jack Gashi",
+    role: "Cloud Infrastructure Architect",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&h=120&q=80",
+    desc: "Architect outbox patterns, Kafka consumer rebalancing, dead-letter queues, and exactly-once processing semantics for enterprise systems.",
+    accent: "bg-[#D1F48C] text-[#273416]",
+    badge: "Microservices",
+  },
+];
 
-const staggerItem = {
-  hidden: { opacity: 0, y: 28 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } },
-};
+// ─── Overnight Activity Feed ───────────────────────────────────────────────────
+const OVERNIGHT_FEED = [
+  {
+    time: "11:42 PM",
+    tag: "Performance",
+    tagColor: "bg-violet-500/20 text-violet-300 border-violet-500/30",
+    agent: "@performance",
+    action: "Your system design answers improved by 18%",
+    detail: "Distributed caching and CAP concessions defended crisply without circular rambling.",
+  },
+  {
+    time: "01:15 AM",
+    tag: "Communication",
+    tagColor: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30",
+    agent: "@voice",
+    action: "AI detected hesitation during behavioral questions",
+    detail: "Vocal hesitation stall on conflict resolution lasted 3.1s. Generated a 25-second STAR pacing drill.",
+  },
+  {
+    time: "03:08 AM",
+    tag: "Communication",
+    tagColor: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
+    agent: "@telemetry",
+    action: "Your communication score increased to 86",
+    detail: "Filler words decreased from 4.2/min to 0.9/min across 3 consecutive mock sessions.",
+  },
+  {
+    time: "04:33 AM",
+    tag: "Technical",
+    tagColor: "bg-amber-500/20 text-amber-300 border-amber-500/30",
+    agent: "@compiler",
+    action: "Three technical weaknesses identified",
+    detail: "Flagged lock contention ceiling and memory allocation overhead in concurrent worker pool.",
+  },
+  {
+    time: "06:22 AM",
+    tag: "Readiness",
+    tagColor: "bg-violet-500/20 text-violet-300 border-violet-500/30",
+    agent: "@evaluator",
+    action: "Your frontend interview readiness has improved",
+    detail: "Virtual DOM diffing and state hydration scored 95/100 against Meta Staff Engineer rubrics.",
+  },
+  {
+    time: "07:55 AM",
+    tag: "Intelligence",
+    tagColor: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30",
+    agent: "@intel",
+    action: "Updated Google L5 question banks from 2026 reports",
+    detail: "Integrated 8 new distributed consensus scenarios reported by candidates this week.",
+  },
+];
 
-// ─── Animated counter hook ───────────────────────────────────────────────────
-function AnimatedCounter({ target, suffix = "", prefix = "", decimals = 0 }) {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-60px" });
-  const [count, setCount] = useState(0);
-
-  useState(() => {
-    if (!isInView) return;
-    let start = 0;
-    const end = target;
-    const duration = 1800;
-    const step = 16;
-    const increment = end / (duration / step);
-    const timer = setInterval(() => {
-      start += increment;
-      if (start >= end) {
-        setCount(end);
-        clearInterval(timer);
-      } else {
-        setCount(Math.floor(start));
-      }
-    }, step);
-    return () => clearInterval(timer);
-  });
-
-  return (
-    <span ref={ref}>
-      {prefix}{isInView ? count.toFixed(decimals) : 0}{suffix}
-    </span>
-  );
-}
-
-// Curated high-resolution editorial photography (Studio dark hardware & tech imagery)
-const IMAGES = {
-  heroStage: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1800&q=85",
-  voiceEngine: "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?auto=format&fit=crop&w=1400&q=85",
-  codeSandbox: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1400&q=85",
-  systemArch: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1400&q=85",
-  candidateStudio: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=1400&q=85",
-};
+// ─── Ecosystem Partners ────────────────────────────────────────────────────────
+const INTEGRATIONS_LIST = [
+  "LeetCode", "GitHub", "VS Code", "HackerRank", "Codeforces", "Terminal", "Docker",
+  "PostgreSQL", "Redis", "Kafka", "Kubernetes", "TypeScript", "Python", "Go",
+  "Java", "C++", "Rust", "Claude", "ChatGPT", "Cursor", "Notion", "Linear", "Slack",
+  "Stripe", "Supabase", "Datadog", "AWS", "Google Cloud", "Azure", "GraphQL"
+];
 
 export default function LandingPage() {
   const navigate = useNavigate();
-  const [activeHighlight, setActiveHighlight] = useState(0);
-  const [selectedTrack, setSelectedTrack] = useState("pro");
-  const [openFaq, setOpenFaq] = useState(null);
+  const [videoModalOpen, setVideoModalOpen] = useState(false);
+  const [urlInput, setUrlInput] = useState("");
+  const [activePunchcard, setActivePunchcard] = useState(0);
+  const heroRef = useRef(null);
+  const scrollFillRef = useRef(null);
+  const playbooksScrollRef = useRef(null);
 
-  const reducedMotion = useMemo(
-    () =>
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-    []
-  );
+  const scrollPlaybooks = (direction) => {
+    if (playbooksScrollRef.current) {
+      const scrollAmount = direction === "left" ? -350 : 350;
+      playbooksScrollRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+    }
+  };
+
+  // Dynamic live metrics ticker for Section 2 (Interview Stats)
+  const [liveMetrics, setLiveMetrics] = useState({
+    interviews: 42,
+    avgScore: 91,
+    questions: 340,
+    trend: 28,
+    analysisScore: 88,
+    techAccuracy: 94,
+    confidence: 88,
+    weaknesses: 2,
+    offerBump: 54,
+    skills: 14,
+    streak: 18,
+    readiness: 96,
+  });
 
   useEffect(() => {
-    if (reducedMotion) {
-      return undefined;
+    const timer = setInterval(() => {
+      setLiveMetrics((prev) => ({
+        interviews: prev.interviews >= 99 ? 42 : prev.interviews + 1,
+        avgScore: Math.min(98, prev.avgScore + (Math.random() > 0.6 ? 1 : 0)),
+        questions: prev.questions + Math.floor(Math.random() * 3) + 1,
+        trend: Math.min(38, prev.trend + (Math.random() > 0.65 ? 1 : 0)),
+        analysisScore: Math.min(99, prev.analysisScore + (Math.random() > 0.5 ? 1 : 0)),
+        techAccuracy: Math.min(99, prev.techAccuracy + (Math.random() > 0.7 ? 1 : 0)),
+        confidence: Math.min(96, prev.confidence + (Math.random() > 0.5 ? 1 : 0)),
+        weaknesses: 2,
+        offerBump: prev.offerBump + (Math.random() > 0.7 ? 1 : 0),
+        skills: Math.min(24, prev.skills + (Math.random() > 0.8 ? 1 : 0)),
+        streak: prev.streak,
+        readiness: Math.min(99, prev.readiness + (Math.random() > 0.75 ? 1 : 0)),
+      }));
+    }, 2800);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Silky-smooth GPU conveyor ticker for Section 5B (zero lag, 60/120fps compositor)
+  const [feedIndex, setFeedIndex] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+
+  useEffect(() => {
+    if (isPaused) return;
+
+    let animTimeout;
+    const interval = setInterval(() => {
+      setIsAnimating(true);
+      animTimeout = setTimeout(() => {
+        setFeedIndex((prev) => (prev + 1) % OVERNIGHT_FEED.length);
+        setIsAnimating(false);
+      }, 650);
+    }, 3200);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(animTimeout);
+    };
+  }, [isPaused]);
+
+  // Initialize Lenis Smooth Scroll
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+    });
+
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
     }
+    requestAnimationFrame(raf);
+
+    return () => lenis.destroy();
+  }, []);
+
+  // Scroll-Triggered Text Fill Scrub for Headline
+  useEffect(() => {
+    if (!scrollFillRef.current) return;
+    const lines = scrollFillRef.current.querySelectorAll(".scroll-fill-line");
 
     const ctx = gsap.context(() => {
-      const heroText = gsap.utils.toArray(".hero-reveal");
-      gsap.from(heroText, {
-        y: 42,
-        opacity: 0,
-        duration: 0.95,
-        stagger: 0.14,
-        ease: Ease,
-      });
-
-      gsap.from(".hero-image", {
-        scale: 1.08,
-        opacity: 0,
-        duration: 1.15,
-        ease: Ease,
-      });
-
-      gsap.to(".hero-image", {
-        yPercent: 8,
-        ease: "none",
-        scrollTrigger: {
-          trigger: heroRef.current,
-          start: "top top",
-          end: "bottom top",
-          scrub: true,
-        },
-      });
-
-      const localSteps = gsap.utils.toArray(".timeline-step");
-      if (pinRef.current && localSteps.length > 0) {
+      lines.forEach((line) => {
         ScrollTrigger.create({
-          trigger: pinRef.current,
-          start: "top top",
-          end: "+=220%",
-          pin: true,
-          scrub: 1,
+          trigger: line,
+          start: "top 80%",
+          end: "bottom 45%",
+          scrub: 0.5,
           onUpdate: (self) => {
-            const idx = Math.min(
-              localSteps.length - 1,
-              Math.floor(self.progress * localSteps.length)
-            );
-            setStepIndex(idx);
+            const pct = Math.min(100, Math.max(0, self.progress * 100));
+            line.style.setProperty("--progress", `${pct}%`);
           },
         });
-
-        gsap.from(localSteps, {
-          opacity: 0,
-          y: 32,
-          stagger: 0.2,
-          duration: 0.9,
-          ease: Ease,
-          scrollTrigger: {
-            trigger: pinRef.current,
-            start: "top 60%",
-          },
-        });
-      }
-
-      if (horizontalRef.current && trackRef.current) {
-        const cards = gsap.utils.toArray(".story-card");
-        if (cards.length > 1) {
-          gsap.to(trackRef.current, {
-            xPercent: -100 * (cards.length - 1),
-            ease: "none",
-            scrollTrigger: {
-              trigger: horizontalRef.current,
-              start: "top top",
-              end: () => `+=${cards.length * 420}`,
-              scrub: 1,
-              pin: true,
-              anticipatePin: 1,
-            },
-          });
-        }
-      }
-
-      gsap.from(".fade-up", {
-        y: 35,
-        opacity: 0,
-        duration: 0.9,
-        stagger: 0.1,
-        ease: Ease,
-        scrollTrigger: {
-          trigger: ".fade-up-wrap",
-          start: "top 70%",
-        },
       });
-    }, rootRef);
+    }, scrollFillRef);
 
     return () => ctx.revert();
-  }, [reducedMotion]);
+  }, []);
 
-  const currentStep = steps[stepIndex] || steps[0];
+  const handleStartDrill = (e) => {
+    e?.preventDefault();
+    const query = urlInput.trim() || "Staff Software Engineer";
+    navigate(`/interview-setup?role=${encodeURIComponent(query)}`);
+  };
 
-  const highlights = [
-    {
-      title: "Conversational Voice Engine.",
-      subtitle: "Zero-latency acoustic turn-taking.",
-      desc: "An ultra-low latency (<180ms) bidirectional audio pipeline that simulates real interviewer pressure. It listens, interrupts when arguments falter, and probes deeper into architectural trade-offs.",
-      image: IMAGES.voiceEngine,
-      tag: "Neural Speech Architecture",
-    },
-    {
-      title: "Real-time AST Code Compiler.",
-      subtitle: "Instant edge-case & complexity analysis.",
-      desc: "Execute code across 20+ programming languages inside a hermetically isolated WebAssembly container. Evaluates cyclomatic complexity O(n), memory allocation ceilings, and hidden boundary conditions.",
-      image: IMAGES.codeSandbox,
-      tag: "Execution Sandbox",
-    },
-    {
-      title: "Distributed System Whiteboard.",
-      subtitle: "Architectures measured at scale.",
-      desc: "Simulate multi-region fault tolerance, distributed cache synchronization, and CAP theorem trade-offs. Calibrated directly to the rubric sheets used by Big Tech hiring committees.",
-      image: IMAGES.systemArch,
-      tag: "System Modeling",
-    },
-  ];
+  // Dynamic interview performance graph
+  const interviewHistory = liveMetrics.interviewHistory || [];
 
-  // Hero parallax
-  const heroRef = useRef(null);
-  const { scrollYProgress: heroScroll } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"],
-  });
-  const heroTextY = useTransform(heroScroll, [0, 1], [0, -60]);
-  const heroTextOpacity = useTransform(heroScroll, [0, 0.6], [1, 0]);
-  const heroImageY = useTransform(heroScroll, [0, 1], [0, 50]);
-  const heroImageSpring = useSpring(heroImageY, { stiffness: 50, damping: 18 });
+  // Generate fallback data if historical data is unavailable
+  const graphData =
+    interviewHistory.length >= 2
+      ? interviewHistory
+      : Array.from({ length: 12 }, (_, i) => {
+        const progress = (i + 1) / 12;
+        return liveMetrics.interviews * progress;
+      });
 
+  const maxValue = Math.max(...graphData, 1);
+  const minValue = Math.min(...graphData);
+
+  const points = graphData.map((value, index) => ({
+    x: (index / (graphData.length - 1)) * 100,
+    y: 35 - ((value - minValue) / (maxValue - minValue || 1)) * 29,
+  }));
+
+  // Smooth curve using cubic Bézier
+  const createSmoothPath = (points) => {
+    if (points.length < 2) return "";
+
+    return points.reduce((path, point, index, arr) => {
+      if (index === 0) return `M ${point.x} ${point.y}`;
+
+      const previous = arr[index - 1];
+      const controlX = (previous.x + point.x) / 2;
+
+      return `${path} C ${controlX} ${previous.y}, ${controlX} ${point.y}, ${point.x} ${point.y}`;
+    }, "");
+  };
+
+  const sparklineLinePath = createSmoothPath(points);
+
+  const sparklineAreaPath = `
+  ${sparklineLinePath}
+  L 100 40
+  L 0 40
+  Z
+`;
+
+  // Dynamic Career Progress Sparkline
+  const careerHistory = liveMetrics.careerHistory || [];
+
+  const careerGraphData =
+    careerHistory.length >= 2
+      ? careerHistory
+      : Array.from({ length: 12 }, (_, i) => {
+        const progress = (i + 1) / 12;
+        return liveMetrics.offerBump * progress;
+      });
+
+  const careerMaxValue = Math.max(...careerGraphData, 1);
+  const careerMinValue = Math.min(...careerGraphData);
+
+  const careerPoints = careerGraphData.map((value, index) => ({
+    x: (index / (careerGraphData.length - 1)) * 100,
+    y:
+      35 -
+      ((value - careerMinValue) /
+        (careerMaxValue - careerMinValue || 1)) *
+      29,
+  }));
+
+  const createCareerPath = (points) => {
+    if (points.length < 2) return "";
+
+    return points.reduce((path, point, index, arr) => {
+      if (index === 0) return `M ${point.x} ${point.y}`;
+
+      const previous = arr[index - 1];
+      const controlX = (previous.x + point.x) / 2;
+
+      return `${path} C ${controlX} ${previous.y}, ${controlX} ${point.y}, ${point.x} ${point.y}`;
+    }, "");
+  };
+
+  const careerLinePath = createCareerPath(careerPoints);
+
+  const careerAreaPath = `
+  ${careerLinePath}
+  L 100 40
+  L 0 40
+  Z
+`;
+  // Dynamic AI Analysis Sparkline
+  const analysisHistory = liveMetrics.analysisHistory || [];
+
+  const analysisGraphData =
+    analysisHistory.length >= 2
+      ? analysisHistory
+      : Array.from({ length: 12 }, (_, i) => {
+        const progress = (i + 1) / 12;
+        return liveMetrics.analysisScore * progress;
+      });
+
+  const analysisMaxValue = Math.max(...analysisGraphData, 1);
+  const analysisMinValue = Math.min(...analysisGraphData);
+
+  const analysisPoints = analysisGraphData.map((value, index) => ({
+    x: (index / (analysisGraphData.length - 1)) * 100,
+    y:
+      35 -
+      ((value - analysisMinValue) /
+        (analysisMaxValue - analysisMinValue || 1)) *
+      29,
+  }));
+
+  const createAnalysisPath = (points) => {
+    if (points.length < 2) return "";
+
+    return points.reduce((path, point, index, arr) => {
+      if (index === 0) return `M ${point.x} ${point.y}`;
+
+      const previous = arr[index - 1];
+      const controlX = (previous.x + point.x) / 2;
+
+      return `${path} C ${controlX} ${previous.y}, ${controlX} ${point.y}, ${point.x} ${point.y}`;
+    }, "");
+  };
+
+  const analysisLinePath = createAnalysisPath(analysisPoints);
+
+  const analysisAreaPath = `
+  ${analysisLinePath}
+  L 100 40
+  L 0 40
+  Z
+`;
   return (
-    <div className="apple-root bg-[#000000] text-[#f5f5f7] selection:bg-[#0071e3] selection:text-white antialiased font-['Inter',-apple-system,BlinkMacSystemFont,sans-serif]">
+    <div className="min-h-screen bg-[#0A0D12] text-[#F3F4F6] font-sans antialiased selection:bg-white selection:text-black">
       <SEO
-        title="Intervyo Pro | The Midnight Hardware Gallery for AI Interview Mastery"
-        description="Master tech interviews on an exhibition-grade black stage. Sub-180ms voice simulation, live AST code execution, and Big Tech rubric telemetry on Intervyo."
+        title="Intervyo | Autonomous AI Interview & Career Growth Platform"
+        description="Your interview prep should be working harder than you are. Intervyo is the autonomous platform that turns your prep into an unfair career advantage."
         canonical="/"
       />
 
-      {/* Apple Design Tokens & Micro Styles */}
+      {/* ── FK Screamer & Micro Styles ── */}
       <style>{`
-        :root {
-          --color-obsidian: #000000;
-          --color-graphite: #0e0e0e;
-          --color-carbon: #1d1d1f;
-          --color-steel: #333336;
-          --color-slate: #6e6e73;
-          --color-ash: #86868b;
-          --color-porcelain: #f5f5f7;
-          --color-white: #ffffff;
-          --color-apple-blue: #0071e3;
-          --color-electric-link: #2997ff;
-          --color-cobalt-link: #0066cc;
-          --color-copper-new: #b64400;
-          --color-optical-yellow: #ffd500;
+        @font-face {
+          font-family: 'FK Screamer';
+          src: url('https://cdn.ploy.ai/d21bf4ad-2458-43ee-9561-54c28ab0e85f/user/4b73ec13-fkscreamer.woff2') format('woff2');
+          font-weight: 100 900;
+          font-style: normal;
+          font-display: swap;
         }
 
-        /* Apple SF Pro Display Typography with compact negative tracking */
-        .apple-display-xl {
-          font-size: clamp(48px, 8vw, 96px);
-          font-weight: 600;
-          line-height: 1.04;
-          letter-spacing: -1.44px;
+        .font-heading {
+          font-family: 'FK Screamer', 'Impact', -apple-system, sans-serif;
+          letter-spacing: -0.02em;
         }
 
-        .apple-display {
-          font-size: clamp(40px, 6vw, 80px);
-          font-weight: 600;
-          line-height: 1.05;
-          letter-spacing: -1.2px;
+        @keyframes marquee {
+          0% { transform: translateX(0%); }
+          100% { transform: translateX(-50%); }
         }
 
-        .apple-display-md {
-          font-size: clamp(32px, 4.5vw, 56px);
-          font-weight: 600;
-          line-height: 1.08;
-          letter-spacing: -0.84px;
+        .animate-marquee {
+          display: flex;
+          width: max-content;
+          animation: marquee 35s linear infinite;
+        }
+        .animate-marquee:hover {
+          animation-play-state: paused;
         }
 
-        .apple-product-name {
-          font-size: 32px;
-          font-weight: 600;
-          line-height: 1.13;
-          letter-spacing: 0.128px;
+        .char-btn:hover .c-char {
+          transform: translateY(-2px);
         }
 
-        .apple-product-label {
-          font-size: 19px;
-          font-weight: 600;
-          line-height: 1.21;
-          letter-spacing: 0.228px;
+        .scroll-fill-line {
+          --progress: 0%;
+          color: transparent;
+          background-color: rgba(255, 255, 255, 0.18);
+          background-image: linear-gradient(
+            90deg,
+            #FFFFFF 0%,
+            #FFFFFF var(--progress),
+            transparent var(--progress)
+          );
+          -webkit-background-clip: text;
+          background-clip: text;
+          display: inline-block;
+          will-change: background-image;
         }
 
-        .apple-feature-stat {
-          font-size: 28px;
-          font-weight: 600;
-          line-height: 1;
-          letter-spacing: 0.196px;
+        @keyframes waveformPulse {
+          0%, 100% {
+            transform: scale(0.96);
+            opacity: 0.45;
+          }
+          50% {
+            transform: scale(1.04);
+            opacity: 0.85;
+          }
+        }
+        .animate-waveform-pulse {
+          animation: waveformPulse 4s ease-in-out infinite;
         }
 
-        .apple-body {
-          font-size: 14px;
-          font-weight: 400;
-          line-height: 1.29;
-          letter-spacing: -0.224px;
+        @keyframes micFloat {
+          0%, 100% {
+            transform: translateY(0px) rotate(-3deg) scale(1);
+          }
+          50% {
+            transform: translateY(-14px) rotate(3deg) scale(1.05);
+          }
         }
-
-        .apple-utility {
-          font-size: 12px;
-          font-weight: 400;
-          line-height: 1.33;
-          letter-spacing: -0.12px;
-        }
-
-        /* Apple Blue Buy Pill (170px radius) */
-        .apple-btn-buy {
-          background-color: var(--color-apple-blue);
-          color: #ffffff;
-          font-size: 12px;
-          font-weight: 400;
-          line-height: 16px;
-          letter-spacing: -0.12px;
-          border-radius: 170px;
-          padding: 8px 18px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          border: none;
-          cursor: pointer;
-          transition: background-color 0.2s ease, transform 0.1s ease;
-          text-decoration: none;
-        }
-        .apple-btn-buy:hover {
-          background-color: #0077ed;
-        }
-        .apple-btn-buy:active {
-          transform: scale(0.98);
-        }
-
-        /* Large Action Pill */
-        .apple-btn-large {
-          background-color: var(--color-apple-blue);
-          color: #ffffff;
-          font-size: 17px;
-          font-weight: 400;
-          letter-spacing: -0.374px;
-          border-radius: 9999px;
-          padding: 12px 28px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          border: none;
-          cursor: pointer;
-          transition: background-color 0.2s ease, transform 0.15s ease;
-          text-decoration: none;
-        }
-        .apple-btn-large:hover {
-          background-color: #0077ed;
-        }
-        .apple-btn-large:active {
-          transform: scale(0.98);
-        }
-
-        /* Outlined Explore Pill (9999px radius) */
-        .apple-btn-outline {
-          background-color: transparent;
-          color: var(--color-porcelain);
-          font-size: 12px;
-          font-weight: 400;
-          line-height: 16px;
-          letter-spacing: -0.12px;
-          border-radius: 9999px;
-          padding: 7px 18px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          border: 1px solid var(--color-slate);
-          cursor: pointer;
-          transition: border-color 0.2s ease, background-color 0.2s ease;
-          text-decoration: none;
-        }
-        .apple-btn-outline:hover {
-          border-color: var(--color-porcelain);
-          background-color: rgba(255, 255, 255, 0.06);
-        }
-
-        /* Dark Pricing Capsule */
-        .apple-pricing-capsule {
-          background-color: rgba(66, 66, 69, 0.72);
-          color: rgba(255, 255, 255, 0.8);
-          font-size: 12px;
-          font-weight: 400;
-          border-radius: 36px;
-          padding: 8px 16px;
-          display: inline-flex;
-          align-items: center;
-          letter-spacing: -0.12px;
-        }
-
-        /* Electric Link */
-        .apple-electric-link {
-          color: var(--color-electric-link);
-          font-size: 14px;
-          font-weight: 400;
-          letter-spacing: -0.224px;
-          display: inline-flex;
-          align-items: center;
-          gap: 4px;
-          text-decoration: none;
-          transition: opacity 0.2s ease;
-        }
-        .apple-electric-link:hover {
-          text-decoration: underline;
-        }
-
-        /* 28px Geometry Cards */
-        .apple-card-28 {
-          border-radius: 28px;
-        }
-
-        /* Subtle shadow keyline */
-        .apple-keyline {
-          box-shadow: rgb(40, 40, 40) 0px 0px 0px 1px;
+        .animate-mic-float {
+          animation: micFloat 4.8s ease-in-out infinite;
         }
       `}</style>
 
-      {/* =========================================================================
-          1. GLOBAL UTILITY NAVIGATION (44px height, #000000, 12px/400 SF Pro Text)
-      ========================================================================= */}
-      <div className="h-11 bg-[#000000] border-b border-[#1d1d1f] flex items-center px-6 sticky top-0 z-50">
-        <div className="max-w-[1024px] mx-auto w-full flex items-center justify-between text-[12px] text-[rgba(255,255,255,0.8)] tracking-[-0.12px]">
-          
-          {/* Logo / Glyph */}
-          <Link to="/" className="flex items-center gap-2 text-white font-semibold text-[14px] no-underline">
-            <span className="w-4 h-4 rounded-full bg-[#f5f5f7] inline-block flex-shrink-0"></span>
-            <span>Intervyo</span>
-          </Link>
+      {/* ── 1. FIXED FLOATING CAPSULE NAVIGATION (DARK MODE) ── */}
+      <nav className="fixed top-10 z-50 w-[99%] px-6 md:px-[10px]">
+        <div className="flex  items-center justify-around gap-3">
 
-          {/* Center Utility Links */}
-          <nav className="hidden md:flex items-center space-x-8">
-            <a href="#overview" className="hover:text-white transition-colors">Overview</a>
-            <a href="#highlights" className="hover:text-white transition-colors">Highlights</a>
-            <a href="#capabilities" className="hover:text-white transition-colors">Capabilities</a>
-            <a href="#compare" className="hover:text-white transition-colors">Compare</a>
-            <Link to="/pricing" className="hover:text-white transition-colors">Pricing</Link>
-            <Link to="/about" className="hover:text-white transition-colors">Methodology</Link>
-          </nav>
+          {/* LEFT: Brand + Navigation Pill */}
+          <div className="flex items-center gap-7 rounded-full bg-white px-5 py-2.5 shadow-sm">
 
-          {/* Right Action */}
-          <div className="flex items-center space-x-4">
-            <Link to="/login" className="hover:text-white transition-colors">
-              Sign In
+            {/* Intervyo Brand */}
+            <Link to="/" className="flex items-center gap-2 group shrink-0">
+              <span className="font-heading font-extrabold text-[35px] tracking-tight text-[#171717] leading-none">
+                Intervyo
+              </span>
+
             </Link>
-            <Link to="/register" className="apple-btn-buy">
-              Try Free
-            </Link>
-          </div>
-        </div>
-      </div>
 
-      {/* =========================================================================
-          2. UPGRADE ANNOUNCEMENT STRIP (72px, #1d1d1f Carbon Band)
-      ========================================================================= */}
-      <section className="bg-[#1d1d1f] border-b border-[#333336] py-3.5 px-4 text-center">
-        <div className="max-w-[1024px] mx-auto text-[14px] text-[#f5f5f7] leading-[20px] tracking-[-0.224px]">
-          <span>Get 3 full-length AI mock interviews calibrated to Google L5–L7 and Meta E5–E7 hiring bars. </span>
-          <Link to="/interview-setup" className="apple-electric-link inline-flex ml-1">
-            Configure your session <ChevronRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-      </section>
+            {/* Navigation Links */}
+            <div className="hidden lg:flex items-center gap-7 text-[16px] font-medium text-[#555555]">
 
-      {/* =========================================================================
-          3. PRODUCT SECTION NAVIGATION (Contained #0e0e0e bar, 20px radius, 1px keyline)
-      ========================================================================= */}
-      <div className="py-4 px-4 sticky top-11 z-40 pointer-events-none">
-        <div className="max-w-[980px] mx-auto bg-[#0e0e0e]/95 backdrop-blur-md rounded-[20px] border border-[#282828] px-6 py-3 flex items-center justify-between shadow-[0_4px_24px_rgba(0,0,0,0.8)] pointer-events-auto">
-          
-          <div className="flex items-center gap-3">
-            <span className="text-[19px] font-semibold text-[#f5f5f7] tracking-[0.228px]">
-              Intervyo Pro
-            </span>
-          </div>
-
-          <div className="flex items-center gap-6">
-            <nav className="hidden sm:flex items-center gap-6 text-[14px] text-[#86868b]">
-              <a href="#overview" className="hover:text-[#f5f5f7] transition-colors">Overview</a>
-              <a href="#highlights" className="hover:text-[#f5f5f7] transition-colors">Tech Specs</a>
-              <a href="#compare" className="hover:text-[#f5f5f7] transition-colors">Compare</a>
-            </nav>
-            <button
-              onClick={() => navigate("/interview-setup")}
-              className="apple-btn-buy"
-            >
-              Start Free
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* =========================================================================
-          4. HERO PRODUCT STAGE — with parallax scroll
-      ========================================================================= */}
-      <section
-        id="overview"
-        ref={heroRef}
-        className="bg-[#000000] pt-12 pb-24 px-6 text-center relative overflow-hidden"
-      >
-        <div className="max-w-[1200px] mx-auto flex flex-col items-center">
-
-          {/* Hero copy — parallax upward on scroll */}
-          <motion.div
-            style={{ y: heroTextY, opacity: heroTextOpacity }}
-            className="flex flex-col items-center"
-          >
-            {/* Status badge */}
-            <motion.div
-              className="text-[#b64400] text-[12px] font-semibold tracking-[-0.12px] mb-3 uppercase"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-            >
-              New • Winter 2026 Release
-            </motion.div>
-
-            {/* Product name */}
-            <motion.h2
-              className="apple-product-name text-[#f5f5f7] mb-2"
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.75, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
-            >
-              Intervyo Pro
-            </motion.h2>
-
-            {/* Headline */}
-            <motion.h1
-              className="apple-display text-[#f5f5f7] max-w-4xl mb-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-            >
-              Engineered for the final round.
-            </motion.h1>
-
-            {/* Subtext */}
-            <motion.p
-              className="text-[17px] sm:text-[20px] font-normal text-[#86868b] max-w-2xl leading-[1.4] tracking-[-0.374px] mb-8"
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.75, delay: 0.22, ease: [0.16, 1, 0.3, 1] }}
-            >
-              The world's first autonomous AI interview gallery. Real-time acoustic voice turn-taking, isolated AST code compilation, and Big Tech rubric telemetry.
-            </motion.p>
-
-            {/* CTA cluster */}
-            <motion.div
-              className="flex flex-wrap items-center justify-center gap-4 mb-16"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <div className="apple-pricing-capsule">From $0/mo. or free trial</div>
-              <button
-                onClick={() => navigate("/register")}
-                className="apple-btn-buy text-[13px] py-2 px-5"
+              <a
+                href="#platform"
+                className="hover:text-black transition-colors duration-200"
               >
-                Start Practicing Free
-              </button>
-              <a href="#highlights" className="apple-btn-outline text-[13px] py-2 px-5">
-                Explore Highlights ↓
+                Platform
               </a>
-            </motion.div>
-          </motion.div>
 
-          {/* Hero image — parallax slower than text */}
-          <motion.div
-            className="w-full max-w-[1100px] aspect-[16/9] bg-[#0e0e0e] rounded-[28px] border border-[#333336] overflow-hidden relative shadow-[0_0_80px_rgba(0,113,227,0.08)]"
-            style={{ y: heroImageSpring }}
-            initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
+              <a
+                href="#engines"
+                className="hover:text-black transition-colors duration-200"
+              >
+                Engines
+              </a>
+
+              <a
+                href="#playbooks"
+                className="hover:text-black transition-colors duration-200"
+              >
+                Playbooks
+              </a>
+
+              <a
+                href="#migrations"
+                className="hover:text-black transition-colors duration-200 whitespace-nowrap"
+              >
+                Candidate Stories
+              </a>
+
+              <Link
+                to="/pricing"
+                className="hover:text-black transition-colors duration-200"
+              >
+                Pricing
+              </Link>
+
+            </div>
+          </div>
+
+
+          {/* RIGHT: Action Buttons */}
+          <div className="flex items-center gap-2.5 shrink-0">
+
+            {/* Login */}
+            <Link
+  to="/login"
+  className="wave-btn hidden sm:flex items-center justify-center bg-white text-[#171717] text-[15px] font-bold px-7 py-3 rounded-full hover:bg-zinc-100 transition-all duration-200 shadow-sm"
+>
+  <span className="inline-flex">
+    {"Log in".split("").map((char, i) => (
+      <span
+        key={i}
+        className="wave-char inline-block"
+        style={{ "--i": i }}
+      >
+        {char === " " ? "\u00A0" : char}
+      </span>
+    ))}
+  </span>
+</Link>
+
+
+            {/* Get Demo */}
+            <Link
+              to="/interview-setup"
+              className="hidden sm:flex items-center justify-center bg-white text-[#171717] text-[15px] font-semibold px-7 py-3 rounded-full hover:bg-zinc-100 transition-all duration-200 shadow-sm"
+            >
+              Get Demo
+            </Link>
+
+
+            {/* Start Free */}
+            <Link
+              to="/interview-setup"
+              className="char-btn flex items-center justify-center gap-1.5 bg-[#171717] text-white text-[15px] font-semibold px-7 py-3 rounded-full hover:bg-[#333333] transition-all duration-200 active:scale-[0.97] shadow-sm"
+            >
+
+              <span className="inline-flex">
+                {"Start Free".split("").map((c, i) => (
+                  <span
+                    key={i}
+                    className="c-char inline-block transition-transform duration-200"
+                    style={{ transitionDelay: `${i * 20}ms` }}
+                  >
+                    {c === " " ? "\u00A0" : c}
+                  </span>
+                ))}
+              </span>
+
+              <ArrowRight className="w-3.5 h-3.5" />
+
+            </Link>
+
+          </div>
+
+        </div>
+      </nav>
+
+      {/* ── 2. HERO SECTION WITH EMBEDDED STAGE (DARK MODE) ── */}
+      <section className="relative  px-4 pt-28 pb-12 sm:px-6 lg:px-8 max-w-[10/12] mx-auto">
+        <div
+          ref={heroRef}
+          className="relative mx-auto flex h-[calc(100vh-9rem+110px)] min-h-[750px] max-h-[1090px] w-full items-center justify-center overflow-hidden rounded-[12px] bg-[#0E121A] border border-white/10 shadow-[0_20px_70px_rgba(0,0,0,0.8)] text-center text-white"
+        >
+          {/* Background Loop Video/Poster */}
+          <img
+            src={ASSETS.heroPoster}
+            alt="Intervyo Autonomous Stage"
+            className="absolute inset-0 h-full w-full object-cover opacity-50 scale-105"
+          />
+          <div className="absolute inset-0 bg-[#0A0D12]/70 backdrop-blur-[2px]" />
+
+          {/* Floating Announcement Badge (Bottom-Left) */}
+          <Link
+            to="/interview-setup"
+            className="group absolute left-6 sm:left-12 bottom-6 z-20 flex w-[min(380px,calc(100%-48px))] items-center gap-3.5 rounded-[12px] bg-[#141824]/95 border border-white/15 p-3 text-white shadow-2xl backdrop-blur-md hover:border-white/30 transition-all text-left"
           >
             <img
-              src={IMAGES.heroStage}
-              alt="Intervyo Pro Exhibition Stage"
-              className="w-full h-full object-cover object-center filter contrast-110 brightness-95"
-              loading="eager"
+              src={ASSETS.announcementThumb}
+              alt="Intervyo 2.0"
+              className="size-[54px] shrink-0 rounded-[8px] object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#000000] via-transparent to-transparent opacity-90" />
-            <div className="absolute bottom-8 left-8 right-8 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 text-left">
-              <motion.div
-                initial={{ opacity: 0, x: -16 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.7, duration: 0.6 }}
-              >
-                <span className="text-[11px] font-semibold text-[#ffd500] uppercase tracking-[1px] block mb-1">
-                  Active Exhibition Chamber
-                </span>
-                <h3 className="text-[22px] sm:text-[26px] font-semibold text-[#f5f5f7] tracking-tight">
-                  Distributed System Telemetry • Meta E6
-                </h3>
-                <p className="text-[13px] text-[#86868b] mt-1 max-w-lg">
-                  Sub-180ms conversational turn-taking actively probing sharded database failovers.
-                </p>
-              </motion.div>
-              <motion.div
-                className="flex items-center gap-3 bg-[#1d1d1f]/90 border border-[#333336] rounded-full px-4 py-2"
-                initial={{ opacity: 0, x: 16 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.8, duration: 0.5 }}
-              >
-                <span className="w-2 h-2 rounded-full bg-[#2997ff] animate-ping" />
-                <span className="text-[12px] text-[#f5f5f7] font-medium">99.4% Calibrated</span>
-              </motion.div>
+            <div className="flex flex-col min-w-0">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                Announcement
+              </span>
+              <span className="mt-0.5 text-xs font-semibold leading-tight text-white line-clamp-2">
+                Intervyo 2.0 launches: The first autonomous platform that guarantees your offer.
+              </span>
             </div>
-          </motion.div>
+            <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:text-white group-hover:translate-x-1 transition-all shrink-0 ml-auto" />
+          </Link>
 
+          {/* Hero Content Center */}
+          <div className="relative z-10 max-w-[1100px] px-4 flex flex-col items-center">
+            <h1 className="w-full font-heading font-bold uppercase leading-[0.86] text-balance text-[56px] sm:text-[84px] md:text-[110px] lg:text-[132px] text-white">
+              Your interview prep should be working harder than you are.
+            </h1>
+
+            <p className="mt-8 max-w-md text-base sm:text-lg text-zinc-300 leading-relaxed font-normal">
+              Intervyo is the autonomous platform that turns your interview preparation into your unfair career advantage.
+            </p>
+
+            <div className="mt-10 flex items-center gap-3.5">
+              <Link
+                to="/interview-setup"
+                className="px-8 py-4 rounded-full bg-white text-[#0A0D12] font-semibold text-sm hover:bg-zinc-200 transition-all shadow-xl active:scale-[0.98]"
+              >
+                Start Free
+              </Link>
+              <Link
+                to="/interview-setup"
+                className="px-8 py-4 rounded-full bg-white/10 hover:bg-white/15 border border-white/20 text-white font-semibold text-sm transition-all"
+              >
+                Get Demo
+              </Link>
+              <button
+                type="button"
+                onClick={() => setVideoModalOpen(true)}
+                aria-label="Watch Product Tour"
+                className="size-[52px] rounded-full bg-white/15 hover:bg-white/25 border border-white/30 text-white flex items-center justify-center transition-all group"
+              >
+                <Play className="w-4 h-4 fill-white ml-0.5 group-hover:scale-110 transition-transform" />
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* =========================================================================
-          4B. 3D SCROLL-TRIGGERED LAPTOP CHAMBER & PLACEMENT ANIMATION STAGE
-      ========================================================================= */}
-      <LaptopScrollStage />
-
-      {/* =========================================================================
-          5. HIGHLIGHTS MEDIA FRAME
-      ========================================================================= */}
-      <section id="highlights" className="bg-gradient-to-b from-[#1d1d1f] to-[#000000] py-24 px-6 border-t border-[#333336]">
-        <motion.div
-          variants={staggerContainer}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, margin: "-80px" }}
-          className="max-w-[1100px] mx-auto"
-        >
-          
-          <motion.div
-            variants={staggerItem}
-            className="flex flex-col sm:flex-row sm:items-end justify-between mb-12"
-          >
-            <div>
-              <h2 className="apple-display-md text-[#f5f5f7]">
-                Get the highlights.
-              </h2>
-            </div>
-            <div className="flex items-center gap-2 bg-[#333336]/60 backdrop-blur-md p-1.5 rounded-full border border-[#6e6e73]/40 mt-4 sm:mt-0">
-              {highlights.map((item, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setActiveHighlight(idx)}
-                  className={`px-4 py-1.5 text-[12px] rounded-full transition-all ${
-                    activeHighlight === idx
-                      ? "bg-[#0071e3] text-white font-medium"
-                      : "text-[#86868b] hover:text-[#f5f5f7]"
-                  }`}
-                >
-                  0{idx + 1}
-                </button>
+      {/* ── 3. LOGO WALL (TOP TECH HIRING MARQUEE - DARK MODE) ── */}
+      <section className="py-16 overflow-hidden border-y border-white/10 bg-[#0E121A]/50">
+        <div className="max-w-[1400px] mx-auto px-4 text-center">
+          <p className="text-sm font-semibold text-zinc-400 mb-10">
+            Trusted by high-horsepower engineers landing offers at
+          </p>
+          <div className="relative w-full overflow-hidden" style={{ maskImage: "linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)" }}>
+            <div className="animate-marquee flex items-center gap-16 text-zinc-300 hover:text-white transition-all">
+              {[...ASSETS.logos, ...ASSETS.logos, ...ASSETS.logos].map((logo, idx) => (
+                <div key={idx} className="flex items-center gap-2.5 shrink-0">
+                  <span className="font-heading font-bold text-2xl tracking-wider text-zinc-300 hover:text-white transition-colors cursor-default">
+                    {logo.name}
+                  </span>
+                </div>
               ))}
             </div>
-          </motion.div>
-
-          {/* Highlights Contained Media Frame */}
-          <motion.div
-            variants={staggerItem}
-            className="bg-[#000000] border border-[#333336] rounded-[28px] overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[500px]"
-          >
-            {/* Text details */}
-            <div className="lg:col-span-5 p-8 sm:p-12 flex flex-col justify-between">
-              <motion.div
-                key={activeHighlight}
-                initial={{ opacity: 0, x: -16 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <span className="text-[12px] font-semibold text-[#2997ff] uppercase tracking-[1px] block mb-2">
-                  {highlights[activeHighlight].tag}
-                </span>
-                <h3 className="text-[28px] sm:text-[34px] font-semibold text-[#f5f5f7] leading-tight mb-2">
-                  {highlights[activeHighlight].title}
-                </h3>
-                <h4 className="text-[18px] font-medium text-[#86868b] mb-6">
-                  {highlights[activeHighlight].subtitle}
-                </h4>
-                <p className="text-[14px] text-[#86868b] leading-[1.5] tracking-[-0.224px]">
-                  {highlights[activeHighlight].desc}
-                </p>
-              </motion.div>
-
-              <div className="pt-8 border-t border-[#1d1d1f]">
-                <button
-                  onClick={() => navigate("/interview-setup")}
-                  className="apple-electric-link text-[14px]"
-                >
-                  Launch this simulation module <ArrowRight className="w-4 h-4 ml-1" />
-                </button>
-              </div>
-            </div>
-
-            {/* Visual media with cross-fade */}
-            <div className="lg:col-span-7 bg-[#0e0e0e] relative overflow-hidden flex items-center justify-center p-6">
-              <motion.img
-                key={activeHighlight}
-                src={highlights[activeHighlight].image}
-                alt={highlights[activeHighlight].title}
-                className="w-full h-full object-cover rounded-[20px] filter contrast-105"
-                loading="lazy"
-                initial={{ opacity: 0, scale: 1.04 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#000000] via-transparent to-transparent opacity-40" />
-            </div>
-          </motion.div>
-
-        </motion.div>
-      </section>
-
-      {/* =========================================================================
-          6. FEATURE METRIC TILES (4-up Grid, Obsidian #000000, 28px radius, no shadow)
-      ========================================================================= */}
-      <section id="capabilities" className="bg-[#000000] py-24 px-6 border-t border-[#1d1d1f]">
-        <motion.div
-          variants={staggerContainer}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, margin: "-80px" }}
-          className="max-w-[1100px] mx-auto"
-        >
-          
-          <motion.div variants={staggerItem} className="text-center max-w-2xl mx-auto mb-16">
-            <span className="text-[12px] font-semibold text-[#b64400] uppercase tracking-[1px] block mb-2">
-              Performance Architecture
-            </span>
-            <h2 className="apple-display-md text-[#f5f5f7]">
-              Engineered with extreme tolerances.
-            </h2>
-          </motion.div>
-
-          <motion.div
-            variants={staggerContainer}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-          >
-            {[
-              {
-                accent: "#ffd500",
-                label: "Acoustic Engine",
-                stat: "<180ms",
-                title: "Voice Roundtrip",
-                desc: "Real-time neural audio streaming handles sudden interjections and deep follow-ups without latency.",
-                footer: "Bidirectional WebRTC",
-              },
-              {
-                accent: "#2997ff",
-                label: "Rubric Calibration",
-                stat: "99.4%",
-                title: "Committee Parity",
-                desc: "Calibrated directly against official L4–L7 hiring rubric sheets from Google, Meta, and Apple.",
-                footer: "48 Rubric Dimensions",
-              },
-              {
-                accent: "#f5f5f7",
-                label: "Execution Sandbox",
-                stat: "20+",
-                title: "Languages Compiled",
-                desc: "Isolated WebAssembly compiler profiles memory ceiling, cyclomatic load, and boundary defense.",
-                footer: "Zero Edge-Case Leakage",
-              },
-              {
-                accent: "#ffd500",
-                label: "Proven Trajectory",
-                stat: "12k+",
-                title: "Offers Landed",
-                desc: "Engineers verified into tier-1 tech institutions with 2.4x higher interview pass velocity.",
-                footer: "87% Conversion Rate",
-              },
-            ].map((tile, i) => (
-              <motion.div
-                key={i}
-                variants={staggerItem}
-                whileHover={{ y: -6, boxShadow: "0 16px 40px rgba(0,113,227,0.12)" }}
-                transition={{ type: "spring", stiffness: 300, damping: 22 }}
-                className="bg-[#0e0e0e] border border-[#333336] rounded-[28px] p-8 flex flex-col justify-between cursor-default"
-              >
-                <div>
-                  <span
-                    className="text-[11px] font-semibold uppercase tracking-[1px] block mb-4"
-                    style={{ color: tile.accent }}
-                  >
-                    {tile.label}
-                  </span>
-                  <div className="text-[44px] font-semibold text-[#f5f5f7] tracking-tight leading-none mb-2">
-                    {tile.stat}
-                  </div>
-                  <div className="text-[14px] font-semibold text-[#f5f5f7] mb-2">
-                    {tile.title}
-                  </div>
-                  <p className="text-[13px] text-[#86868b] leading-relaxed">
-                    {tile.desc}
-                  </p>
-                </div>
-                <div className="mt-8 pt-4 border-t border-[#1d1d1f]">
-                  <span className="text-[12px] text-[#2997ff]">{tile.footer}</span>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-
-        </motion.div>
-      </section>
-
-      {/* =========================================================================
-          7. UPGRADE COMPARISON PANEL (Carbon #1d1d1f, 28px corners, Pale White Card)
-      ========================================================================= */}
-      <section id="compare" className="bg-[#1d1d1f] py-24 px-6 border-t border-[#333336]">
-        <motion.div
-          variants={staggerContainer}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, margin: "-80px" }}
-          className="max-w-[1100px] mx-auto"
-        >
-          
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <span className="text-[12px] font-semibold text-[#2997ff] uppercase tracking-[1px] block mb-2">
-              Compare Environments
-            </span>
-            <h2 className="apple-display-md text-[#f5f5f7] mb-4">
-              Choose your practice chamber.
-            </h2>
-            <p className="text-[14px] text-[#86868b]">
-              Every tier delivers uncompromised accuracy. Select the depth required for your target engineering bar.
-            </p>
           </div>
-
-          {/* Device Selector Input (rgba(255,255,255,0.04), 980px radius, 1px #6e6e73 border) */}
-          <div className="flex justify-center mb-12">
-            <div className="bg-white/[0.04] border border-[#6e6e73] rounded-[980px] p-1.5 flex items-center gap-2">
-              <button
-                onClick={() => setSelectedTrack("starter")}
-                className={`px-6 py-2 rounded-[980px] text-[13px] transition-all ${
-                  selectedTrack === "starter"
-                    ? "bg-[#0071e3] text-white font-medium"
-                    : "text-[#86868b] hover:text-[#f5f5f7]"
-                }`}
-              >
-                Diagnostic Standard
-              </button>
-              <button
-                onClick={() => setSelectedTrack("pro")}
-                className={`px-6 py-2 rounded-[980px] text-[13px] transition-all ${
-                  selectedTrack === "pro"
-                    ? "bg-[#0071e3] text-white font-medium"
-                    : "text-[#86868b] hover:text-[#f5f5f7]"
-                }`}
-              >
-                Intervyo Pro Studio
-              </button>
-              <button
-                onClick={() => setSelectedTrack("enterprise")}
-                className={`px-6 py-2 rounded-[980px] text-[13px] transition-all ${
-                  selectedTrack === "enterprise"
-                    ? "bg-[#0071e3] text-white font-medium"
-                    : "text-[#86868b] hover:text-[#f5f5f7]"
-                }`}
-              >
-                Executive Chamber
-              </button>
-            </div>
-          </div>
-
-          {/* 3-Column Comparison Workspace */}
-          <motion.div variants={staggerContainer} className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            
-            {/* Tile 1: Obsidian Starter Tile */}
-            <motion.div
-              variants={staggerItem}
-              whileHover={{ y: -4 }}
-              transition={{ type: "spring", stiffness: 260, damping: 20 }}
-              className="bg-[#000000] border border-[#333336] rounded-[28px] p-8 flex flex-col justify-between"
-            >
-              <div>
-                <span className="text-[12px] font-semibold text-[#86868b] uppercase tracking-[1px] block mb-2">
-                  Basic Entry
-                </span>
-                <h3 className="text-[24px] font-semibold text-[#f5f5f7] mb-1">
-                  Starter Lab
-                </h3>
-                <div className="text-[28px] font-semibold text-[#f5f5f7] mb-4">
-                  Free
-                </div>
-                <p className="text-[13px] text-[#86868b] mb-6">
-                  Essential algorithmic verification for junior and mid-level roles.
-                </p>
-
-                <div className="space-y-3 border-t border-[#1d1d1f] pt-4 text-[13px] text-[#f5f5f7]">
-                  <div className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-[#2997ff]" /> 3 Mock Sessions / Month
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-[#2997ff]" /> Standard AST Compilation
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-[#2997ff]" /> Text Feedback Summary
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-8 pt-6 border-t border-[#1d1d1f]">
-                <button
-                  onClick={() => navigate("/register")}
-                  className="apple-btn-outline w-full text-center"
-                >
-                  Get Started
-                </button>
-              </div>
-            </motion.div>
-
-            {/* Tile 2: Obsidian Pro Tile with Apple Blue Accent */}
-            <motion.div
-              variants={staggerItem}
-              whileHover={{ y: -6, boxShadow: "0 0 60px rgba(0,113,227,0.25)" }}
-              transition={{ type: "spring", stiffness: 260, damping: 20 }}
-              className="bg-[#000000] border-2 border-[#0071e3] rounded-[28px] p-8 flex flex-col justify-between relative shadow-[0_0_40px_rgba(0,113,227,0.15)]"
-            >
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#0071e3] text-white text-[11px] font-semibold uppercase tracking-[1px] px-3 py-0.5 rounded-full">
-                Most Popular
-              </div>
-              <div>
-                <span className="text-[12px] font-semibold text-[#2997ff] uppercase tracking-[1px] block mb-2">
-                  Full Experience
-                </span>
-                <h3 className="text-[24px] font-semibold text-[#f5f5f7] mb-1">
-                  Intervyo Pro
-                </h3>
-                <div className="text-[28px] font-semibold text-[#f5f5f7] mb-4">
-                  $19 <span className="text-[14px] text-[#86868b] font-normal">/ month</span>
-                </div>
-                <p className="text-[13px] text-[#86868b] mb-6">
-                  The complete suite calibrated to Google, Meta, and Apple L5–L7 standards.
-                </p>
-
-                <div className="space-y-3 border-t border-[#1d1d1f] pt-4 text-[13px] text-[#f5f5f7]">
-                  <div className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-[#0071e3]" /> Unlimited Voice AI Simulations
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-[#0071e3]" /> Sub-180ms Neural Interruptions
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-[#0071e3]" /> Distributed System Whiteboard
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-[#0071e3]" /> 48-Dimension Rubric Scoring
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-8 pt-6 border-t border-[#1d1d1f]">
-                <button
-                  onClick={() => navigate("/register")}
-                  className="apple-btn-buy w-full text-center py-2.5"
-                >
-                  Start 7-Day Free Trial
-                </button>
-              </div>
-            </motion.div>
-
-            {/* Tile 3: White Comparison Card */}
-            <motion.div
-              variants={staggerItem}
-              whileHover={{ y: -4 }}
-              transition={{ type: "spring", stiffness: 260, damping: 20 }}
-              className="bg-[#ffffff] text-[#1d1d1f] rounded-[28px] p-8 flex flex-col justify-between"
-            >
-              <div>
-                <span className="text-[12px] font-semibold text-[#0066cc] uppercase tracking-[1px] block mb-2">
-                  White Comparison Card
-                </span>
-                <h3 className="text-[24px] font-semibold text-[#1d1d1f] mb-1">
-                  Executive Suite
-                </h3>
-                <div className="text-[28px] font-semibold text-[#1d1d1f] mb-4">
-                  $49 <span className="text-[14px] text-[#6e6e73] font-normal">/ month</span>
-                </div>
-                <p className="text-[13px] text-[#333336] mb-6">
-                  For Staff, Principal, and Director-level candidates managing org-scale trade-offs.
-                </p>
-
-                <div className="space-y-3 border-t border-[#e5e5e7] pt-4 text-[13px] text-[#1d1d1f]">
-                  <div className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-[#0066cc]" /> Everything in Pro
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-[#0066cc]" /> 1-on-1 Human Staff Review
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-[#0066cc]" /> Compensation Negotiation Lab
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-[#0066cc]" /> Priority Dedicated Cluster
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-8 pt-6 border-t border-[#e5e5e7]">
-                <a
-                  href="/contact"
-                  className="text-[#0066cc] font-medium text-[13px] flex items-center justify-between no-underline hover:underline"
-                >
-                  <span>Contact Sales for Enterprise</span>
-                  <ArrowRight className="w-4 h-4" />
-                </a>
-              </div>
-            </motion.div>
-
-          </motion.div>
-
-        </motion.div>
+        </div>
       </section>
 
-      {/* =========================================================================
-          8. TESTIMONIALS / OUTCOMES (Midnight Hardware Plinths)
-      ========================================================================= */}
-      <section className="bg-[#000000] py-24 px-6 border-t border-[#1d1d1f]">
-        <motion.div
-          variants={staggerContainer}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, margin: "-80px" }}
-          className="max-w-[1100px] mx-auto"
-        >
-          
-          <motion.div variants={staggerItem} className="mb-16">
-            <span className="text-[12px] font-semibold text-[#ffd500] uppercase tracking-[1px] block mb-2">
-              Verified Candidate Outlines
-            </span>
-            <h2 className="apple-display-md text-[#f5f5f7]">
-              Real candidates. Authentic offers.
-            </h2>
-          </motion.div>
+      {/* ── 4. "YOUR PREP LAUNCHED. THEN IT STOPPED." (DARK MODE WITH 3D MACBOOK MOCKUP) ── */}
+      <section id="platform" className="py-20 sm:py-30 px-4 sm:px-6 max-w-[1400px] mx-auto relative overflow-visible">
+        {/* Subtle Tech Lattice Behind Mockup */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_40%,black_40%,transparent_100%)] pointer-events-none z-0" />
 
-          <motion.div variants={staggerContainer} className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                quote: "“The voice interruption engine challenged my database partition assumptions the exact same way my Meta interviewer did. I walked in calm because I had already lived it.”",
-                name: "Senior Infrastructure Engineer",
-                offer: "Offered Meta E6 • Seattle",
-              },
-              {
-                quote: "“Instead of memorizing LeetCode solutions, Intervyo forced me to narrate time-space trade-offs while writing clean syntax. The rubric feedback is scary accurate.”",
-                name: "Staff Software Engineer",
-                offer: "Offered Google L6 • Zurich",
-              },
-              {
-                quote: "“The distributed system whiteboard identified three single-points-of-failure in my cache architecture that no human peer had ever flagged. Landed my dream staff role.”",
-                name: "Principal Systems Architect",
-                offer: "Offered Stripe L5 • San Francisco",
-              },
-            ].map((t, i) => (
-              <motion.div
-                key={i}
-                variants={staggerItem}
-                whileHover={{ y: -5, borderColor: "#0071e3" }}
-                transition={{ type: "spring", stiffness: 280, damping: 22 }}
-                className="bg-[#0e0e0e] border border-[#333336] rounded-[28px] p-8 flex flex-col justify-between"
-              >
-                <p className="text-[15px] text-[#f5f5f7] leading-relaxed mb-8">{t.quote}</p>
-                <div>
-                  <div className="text-[14px] font-semibold text-[#f5f5f7]">{t.name}</div>
-                  <div className="text-[12px] text-[#2997ff] mt-0.5">{t.offer}</div>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-
-        </motion.div>
-      </section>
-
-      {/* =========================================================================
-          9. FREQUENTLY ASKED QUESTIONS (28px Accordion Modules)
-      ========================================================================= */}
-      <section className="bg-[#0e0e0e] py-24 px-6 border-t border-[#1d1d1f]">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          className="max-w-[800px] mx-auto"
-        >
-          
-          <div className="text-center mb-16">
-            <h2 className="apple-display-md text-[#f5f5f7] mb-3">
-              Questions & Answers.
-            </h2>
-            <p className="text-[14px] text-[#86868b]">
-              Everything you need to know about the Intervyo autonomous interview chamber.
-            </p>
-          </div>
-
-          <div className="space-y-4">
-            {[
-              {
-                q: "How does the voice AI interruption model work?",
-                a: "Intervyo runs a sub-180ms neural speech pipeline. If you make an ungrounded assumption or introduce algorithmic regression, the model politely cuts in with clarifying questions, precisely reflecting real interview pressure.",
-              },
-              {
-                q: "Are the coding challenges executed in a real sandbox?",
-                a: "Yes. Every solution executes in an isolated WebAssembly sandbox against hidden test suites, memory constraints, and time complexity benchmarks.",
-              },
-              {
-                q: "Can I use Intervyo for behavioral & leadership rounds?",
-                a: "Yes. Our executive behavioral track analyzes STAR responses, vocal cadence, conciseness, and stakeholder management alignment.",
-              },
-              {
-                q: "What tech levels are supported?",
-                a: "Calibrated rubrics span L3 (Junior), L4 (Mid-Level), L5 (Senior), L6 (Staff), and L7 (Principal/Director) across engineering domains.",
-              },
-            ].map((faq, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-40px" }}
-                transition={{ duration: 0.5, delay: idx * 0.08, ease: [0.16, 1, 0.3, 1] }}
-                className="bg-[#000000] border border-[#333336] rounded-[20px] p-6 transition-colors hover:border-[#555558]"
-              >
-                <button
-                  onClick={() => toggleFaq(idx)}
-                  className="w-full flex items-center justify-between text-left group"
-                >
-                  <span className="text-[16px] font-semibold text-[#f5f5f7] group-hover:text-[#2997ff] transition-colors pr-4">
-                    {faq.q}
-                  </span>
-                  <motion.div
-                    animate={{ rotate: openFaq === idx ? 180 : 0 }}
-                    transition={{ duration: 0.25 }}
-                  >
-                    <ChevronDown
-                      className={`w-5 h-5 flex-shrink-0 ${
-                        openFaq === idx ? "text-[#2997ff]" : "text-[#86868b]"
-                      }`}
-                    />
-                  </motion.div>
-                </button>
-                <AnimatePresence initial={false}>
-                  {openFaq === idx && (
-                    <motion.div
-                      key="answer"
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                      className="overflow-hidden"
-                    >
-                      <p className="mt-4 text-[14px] text-[#86868b] leading-relaxed pt-2 border-t border-[#1d1d1f]">
-                        {faq.a}
-                      </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            ))}
-          </div>
-
-        </motion.div>
-      </section>
-
-      {/* =========================================================================
-          10. CLOSING HERO REVEAL
-      ========================================================================= */}
-      <section className="bg-[#000000] py-28 px-6 text-center border-t border-[#1d1d1f] relative overflow-hidden">
-        {/* Radial glow behind CTA */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <motion.div
-            className="w-[600px] h-[300px] rounded-full bg-[#0071e3] blur-[140px] opacity-10"
-            initial={{ scale: 0.6, opacity: 0 }}
-            whileInView={{ scale: 1, opacity: 0.1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1.5, ease: "easeOut" }}
+        {/* 3D Floating MacBook with 'intervyo' typed on screen */}
+        <div className="absolute -top-[8px] sm:-top-[130px] left-[300px] -translate-x-1/2 w-[440px] sm:w-[540px] lg:w-[780px] max-w-[98vw] 
+        aspect-square z-0 pointer-events-none opacity-55 select-none 
+        drop-shadow-[0_25px_70px_rgba(0,0,0,0.9)] 
+        [mask-image:radial-gradient(ellipse_100%_75%_at_35%_45%,black_15%,rgba(0,0,0,0.9)_40%,rgba(0,0,0,0.6)_60%,rgba(0,0,0,0.25)_80%,transparent_100%)]
+[-webkit-mask-image:radial-gradient(ellipse_100%_75%_at_35%_45%,black_15%,rgba(0,0,0,0.9)_40%,rgba(0,0,0,0.6)_60%,rgba(0,0,0,0.25)_80%,transparent_100%)]">
+          <img
+            src={ASSETS.macbookMockup}
+            alt="Intervyo Platform MacBook Mockup"
+            className="w-full h-full object-contain"
+            loading="lazy"
+            decoding="async"
+            draggable="false"
           />
         </div>
-        <motion.div
-          variants={staggerContainer}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, margin: "-80px" }}
-          className="max-w-[900px] mx-auto relative z-10"
-        >
-          <motion.span
-            variants={staggerItem}
-            className="text-[12px] font-semibold text-[#b64400] uppercase tracking-[1px] block mb-4"
-          >
-            The Exhibition Closes. Your Career Begins.
-          </motion.span>
-          <motion.h2 variants={staggerItem} className="apple-display text-[#f5f5f7] mb-6">
-            Step onto the stage with total conviction.
-          </motion.h2>
-          <motion.p
-            variants={staggerItem}
-            className="text-[17px] text-[#86868b] max-w-xl mx-auto mb-10 leading-relaxed"
-          >
-            Eliminate interview anxiety through mathematical precision and high-fidelity simulation.
-          </motion.p>
 
-          <motion.div
-            variants={staggerItem}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4"
+        {/* Headline with Continuous Scroll-Triggered Text Fill */}
+        <div className="relative z-10 text-center max-w-5xl mx-auto mb-20">
+          <h2
+            ref={scrollFillRef}
+            className="w-full font-heading font-bold uppercase leading-[0.86] text-balance text-[56px] sm:text-[96px] md:text-[120px] lg:text-[144px] text-center select-none"
           >
-            <motion.button
-              onClick={() => navigate("/register")}
-              className="apple-btn-large"
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.97 }}
-            >
-              Start Practicing Free Now
-            </motion.button>
-            <Link
-              to="/pricing"
-              className="apple-btn-outline text-[14px] py-3 px-6"
-            >
-              View Pricing Tiers
-            </Link>
-          </motion.div>
-        </motion.div>
-      </section>
+            <span className="scroll-fill-line">Your prep launched.</span>
+            <br />
+            <span className="scroll-fill-line">Then it stopped.</span>
+          </h2>
+          <p className="mt-8 text-zinc-400 text-lg sm:text-xl font-normal max-w-xl mx-auto">
+            Intervyo takes what you have and puts it on autopilot.
+          </p>
+        </div>
 
-      {/* Apple-Style Dark Footer (Graphite / Charcoal, 4-Column Directory) */}
-      <footer className="bg-[#0e0e0e] text-[#86868b] text-[12px] py-16 px-6 border-t border-[#1d1d1f]">
-        <div className="max-w-[1024px] mx-auto">
-          
-          {/* Legal Fine Print */}
-          <div className="border-b border-[#1d1d1f] pb-6 mb-8 text-[11px] leading-relaxed space-y-2">
-            <p>
-              1. Latency measurements benchmarked across US-East and EU-Central cloud clusters running bidirectional WebRTC audio streams with neural speech classification.
-            </p>
-            <p>
-              2. Hiring rubric calibrations are independent models synthesized from publicly disclosed hiring committee standards and are not endorsed by Google LLC, Meta Platforms Inc., or Apple Inc.
-            </p>
+        {/* 3-Column Split Card with Dark Background & Fine Dividers */}
+        <div className="p-8 sm:p-12 bg-black rounded-[16px] border border-white/10 shadow-xl grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/10 gap-8 md:gap-0">
+          {/* Monitor */}
+          <div className="flex flex-col justify-between md:pr-10">
+            <div>
+              <div className="w-10 h-10 rounded-[8px] bg-black border border-white/15 flex items-center justify-center mb-8 shadow-sm overflow-hidden relative">
+
+                <svg
+                  viewBox="0 0 40 40"
+                  className="w-full h-full"
+                  fill="none"
+                >
+                  <g className="chain-animation">
+
+                    {[0, 32, 64].map((offset) => (
+                      <g key={offset} transform={`translate(${offset}, 0)`}>
+
+                        {/* Connecting Chain Lines */}
+                        <g
+                          stroke="#FFFA64"
+                          strokeWidth="1"
+                          strokeOpacity="0.45"
+                        >
+                          <path d="
+              M0 11 L4 27
+              M8 11 L4 27 L12 11
+              M16 11 L12 27 L20 11
+              M24 11 L20 27 L28 11
+              M32 11 L28 27
+            " />
+                        </g>
+
+                        {/* Top Layer Dots */}
+                        {[0, 8, 16, 24, 32].map((x) => (
+                          <circle
+                            key={`top-${x}`}
+                            cx={x}
+                            cy="11"
+                            r="2"
+                            fill="#FFFA64"
+                          />
+                        ))}
+
+                        {/* Bottom Layer Dots */}
+                        {[4, 12, 20, 28].map((x) => (
+                          <circle
+                            key={`bottom-${x}`}
+                            cx={x}
+                            cy="27"
+                            r="2"
+                            fill="#FFFA64"
+                          />
+                        ))}
+
+                      </g>
+                    ))}
+
+                  </g>
+                </svg>
+
+              </div>
+              <h3 className="text-2xl font-bold tracking-tight text-white mb-3">
+                Monitor
+              </h3>
+              <p className="text-sm sm:text-base text-zinc-400 leading-relaxed font-sans">
+                Intervyo watches your interview performance and target hiring bars — continuously. Vocal hesitation, AST algorithmic flaws, filler words, rubric gaps. Nothing slips through.
+              </p>
+            </div>
           </div>
 
-          {/* 4-Column Directory */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+          {/* Act */}
+          <div className="flex flex-col justify-between pt-8 md:pt-0 md:px-10">
             <div>
-              <h4 className="text-[#f5f5f7] font-semibold text-[12px] mb-3">
-                Practice Tracks
-              </h4>
-              <ul className="space-y-2">
-                <li><Link to="/interview-setup" className="hover:text-white transition-colors">Distributed Systems</Link></li>
-                <li><Link to="/interview-setup" className="hover:text-white transition-colors">Algorithms & AST</Link></li>
-                <li><Link to="/interview-setup" className="hover:text-white transition-colors">Voice Simulation</Link></li>
-                <li><Link to="/interview-setup" className="hover:text-white transition-colors">Executive Behavioral</Link></li>
+              <div className="w-10 h-10 rounded-[8px] bg-black border border-white/15 flex items-center justify-center font-mono text-sm mb-8 text-[#D1F48C] shadow-sm">
+                :::
+              </div>
+              <h3 className="text-2xl font-bold tracking-tight text-white mb-3">
+                Act
+              </h3>
+              <p className="text-sm sm:text-base text-zinc-400 leading-relaxed font-sans">
+                Intervyo doesn't just report back. Its agents generate targeted micro-drills, fix what's broken in your reasoning, and run pressure simulations — automatically, while you focus on life.
+              </p>
+            </div>
+          </div>
+
+          {/* Surface */}
+          <div className="flex flex-col justify-between pt-8 md:pt-0 md:pl-10">
+            <div>
+              <div className="w-10 h-10 rounded-[8px] bg-black border border-white/15 flex items-center justify-center font-mono text-sm mb-8 text-[#FFB8FC] shadow-sm">
+                :::
+              </div>
+              <h3 className="text-2xl font-bold tracking-tight text-white mb-3">
+                Surface
+              </h3>
+              <p className="text-sm sm:text-base text-zinc-400 leading-relaxed font-sans">
+                Every mock session becomes a clear next step. Know your percentile ranking across Google and Meta rubrics, what's working, and where your highest compensation opportunities are.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Integration Callout (Dark Mode) */}
+        <div className="mt-8 p-6 rounded-[14px] bg-[#131722] border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left shadow-md">
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-medium text-zinc-200">
+              Works with <strong>LeetCode, GitHub, VS Code and Terminal</strong> too.
+            </span>
+          </div>
+          <span className="text-xs font-semibold text-zinc-400 hover:text-white transition-colors cursor-pointer">
+            Ship offer-ready answers from any workflow →
+          </span>
+        </div>
+      </section>
+
+      {/* ── 5. REDESIGNED INTERVYO SECTIONS (FOLLOWING IMAGE 1 LAYOUT DNA IN INTERVYO DARK THEME) ── */}
+      <section className=" px-4 sm:px-6 max-w-[10/12] mx-auto">
+        {/* ── SECTION 1: HERO / MAIN HEADING (PRIMARY SECTION BACKGROUND #11121A) ── */}
+        <div className="relative rounded-[10px] bg-gradient-to-b from-[#FFB8FC] to-[#E270DB]  p-8 sm:p-14 lg:p-10 pb-10 sm:pb-16 text-white shadow-2xl overflow-visible mb-6 sm:mb-8">
+          {/* Subtle Electric Violet Ambient Radial Lighting */}
+          <div className="absolute top-0 right-1/4 w-[500px] h-[300px] bg-purple-600/10 blur-3xl pointer-events-none rounded-t-[36px]" />
+
+          <div className="flex flex-col lg:flex-row items-start justify-between gap-8 mb-14 relative z-10">
+            <div>
+              <h2 className="font-heading font-bold uppercase leading-[0.88] text-6xl sm:text-8xl lg:text-[100px] text-black">
+                <span>YOU SLEPT 8 HOURS.</span>
+                <br />
+                <span className="flex items-center flex-wrap gap-2 sm:gap-3 mt-2">
+                  {/* Floating Studio Microphone */}
+                  <span className="inline-block relative w-16 sm:w-24 lg:w-32 h-14 sm:h-20 lg:h-24 align-middle mx-1 sm:mx-3 select-none shrink-0">
+                    <img
+                      src={ASSETS.micImage}
+                      alt="Intervyo Studio Microphone"
+                      className="w-full h-full object-contain animate-mic-float drop-shadow-[0_10px_35px_rgba(139,92,246,0.5)]"
+                    />
+                  </span>
+                  <span>INTERVYO DIDN'T.</span>
+                </span>
+              </h2>
+            </div>
+
+            <div className="max-w-lg pt-[160px] lg:mt-6 text-[#11121A] text-sm sm:text-base leading-relaxed font-normal">
+              Intervyo continuously evaluates your mock interview performance, catches blind spots, and calibrates your answers against top-tier tech hiring bars — even while you sleep.
+            </div>
+          </div>
+
+          {/* ── SECTION 2: THREE FLOATING STATISTIC CARDS (OVERLAPPING SECTION BOUNDARIES) ── */}
+          <div className="relative z-30 translate-y-10 sm:translate-y-26 -mb-15 sm:-mb-36 ">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-x-3 max-w-[1150px] mx-auto">
+              {/* Card 1: Interview Performance */}
+              <div className="relative p-5 bg-white rounded-[12px] border border-black/[0.06] shadow-[0_12px_35px_rgba(0,0,0,0.12)] flex flex-col justify-around h-[400px]  min-h-[200px] overflow-hidden transition-all">
+
+                <div className="flex flex-col justify-center">
+
+                  {/* Header + Graph */}
+                  <div className="relative flex items-center justify-between gap-2">
+
+                    <div className="relative z-10 flex items-center gap-2">
+                      <span className="font-heading font-bold text-3xl text-[#212121]">
+                        intervyo
+                      </span>
+
+                      <span className="text-[10px] uppercase font-mono font-bold px-2.5 py-0.5 rounded-full bg-black text-white border border-violet-500/30">
+                        Performance
+                      </span>
+                    </div>
+
+                    {/* Dynamic Sparkline - Right Side */}
+                    <div className="absolute right-0 top-[25px] w-[42%] h-[65px] pointer-events-none">
+
+                      <svg
+                        viewBox="0 0 100 40"
+                        preserveAspectRatio="none"
+                        className="w-full h-full overflow-visible"
+                      >
+                        <defs>
+                          <linearGradient
+                            id="perfGrad"
+                            x1="0"
+                            y1="0"
+                            x2="0"
+                            y2="1"
+                          >
+                            <stop
+                              offset="0%"
+                              stopColor="#E879F9"
+                              stopOpacity="0.35"
+                            />
+
+                            <stop
+                              offset="100%"
+                              stopColor="#E879F9"
+                              stopOpacity="0.02"
+                            />
+                          </linearGradient>
+                        </defs>
+
+                        {/* Gradient Area */}
+                        <path
+                          d={sparklineAreaPath}
+                          fill="url(#perfGrad)"
+                        />
+
+                        {/* Smooth Graph Line */}
+                        <path
+                          d={sparklineLinePath}
+                          stroke="#E879F9"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          fill="none"
+                        />
+
+                      </svg>
+
+                    </div>
+                  </div>
+
+
+                  {/* Main Interview Count */}
+                  <div className="font-heading text-6xl sm:text-7xl font-bold text-[#212121] mt-4 tracking-tight leading-none transition-all duration-300">
+                    {liveMetrics.interviews}
+                  </div>
+
+                  <div className="text-xs sm:text-sm text-[#A1A1AA] font-medium mt-1">
+                    mock interviews completed
+                  </div>
+
+
+                  {/* Description */}
+                  <p className="mt-4 p-3.5 rounded-xl bg-[#F5F5F5] border border-black/[0.04] text-xs sm:text-[13px] text-black/80 leading-relaxed font-sans">
+                    Analyzed distributed system trade-offs and STAR behavioral frameworks across FAANG rubrics.
+                  </p>
+
+                </div>
+
+
+                {/* Bottom Metrics */}
+                <div>
+
+                  <div className="grid grid-cols-3 gap-2 text-center">
+
+                    <div>
+                      <span className="text-[10px] sm:text-[13px] text-[#A1A1AA] block font-mono uppercase">
+                        Avg Score
+                      </span>
+
+                      <span className="font-heading font-bold text-base sm:text-2xl text-[#222222] mt-0.5">
+                        {liveMetrics.avgScore}%
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-[10px] sm:text-[13px] text-[#A1A1AA] block font-mono uppercase tracking-wider">
+                        Questions
+                      </span>
+
+                      <span className="font-heading font-bold text-2xl text-[#222222] mt-0.5">
+                        {liveMetrics.questions}
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-[10px] sm:text-[13px] text-[#A1A1AA] block font-mono uppercase tracking-wider">
+                        Trend
+                      </span>
+
+                      <span className="font-heading font-bold text-base sm:text-2xl text-violet-400 mt-0.5">
+                        +{liveMetrics.trend}%
+                      </span>
+                    </div>
+
+                  </div>
+
+
+                  {/* Status */}
+                  <div className="mt-4 flex items-center gap-2 text-xs font-mono font-medium text-violet-500">
+                    <span className="size-2 rounded-full bg-violet-400 animate-pulse" />
+                    <span>Calibrating system design rubric</span>
+                  </div>
+
+                </div>
+
+              </div>
+
+              {/* Card 2: AI Analysis */}
+
+              <div className="p-5 bg-white rounded-[12px] border border-black/[0.06] shadow-[0_12px_35px_rgba(0,0,0,0.12)] flex flex-col justify-around h-[400px] min-h-[300px] transition-all">
+                <div>
+                  {/* Brand Pill + Sparkline Row */}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="font-heading font-bold text-3xl text-[#212121]">
+                        intervyo
+                      </span>
+                      <span className="text-[10px] uppercase font-mono font-bold px-2.5 py-0.5 rounded-full bg-black text-white border border-emerald-500/30">
+                        AI Analysis
+                      </span>
+                    </div>
+
+                    {/* Soft Green Sparkline Chart SVG */}
+                    {/* Dynamic Emerald Green Sparkline */}
+                    <svg
+                      className="absolute translate-x-[180px] translate-y-[50px] w-[150px] h-[70px] shrink-0 overflow-visible"
+                      viewBox="0 0 100 40"
+                      preserveAspectRatio="none"
+                      fill="none"
+                    >
+                      <defs>
+                        <linearGradient
+                          id="aiGrad"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop offset="0%" stopColor="#10B981" stopOpacity="0.4" />
+                          <stop offset="100%" stopColor="#10B981" stopOpacity="0.0" />
+                        </linearGradient>
+                      </defs>
+
+                      {/* Gradient Area */}
+                      <path
+                        d={analysisAreaPath}
+                        fill="url(#aiGrad)"
+                      />
+
+                      {/* Smooth Graph Line */}
+                      <path
+                        d={analysisLinePath}
+                        stroke="#10B981"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        fill="none"
+                      />
+                    </svg>
+                  </div>
+
+                  {/* Big Numerical Metric */}
+                  <div className="font-heading text-6xl sm:text-7xl font-bold text-[#212121] mt-4 tracking-tight leading-none transition-all duration-300">
+                    {liveMetrics.analysisScore}%
+                  </div>
+
+                  <div className="text-xs sm:text-sm text-[#A1A1AA] font-medium mt-1">
+                    communication & speech rating
+                  </div>
+
+                  {/* Supporting Description */}
+                  <p className="mt-4 p-3.5 rounded-xl bg-[#F5F5F5] border border-white/[0.08] text-xs sm:text-[13px] text-black/80 leading-relaxed font-sans">
+                    Detected cadence stalls during complexity defense → auto-generated 3 targeted STAR drills.
+                  </p>
+                </div>
+
+                <div>
+                  {/* Bottom Supporting Metrics */}
+                  <div className=" grid grid-cols-3 gap-2 text-center">
+                    <div>
+                      <span className="text-[10px] sm:text-[13px] text-[#A1A1AA] block font-mono uppercase">
+                        Accuracy
+                      </span>
+                      <span className="font-heading font-bold text-base sm:text-2xl text-[#222222] mt-0.5">
+                        {liveMetrics.techAccuracy}%
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-[10px] sm:text-[13px] text-[#A1A1AA] block font-mono uppercase tracking-wider">
+                        Confidence
+                      </span>
+                      <span className="font-heading font-bold text-base sm:text-2xl text-[#222222] mt-0.5">
+                        {liveMetrics.confidence}%
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-[10px] sm:text-[13px] text-[#A1A1AA] block font-mono uppercase tracking-wider">
+                        Weaknesses
+                      </span>
+                      <span className="font-heading font-bold text-base sm:text-2xl text-emerald-500 mt-0.5">
+                        {liveMetrics.weaknesses} flagged
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Status Indicator */}
+                  <div className="mt-4 flex items-center gap-2 text-xs font-mono font-medium text-emerald-500">
+                    <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>Synthesizing vocal pacing drill</span>
+                  </div>
+                </div>
+              </div>
+
+
+              {/* Card 3: Career Progress */}
+
+              <div className="p-5 bg-white rounded-[12px] border border-black/[0.06] shadow-[0_12px_35px_rgba(0,0,0,0.12)] flex flex-col justify-around h-[400px] min-h-[300px]  transition-all">
+                <div>
+                  {/* Brand Pill + Sparkline Row */}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="font-heading font-bold text-3xl text-[#212121]">
+                        intervyo
+                      </span>
+                      <span className="text-[10px] uppercase font-mono font-bold px-2.5 py-0.5 rounded-full bg-black text-white border border-cyan-500/30">
+                        Career Progress
+                      </span>
+                    </div>
+
+                    {/* Cyan Sparkline Chart SVG */}
+                    {/* Dynamic Cyan Career Progress Sparkline */}
+                    <svg
+                      className="absolute translate-x-[170px] translate-y-[50px] w-[160px] h-[70px] shrink-0 overflow-visible"
+                      viewBox="0 0 100 40"
+                      preserveAspectRatio="none"
+                      fill="none"
+                    >
+                      <defs>
+                        <linearGradient
+                          id="careerGrad"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop offset="0%" stopColor="#06B6D4" stopOpacity="0.4" />
+                          <stop offset="100%" stopColor="#06B6D4" stopOpacity="0" />
+                        </linearGradient>
+                      </defs>
+
+                      {/* Gradient Area */}
+                      <path
+                        d={careerAreaPath}
+                        fill="url(#careerGrad)"
+                      />
+
+                      {/* Smooth Cyan Graph */}
+                      <path
+                        d={careerLinePath}
+                        stroke="#06B6D4"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        fill="none"
+                      />
+                    </svg>
+                  </div>
+
+                  {/* Big Numerical Metric */}
+                  <div className="font-heading text-6xl sm:text-7xl font-bold text-[#212121] mt-4 tracking-tight leading-none transition-all duration-300">
+                    +${liveMetrics.offerBump}K
+                  </div>
+
+                  <div className="text-xs sm:text-sm text-[#A1A1AA] font-medium mt-1">
+                    projected offer increase
+                  </div>
+
+                  {/* Supporting Description */}
+                  <p className="mt-4 p-3.5 rounded-xl bg-[#F5F5F5] border border-white/[0.08] text-xs sm:text-[13px] text-black/80 leading-relaxed font-sans">
+                    Promoted to L5 Strong Hire consensus based on Raft consensus defense and concise delivery.
+                  </p>
+                </div>
+
+                <div>
+                  {/* Bottom Supporting Metrics */}
+                  <div className="grid grid-cols-3  text-center">
+                    <div>
+                      <span className="text-[10px] sm:text-[13px] text-[#A1A1AA] block font-mono uppercase">
+                        Skills
+                      </span>
+                      <span className="font-heading font-bold text-base sm:text-2xl text-[#222222] mt-0.5">
+                        {liveMetrics.skills}
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-[10px] sm:text-[13px] text-[#A1A1AA] block font-mono uppercase tracking-wider">
+                        Streak
+                      </span>
+                      <span className="font-heading font-bold text-base sm:text-2xl text-[#222222] mt-0.5">
+                        {liveMetrics.streak}d
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-[10px] sm:text-[13px] text-[#A1A1AA] block font-mono uppercase tracking-wider">
+                        Readiness
+                      </span>
+                      <span className="font-heading font-bold text-base sm:text-2xl text-cyan-500 mt-0.5">
+                        {liveMetrics.readiness}th
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Status Indicator */}
+                  <div className="mt-4 flex items-center gap-2 text-xs font-mono font-medium text-cyan-500">
+                    <span className="size-2 rounded-full bg-cyan-400 animate-pulse" />
+                    <span>Calibrating L6 Bar Raiser</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        {/* ── SECTION 3: ACTIVITY / AI INTELLIGENCE FEED (SECONDARY SECTION BACKGROUND #171824) ── */}
+        <div className="relative rounded-[28px] sm:rounded-[12px] bg-[#FFFA64] border border-white/[0.12] p-8 sm:p-14 lg:p-20 pt-40 sm:pt-48 overflow-hidden text-white shadow-2xl">
+          {/* Subtle Ambient Radial Lighting */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-purple-600/10 blur-3xl pointer-events-none" />
+
+          {/* Top-Left Editorial Heading */}
+          <h2 className="mt-16 font-heading font-bold uppercase text-6xl sm:text-8xl md:text-[108px] text-black leading-none relative z-10">
+            AN AI
+          </h2>
+
+          {/* Central Area with 3D Floating Real Studio Microphone & Activity Intelligence Feed */}
+          <div className="relative my-8 sm:my-14 flex items-center justify-center">
+            {/* Real Studio Microphone Visual Floating in Place of the Balloon */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 sm:w-64 lg:w-80 aspect-square z-0 pointer-events-none select-none opacity-40 flex items-center justify-center">
+              <img
+                src={ASSETS.micImage}
+                alt="Studio Microphone"
+                className="w-full h-full object-contain animate-mic-float drop-shadow-[0_10px_45px_rgba(139,92,246,0.4)]"
+              />
+            </div>
+
+            {/* Silky-Smooth GPU Activity Stream (Zero-Lag, 1-by-1 Flow, Full Text Shown) */}
+            <div
+              className="w-full max-w-xl sm:max-w-2xl h-[400px] sm:h-[455px] overflow-hidden relative z-10 py-1"
+              onMouseEnter={() => setIsPaused(true)}
+              onMouseLeave={() => setIsPaused(false)}
+            >
+              <div
+                className="flex flex-col gap-3.5 will-change-transform"
+                style={{
+                  transform: isAnimating ? "translateY(-142px)" : "translateY(0px)",
+                  transition: isAnimating ? "transform 650ms cubic-bezier(0.16, 1, 0.3, 1)" : "none",
+                }}
+              >
+                {[0, 1, 2, 3].map((offset) => {
+                  const cardIndex = (feedIndex + offset) % OVERNIGHT_FEED.length;
+                  const card = OVERNIGHT_FEED[cardIndex];
+                  const isExiting = isAnimating && offset === 0;
+                  const isEntering = isAnimating && offset === 3;
+
+                  return (
+                    <div
+                      key={`${feedIndex}-${offset}`}
+                      style={{
+                        opacity: isExiting ? 0 : isEntering ? 1 : 1,
+                        transform: isExiting ? "scale(0.96)" : isEntering ? "scale(1)" : "scale(1)",
+                        transition: isAnimating
+                          ? "opacity 550ms ease, transform 650ms cubic-bezier(0.16, 1, 0.3, 1)"
+                          : "none",
+                      }}
+                      className="h-[138px] p-10 sm:p-5 rounded-[12px] bg-white hover:border-violet-500/40 transition-colors select-none flex flex-col justify-between shrink-0"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-mono font-bold text-zinc-400">{card.time}</span>
+                        <span
+                          className={`text-[11px] font-semibold px-3 py-0.5 rounded-full border ${card.tagColor || "bg-violet-500/20 text-black border-violet-500/30"
+                            }`}
+                        >
+                          {card.tag}
+                        </span>
+                      </div>
+                      <div className="text-sm sm:text-base font-bold text-white leading-snug">
+                        <span className="text-black font-bold mr-1.5">{card.agent}</span>
+                        <span>{card.action}</span>
+                      </div>
+                      <div className="text-xs sm:text-sm text-black/60 leading-relaxed font-sans">
+                        {card.detail}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom-Right Editorial Heading */}
+          <h2 className="font-heading font-bold uppercase text-5xl sm:text-7xl md:text-[96px] text-black leading-none text-right relative z-10">
+            THAT NEVER STOPS IMPROVING YOU.
+          </h2>
+        </div>
+      </section>
+
+      {/* ── 6. INTERVYO BOOKS (EXACT REPLICA: LIGHT BLUE CONTAINER, ASYMMETRIC HEADER, TWO-TONE HORIZONTAL CARDS) ── */}
+      <section id="playbooks" className="py-12 sm:py-16 px-4 sm:px-6 max-w-[10/12] mx-auto">
+        <div className="relative  sm:rounded-[12px] bg-[#C3DBFF] p-8 sm:p-12 lg:p-16 shadow-xl overflow-hidden text-black">
+          {/* Header Row: Left-aligned bold headline, Right-aligned paragraph + black arrow buttons */}
+          <div className="flex flex-col lg:flex-row items-start lg:items-end justify-between gap-8 mb-12 relative z-10">
+            <div className="max-w-2xl">
+              <h2 className="font-heading font-bold uppercase leading-[0.88] text-5xl sm:text-7xl md:text-8xl lg:text-[90px] text-black tracking-tight select-none">
+                <span>EXPERT STRATEGIES,</span>
+                <br />
+                <span className="flex items-center flex-wrap gap-2 sm:gap-3 mt-1.5">
+                  <span>DEPLOYED</span>
+                  {/* Floating Microphone in place of flower/balloon icon */}
+                  <span className="inline-block relative w-12 sm:w-16 lg:w-20 h-10 sm:h-14 lg:h-16 align-middle mx-1 sm:mx-2 select-none shrink-0">
+                    <img
+                      src={ASSETS.micImage}
+                      alt="Intervyo Icon"
+                      className="w-full h-full object-contain animate-mic-float drop-shadow-[0_8px_20px_rgba(0,0,0,0.18)]"
+                    />
+                  </span>
+                  <span>FOR YOU.</span>
+                </span>
+              </h2>
+            </div>
+
+            {/* Right Column: Paragraph + Solid Black Navigation Buttons */}
+            <div className="max-w-md flex flex-col items-start lg:items-start lg:pb-2">
+              <p className="text-black/80 font-normal text-xs sm:text-sm leading-relaxed">
+                IntervyoBooks are pre-built interview workflows executed by specialized agents. Run them on a schedule, trigger them from an event, or let Intervyo decide.
+              </p>
+
+              {/* Two Solid Black Circular Buttons with White Arrows */}
+              <div className="flex items-center gap-2.5 mt-5">
+                <button
+                  type="button"
+                  onClick={() => scrollPlaybooks("left")}
+                  aria-label="Scroll Left"
+                  className="size-8 sm:size-9 rounded-full bg-black hover:bg-black/80 text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-sm"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scrollPlaybooks("right")}
+                  aria-label="Scroll Right"
+                  className="size-8 sm:size-9 rounded-full bg-black hover:bg-black/80 text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-sm"
+                >
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Horizontally Scrollable Two-Tone Cards Row */}
+          <div
+            ref={playbooksScrollRef}
+            className="flex gap-5 sm:gap-6 overflow-x-auto scrollbar-none scroll-smooth pb-4 pt-1 px-1 select-none relative z-10"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          >
+            {INTERVYO_BOOKS.map((book, idx) => (
+              <div
+                key={idx}
+                onClick={() => navigate(`/interview-setup?role=${encodeURIComponent(book.title)}`)}
+                className="w-[275px] sm:w-[310px] shrink-0 rounded-[20px] overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col bg-white border border-black/5"
+              >
+                {/* Top Zone: Light Ice Blue Header with intervyo Logo + Large Title */}
+                <div className="p-6 bg-[#D7E9FE] flex flex-col justify-between h-[210px] rounded-t-[20px]">
+                  <span className="font-heading font-bold text-2xl tracking-tight text-black">
+                    intervyo
+                  </span>
+                  <h3 className="font-heading font-bold text-2xl sm:text-3xl text-black leading-tight line-clamp-3">
+                    {book.title}
+                  </h3>
+                </div>
+
+                {/* Bottom Zone: Pure White Surface with Author + Description */}
+                <div className="p-6 bg-white rounded-b-[20px] flex flex-col justify-between min-h-[165px] grow">
+                  <div className="flex items-center gap-2">
+                    <img
+                      src={book.avatar}
+                      alt={book.author}
+                      className="size-6 rounded-full object-cover shrink-0"
+                    />
+                    <span className="text-xs font-semibold text-black/85">
+                      by {book.author}
+                    </span>
+                  </div>
+                  <p className="text-xs text-black/65 leading-relaxed font-sans line-clamp-4 mt-3">
+                    {book.desc}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── 7. ONE PLATFORM THREE ENGINES (DARK MODE) ── */}
+      <section id="engines" className="py-12 sm:py-16 px-4 sm:px-6 max-w-[97%] mx-auto bg-[#131722] rounded-[12px] ">
+        <div className="max-w-2xl mb-16 relative">
+          <span className="text-xs font-mono uppercase tracking-widest text-zinc-400">
+            Unified Architecture
+          </span>
+          <h2 className="font-heading font-bold uppercase leading-[0.86] text-5xl sm:text-7xl text-white mt-2">
+            One platform three engines.
+          </h2>
+        </div>
+
+        {/* Intervyo Features Card */}
+        <div className="w-[80%] mx-auto bg-white rounded-[5px] border border-black/[0.04] px-5 py-6 md:px-[22px] md:py-[22px]">
+
+          <div className="grid grid-cols-1 md:grid-cols-3">
+
+            {/* VOICE */}
+            <div className="space-y-5 md:pr-6 md:border-r md:border-black/[0.12]">
+
+              {/* Brand + Pill */}
+              <div className="flex items-center gap-2">
+                <span className="font-heading text-[32px] font-extrabold tracking-tight text-[#212121] leading-none">
+                  intervyo
+                </span>
+
+                <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-black text-fuchsia-400">
+                  Voice
+                </span>
+              </div>
+
+              {/* Heading */}
+              <div className="text-base font-semibold text-[#171717]">
+                Build. Converse. Clarify.
+              </div>
+
+              {/* Features */}
+              <ul className="space-y-4 text-sm text-[#777777]">
+
+                <li className="flex items-start gap-3">
+                  <span className="size-[4px] rounded-full bg-fuchsia-400 mt-[8px] shrink-0" />
+                  Sub-150ms bidirectional speech streaming
+                </li>
+
+                <li className="flex items-start gap-3">
+                  <span className="size-[4px] rounded-full bg-fuchsia-400 mt-[8px] shrink-0" />
+                  Natural conversational interruptions
+                </li>
+
+                <li className="flex items-start gap-3">
+                  <span className="size-[4px] rounded-full bg-fuchsia-400 mt-[8px] shrink-0" />
+                  Tone, inflection, and cadence analysis
+                </li>
+
+                <li className="flex items-start gap-3">
+                  <span className="size-[4px] rounded-full bg-fuchsia-400 mt-[8px] shrink-0" />
+                  Real-time filler word detection
+                </li>
+
               </ul>
             </div>
 
+
+            {/* CODE */}
+            <div className="space-y-5 pt-8 mt-8 border-t border-black/[0.12] md:pt-0 md:mt-0 md:px-6 md:border-t-0 md:border-r">
+
+              {/* Brand + Pill */}
+              <div className="flex items-center gap-2">
+                <span className="font-heading text-[32px] font-extrabold tracking-tight text-[#212121] leading-none">
+                  intervyo
+                </span>
+
+                <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-black text-lime-400">
+                  Code
+                </span>
+              </div>
+
+              {/* Heading */}
+              <div className="text-base font-semibold text-[#171717]">
+                Compile. Fuzz. Optimize.
+              </div>
+
+              {/* Features */}
+              <ul className="space-y-4 text-sm text-[#777777]">
+
+                <li className="flex items-start gap-3">
+                  <span className="size-[4px] rounded-full bg-lime-400 mt-[8px] shrink-0" />
+                  Isolated WebAssembly compiler
+                </li>
+
+                <li className="flex items-start gap-3">
+                  <span className="size-[4px] rounded-full bg-lime-400 mt-[8px] shrink-0" />
+                  Support for 20+ languages
+                </li>
+
+                <li className="flex items-start gap-3">
+                  <span className="size-[4px] rounded-full bg-lime-400 mt-[8px] shrink-0" />
+                  Real-time AST Big-O cyclomatic audit
+                </li>
+
+                <li className="flex items-start gap-3">
+                  <span className="size-[4px] rounded-full bg-lime-400 mt-[8px] shrink-0" />
+                  Hidden boundary test case injection
+                </li>
+
+              </ul>
+            </div>
+
+
+            {/* TELEMETRY */}
+            <div className="space-y-5 pt-8 mt-8 border-t border-black/[0.12] md:pt-0 md:mt-0 md:pl-6 md:border-t-0">
+
+              {/* Brand + Pill */}
+              <div className="flex items-center gap-2">
+                <span className="font-heading text-[32px] font-extrabold tracking-tight text-[#212121] leading-none">
+                  intervyo
+                </span>
+
+                <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-black text-cyan-400">
+                  AI
+                </span>
+              </div>
+
+              {/* Heading */}
+              <div className="text-base font-semibold text-[#171717]">
+                Evaluate. Benchmark. Win.
+              </div>
+
+              {/* Features */}
+              <ul className="space-y-4 text-sm text-[#777777]">
+
+                <li className="flex items-start gap-3">
+                  <span className="size-[4px] rounded-full bg-cyan-400 mt-[8px] shrink-0" />
+                  Official FAANG hiring committee rubrics
+                </li>
+
+                <li className="flex items-start gap-3">
+                  <span className="size-[4px] rounded-full bg-cyan-400 mt-[8px] shrink-0" />
+                  Level calibration from L3 to Staff L6+
+                </li>
+
+                <li className="flex items-start gap-3">
+                  <span className="size-[4px] rounded-full bg-cyan-400 mt-[8px] shrink-0" />
+                  STAR behavioral scoring matrix
+                </li>
+
+                <li className="flex items-start gap-3">
+                  <span className="size-[4px] rounded-full bg-cyan-400 mt-[8px] shrink-0" />
+                  Line-by-line transcript recommendations
+                </li>
+
+              </ul>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ── 8. SEAMLESS ONBOARDING / MIGRATIONS SECTION (LIME ACCENT CONTAINER) ── */}
+      <section id="migrations" className="py-9 px-4 sm:px-6 max-w-[10/12] mx-auto">
+        <div className="relative w-full rounded-[12px] sm:rounded-[12px] bg-[#D1F48C] text-[#0A0D12] p-8 sm:p-14 lg:p-20 overflow-hidden shadow-2xl">
+          {/* Top Row: Badge + Massive Title Block */}
+          <div className="w-full flex flex-col lg:flex-row items-start justify-around gap-20 mb-16 sm:mb-20">
             <div>
-              <h4 className="text-[#f5f5f7] font-semibold text-[12px] mb-3">
-                Platform
-              </h4>
-              <ul className="space-y-2">
-                <li><Link to="/practice-lab" className="hover:text-white transition-colors">Interactive Practice Lab</Link></li>
-                <li><Link to="/analytics" className="hover:text-white transition-colors">Telemetry Analytics</Link></li>
-                <li><Link to="/leaderboard" className="hover:text-white transition-colors">Candidate Standings</Link></li>
+              <span className="inline-block px-4 py-1.5 rounded-full bg-black text-[#D1F48C] font-mono font-bold text-xs tracking-wider uppercase shadow-sm">
+                Onboarding
+              </span>
+            </div>
+
+            <div className="max-w-3xl lg:mr-auto lg:ml-12">
+              <h2 className="font-heading font-bold uppercase leading-[10px] text-5xl sm:text-7xl lg:text-[84px] text-black">
+                Bring any background. Intervyo turns it into your growth engine.
+              </h2>
+              <p className="mt-6 text-sm sm:text-base text-black/85 leading-relaxed font-medium max-w-2xl">
+                Junior, Senior, Staff, or Engineering Director. Intervyo maps your current level, calibrates your dream hiring bar, and keeps working with you every day.
+              </p>
+            </div>
+          </div>
+
+          {/* 5-Step Timeline with Connected Horizontal Line */}
+          <div className="relative mt-12 sm:mt-16">
+            {/* Horizontal Line behind nodes for desktop */}
+            <div className="hidden md:block absolute top-[14px] left-4 right-4 h-[1px] bg-black/25 z-0" />
+
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-8 md:gap-6 relative z-10">
+              {[
+                {
+                  num: "01",
+                  title: "Paste your role.",
+                  desc: "Intervyo reads any tech stack, resume, or target JD, and maps level expectations from L3 to Staff L6+.",
+                },
+                {
+                  num: "02",
+                  title: "Approve the plan.",
+                  desc: "Intervyo recommends what to practice and where your gaps are. Nothing changes until you say so.",
+                },
+                {
+                  num: "03",
+                  title: "Run live loops.",
+                  desc: "Experience real-time voice interruptions, AST code fuzzing, and system design whiteboards.",
+                },
+                {
+                  num: "04",
+                  title: "Patch at your pace.",
+                  desc: "Autonomous overnight agents synthesize targeted 5-minute drills for hesitation and weak spots.",
+                },
+                {
+                  num: "05",
+                  title: "Start winning offers.",
+                  desc: "The same rubrics evaluate your performance before you face the real hiring committee.",
+                },
+              ].map((step) => (
+                <div key={step.num} className="flex flex-col">
+                  {/* Circle Step Number */}
+                  <div className="size-7 rounded-full bg-black text-white flex items-center justify-center font-mono text-xs font-bold mb-4 shadow-sm">
+                    {step.num}
+                  </div>
+                  {/* Step Title */}
+                  <h3 className="font-bold text-base text-black mb-2 tracking-tight">
+                    {step.title}
+                  </h3>
+                  {/* Step Description */}
+                  <p className="text-xs sm:text-[13px] text-black/80 leading-relaxed font-sans">
+                    {step.desc}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Bottom Divider & Success Story */}
+          <div className="mt-16 pt-8 border-t border-black/20 text-xs sm:text-sm text-black/85 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              Marcus passed 4 consecutive Staff loops at Stripe with an $84,000 compensation increase in 3 weeks.{" "}
+              <Link
+                to="/interview-setup?role=Staff%20Software%20Engineer"
+                className="font-bold underline underline-offset-4 text-black hover:text-black/70 transition-colors cursor-pointer"
+              >
+                Read Marcus's story
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 9. WHO'S INTERVYO FOR? (STICKY LEFT + ACCORDION PUNCHCARDS) ── */}
+      <section className="py-24 px-4 sm:px-6 max-w-[1400px] mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start relative">
+          {/* Left Column (Sticky on scroll) */}
+          <div className="lg:col-span-5 lg:sticky lg:top-36 self-start">
+            <span className="inline-block px-4 py-1.5 rounded-full bg-black border border-white/20 text-white font-semibold text-xs tracking-wide mb-6 shadow-sm">
+              Who's Intervyo for?
+            </span>
+            <h2 className="font-heading font-bold uppercase leading-[0.88] text-5xl sm:text-6xl lg:text-7xl text-white">
+              For engineers that ship, measure, and win.
+            </h2>
+            <p className="mt-6 text-zinc-400 text-base leading-relaxed max-w-md">
+              Whether you are defending distributed consensus at L6+ or writing your first recursive backtracking algorithms, Intervyo adapts to your exact career stage.
+            </p>
+          </div>
+
+          {/* Right Column (Clickable Accordion Punchcards) */}
+          <div className="lg:col-span-7 flex flex-col gap-5">
+            {[
+              {
+                id: "staff",
+                title: "Staff+",
+                subtitle: "Scale without the fluff.",
+                activeBg: "bg-[#C3DBFF] text-black border-transparent",
+                activeDot: "bg-white",
+                btnText: "Explore Staff+",
+                btnAction: "Launch Staff+ Track",
+                roleQuery: "Staff Software Engineer",
+                bullets: [
+                  "Stress test distributed systems under high-concurrency failure modes",
+                  "Defend CAP concessions and trade-offs with executive brevity",
+                  "Real-time whiteboard topology benchmarks & failure isolation",
+                  "L6 and Principal level compensation calibration",
+                ],
+              },
+              {
+                id: "seniors",
+                title: "Seniors",
+                subtitle: "Production-grade craft.",
+                activeBg: "bg-[#D1F48C] text-black border-transparent",
+                activeDot: "bg-black",
+                btnText: "Explore Senior",
+                btnAction: "Launch Senior Track",
+                roleQuery: "Senior Software Engineer",
+                bullets: [
+                  "Full AST code fuzzing and stress testing across 20+ languages",
+                  "Amazon 16 Leadership Principles & STAR behavioral mastery",
+                  "Eliminate verbal hesitation, filler words, and cadence stalls",
+                  "Real-time Big Tech hiring committee bar raiser rubrics",
+                ],
+              },
+              {
+                id: "grads",
+                title: "Grads",
+                subtitle: "Growth from day one.",
+                activeBg: "bg-[#FFFA64] text-black border-transparent",
+                activeDot: "bg-black",
+                btnText: "Explore Grads",
+                btnAction: "Launch Grads Free",
+                roleQuery: "Junior Software Engineer",
+                bullets: [
+                  "Master algorithmic foundations and data structures without anxiety",
+                  "120,000+ completed interview loops to benchmark and learn from",
+                  "Personalized overnight micro-drill generation for weak spots",
+                  "Startup-friendly credit pricing with unlimited practice loops",
+                ],
+              },
+            ].map((card, idx) => {
+              const isActive = activePunchcard === idx;
+
+              return (
+                <div
+                  key={card.id}
+                  onClick={() => setActivePunchcard(isActive ? -1 : idx)}
+                  className={`relative rounded-sm p-8 transition-all duration-300 cursor-pointer shadow-lg select-none ${isActive
+                    ? card.activeBg
+                    : "bg-[#131722] text-white border border-white/10 hover:border-white/25"
+                    }`}
+                >
+                  {/* 4 Corner Punchcard Dots */}
+                  <span
+                    className={`absolute w-2.5 h-2.5 rounded-full top-3 left-3 transition-colors ${isActive ? card.activeDot : "bg-zinc-600"
+                      }`}
+                  />
+                  <span
+                    className={`absolute w-2.5 h-2.5 rounded-full top-3 right-3 transition-colors ${isActive ? card.activeDot : "bg-zinc-600"
+                      }`}
+                  />
+                  <span
+                    className={`absolute w-2.5 h-2.5 rounded-full bottom-3 left-3 transition-colors ${isActive ? card.activeDot : "bg-zinc-600"
+                      }`}
+                  />
+                  <span
+                    className={`absolute w-2.5 h-2.5 rounded-full bottom-3 right-3 transition-colors ${isActive ? card.activeDot : "bg-zinc-600"
+                      }`}
+                  />
+
+                  {/* Header Row: Title + Subtitle */}
+                  <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 pr-6">
+                    <h3 className="font-heading text-5xl sm:text-6xl font-bold uppercase tracking-tight">
+                      {card.title}
+                    </h3>
+                    <span
+                      className={`text-sm sm:text-base font-normal ${isActive ? "text-black/80" : "text-zinc-400"
+                        }`}
+                    >
+                      {card.subtitle}
+                    </span>
+                  </div>
+
+                  {/* Expandable Accordion Body */}
+                  <AnimatePresence initial={false}>
+                    {isActive && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                        className="overflow-hidden"
+                      >
+                        <div className="pt-8">
+                          {/* Bulleted List */}
+                          <ul className="space-y-3 text-sm text-black/85 mb-8">
+                            {card.bullets.map((bullet, bIdx) => (
+                              <li key={bIdx} className="flex items-start gap-2.5">
+                                <span className="font-bold select-none text-base leading-tight">•</span>
+                                <span className="leading-relaxed">{bullet}</span>
+                              </li>
+                            ))}
+                          </ul>
+
+                          {/* Action Buttons */}
+                          <div
+                            className="flex flex-wrap items-center gap-5 pt-4"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <button
+                              type="button"
+                              onClick={() =>
+                                navigate(`/interview-setup?role=${encodeURIComponent(card.roleQuery)}`)
+                              }
+                              className="px-6 py-3 rounded-full bg-black text-white text-xs font-semibold hover:bg-zinc-800 transition-colors shadow-md"
+                            >
+                              {card.btnAction}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                navigate(`/interview-setup?role=${encodeURIComponent(card.roleQuery)}`)
+                              }
+                              className="text-xs font-semibold text-black underline underline-offset-4 hover:text-black/70 transition-colors"
+                            >
+                              {card.btnText}
+                            </button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── 10. PRE-FOOTER CTA (THE 60-SECOND SLURP - DARK MODE) ── */}
+      <section className="py-24 px-4 sm:px-6 max-w-[1400px] mx-auto text-center">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="font-heading font-bold uppercase leading-[0.86] text-5xl sm:text-7xl md:text-8xl text-white">
+            Stop guessing your interview readiness.
+          </h2>
+          <p className="mt-6 text-lg sm:text-xl text-zinc-400 max-w-xl mx-auto">
+            Plug in your dream role and run a full autonomous mock session in 60 seconds.
+          </p>
+
+          <form
+            onSubmit={handleStartDrill}
+            className="mt-10 max-w-xl mx-auto p-2 bg-[#131722] rounded-full border border-white/15 shadow-xl flex items-center gap-3"
+          >
+            <input
+              type="text"
+              value={urlInput}
+              onChange={(e) => setUrlInput(e.target.value)}
+              placeholder="e.g. Senior Backend Engineer at Stripe..."
+              className="flex-1 px-5 py-2 text-sm bg-transparent outline-none text-white placeholder-zinc-500 font-medium"
+            />
+            <button
+              type="submit"
+              className="px-8 py-3.5 rounded-full bg-white hover:bg-zinc-200 text-[#0A0D12] font-semibold text-sm transition-all shadow-md flex items-center gap-2 shrink-0"
+            >
+              <span>Start Free</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </form>
+
+          <div className="mt-4 text-xs font-mono text-zinc-500">
+            Free tier · No credit card required · 60-second setup
+          </div>
+        </div>
+      </section>
+
+      {/* ── 11. "WANT THE SHORT VERSION? ASK AI" (DARK MODE) ── */}
+      <section className="py-16 border-t border-white/10 bg-[#0E121A]/30">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
+          <div>
+            <h4 className="font-heading text-4xl font-bold text-white">
+              Want the short version?
+            </h4>
+            <p className="text-xs text-zinc-400 max-w-xl mt-1">
+              Ask AI for a summary of Intervyo, comparable mock platforms, and the value of running your interview prep on autonomous voice and AST feedback.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            {["ChatGPT", "Claude", "Google AI Mode", "Grok", "Perplexity"].map((ai) => (
+              <a
+                key={ai}
+                href={`https://www.google.com/search?q=${encodeURIComponent(ai + " Intervyo AI mock interview platform review")}`}
+                target="_blank"
+                rel="noreferrer"
+                className="px-4 py-2 rounded-full bg-[#131722] hover:bg-white/10 border border-white/10 text-xs font-semibold text-white transition-colors"
+              >
+                {ai} ↗
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
+
+
+      {/* ── 13. MEGA FOOTER (DARK MODE) ── */}
+      <footer className="border-t border-white/10 bg-[#07090D] text-xs text-zinc-400 py-20">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-10 mb-16">
+            <div>
+              <h5 className="font-semibold text-white uppercase text-[11px] mb-4">Product</h5>
+              <ul className="space-y-2.5">
+                <li><Link to="/interview-setup" className="hover:text-white transition-colors">AI Voice Interview Engine</Link></li>
+                <li><Link to="/practice-lab" className="hover:text-white transition-colors">AST Code Sandbox</Link></li>
+                <li><Link to="/interview-setup" className="hover:text-white transition-colors">Distributed Whiteboard</Link></li>
+                <li><Link to="/analytics" className="hover:text-white transition-colors">FAANG Rubric Telemetry</Link></li>
+                <li><Link to="/leaderboard" className="hover:text-white transition-colors">Candidate Leaderboard</Link></li>
                 <li><Link to="/pricing" className="hover:text-white transition-colors">Pricing & Plans</Link></li>
               </ul>
             </div>
 
             <div>
-              <h4 className="text-[#f5f5f7] font-semibold text-[12px] mb-3">
-                Company
-              </h4>
-              <ul className="space-y-2">
-                <li><Link to="/about" className="hover:text-white transition-colors">About Intervyo</Link></li>
+              <h5 className="font-semibold text-white uppercase text-[11px] mb-4">Solutions</h5>
+              <ul className="space-y-2.5">
+                <li><Link to="/interview-setup?role=Backend" className="hover:text-white transition-colors">For Backend Engineers</Link></li>
+                <li><Link to="/interview-setup?role=Frontend" className="hover:text-white transition-colors">For Frontend Engineers</Link></li>
+                <li><Link to="/interview-setup?role=Staff" className="hover:text-white transition-colors">For Staff & Principal</Link></li>
+                <li><Link to="/interview-setup?role=Behavioral" className="hover:text-white transition-colors">For Behavioral & STAR</Link></li>
+                <li><Link to="/contact" className="hover:text-white transition-colors">For Universities & Bootcamps</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h5 className="font-semibold text-white uppercase text-[11px] mb-4">Compare</h5>
+              <ul className="space-y-2.5">
+                <li><span className="text-zinc-500">Intervyo vs Human Coaches</span></li>
+                <li><span className="text-zinc-500">Intervyo vs Pramp</span></li>
+                <li><span className="text-zinc-500">Intervyo vs LeetCode</span></li>
+                <li><span className="text-zinc-500">Intervyo vs Interviewing.io</span></li>
+                <li><span className="text-zinc-500">Intervyo vs Exponent</span></li>
+              </ul>
+            </div>
+
+            <div>
+              <h5 className="font-semibold text-white uppercase text-[11px] mb-4">Company</h5>
+              <ul className="space-y-2.5">
+                <li><Link to="/about" className="hover:text-white transition-colors">About Us</Link></li>
                 <li><Link to="/career" className="hover:text-white transition-colors">Careers</Link></li>
-                <li><Link to="/contact" className="hover:text-white transition-colors">Contact Engineering</Link></li>
-                <li><Link to="/faq" className="hover:text-white transition-colors">Support & FAQ</Link></li>
+                <li><Link to="/faq" className="hover:text-white transition-colors">FAQ & Support</Link></li>
+                <li><Link to="/contact" className="hover:text-white transition-colors">Contact</Link></li>
+                <li><Link to="/blog" className="hover:text-white transition-colors">Engineering Blog</Link></li>
               </ul>
             </div>
 
             <div>
-              <h4 className="text-[#f5f5f7] font-semibold text-[12px] mb-3">
-                Legal & Privacy
-              </h4>
-              <ul className="space-y-2">
+              <h5 className="font-semibold text-white uppercase text-[11px] mb-4">Trust & Legal</h5>
+              <ul className="space-y-2.5">
                 <li><Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
-                <li><Link to="/terms" className="hover:text-white transition-colors">Terms of Use</Link></li>
+                <li><Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
                 <li><Link to="/cookie-policy" className="hover:text-white transition-colors">Cookie Policy</Link></li>
+                <li><span className="text-emerald-400 font-mono font-bold">Status: All Systems Normal (134ms)</span></li>
               </ul>
             </div>
           </div>
 
-          {/* Copyright & Country/Region */}
-          <div className="border-t border-[#1d1d1f] pt-6 flex flex-col sm:flex-row items-center justify-between text-[11px] gap-4">
+          <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-500 gap-4">
             <div>
-              Copyright © {new Date().getFullYear()} Intervyo Inc. All rights reserved. Apple Style Dark Gallery Edition.
+              © 2026, Intervyo. All rights reserved.
             </div>
-            <div className="flex items-center gap-4 text-[#86868b]">
-              <Link to="/privacy" className="hover:text-white">Privacy</Link>
-              <span>|</span>
-              <Link to="/terms" className="hover:text-white">Terms</Link>
-              <span>|</span>
-              <span className="text-[#f5f5f7]">United States (English)</span>
+            <div className="flex items-center gap-6">
+              <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+              <Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+              <span className="text-zinc-300 font-semibold">Made for Engineers</span>
             </div>
           </div>
-
         </div>
       </footer>
 
+      {/* ── VIDEO MODAL ── */}
+      <AnimatePresence>
+        {videoModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md"
+            onClick={() => setVideoModalOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="relative w-full max-w-4xl aspect-video rounded-2xl overflow-hidden bg-black border border-white/20 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                onClick={() => setVideoModalOpen(false)}
+                className="absolute top-4 right-4 z-10 size-10 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/90 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              <iframe
+                src="https://www.youtube.com/embed/NONVS2IoDQE?autoplay=1"
+                title="Intervyo Platform Tour"
+                className="w-full h-full border-0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

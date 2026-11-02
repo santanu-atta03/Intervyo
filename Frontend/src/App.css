@@ -622,3 +622,37 @@
     transition: none !important;
   }
 }
+
+@keyframes chainSlide {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-32px);
+  }
+}
+
+.chain-animation {
+  animation: chainSlide 1.5s linear infinite;
+  will-change: transform;
+}
+
+.wave-char {
+  display: inline-block;
+}
+
+.wave-btn:hover .wave-char {
+  animation: textWave 0.45s ease-in-out;
+  animation-delay: calc(var(--i) * 0.035s);
+}
+
+@keyframes textWave {
+  0%, 100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
+}

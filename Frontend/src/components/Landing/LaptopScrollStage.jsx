@@ -8,6 +8,7 @@ import {
   AnimatePresence,
 } from "framer-motion";
 import {
+
   CheckCircle2,
   Sparkles,
   Terminal,
