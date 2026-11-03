@@ -537,7 +537,7 @@ export default function LandingPage() {
 
             {/* Intervyo Brand */}
             <Link to="/" className="flex items-center gap-2 group shrink-0">
-              <span className="font-heading font-extrabold text-[35px] tracking-tight text-[#171717] leading-none">
+              <span className="font-heading font-extrabold text-[35px] tracking-normal text-[#171717] leading-none">
                 Intervyo
               </span>
 
@@ -590,21 +590,15 @@ export default function LandingPage() {
 
             {/* Login */}
             <Link
-  to="/login"
-  className="wave-btn hidden sm:flex items-center justify-center bg-white text-[#171717] text-[15px] font-bold px-7 py-3 rounded-full hover:bg-zinc-100 transition-all duration-200 shadow-sm"
->
-  <span className="inline-flex">
-    {"Log in".split("").map((char, i) => (
-      <span
-        key={i}
-        className="wave-char inline-block"
-        style={{ "--i": i }}
-      >
-        {char === " " ? "\u00A0" : char}
-      </span>
-    ))}
-  </span>
-</Link>
+              to="/login"
+              className="hidden sm:flex items-center justify-center 
+              bg-white text-[#171717] text-[15px] font-bold px-7 py-3 rounded-full 
+              hover:bg-zinc-100 transition-all duration-200 shadow-sm group"
+            >
+              <span className="flex flex-col transition-transform duration-300 ease-in-out group-hover:-translate-y-full">
+                <span>Log in</span>
+              </span>
+            </Link>
 
 
             {/* Get Demo */}
@@ -680,7 +674,7 @@ export default function LandingPage() {
 
           {/* Hero Content Center */}
           <div className="relative z-10 max-w-[1100px] px-4 flex flex-col items-center">
-            <h1 className="w-full font-heading font-bold uppercase leading-[0.86] text-balance text-[56px] sm:text-[84px] md:text-[110px] lg:text-[132px] text-white">
+            <h1 className="w-full font-heading font-bold uppercase leading-[0.86] tracking-wide text-balance text-[56px] sm:text-[84px] md:text-[110px] lg:text-[132px] text-white">
               Your interview prep should be working harder than you are.
             </h1>
 

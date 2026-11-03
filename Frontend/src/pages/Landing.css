@@ -64,7 +64,7 @@
   color: var(--landing-ink);
   font-size: 20px;
   font-weight: 750;
-  letter-spacing: -0.8px;
+  
 }
 
 .landing-brand-mark {
@@ -213,8 +213,8 @@
   margin: 0;
   color: #18221f;
   font-size: clamp(46px, 6vw, 76px);
-  font-weight: 730;
-  letter-spacing: -5.2px;
+  font-weight: 740;
+  
   line-height: 0.99;
 }
 

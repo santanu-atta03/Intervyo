@@ -1,454 +1,715 @@
-// import { SignUp } from "@clerk/react";
-// import { dark } from "@clerk/themes";
-// import { Link } from "react-router-dom";
-// import SEO from "../components/SEO";
-// import BrandLogo from "../components/shared/BrandLogo";
-
-// export default function Register() {
-//   const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-
-//   return (
-//     <div className="relative min-h-screen overflow-hidden bg-[#09090b] text-white flex flex-col justify-center items-center px-4 py-16 selection:bg-emerald-500/30">
-//       <SEO
-//         title="Create Account – Intervyo"
-//         description="Join Intervyo to master your technical & behavioral interviews with real-time AI simulations."
-//         url="https://intervyo.xyz/register"
-//       />
-
-//       {/* Futuristic Background Accents */}
-//       <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_45%,#000_70%,transparent_100%)] pointer-events-none" />
-//       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-b from-emerald-500/20 via-emerald-500/5 to-transparent rounded-full blur-[110px] pointer-events-none" />
-//       <div className="absolute -bottom-20 left-10 w-[400px] h-[300px] bg-emerald-600/10 rounded-full blur-[100px] pointer-events-none" />
-
-//       {/* Main Centered Content */}
-//       <div className="relative z-10 w-full max-w-[480px] flex flex-col items-center">
-//         {/* Brand Header */}
-//         <Link to="/" className="inline-flex items-center gap-2 mb-6 group transition-transform hover:scale-[1.02]">
-//           <BrandLogo
-//             className="text-3xl tracking-tight"
-//             primaryClassName="text-white group-hover:text-emerald-400 transition-colors"
-//             secondaryClassName="text-emerald-400"
-//           />
-//         </Link>
-
-//         {/* Missing Key Notification */}
-//         {!publishableKey && (
-//           <div className="mb-6 w-full bg-amber-500/10 border border-amber-500/30 text-amber-300 p-4 rounded-2xl text-center backdrop-blur-xl shadow-lg">
-//             <p className="font-semibold text-sm">Clerk Publishable Key Required</p>
-//             <p className="text-xs text-amber-200/80 mt-1">
-//               Add <code className="bg-black/50 px-1.5 py-0.5 rounded font-mono text-amber-300">VITE_CLERK_PUBLISHABLE_KEY</code> to your <code className="bg-black/50 px-1.5 py-0.5 rounded font-mono text-amber-300">Frontend/.env</code> file.
-//             </p>
-//           </div>
-//         )}
-
-//         {/* Clerk Sign Up Component */}
-//         <div className="w-full">
-//           <SignUp
-//             routing="path"
-//             path="/register"
-//             signInUrl="/login"
-//             fallbackRedirectUrl="/dashboard"
-//             appearance={{
-//               baseTheme: dark,
-//               variables: {
-//                 colorPrimary: "#10b981",
-//                 colorBackground: "#131316",
-//                 colorInputBackground: "#1e1e24",
-//                 colorInputText: "#ffffff",
-//                 colorTextSecondary: "#a1a1aa",
-//                 colorText: "#ffffff",
-//                 borderRadius: "0.875rem",
-//                 fontFamily: "inherit",
-//               },
-//               elements: {
-//                 rootBox: "w-full",
-//                 card: "bg-zinc-900/90 backdrop-blur-2xl border border-white/10 shadow-[0_0_50px_rgba(16,185,129,0.12),0_25px_50px_rgba(0,0,0,0.7)] rounded-3xl p-6 sm:p-8",
-//                 headerTitle: "text-2xl font-bold text-white tracking-tight text-center",
-//                 headerSubtitle: "text-zinc-400 text-sm text-center mt-1.5",
-//                 socialButtonsBlockButton: "bg-zinc-800/90 hover:bg-zinc-750 border border-zinc-700/80 hover:border-emerald-500/50 text-white rounded-xl py-2.5 transition-all duration-200 shadow-sm",
-//                 socialButtonsBlockButtonText: "font-medium text-zinc-200 text-sm",
-//                 dividerLine: "bg-zinc-800",
-//                 dividerText: "text-zinc-500 text-xs font-semibold uppercase tracking-wider px-2",
-//                 formFieldLabel: "text-zinc-300 text-xs font-semibold uppercase tracking-wider mb-1.5",
-//                 formFieldInput: "bg-zinc-800/90 border border-zinc-700/80 rounded-xl px-4 py-2.5 text-white placeholder-zinc-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm",
-//                 formButtonPrimary: "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-black font-bold rounded-xl py-3 shadow-[0_0_20px_rgba(16,185,129,0.35)] hover:shadow-[0_0_30px_rgba(16,185,129,0.55)] transition-all duration-200 active:scale-[0.98] text-sm",
-//                 footer: "bg-transparent border-t border-zinc-800/80 mt-5 pt-4",
-//                 footerActionText: "text-zinc-400 text-sm",
-//                 footerActionLink: "text-emerald-400 hover:text-emerald-300 font-semibold transition-colors",
-//                 identityPreviewText: "text-white font-medium",
-//                 identityPreviewEditButton: "text-emerald-400 hover:text-emerald-300",
-//                 formFieldAction: "text-emerald-400 hover:text-emerald-300 text-xs font-medium",
-//                 formResendCodeLink: "text-emerald-400 hover:text-emerald-300 font-semibold",
-//                 otpCodeFieldInput: "border-zinc-700 bg-zinc-800 text-white rounded-xl focus:border-emerald-500",
-//                 phoneInputBox: "bg-zinc-800/90 border border-zinc-700/80 rounded-xl text-white",
-//                 formFieldSuccessText: "text-emerald-400 text-xs",
-//                 formFieldErrorText: "text-rose-400 text-xs",
-//                 alertText: "text-zinc-200 text-sm",
-//               },
-//             }}
-//           />
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-// =====================================================
-// PREVIOUS REGISTER COMPONENT (COMMENTED OUT AS REQUESTED)
-// =====================================================
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  AtSign,
+  BriefcaseBusiness,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  EyeOff,
+  Github,
+  Mail,
+  Monitor,
+  Rocket,
+  Search,
+  Sparkles,
+  Users,
+} from "lucide-react";
+
 import { setSignupData } from "../slices/authSlice";
 import { sendOtp, warmUpAuthService } from "../services/operations/authAPI";
 
+const HERO_IMAGE = {
+  register_img: "/upscalemedia-transformed.png",
+};
+
 const PASSWORD_REQUIREMENTS = [
-  { id: "length", label: "8+ Characters", test: (p) => p.length >= 8 },
-  { id: "uppercase", label: "Upper Case", test: (p) => /[A-Z]/.test(p) },
-  { id: "number", label: "Number", test: (p) => /[0-9]/.test(p) },
-  { id: "special", label: "Special Char", test: (p) => /[#?!@$%^&*-]/.test(p) },
+  {
+    id: "length",
+    label: "8+ Characters",
+    test: (password) => password.length >= 8,
+  },
+  {
+    id: "uppercase",
+    label: "Upper Case",
+    test: (password) => /[A-Z]/.test(password),
+  },
+  {
+    id: "number",
+    label: "Number",
+    test: (password) => /[0-9]/.test(password),
+  },
+  {
+    id: "special",
+    label: "Special Char",
+    test: (password) => /[#?!@$%^&*-]/.test(password),
+  },
+];
+
+const PLATFORMS = [
+  {
+    id: "frontend",
+    label: "Frontend",
+    icon: Monitor,
+  },
+  {
+    id: "backend",
+    label: "Backend",
+    icon: BriefcaseBusiness,
+  },
+  {
+    id: "fullstack",
+    label: "Full Stack",
+    icon: Rocket,
+  },
+  {
+    id: "data-science",
+    label: "Data Science",
+    icon: Sparkles,
+  },
+  {
+    id: "devops",
+    label: "DevOps",
+    icon: Search,
+  },
+  {
+    id: "mobile",
+    label: "Mobile",
+    icon: AtSign,
+  },
 ];
 
 const getStrength = (password) =>
-  PASSWORD_REQUIREMENTS.filter((req) => req.test(password)).length;
+  PASSWORD_REQUIREMENTS.filter((requirement) =>
+    requirement.test(password)
+  ).length;
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 12 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.4,
+      ease: [0.22, 1, 0.36, 1],
+    },
+  },
+};
 
 function Register() {
+  const dispatch = useDispatch();
+  const { loading } = useSelector((state) => state.auth);
+
+  const [step, setStep] = useState(1);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [platform, setPlatform] = useState("");
+  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   useEffect(() => {
     warmUpAuthService();
   }, []);
 
-  const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    domain: "",
-    experience: "",
-  });
+  const strength = getStrength(password);
+  const passwordsMatch =
+    password.length > 0 &&
+    confirmPassword.length > 0 &&
+    password === confirmPassword;
 
-  const currentStrength = getStrength(formData.password);
-  const isPasswordValid = currentStrength === 4;
-  const isMatching = formData.password === formData.confirmPassword && formData.confirmPassword !== '';
-  const isFormFilled = formData.name.trim() !== '' && formData.email.trim() !== '';
-
-  const [errors, setErrors] = useState({});
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const { loading } = useSelector((state) => state.auth);
-  const domains = [
-    {
-      id: "frontend",
-      name: "Frontend",
-      icon: "🎨",
-      color: "from-pink-500 to-rose-500",
-    },
-    {
-      id: "backend",
-      name: "Backend",
-      icon: "⚙️",
-      color: "from-blue-500 to-cyan-500",
-    },
-    {
-      id: "fullstack",
-      name: "Full Stack",
-      icon: "🚀",
-      color: "from-purple-500 to-pink-500",
-    },
-    {
-      id: "data-science",
-      name: "Data Science",
-      icon: "📊",
-      color: "from-green-500 to-emerald-500",
-    },
-    {
-      id: "devops",
-      name: "DevOps",
-      icon: "🔧",
-      color: "from-orange-500 to-amber-500",
-    },
-    {
-      id: "mobile",
-      name: "Mobile",
-      icon: "📱",
-      color: "from-indigo-500 to-blue-500",
-    },
-  ];
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    setErrors({ ...errors, [e.target.name]: "" });
-  };
-
-  const validateStep1 = () => {
-    const newErrors = {};
-    if (!formData.name.trim()) newErrors.name = 'Name is required';
-    if (!formData.email.trim()) newErrors.email = 'Email is required';
-    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email is invalid';
-    if (!formData.password) newErrors.password = 'Password is required';
-    else if (formData.password.length < 8) newErrors.password = 'Password must be 6+ characters';
-    if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
+  const validateEmail = () => {
+    if (!email.trim()) {
+      setError("Email is required");
+      return false;
     }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      setError("Please enter a valid email address");
+      return false;
+    }
+
+    setError("");
+    return true;
   };
 
-  const handleNextStep = () => {
-    if (validateStep1()) {
-      const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${formData.name}`;
+  const validatePassword = () => {
+    if (strength !== 4) {
+      setError("Please choose a stronger password");
+      return false;
+    }
+
+    if (!passwordsMatch) {
+      setError("Passwords do not match");
+      return false;
+    }
+
+    setError("");
+    return true;
+  };
+
+  const handleContinue = async () => {
+    if (step === 1) {
+      if (validateEmail()) {
+        setStep(2);
+      }
+
+      return;
+    }
+
+    if (step === 2) {
+      if (validatePassword()) {
+        setStep(3);
+      }
+
+      return;
+    }
+
+    if (step === 3) {
+      if (!platform) {
+        setError("Please choose a platform");
+        return;
+      }
+
+      setError("");
+
+      const derivedName = email
+        .split("@")[0]
+        .replace(/[._-]+/g, " ")
+        .replace(/\b\w/g, (character) => character.toUpperCase());
+
       dispatch(
         setSignupData({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-          profilePicture: avatarUrl,
-        }),
+          name: derivedName || "Intervyo User",
+          email,
+          password,
+          platform,
+          profilePicture: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(
+            email
+          )}`,
+        })
       );
-      dispatch(sendOtp(formData.email, navigate));
+
+      setStep(4);
+
+      // Passing an empty callback keeps the verification message on this screen.
+      // The verification page can still be opened from your auth flow if needed.
+      dispatch(sendOtp(email, () => { }));
+
+      return;
     }
   };
 
-  const BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:5000";
+  const handleBack = () => {
+    setError("");
+
+    if (step > 1 && step < 4) {
+      setStep((currentStep) => currentStep - 1);
+    }
+  };
 
   const handleGoogleAuth = () => {
-    window.location.href = `${BASE_URL}/api/auth/google`;
+    const baseUrl =
+      import.meta.env.VITE_BASE_URL || "http://localhost:5000";
+
+    window.location.href = `${baseUrl}/api/auth/google`;
   };
 
   const handleGithubAuth = () => {
-    window.location.href = `${BASE_URL}/api/auth/github`;
+    const baseUrl =
+      import.meta.env.VITE_BASE_URL || "http://localhost:5000";
+
+    window.location.href = `${baseUrl}/api/auth/github`;
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-black text-white">
-      <div className="absolute inset-0 grid grid-cols-[repeat(auto-fill,minmax(60px,1fr))] grid-rows-[repeat(auto-fill,minmax(60px,1fr))] pointer-events-auto">
-        {Array.from({ length: 800 }).map((_, i) => (
-          <div
-            key={i}
-            className="
-              border border-white/5
-              transition-colors duration-150 ease-out
-              hover:bg-[#10b981]
-            "
-          />
-        ))}
-      </div>
+    <main className="relative h-screen w-full overflow-hidden bg-[#0A0D12] text-white">
+      <style>{`
+      @font-face {
+        font-family: "FK Screamer";
+        src: url("https://cdn.ploy.ai/d21bf4ad-2458-43ee-9561-54c28ab0e85f/user/4b73ec13-fkscreamer.woff2") format("woff2");
+        font-weight: 100 900;
+        font-style: normal;
+        font-display: swap;
+      }
 
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="w-[420px] h-[420px] rounded-full bg-emerald-500 blur-[80px]" />
-      </div>
+      .font-heading {
+        font-family: "FK Screamer", Impact, sans-serif, "Geist;
+        letter-spacing: -0.02em;
+      }
 
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-4 pt-32 pb-12 pointer-events-none">
-        <div
-          className="pointer-events-auto w-full max-w-md rounded-2xl border border-white/10
-          bg-gradient-to-br from-zinc-900/90 to-zinc-800/80
-          backdrop-blur-xl shadow-[0_0_60px_rgba(16,185,129,0.15)] p-8"
+      .register-grid {
+        background-image:
+          linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+        background-size: 4rem 4rem;
+        mask-image: radial-gradient(ellipse at center, black 0%, transparent 78%);
+        -webkit-mask-image: radial-gradient(ellipse at center, black 0%, transparent 78%);
+      }
+
+      .nav-heading{
+          font-family: "FK Screamer", Impact, sans-serif;
+        }
+
+      @keyframes imageDrift {
+        0%, 100% {
+          transform: scale(1.02) translate3d(0, 0, 0);
+        }
+
+        50% {
+          transform: scale(1.06) translate3d(-1%, -1%, 0);
+        }
+      }
+      
+      .reg-panel{
+        font-family : Geist
+      }
+
+      .register-image-drift {
+        animation: imageDrift 18s ease-in-out infinite;
+      }
+    `}</style>
+
+      {/* Background */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(195,219,255,0.12),transparent_35%),linear-gradient(180deg,#0E121A_0%,#0A0D12_100%)]" />
+
+      <div className="register-grid pointer-events-none absolute inset-0" />
+
+      {/* Navigation */}
+      <motion.nav
+        initial={{ opacity: 0, y: -16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="relative z-30 flex h-[88px] items-center justify-between px-5 sm:px-8 lg:px-12"
+      >
+        <Link
+          to="/"
+          className="rounded-full bg-white px-5 py-2.5 text-[#171717] shadow-lg shadow-black/20 transition hover:bg-zinc-100"
         >
-          <div className="mb-8">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-semibold text-gray-300">
-                Step 1 of 3
-              </span>
-              <span className="text-sm text-gray-400">33%</span>
-            </div>
-            <div className="w-full bg-zinc-800/50 rounded-full h-2">
-              <div
-                className="bg-gradient-to-r from-emerald-500 to-emerald-400 h-2 rounded-full transition-all duration-500"
-                style={{ width: "33%" }}
-              ></div>
-            </div>
-          </div>
+          <span className="nav-heading text-[30px] font-extrabold leading-none">
+            Intervyo
+          </span>
+        </Link>
 
-          <div>
-            <div className="text-center mb-6">
-              <div className="inline-block p-3 bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full mb-3">
-                <span className="text-4xl">🚀</span>
-              </div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                Create Account
-              </h1>
-              <p className="text-gray-400 mt-2">
-                Start your interview prep journey today!
-              </p>
-            </div>
+        <Link
+          to="/login"
+          className="text-sm text-zinc-400 transition hover:text-white"
+        >
+          Already have an account?{" "}
+          <span className="font-semibold text-white">Log in</span>
+        </Link>
+      </motion.nav>
 
-            {errors.submit && (
-              <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg mb-4">
-                {errors.submit}
-              </div>
+      {/* Main content */}
+      <div className="relative z-10 mx-auto grid h-[calc(100vh-88px)] w-full max-w-[1440px] grid-cols-1 items-center lg:grid-cols-[minmax(0,1.15fr)_minmax(390px,0.85fr)]">
+        {/* Image panel */}
+        <motion.section
+          initial={{ opacity: 0, x: -24 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{
+            duration: 0.8,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+          className="relative hidden h-full min-h-0 items-center justify-center overflow-hidden lg:flex lg:flex-row"
+        >
+          <img
+            src={HERO_IMAGE.register_img}
+            alt="Intervyo interview preparation workspace"
+            className="register-image-drift block max-h-[82vh] w-[95%] object-contain object-center"
+          />
+
+
+        </motion.section>
+
+        {/* Registration panel */}
+        <motion.section
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.75,
+            delay: 0.12,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+          className="reg-panel flex h-full min-h-0 items-center justify-center px-10 py-10 font-[Geist]"
+        >
+          <div className="w-full max-w-[394px]">
+          <div className="relative rounded-[5px] border border-[#303030] bg-[#292929] px-7 py-7 shadow-[0_8px_30px_rgba(0,0,0,0.35)]">
+            {/* Decorative card dots */}
+            <span className="absolute left-[11px] top-[10px] h-[7px] w-[7px] rounded-full bg-[#3b3b3b]" />
+            <span className="absolute right-[11px] top-[10px] h-[7px] w-[7px] rounded-full bg-[#3b3b3b]" />
+            <span className="absolute bottom-[10px] left-[11px] h-[7px] w-[7px] rounded-full bg-[#3b3b3b]" />
+            <span className="absolute bottom-[10px] right-[11px] h-[7px] w-[7px] rounded-full bg-[#3b3b3b]" />
+
+            {step > 1 && step < 4 && (
+              <button
+                type="button"
+                onClick={handleBack}
+                className="absolute left-6 top-6 rounded-full p-1 text-[#8d8d8d] transition hover:bg-white/[0.06] hover:text-white"
+                aria-label="Go back"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
             )}
 
-            <div className="space-y-4 mb-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className={`w-full px-4 py-3 rounded-lg bg-zinc-900 border ${errors.name ? "border-red-500/50" : "border-zinc-700"} text-white placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 outline-none transition`}
-                  placeholder="John Doe"
-                />
-                {errors.name && (
-                  <p className="text-red-400 text-sm mt-1">{errors.name}</p>
-                )}
-              </div>
+            <AnimatePresence mode="wait">
+              {step === 1 && (
+                <motion.div
+                  key="email"
+                  variants={fadeUp}
+                  initial="hidden"
+                  animate="visible"
+                  exit={{ opacity: 0, y: -10 }}
+                >
+                  <h1 className="font-heading text-[28px] font-bold leading-none text-white font-[Geist]">
+                    Sign up
+                  </h1>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className={`w-full px-4 py-3 rounded-lg bg-zinc-900 border ${errors.email ? "border-red-500/50" : "border-zinc-700"} text-white placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 outline-none transition`}
-                  placeholder="you@example.com"
-                />
-                {errors.email && (
-                  <p className="text-red-400 text-sm mt-1">{errors.email}</p>
-                )}
-              </div>
+                  <div className="mt-7">
+                    <label
+                      htmlFor="signup-email"
+                      className="mb-2 block text-[14px] font-semibold text-white"
+                    >
+                      Email
+                    </label>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-300">Password</label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-lg bg-zinc-900 border border-zinc-700 text-white focus:ring-2 focus:ring-emerald-500 outline-none"
-                  />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">
-                    {showPassword ? '👁️' : '👁️‍🗨️'}
+                    <input
+                      id="signup-email"
+                      type="email"
+                      value={email}
+                      onChange={(event) => {
+                        setEmail(event.target.value);
+                        setError("");
+                      }}
+                      placeholder="m@example.com"
+                      autoComplete="email"
+                      autoFocus
+                      className={`h-[36px] w-full rounded-[5px] border bg-transparent px-3 text-[14px] text-white outline-none transition placeholder:text-[#858585] focus:border-[#72b2ff] focus:ring-1 focus:ring-[#72b2ff]/30 ${error ? "border-red-400/70" : "border-[#414141]"
+                        }`}
+                    />
+                  </div>
+
+                  {error && (
+                    <p className="mt-2 text-[11px] text-red-300">{error}</p>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={handleContinue}
+                    className="mt-6 flex h-[39px] w-full items-center justify-center rounded-full bg-[#e6e6e6] text-[14px] font-medium text-[#111] transition hover:bg-white active:scale-[0.98]"
+                  >
+                    Continue
                   </button>
-                </div>
 
-                {formData.password.length > 0 && (
-                  <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-                    <div className="flex gap-1 h-1 my-3">
-                      {[1, 2, 3, 4].map((i) => (
-                        <div key={i} className={`h-full flex-1 rounded-full transition-all duration-500 ${getStrength(formData.password) >= i ? (getStrength(formData.password) <= 2 ? 'bg-red-500' : getStrength(formData.password) === 3 ? 'bg-yellow-500' : 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]') : 'bg-zinc-800'}`} />
-                      ))}
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 p-3 bg-zinc-900/50 rounded-lg border border-white/5">
-                      {PASSWORD_REQUIREMENTS.map((req) => (
-                        <div key={req.id} className="flex items-center gap-2">
-                          <div className={`w-3 h-3 rounded-full ${req.test(formData.password) ? 'bg-emerald-500' : 'bg-zinc-700'} transition-colors`} />
-                          <span className={`text-[10px] uppercase tracking-tighter ${req.test(formData.password) ? 'text-emerald-400' : 'text-zinc-500'}`}>{req.label}</span>
-                        </div>
-                      ))}
+                  <div className="my-5 flex items-center gap-3">
+                    <div className="h-px flex-1 bg-[#444]" />
+                    <span className="text-[13px] text-[#aaa]">or</span>
+                    <div className="h-px flex-1 bg-[#444]" />
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleGoogleAuth}
+                    className="flex h-[40px] w-full items-center justify-center gap-2 rounded-full border border-[#444] text-[14px] font-medium text-white transition hover:border-[#666] hover:bg-white/[0.04]"
+                  >
+                    <span className="text-[18px] font-[Geist]">G</span>
+                    Continue with Google
+                  </button>
+
+                  <p className="mt-6 text-center text-[13px] text-[#aaa]">
+                    Already have an account?{" "}
+                    <Link
+                      to="/login"
+                      className="font-semibold text-white hover:text-[#D1F48C]"
+                    >
+                      Log in
+                    </Link>
+                  </p>
+                </motion.div>
+              )}
+
+              {step === 2 && (
+                <motion.div
+                  key="password"
+                  variants={fadeUp}
+                  initial="hidden"
+                  animate="visible"
+                  exit={{ opacity: 0, y: -10 }}
+                >
+                  <h1 className="font-heading text-[27px] font-bold leading-none text-white">
+                    Create your password
+                  </h1>
+
+                  <p className="mt-2 text-[12px] leading-relaxed text-[#aaa]">
+                    Choose a password to secure your interview workspace.
+                  </p>
+
+                  <div className="mt-7">
+                    <label
+                      htmlFor="signup-password"
+                      className="mb-2 block text-[12px] font-semibold text-white"
+                    >
+                      Password
+                    </label>
+
+                    <div className="relative">
+                      <input
+                        id="signup-password"
+                        type={showPassword ? "text" : "password"}
+                        value={password}
+                        onChange={(event) => {
+                          setPassword(event.target.value);
+                          setError("");
+                        }}
+                        autoFocus
+                        className="h-[36px] w-full rounded-[5px] border border-[#414141] bg-transparent px-3 pr-10 text-[12px] text-white outline-none transition focus:border-[#72b2ff] focus:ring-1 focus:ring-[#72b2ff]/30"
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((value) => !value)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[#888] hover:text-white"
+                        aria-label={
+                          showPassword ? "Hide password" : "Show password"
+                        }
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </button>
                     </div>
                   </div>
-                )}
-              </div>
 
-              <div className="space-y-2 mt-4">
-                <label className="text-sm font-medium text-gray-300">Confirm Password</label>
-                <div className="relative">
-                  <input
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    name="confirmPassword"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-3 rounded-lg bg-zinc-900 border ${formData.confirmPassword && (formData.password === formData.confirmPassword ? 'border-emerald-500/50' : 'border-red-500/50')} text-white outline-none`}
-                  />
-                  {formData.confirmPassword && (
-                    <span className={`absolute right-10 top-1/2 -translate-y-1/2 text-[10px] font-bold uppercase ${formData.password === formData.confirmPassword ? 'text-emerald-500' : 'text-red-500'}`}>
-                      {formData.password === formData.confirmPassword ? 'Matched' : 'Mismatch'}
-                    </span>
+                  <div className="mt-5">
+                    <label
+                      htmlFor="confirm-password"
+                      className="mb-2 block text-[12px] font-semibold text-white"
+                    >
+                      Confirm password
+                    </label>
+
+                    <div className="relative">
+                      <input
+                        id="confirm-password"
+                        type={showConfirmPassword ? "text" : "password"}
+                        value={confirmPassword}
+                        onChange={(event) => {
+                          setConfirmPassword(event.target.value);
+                          setError("");
+                        }}
+                        className={`h-[36px] w-full rounded-[5px] border bg-transparent px-3 pr-10 text-[12px] text-white outline-none transition focus:ring-1 ${confirmPassword && !passwordsMatch
+                            ? "border-red-400/70 focus:border-red-400"
+                            : "border-[#414141] focus:border-[#72b2ff] focus:ring-[#72b2ff]/30"
+                          }`}
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setShowConfirmPassword((value) => !value)
+                        }
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[#888] hover:text-white"
+                        aria-label={
+                          showConfirmPassword
+                            ? "Hide confirm password"
+                            : "Show confirm password"
+                        }
+                      >
+                        {showConfirmPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  {password.length > 0 && (
+                    <div className="mt-4">
+                      <div className="flex h-[3px] gap-1">
+                        {[1, 2, 3, 4].map((level) => (
+                          <div
+                            key={level}
+                            className={`flex-1 rounded-full transition-all ${strength >= level
+                                ? "bg-[#d9d9d9]"
+                                : "bg-[#414141]"
+                              }`}
+                          />
+                        ))}
+                      </div>
+
+                      <div className="mt-3 grid grid-cols-2 gap-2">
+                        {PASSWORD_REQUIREMENTS.map((requirement) => (
+                          <span
+                            key={requirement.id}
+                            className={`text-[10px] ${requirement.test(password)
+                                ? "text-[#d9d9d9]"
+                                : "text-[#777]"
+                              }`}
+                          >
+                            {requirement.test(password) ? "✓" : "○"}{" "}
+                            {requirement.label}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   )}
-                </div>
-              </div>
-            </div>
 
-            <button
-              onClick={handleNextStep}
-              disabled={loading || !isPasswordValid || !isMatching || !isFormFilled}
-              className="relative w-full overflow-hidden rounded-lg bg-emerald-500 py-3 font-semibold text-black
-              transition-all duration-300
-              hover:scale-[1.02] hover:shadow-[0_0_25px_rgba(16,185,129,0.8)]
-              active:scale-95 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
-            >
-              <span className="relative z-10">
-                {loading ? "Sending OTP..." : "Continue →"}
-              </span>
-              <span className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-emerald-600 opacity-0 hover:opacity-100 transition-opacity" />
-            </button>
+                  {error && (
+                    <p className="mt-3 text-[11px] text-red-300">{error}</p>
+                  )}
 
-            <div className="flex items-center my-6">
-              <div className="flex-1 border-t border-zinc-700"></div>
-              <span className="px-4 text-sm text-gray-400">
-                Or sign up with
-              </span>
-              <div className="flex-1 border-t border-zinc-700"></div>
-            </div>
+                  <button
+                    type="button"
+                    onClick={handleContinue}
+                    className="mt-6 flex h-[39px] w-full items-center justify-center gap-2 rounded-full bg-[#e6e6e6] text-[13px] font-medium text-[#111] transition hover:bg-white active:scale-[0.98]"
+                  >
+                    Continue
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </motion.div>
+              )}
 
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={handleGoogleAuth}
-                className="flex items-center justify-center gap-3 rounded-lg border border-zinc-700
-                bg-zinc-900 py-3 font-semibold text-white
-                hover:border-emerald-500 hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] transition"
-              >
-                <svg className="w-5 h-5" viewBox="0 0 24 24">
-                  <path
-                    fill="#4285F4"
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                  />
-                  <path
-                    fill="#34A853"
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                  />
-                  <path
-                    fill="#FBBC05"
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                  />
-                  <path
-                    fill="#EA4335"
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                  />
-                </svg>
-                Google
-              </button>
-
-              <button
-                onClick={handleGithubAuth}
-                className="flex items-center justify-center gap-3 rounded-lg
-                bg-zinc-800 py-3 font-semibold text-white
-                hover:bg-zinc-700 hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] transition"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
+              {step === 3 && (
+                <motion.div
+                  key="platform"
+                  variants={fadeUp}
+                  initial="hidden"
+                  animate="visible"
+                  exit={{ opacity: 0, y: -10 }}
                 >
-                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-                </svg>
-                GitHub
-              </button>
-            </div>
+                  <h1 className="font-heading text-[27px] font-bold leading-none text-white">
+                    Which platform are you preparing for?
+                  </h1>
 
-            <p className="text-center mt-6 text-gray-400">
-              Already have an account?{" "}
-              <Link
-                to="/login"
-                className="text-emerald-400 font-semibold hover:underline"
-              >
-                Sign in
-              </Link>
-            </p>
+                  <p className="mt-2 text-[12px] leading-relaxed text-[#aaa]">
+                    We&apos;ll personalize your interview preparation.
+                  </p>
+
+                  <div className="mt-6 space-y-2">
+                    {PLATFORMS.map((item) => {
+                      const Icon = item.icon;
+                      const selected = platform === item.id;
+
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => {
+                            setPlatform(item.id);
+                            setError("");
+                          }}
+                          className={`flex h-[39px] w-full items-center justify-between rounded-[5px] border px-3 text-left transition ${selected
+                              ? "border-[#8c8c8c] bg-white/[0.08]"
+                              : "border-[#414141] hover:border-[#626262]"
+                            }`}
+                        >
+                          <span className="flex items-center gap-3 text-[12px] text-white">
+                            <Icon className="h-4 w-4 text-[#aaa]" />
+                            {item.label}
+                          </span>
+
+                          <span
+                            className={`flex h-3.5 w-3.5 items-center justify-center rounded-full border ${selected
+                                ? "border-white bg-white"
+                                : "border-[#555]"
+                              }`}
+                          >
+                            {selected && (
+                              <span className="h-1.5 w-1.5 rounded-full bg-[#292929]" />
+                            )}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {error && (
+                    <p className="mt-3 text-[11px] text-red-300">{error}</p>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={handleContinue}
+                    disabled={loading}
+                    className="mt-5 flex h-[39px] w-full items-center justify-center rounded-full bg-[#e6e6e6] text-[13px] font-medium text-[#111] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {loading ? "Sending verification..." : "Continue"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPlatform("skipped");
+                      handleContinue();
+                    }}
+                    className="mx-auto mt-5 block text-[12px] font-medium text-white hover:text-[#D1F48C]"
+                  >
+                    Skip
+                  </button>
+                </motion.div>
+              )}
+
+              {step === 4 && (
+                <motion.div
+                  key="verification"
+                  variants={fadeUp}
+                  initial="hidden"
+                  animate="visible"
+                  className="py-5 text-center"
+                >
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-[#555] bg-white/[0.05]">
+                    <Mail className="h-5 w-5 text-[#d9d9d9]" />
+                  </div>
+
+                  <h1 className="mt-5 font-heading text-[28px] font-bold leading-none text-white">
+                    Check your inbox
+                  </h1>
+
+                  <p className="mt-3 text-[12px] leading-relaxed text-[#aaa]">
+                    We sent a verification link to:
+                  </p>
+
+                  <p className="mt-2 break-all text-[13px] font-semibold text-white">
+                    {email}
+                  </p>
+
+                  <p className="mt-5 text-[11px] leading-relaxed text-[#888]">
+                    Open the email and follow the link to finish creating your
+                    Intervyo account.
+                  </p>
+
+                  <div className="mt-6 rounded-[5px] border border-[#414141] bg-white/[0.03] px-4 py-3 text-left text-[11px] text-[#aaa]">
+                    <div className="flex items-center gap-2 text-white">
+                      <Check className="h-4 w-4 text-[#d9d9d9]" />
+                      Account details saved
+                    </div>
+                    <div className="mt-2 flex items-center gap-2 text-white">
+                      <Check className="h-4 w-4 text-[#d9d9d9]" />
+                      Preparation path selected
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setStep(1)}
+                    className="mt-6 text-[12px] font-semibold text-white hover:text-[#D1F48C]"
+                  >
+                    Use a different email
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
-        </div>
+          </div>
+        </motion.section>
       </div>
-    </div>
+    </main>
   );
 }
 
