@@ -1,210 +1,236 @@
-import { HugeiconsIcon } from "@hugeicons/react";
-import { TelegramIcon } from "@hugeicons/core-free-icons";
-import { Twitter, Linkedin, Github, Youtube, Mail } from "lucide-react";
+import React from "react";
 import { Link } from "react-router-dom";
-import BrandLogo from "./BrandLogo";
+import { Linkedin, Github } from "lucide-react";
+
+// Clean minimal X (Twitter) icon
+const XIcon = ({ className = "size-4" }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+  </svg>
+);
+
+// Clean minimal Instagram icon
+const InstagramIcon = ({ className = "size-4" }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+  </svg>
+);
 
 export default function Footer() {
   return (
-    <footer className="relative bg-skin-primary text-skin-secondary border-t border-skin-primary overflow-hidden transition-colors duration-300">
-      
-      {/* Animated gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-purple-500/5 opacity-50" />
-      
-      {/* Grid pattern overlay */}
-      <div className="absolute inset-0 opacity-10">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `
-              linear-gradient(rgba(0,0,0,.05) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(0,0,0,.05) 1px, transparent 1px)
-            `,
-            backgroundSize: "50px 50px",
-          }}
-        />
+    <footer className="relative bg-[#F8F9FA] dark:bg-[#08090D] py-16 sm:py-24 px-4 sm:px-6 lg:px-8 overflow-hidden transition-colors duration-300">
+      {/* Giant Watermark in background */}
+      <div className="absolute -bottom-8 sm:-bottom-12 lg:-bottom-16 left-1/2 -translate-x-1/2 w-full text-center pointer-events-none select-none overflow-hidden z-0">
+        <span className="font-heading font-extrabold text-[120px] sm:text-[190px] md:text-[240px] lg:text-[290px] tracking-tight leading-none text-neutral-900/[0.04] dark:text-white/[0.03] whitespace-nowrap block uppercase">
+          INTERVYO
+        </span>
       </div>
 
-      <div className="max-w-7xl mx-auto relative z-10 px-6 py-16">
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-16">
+      {/* Floating Card Container */}
+      <div className="max-w-6xl mx-auto relative z-10">
+        <div className="bg-white dark:bg-[#121622] rounded-[28px] sm:rounded-[36px] border border-black/[0.08] dark:border-white/10 shadow-[0_12px_45px_rgba(0,0,0,0.04)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-8 sm:p-12 lg:p-14">
           
-          <div className="lg:col-span-2">
-            <BrandLogo
-              className="text-3xl mb-4"
-              primaryClassName="text-skin-primary"
-            />
+          {/* Top Row: Brand & Info (Left) + 3 Columns (Right) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 pb-12">
+            
+            {/* Left Column: Logo, Description & Social Icons */}
+            <div className="lg:col-span-5 flex flex-col justify-between">
+              <div>
+                <Link to="/" className="inline-flex items-center gap-3 group">
+                  <div className="size-9 rounded-xl bg-black dark:bg-white flex items-center justify-center p-1.5 shadow-sm group-hover:scale-105 transition-transform">
+                    <img
+                      src="/intervyo_logo.png"
+                      alt="Intervyo Logo"
+                      className="w-full h-full object-contain rounded-lg"
+                    />
+                  </div>
+                  <span className="font-heading font-bold text-2xl tracking-tight text-neutral-900 dark:text-white">
+                    Intervyo
+                  </span>
+                </Link>
 
-            <p className="text-skin-secondary mb-6 max-w-sm leading-relaxed">
-              Empowering tech professionals with AI-driven interview preparation.
-              Master your skills, boost your confidence, land your dream job.
-            </p>
+                <p className="mt-5 text-sm text-neutral-600 dark:text-neutral-400 max-w-sm leading-relaxed font-sans">
+                  Intervyo empowers engineers and professionals to master high-stakes technical interviews — turning raw preparation into clear, offer-winning confidence and real career breakthroughs.
+                </p>
+              </div>
 
-            <div className="flex gap-3">
-              <a
-                href="mailto:intervyo.team@example.com"
-                aria-label="Email"
-                className="group relative p-2.5 rounded-lg bg-skin-secondary border border-skin-primary hover:border-emerald-500/50 transition-all duration-300"
-              >
-                <Mail className="w-5 h-5 text-skin-secondary group-hover:text-emerald-400 transition-colors" />
-              </a>
+              {/* Social Media Links */}
+              <div className="flex items-center gap-4 mt-8">
+                <a
+                  href="https://x.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="X (formerly Twitter)"
+                  className="text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white transition-colors"
+                >
+                  <XIcon className="size-4" />
+                </a>
+                <a
+                  href="https://instagram.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram"
+                  className="text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white transition-colors"
+                >
+                  <InstagramIcon className="size-4" />
+                </a>
+                <a
+                  href="https://www.linkedin.com/in/santanu-atta-139820363"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="LinkedIn"
+                  className="text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white transition-colors"
+                >
+                  <Linkedin className="size-4" />
+                </a>
+                <a
+                  href="https://github.com/santanu-atta03"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="GitHub"
+                  className="text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white transition-colors"
+                >
+                  <Github className="size-4" />
+                </a>
+              </div>
+            </div>
 
-              <a
-                href="https://www.linkedin.com/in/santanu-atta-139820363"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="LinkedIn"
-                className="group relative p-2.5 rounded-lg bg-skin-secondary border border-skin-primary hover:border-blue-500/50 transition-all duration-300"
-              >
-                <Linkedin className="w-5 h-5 text-skin-secondary group-hover:text-blue-400 transition-colors" />
-              </a>
+            {/* Right Column: Product, Resources, Company */}
+            <div className="lg:col-span-7 grid grid-cols-3 gap-6 sm:gap-10">
+              
+              {/* Product */}
+              <div>
+                <h4 className="font-bold text-sm text-neutral-900 dark:text-white mb-4 tracking-tight">
+                  Product
+                </h4>
+                <ul className="space-y-3 text-sm text-neutral-600 dark:text-neutral-400">
+                  <li>
+                    <Link to="/interview-setup" className="hover:text-neutral-900 dark:hover:text-white transition-colors">
+                      Features
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/pricing" className="hover:text-neutral-900 dark:hover:text-white transition-colors">
+                      Pricing
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/practice-lab" className="hover:text-neutral-900 dark:hover:text-white transition-colors">
+                      Integrations
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/blog" className="hover:text-neutral-900 dark:hover:text-white transition-colors">
+                      Changelog
+                    </Link>
+                  </li>
+                </ul>
+              </div>
 
-              <a
-                href="https://github.com/santanu-atta03"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="GitHub"
-                className="group relative p-2.5 rounded-lg bg-skin-secondary border border-skin-primary hover:border-white/50 transition-all duration-300"
-              >
-                <Github className="w-5 h-5 text-skin-secondary group-hover:text-skin-primary transition-colors" />
-              </a>
+              {/* Resources */}
+              <div>
+                <h4 className="font-bold text-sm text-neutral-900 dark:text-white mb-4 tracking-tight">
+                  Resources
+                </h4>
+                <ul className="space-y-3 text-sm text-neutral-600 dark:text-neutral-400">
+                  <li>
+                    <Link to="/faq" className="hover:text-neutral-900 dark:hover:text-white transition-colors">
+                      Documentation
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/learning-hub" className="hover:text-neutral-900 dark:hover:text-white transition-colors">
+                      Tutorials
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/blog" className="hover:text-neutral-900 dark:hover:text-white transition-colors">
+                      Blog
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/contact" className="hover:text-neutral-900 dark:hover:text-white transition-colors">
+                      Support
+                    </Link>
+                  </li>
+                </ul>
+              </div>
 
-              <a
-                href="https://t.me/attasantanu747"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Telegram"
-                className="group relative p-2.5 rounded-lg bg-skin-secondary border border-skin-primary hover:border-blue-400/50 transition-all duration-300"
-              >
-                <HugeiconsIcon
-                  icon={TelegramIcon}
-                  className="w-5 h-5 text-skin-secondary group-hover:text-blue-400 transition-colors"
-                />
-              </a>
+              {/* Company */}
+              <div>
+                <h4 className="font-bold text-sm text-neutral-900 dark:text-white mb-4 tracking-tight">
+                  Company
+                </h4>
+                <ul className="space-y-3 text-sm text-neutral-600 dark:text-neutral-400">
+                  <li>
+                    <Link to="/about" className="hover:text-neutral-900 dark:hover:text-white transition-colors">
+                      About
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/career" className="hover:text-neutral-900 dark:hover:text-white transition-colors">
+                      Careers
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/contact" className="hover:text-neutral-900 dark:hover:text-white transition-colors">
+                      Contact
+                    </Link>
+                  </li>
+                  <li>
+                    <a
+                      href="https://github.com/santanu-atta03/Intervyo"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-neutral-900 dark:hover:text-white transition-colors"
+                    >
+                      Partners
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
             </div>
           </div>
 
-          <div>
-            <h4 className="text-skin-primary font-semibold mb-4 text-sm uppercase tracking-wider">
-              Platform
-            </h4>
-            <ul className="space-y-3">
-              <li>
-                <a href="/interview-setup" className="text-skin-secondary hover:text-emerald-400 transition-colors text-sm">
-                  Mock Interviews
-                </a>
-              </li>
-              <li>
-                <a href="/faq" className="text-skin-secondary hover:text-emerald-400 transition-colors text-sm">
-                  AI Feedback
-                </a>
-              </li>
-              <li>
-                <a href="/pricing" className="text-skin-secondary hover:text-emerald-400 transition-colors text-sm">
-                  Role Preparation
-                </a>
-              </li>
-              <li>
-                <a href="/resources" className="text-skin-secondary hover:text-emerald-400 transition-colors text-sm">
-                  Study Plans
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-skin-primary font-semibold mb-4 text-sm uppercase tracking-wider">
-              Company
-            </h4>
-            <ul className="space-y-3">
-              <li>
-                <Link to="/about" className="text-skin-secondary hover:text-emerald-400 transition-colors text-sm">
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link to="/blog" className="text-skin-secondary hover:text-emerald-400 transition-colors text-sm">
-                  Blog
-                </Link>
-              </li>
-              <li>
-                <Link to="/career" className="text-skin-secondary hover:text-emerald-400 transition-colors text-sm">
-                  Careers
-                </Link>
-              </li>
-              <li>
-                <Link to="/contact" className="text-skin-secondary hover:text-emerald-400 transition-colors text-sm">
-                  Contact
-                </Link>
-              </li>
-              <li>
-                <a
-                  href="https://github.com/santanu-atta03/Intervyo"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-skin-secondary hover:text-emerald-400 transition-colors text-sm"
-                >
-                  Community
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-skin-primary font-semibold mb-4 text-sm uppercase tracking-wider">
-              Legal
-            </h4>
-            <ul className="space-y-3">
-              <li>
-                <Link to="/privacy" className="text-skin-secondary hover:text-emerald-400 transition-colors text-sm">
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link to="/terms" className="text-skin-secondary hover:text-emerald-400 transition-colors text-sm">
-                  Terms of Service
-                </Link>
-              </li>
-              <li>
-                <Link to="/cookie-policy" className="text-skin-secondary hover:text-emerald-400 transition-colors text-sm">
-                  Cookie Policy
-                </Link>
-              </li>
-              <li>
-                <Link to="/faq" className="text-skin-secondary hover:text-emerald-400 transition-colors text-sm">
-                  Help Center
-                </Link>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="border-t border-skin-primary pt-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-skin-tertiary">
-              © 2026 Intervyo. All rights reserved.
+          {/* Thin Divider Line & Bottom Legal Links */}
+          <div className="pt-7 border-t border-neutral-200/80 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
+            <p className="text-neutral-500 dark:text-neutral-400 font-normal">
+              © {new Date().getFullYear()} Intervyo. All rights reserved.
             </p>
-            <p className="text-sm text-skin-tertiary">
-              Built with <span className="text-red-500">♥</span> for aspiring developers
-            </p>
-          </div>
-        </div>
 
-        <div className="flex justify-center overflow-hidden">
-          <div
-            className="text-5xl md:text-[80px] lg:text-[120px] xl:text-[160px] font-bold whitespace-nowrap select-none"
-            style={{
-              color: "transparent",
-              background:
-                "radial-gradient(circle, rgba(16, 185, 129, 0.45) 2px, transparent 2px)",
-              backgroundSize: "6px 6px",
-              WebkitBackgroundClip: "text",
-              backgroundClip: "text",
-              letterSpacing: "0.05em",
-            }}
-          >
-            INTERVYO
+            <div className="flex items-center gap-6 text-neutral-600 dark:text-neutral-400">
+              <Link
+                to="/privacy"
+                className="underline underline-offset-4 decoration-neutral-300 dark:decoration-neutral-700 hover:text-neutral-900 dark:hover:text-white hover:decoration-neutral-900 dark:hover:decoration-white transition-colors"
+              >
+                Privacy Policy
+              </Link>
+              <Link
+                to="/terms"
+                className="underline underline-offset-4 decoration-neutral-300 dark:decoration-neutral-700 hover:text-neutral-900 dark:hover:text-white hover:decoration-neutral-900 dark:hover:decoration-white transition-colors"
+              >
+                Terms of Service
+              </Link>
+              <Link
+                to="/cookie-policy"
+                className="underline underline-offset-4 decoration-neutral-300 dark:decoration-neutral-700 hover:text-neutral-900 dark:hover:text-white hover:decoration-neutral-900 dark:hover:decoration-white transition-colors"
+              >
+                Cookies Settings
+              </Link>
+            </div>
           </div>
+
         </div>
       </div>
     </footer>

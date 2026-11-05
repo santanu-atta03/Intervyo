@@ -17,6 +17,7 @@ import Lenis from "@studio-freight/lenis";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import SEO from "../components/shared/SEO";
+import Footer from "../components/shared/Footer";
 import "../pages/Landing.css";
 gsap.registerPlugin(ScrollTrigger);
 
@@ -1922,78 +1923,8 @@ export default function LandingPage() {
 
 
 
-      {/* ── 13. MEGA FOOTER (DARK MODE) ── */}
-      <footer className="border-t border-white/10 bg-[#07090D] text-xs text-zinc-400 py-20">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-10 mb-16">
-            <div>
-              <h5 className="font-semibold text-white uppercase text-[11px] mb-4">Product</h5>
-              <ul className="space-y-2.5">
-                <li><Link to="/interview-setup" className="hover:text-white transition-colors">AI Voice Interview Engine</Link></li>
-                <li><Link to="/practice-lab" className="hover:text-white transition-colors">AST Code Sandbox</Link></li>
-                <li><Link to="/interview-setup" className="hover:text-white transition-colors">Distributed Whiteboard</Link></li>
-                <li><Link to="/analytics" className="hover:text-white transition-colors">FAANG Rubric Telemetry</Link></li>
-                <li><Link to="/leaderboard" className="hover:text-white transition-colors">Candidate Leaderboard</Link></li>
-                <li><Link to="/pricing" className="hover:text-white transition-colors">Pricing & Plans</Link></li>
-              </ul>
-            </div>
-
-            <div>
-              <h5 className="font-semibold text-white uppercase text-[11px] mb-4">Solutions</h5>
-              <ul className="space-y-2.5">
-                <li><Link to="/interview-setup?role=Backend" className="hover:text-white transition-colors">For Backend Engineers</Link></li>
-                <li><Link to="/interview-setup?role=Frontend" className="hover:text-white transition-colors">For Frontend Engineers</Link></li>
-                <li><Link to="/interview-setup?role=Staff" className="hover:text-white transition-colors">For Staff & Principal</Link></li>
-                <li><Link to="/interview-setup?role=Behavioral" className="hover:text-white transition-colors">For Behavioral & STAR</Link></li>
-                <li><Link to="/contact" className="hover:text-white transition-colors">For Universities & Bootcamps</Link></li>
-              </ul>
-            </div>
-
-            <div>
-              <h5 className="font-semibold text-white uppercase text-[11px] mb-4">Compare</h5>
-              <ul className="space-y-2.5">
-                <li><span className="text-zinc-500">Intervyo vs Human Coaches</span></li>
-                <li><span className="text-zinc-500">Intervyo vs Pramp</span></li>
-                <li><span className="text-zinc-500">Intervyo vs LeetCode</span></li>
-                <li><span className="text-zinc-500">Intervyo vs Interviewing.io</span></li>
-                <li><span className="text-zinc-500">Intervyo vs Exponent</span></li>
-              </ul>
-            </div>
-
-            <div>
-              <h5 className="font-semibold text-white uppercase text-[11px] mb-4">Company</h5>
-              <ul className="space-y-2.5">
-                <li><Link to="/about" className="hover:text-white transition-colors">About Us</Link></li>
-                <li><Link to="/career" className="hover:text-white transition-colors">Careers</Link></li>
-                <li><Link to="/faq" className="hover:text-white transition-colors">FAQ & Support</Link></li>
-                <li><Link to="/contact" className="hover:text-white transition-colors">Contact</Link></li>
-                <li><Link to="/blog" className="hover:text-white transition-colors">Engineering Blog</Link></li>
-              </ul>
-            </div>
-
-            <div>
-              <h5 className="font-semibold text-white uppercase text-[11px] mb-4">Trust & Legal</h5>
-              <ul className="space-y-2.5">
-                <li><Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
-                <li><Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
-                <li><Link to="/cookie-policy" className="hover:text-white transition-colors">Cookie Policy</Link></li>
-                <li><span className="text-emerald-400 font-mono font-bold">Status: All Systems Normal (134ms)</span></li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-500 gap-4">
-            <div>
-              © 2026, Intervyo. All rights reserved.
-            </div>
-            <div className="flex items-center gap-6">
-              <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
-              <Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
-              <span className="text-zinc-300 font-semibold">Made for Engineers</span>
-            </div>
-          </div>
-        </div>
-      </footer>
+      {/* ── 13. FOOTER ── */}
+      <Footer />
 
       {/* ── VIDEO MODAL ── */}
       <AnimatePresence>
