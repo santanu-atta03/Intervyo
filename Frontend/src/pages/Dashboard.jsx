@@ -44,11 +44,6 @@ import {
 } from "../services/operations/notificationAPI";
 import BrandLogo from "../components/shared/BrandLogo";
 
-/* ------------------------------------------------------------------ */
-/*  Nike design system – tokens, components and motion                 */
-/*  Light is the documented palette. When the app theme is "dark" the  */
-/*  neutral tokens invert (ink <-> canvas); the pill grammar is kept.  */
-/* ------------------------------------------------------------------ */
 export const NIKE_CSS = `
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 
@@ -1015,7 +1010,6 @@ const prefersReducedMotion = () =>
   window.matchMedia &&
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-/** True once the element has scrolled into view (fires once). */
 function useInView(threshold = 0.15) {
   const ref = useRef(null);
   const [inView, setInView] = useState(false);
