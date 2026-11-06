@@ -1,5 +1,5 @@
 // src/services/operations/interviewAPI.js
-import { toast } from "react-hot-toast";
+import { notify } from "../../utils/sileoNotifications";
 
 import { interviewEndpoints, BASE_URL } from "../apis";
 import {
@@ -16,7 +16,6 @@ import {
   updateProgress,
 } from "../../slices/interviewSlice";
 import { apiConnector } from "../apiConnector";
-import { customToast } from "../../utils/toast";
 
 const {
   CREATE_INTERVIEW_API,
@@ -28,7 +27,7 @@ const {
 } = interviewEndpoints;
 // export const createInterview = (interviewConfig, navigate,token) => {
 //   return async (dispatch) => {
-//     const toastId = toast.loading('Creating your interview...');
+//     const toastId = notify.loading('Creating your interview...');
 //     dispatch(setLoading(true));
 
 //     try {
@@ -46,16 +45,16 @@ const {
 //       }
 
 //       dispatch(setCurrentInterview(response.data.data));
-//       toast.success('Interview created successfully!');
+//       notify.success('Interview created successfully!');
 
 //       // Navigate to interview room
 //       navigate(`/interview/${response.data.data.id}`);
 //     } catch (error) {
 //       console.error('CREATE_INTERVIEW_API ERROR:', error);
-//       toast.error(error.response?.data?.message || 'Failed to create interview');
+//       notify.error(error.response?.data?.message || 'Failed to create interview');
 //       dispatch(setError(error.message));
 //     } finally {
-//       toast.dismiss(toastId);
+//       notify.dismiss(toastId);
 //       dispatch(setLoading(false));
 //     }
 //   };
@@ -63,7 +62,7 @@ const {
 
 export const createInterview = (interviewConfig, navigate, token) => {
   return async (dispatch) => {
-    const toastId = toast.loading("Creating your interview...");
+    const toastId = notify.loading("Creating your interview...");
     dispatch(setLoading(true));
 
     try {
@@ -109,7 +108,7 @@ export const createInterview = (interviewConfig, navigate, token) => {
       }
 
       dispatch(setCurrentInterview(response.data.data));
-      toast.success("Interview created successfully!");
+      notify.success("Interview created successfully!");
 
       // Navigate to interview room — must match the route in App.jsx (/interview-room/:interviewId)
       const interviewId = response.data.data.id || response.data.data._id || response.data.data.interviewId;
@@ -117,10 +116,10 @@ export const createInterview = (interviewConfig, navigate, token) => {
     } catch (error) {
       console.error("CREATE_INTERVIEW_API ERROR:", error);
       const message = error.response?.data?.message || error.message || "Failed to create interview";
-      toast.error(message);
+      notify.error(message);
       dispatch(setError(message));
     } finally {
-      toast.dismiss(toastId);
+      notify.dismiss(toastId);
       dispatch(setLoading(false));
     }
   };
@@ -128,7 +127,7 @@ export const createInterview = (interviewConfig, navigate, token) => {
 
 export const startInterview = (interviewId, token) => {
   return async (dispatch) => {
-    const toastId = customToast.loading("Starting interview...");
+    const toastId = notify.loading("Starting interview...");
     dispatch(setLoading(true));
     const url = START_INTERVIEW_API.replace(":interviewId", interviewId);
     try {
@@ -146,15 +145,15 @@ export const startInterview = (interviewId, token) => {
       }
 
       dispatch(setInterviewData(response.data.data));
-      customToast.success("Interview started! Good luck! 🚀");
+      notify.success("Interview started! Good luck! 🚀");
     } catch (error) {
       console.error("START_INTERVIEW_API ERROR:", error);
-      customToast.error(
+      notify.error(
         error.response?.data?.message || "Failed to start interview",
       );
       dispatch(setError(error.message));
     } finally {
-      toast.dismiss(toastId);
+      notify.dismiss(toastId);
       dispatch(setLoading(false));
     }
   };
@@ -223,16 +222,16 @@ export const startInterview = (interviewId, token) => {
 //       // Set next question or complete
 //       if (nextQuestion) {
 //         dispatch(setCurrentQuestion(nextQuestion));
-//         toast.success(`Score: ${evaluation.overallScore}/100`);
+//         notify.success(`Score: ${evaluation.overallScore}/100`);
 //       } else {
-//         toast.success("Interview completed!");
+//         notify.success("Interview completed!");
 //         dispatch(completeInterview(interviewId, navigate,token))
 //       }
 
 //       return response.data.data;
 //     } catch (error) {
 //       console.error("SUBMIT_ANSWER_API ERROR:", error);
-//       toast.error(error.response?.data?.message || "Failed to submit answer");
+//       notify.error(error.response?.data?.message || "Failed to submit answer");
 //       dispatch(setError(error.message));
 //       throw error;
 //     } finally {
@@ -243,7 +242,7 @@ export const startInterview = (interviewId, token) => {
 
 export const completeInterview = (interviewId, navigate, token) => {
   return async (dispatch) => {
-    const toastId = toast.loading("Generating your results...");
+    const toastId = notify.loading("Generating your results...");
     dispatch(setLoading(true));
     const url = COMPLETE_INTERVIEW_API.replace(":interviewId", interviewId);
     try {
@@ -260,7 +259,7 @@ export const completeInterview = (interviewId, navigate, token) => {
         throw new Error(response.data.message);
       }
 
-      toast.success("Interview completed successfully! 🎉");
+      notify.success("Interview completed successfully! 🎉");
 
       // Navigate to results page
       navigate(`/results/${interviewId}`);
@@ -269,12 +268,12 @@ export const completeInterview = (interviewId, navigate, token) => {
       dispatch(resetInterview());
     } catch (error) {
       console.error("COMPLETE_INTERVIEW_API ERROR:", error);
-      toast.error(
+      notify.error(
         error.response?.data?.message || "Failed to complete interview",
       );
       dispatch(setError(error.message));
     } finally {
-      toast.dismiss(toastId);
+      notify.dismiss(toastId);
       dispatch(setLoading(false));
     }
   };
@@ -301,7 +300,7 @@ export const getInterviewData = (interviewId, token) => {
       dispatch(setInterviewData(response.data.data));
     } catch (error) {
       console.error("GET_INTERVIEW_API ERROR:", error);
-      toast.error("Failed to load interview data");
+      notify.error("Failed to load interview data");
       dispatch(setError(error.message));
     } finally {
       dispatch(setLoading(false));
@@ -399,7 +398,7 @@ export const submitAnswer = async (interviewId, answerData, token) => {
   }
 };
 
-// import toast from 'react-hot-toast';
+// import toast from 'Sileo';
 // import { apiConnector } from '../apiConnector.js';
 // import { interviewEndpoints } from '../apis';
 // import {
@@ -411,8 +410,6 @@ export const submitAnswer = async (interviewId, answerData, token) => {
 //   setError,
 //   setCurrentInterview
 // } from '../../slices/interviewSlice';
-// import { customToast } from '../../utils/toast';
-
 // const {
 //   CREATE_INTERVIEW_API,
 //   START_INTERVIEW_API,
@@ -423,7 +420,7 @@ export const submitAnswer = async (interviewId, answerData, token) => {
 
 //  export const createInterview = (interviewConfig, navigate, token) => {
 //   return async (dispatch) => {
-//     const toastId = customToast.loading('Creating your interview...');
+//     const toastId = notify.loading('Creating your interview...');
 //     dispatch(setLoading(true));
 
 //     try {
@@ -457,16 +454,16 @@ export const submitAnswer = async (interviewId, answerData, token) => {
 //       }
 
 //       dispatch(setCurrentInterview(response.data.data));
-//       customToast.success('Interview created successfully!');
+//       notify.success('Interview created successfully!');
 
 //       // Navigate to interview room
 //       navigate(`/interview/${response.data.data.id}`);
 //     } catch (error) {
 //       console.error('CREATE_INTERVIEW_API ERROR:', error);
-//       customToast.error(error.response?.data?.message || error.message || 'Failed to create interview');
+//       notify.error(error.response?.data?.message || error.message || 'Failed to create interview');
 //       dispatch(setError(error.message));
 //     } finally {
-//       customToast.dismiss(toastId);
+//       notify.dismiss(toastId);
 //       dispatch(setLoading(false));
 //     }
 //   };
@@ -494,10 +491,10 @@ export const submitAnswer = async (interviewId, answerData, token) => {
 
 //       dispatch(setInterviewData(response.data.data));
 //       dispatch(setCurrentQuestion(response.data.data.currentQuestion));
-//       customToast.success('Interview started successfully!');
+//       notify.success('Interview started successfully!');
 //     } catch (error) {
 //       console.error('START_INTERVIEW_API ERROR:', error);
-//       customToast.error(error.response?.data?.message || 'Failed to start interview');
+//       notify.error(error.response?.data?.message || 'Failed to start interview');
 //       dispatch(setError(error.message));
 //     }
 //     dispatch(setLoading(false));
@@ -531,15 +528,15 @@ export const submitAnswer = async (interviewId, answerData, token) => {
 // //       // Get next question
 // //       if (response.data.data.nextQuestion) {
 // //         dispatch(setCurrentQuestion(response.data.data.nextQuestion));
-// //         toast.success('Answer submitted!');
+// //         notify.success('Answer submitted!');
 // //       } else {
-// //         toast.success('All questions completed!');
+// //         notify.success('All questions completed!');
 // //       }
 
 // //       return response.data;
 // //     } catch (error) {
 // //       console.error('SUBMIT_ANSWER_API ERROR:', error);
-// //       toast.error(error.response?.data?.message || 'Failed to submit answer');
+// //       notify.error(error.response?.data?.message || 'Failed to submit answer');
 // //       throw error;
 // //     }
 // //   };
@@ -580,16 +577,16 @@ export const submitAnswer = async (interviewId, answerData, token) => {
 //       if (response.data.data.nextQuestion) {
 //         console.log('Setting next question:', response.data.data.nextQuestion);
 //         dispatch(setCurrentQuestion(response.data.data.nextQuestion));
-//         customToast.success('Answer submitted! Next question loaded.');
+//         notify.success('Answer submitted! Next question loaded.');
 //       } else if (response.data.data.isComplete) {
-//         customToast.success('All questions completed!');
+//         notify.success('All questions completed!');
 //         // Don't set null - keep current question visible
 //       }
 
 //       return response.data;
 //     } catch (error) {
 //       console.error('SUBMIT_ANSWER_API ERROR:', error);
-//       customToast.error(error.response?.data?.message || 'Failed to submit answer');
+//       notify.error(error.response?.data?.message || 'Failed to submit answer');
 //       throw error;
 //     }
 //   };
@@ -598,7 +595,7 @@ export const submitAnswer = async (interviewId, answerData, token) => {
 // // Complete Interview
 // export function completeInterview(interviewId, navigate, token) {
 //   return async (dispatch) => {
-//     const toastId = customToast.loading('Submitting your interview...');
+//     const toastId = notify.loading('Submitting your interview...');
 //     try {
 //       const url = COMPLETE_INTERVIEW_API.replace(':interviewId', interviewId);
 
@@ -615,11 +612,11 @@ export const submitAnswer = async (interviewId, answerData, token) => {
 //         throw new Error(response.data.message);
 //       }
 
-//       customToast.success('Interview completed! Generating report...', { id: toastId });
+//       notify.success('Interview completed! Generating report...', { id: toastId });
 //       navigate(`/results/${interviewId}`);
 //     } catch (error) {
 //       console.error('COMPLETE_INTERVIEW_API ERROR:', error);
-//       toast.error(error.response?.data?.message || 'Failed to complete interview', { id: toastId });
+//       notify.error(error.response?.data?.message || 'Failed to complete interview', { id: toastId });
 //     }
 //   };
 // }
@@ -647,7 +644,7 @@ export const submitAnswer = async (interviewId, answerData, token) => {
 //       return response.data.data;
 //     } catch (error) {
 //       console.error('GET_RESULTS_API ERROR:', error);
-//       toast.error(error.response?.data?.message || 'Failed to get results');
+//       notify.error(error.response?.data?.message || 'Failed to get results');
 //       throw error;
 //     } finally {
 //       dispatch(setLoading(false));

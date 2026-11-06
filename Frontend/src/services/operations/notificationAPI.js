@@ -1,5 +1,5 @@
 import { apiConnector } from "../apiConnector";
-import { toast } from "react-hot-toast";
+import { notify } from "../../utils/sileoNotifications";
 import { BASE_URL } from "../apis";
 
 // Get all notifications
@@ -62,7 +62,7 @@ export const getUnreadCount = async (token) => {
     }
 
     return response.data.count;
-  } catch (error) {
+  } catch {
     // Silently return 0 for any errors
     return 0;
   }
@@ -107,10 +107,10 @@ export const markAllNotificationsAsRead = async (token) => {
       throw new Error(response.data.message);
     }
 
-    toast.success("All notifications marked as read");
+    notify.success("All notifications marked as read");
     return response.data;
   } catch (error) {
-    toast.error("Failed to mark notifications as read");
+    notify.error("Failed to mark notifications as read");
     throw error;
   }
 };
@@ -133,15 +133,14 @@ export const deleteNotification = async (notificationId, token) => {
 
     return response.data;
   } catch (error) {
-    toast.error("Failed to delete notification");
+    notify.error("Failed to delete notification");
     throw error;
   }
 };
 
 // Clear all read notifications
 export const clearReadNotifications = async (token) => {
-  const toastId = toast.loading("Clearing notifications...");
-  try {
+  const clearOperation = async () => {
     const response = await apiConnector(
       "DELETE",
       `${BASE_URL}/notifications/read/clear`,
@@ -151,17 +150,16 @@ export const clearReadNotifications = async (token) => {
       },
     );
 
-    toast.dismiss(toastId);
-
     if (!response.data.success) {
       throw new Error(response.data.message);
     }
 
-    toast.success("Read notifications cleared");
     return response.data;
-  } catch (error) {
-    toast.dismiss(toastId);
-    toast.error("Failed to clear notifications");
-    throw error;
-  }
+  };
+
+  return notify.promise(clearOperation(), {
+    loading: { title: "Clearing notifications..." },
+    success: { title: "Read notifications cleared" },
+    error: { title: "Failed to clear notifications" },
+  });
 };

@@ -1,4 +1,4 @@
-import { toast } from "react-hot-toast";
+import { notify } from "../../utils/sileoNotifications";
 import { apiConnector } from "../apiConnector";
 import { interviewEndpoints, BASE_URL } from "../apis";
 
@@ -22,7 +22,7 @@ const AI_ENDPOINTS = {
 
 // Create new interview
 export const createInterview = async (formData, setLoading, token) => {
-  const toastId = toast.loading("Scheduling interview...");
+  const toastId = notify.loading("Scheduling interview...");
   setLoading(true);
 
   try {
@@ -36,12 +36,12 @@ export const createInterview = async (formData, setLoading, token) => {
     );
 
     if (response.data.success) {
-      toast.success("Interview scheduled successfully!", { id: toastId });
+      notify.success("Interview scheduled successfully!", { id: toastId });
       return response.data.data;
     }
   } catch (error) {
     console.error("Create interview error:", error);
-    toast.error(
+    notify.error(
       error.response?.data?.message || "Failed to schedule interview",
       {
         id: toastId,
@@ -72,7 +72,7 @@ export const getAllInterviews = async (setLoading, token) => {
     }
   } catch (error) {
     console.error("Get interviews error:", error);
-    toast.error("Failed to fetch interviews");
+    notify.error("Failed to fetch interviews");
     throw error;
   } finally {
     setLoading(false);
@@ -96,14 +96,14 @@ export const getInterviewById = async (interviewId, token) => {
     }
   } catch (error) {
     console.error("Get interview error:", error);
-    toast.error("Failed to fetch interview details");
+    notify.error("Failed to fetch interview details");
     throw error;
   }
 };
 
 // Start interview
 export const startInterview = async (interviewId, setLoading, token) => {
-  const toastId = toast.loading("Starting interview...");
+  const toastId = notify.loading("Starting interview...");
   setLoading(true);
 
   try {
@@ -117,12 +117,12 @@ export const startInterview = async (interviewId, setLoading, token) => {
     );
 
     if (response.data.success) {
-      toast.success("Interview started!", { id: toastId });
+      notify.success("Interview started!", { id: toastId });
       return response.data.data;
     }
   } catch (error) {
     console.error("Start interview error:", error);
-    toast.error(error.response?.data?.message || "Failed to start interview", {
+    notify.error(error.response?.data?.message || "Failed to start interview", {
       id: toastId,
     });
     throw error;
@@ -152,7 +152,7 @@ export const getInterviewSession = async (interviewId, token) => {
 
 // End interview
 export const endInterview = async (interviewId, sessionId, setLoading, token) => {
-  const toastId = toast.loading("Ending interview...");
+  const toastId = notify.loading("Ending interview...");
   setLoading(true);
 
   try {
@@ -164,12 +164,12 @@ export const endInterview = async (interviewId, sessionId, setLoading, token) =>
     );
 
     if (response.data.success) {
-      toast.success("Interview completed!", { id: toastId });
+      notify.success("Interview completed!", { id: toastId });
       return response.data.data;
     }
   } catch (error) {
     console.error("End interview error:", error);
-    toast.error("Failed to end interview", { id: toastId });
+    notify.error("Failed to end interview", { id: toastId });
     throw error;
   } finally {
     setLoading(false);
@@ -178,7 +178,7 @@ export const endInterview = async (interviewId, sessionId, setLoading, token) =>
 
 // Delete interview
 export const deleteInterview = async (interviewId, setLoading, token) => {
-  const toastId = toast.loading("Deleting interview...");
+  const toastId = notify.loading("Deleting interview...");
   setLoading(true);
 
   try {
@@ -190,12 +190,12 @@ export const deleteInterview = async (interviewId, setLoading, token) => {
     );
 
     if (response.data.success) {
-      toast.success("Interview deleted!", { id: toastId });
+      notify.success("Interview deleted!", { id: toastId });
       return true;
     }
   } catch (error) {
     console.error("Delete interview error:", error);
-    toast.error("Failed to delete interview", { id: toastId });
+    notify.error("Failed to delete interview", { id: toastId });
     throw error;
   } finally {
     setLoading(false);
@@ -266,7 +266,7 @@ export const getNextQuestion = async (sessionId) => {
 
 // Complete interview
 export const completeInterview = async (interviewId, token) => {
-  const toastId = toast.loading("Generating results...");
+  const toastId = notify.loading("Generating results...");
 
   try {
     const response = await apiConnector(
@@ -284,13 +284,13 @@ export const completeInterview = async (interviewId, token) => {
       throw new Error(response.data.message || "Failed to complete interview");
     }
 
-    toast.success("Results generated successfully!", { id: toastId });
+    notify.success("Results generated successfully!", { id: toastId });
 
     // Return the data object which contains session and feedback
     return response.data.data;
   } catch (error) {
     console.error("Complete Interview API Error:", error);
-    toast.error(error.response?.data?.message || "Failed to generate results", {
+    notify.error(error.response?.data?.message || "Failed to generate results", {
       id: toastId,
     });
     throw error;

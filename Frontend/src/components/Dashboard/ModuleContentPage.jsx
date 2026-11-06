@@ -14,7 +14,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { useSelector } from "react-redux";
-import { customToast } from "../../utils/toast";
+import { notify } from "../../utils/sileoNotifications";
 
 const API_BASE_URL = "https://intervyo.onrender.com/api";
 
@@ -532,16 +532,16 @@ function ModuleContentPage({ moduleId, onBack, onNextModule, onPrevModule }) {
 
       if (response.ok) {
         const data = await response.json();
-        customToast.success(data.message);
-        customToast.success(`You earned ${data.data.xpAwarded} XP!`);
+        notify.success(data.message);
+        notify.success(`You earned ${data.data.xpAwarded} XP!`);
         await fetchModuleData();
       } else {
         const error = await response.json();
-        customToast.error(error.message || "Failed to mark complete!");
+        notify.error(error.message || "Failed to mark complete!");
       }
     } catch (err) {
       console.error("Error marking complete:", err);
-      customToast.error("Failed to mark complete. Please try again.");
+      notify.error("Failed to mark complete. Please try again.");
     } finally {
       setCompleting(false);
     }
@@ -564,12 +564,12 @@ function ModuleContentPage({ moduleId, onBack, onNextModule, onPrevModule }) {
       );
 
       if (response.ok) {
-        customToast.success("Note saved sucessfully");
+        notify.success("Note saved sucessfully");
         setNote("");
         setShowNotes(false);
       }
     } catch (err) {
-      customToast.error("Error saving note");
+      notify.error("Error saving note");
     }
   };
 
@@ -584,23 +584,23 @@ function ModuleContentPage({ moduleId, onBack, onNextModule, onPrevModule }) {
       // Check if Web Share API is supported
       if (navigator.share) {
         await navigator.share(shareData);
-        customToast.success("Course shared successfully!");
+        notify.success("Course shared successfully!");
       } else {
         // Fallback: Copy to clipboard
         await navigator.clipboard.writeText(shareData.url);
-        customToast.success("Course link copied to clipboard!");
+        notify.success("Course link copied to clipboard!");
       }
     } catch (error) {
       if (error.name !== "AbortError") {
         console.error("Error sharing:", error);
-        customToast.error("Failed to share course");
+        notify.error("Failed to share course");
       }
     }
   };
 
   const handleDownloadResources = async (topic, modules, token) => {
     try {
-      customToast.info("Preparing resources for download...");
+      notify.info("Preparing resources for download...");
 
       // Create markdown content with all modules
       let markdownContent = `# ${topic.title}\n\n`;
@@ -672,10 +672,10 @@ function ModuleContentPage({ moduleId, onBack, onNextModule, onPrevModule }) {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
-      customToast.success("Resources downloaded successfully!");
+      notify.success("Resources downloaded successfully!");
     } catch (error) {
       console.error("Error downloading resources:", error);
-      customToast.error("Failed to download resources");
+      notify.error("Failed to download resources");
     }
   };
 
@@ -705,10 +705,10 @@ function ModuleContentPage({ moduleId, onBack, onNextModule, onPrevModule }) {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
-      customToast.success("Module downloaded successfully!");
+      notify.success("Module downloaded successfully!");
     } catch (error) {
       console.error("Error downloading module:", error);
-      customToast.error("Failed to download module");
+      notify.error("Failed to download module");
     }
   };
 
@@ -722,15 +722,15 @@ function ModuleContentPage({ moduleId, onBack, onNextModule, onPrevModule }) {
     try {
       if (navigator.share) {
         await navigator.share(shareData);
-        customToast.success("Module shared successfully!");
+        notify.success("Module shared successfully!");
       } else {
         await navigator.clipboard.writeText(shareData.url);
-        customToast.success("Module link copied to clipboard!");
+        notify.success("Module link copied to clipboard!");
       }
     } catch (error) {
       if (error.name !== "AbortError") {
         console.error("Error sharing:", error);
-        customToast.error("Failed to share module");
+        notify.error("Failed to share module");
       }
     }
   };

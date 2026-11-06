@@ -1,5 +1,5 @@
 import { apiConnector } from "../apiConnector";
-import { toast } from "react-hot-toast";
+import { notify } from "../../utils/sileoNotifications";
 import { analyticsEndpoints } from "../apis";
 
 const { GET_USER_ANALYTICS_API, GET_SKILL_RADAR_API } = analyticsEndpoints;
@@ -17,7 +17,7 @@ export const getUserAnalytics = async (token, timeRange = 30) => {
     return response.data;
   } catch (error) {
     console.error("Analytics fetch error:", error);
-    toast.error("Failed to load analytics");
+    notify.error("Failed to load analytics");
     throw error;
   }
 };

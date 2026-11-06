@@ -1,4 +1,4 @@
-import { toast } from "react-hot-toast";
+import { notify } from "../../utils/sileoNotifications";
 import {
   setAuthUser,
   setLoading,
@@ -6,7 +6,6 @@ import {
 } from "../../slices/authSlice";
 import { setUser } from "../../slices/profileSlice";
 import { authEndpoints } from "../apis.js";
-import { customToast } from "../../utils/toast";
 import { apiConnector } from "../apiConnector.js";
 
 const { SEND_OTP_API, REGISTER_API, LOGIN_API } = authEndpoints;
@@ -25,7 +24,7 @@ export async function warmUpAuthService() {
 // Send OTP
 export function sendOtp(email, navigate) {
   return async (dispatch) => {
-    const toastId = toast.loading("Sending OTP...");
+    const toastId = notify.loading("Sending OTP...");
     dispatch(setLoading(true));
 
     try {
@@ -35,14 +34,14 @@ export function sendOtp(email, navigate) {
         throw new Error(response.data.message);
       }
 
-      toast.success("OTP sent to your email");
+      notify.success("OTP sent to your email");
       navigate("/verify-email");
     } catch (error) {
       console.error("Send OTP Error:", error);
-      toast.error(error.response?.data?.message || "Failed to send OTP");
+      notify.error(error.response?.data?.message || "Failed to send OTP");
     } finally {
       dispatch(setLoading(false));
-      toast.dismiss(toastId);
+      notify.dismiss(toastId);
     }
   };
 }
@@ -50,7 +49,7 @@ export function sendOtp(email, navigate) {
 // Resend OTP
 export function resendOtp(email) {
   return async (dispatch) => {
-    const toastId = toast.loading("Resending OTP...");
+    const toastId = notify.loading("Resending OTP...");
     dispatch(setLoading(true));
 
     try {
@@ -62,13 +61,13 @@ export function resendOtp(email) {
         throw new Error(response.data.message);
       }
 
-      toast.success("OTP resent to your email");
+      notify.success("OTP resent to your email");
     } catch (error) {
       console.error("Resend OTP Error:", error);
-      toast.error(error.response?.data?.message || "Failed to resend OTP");
+      notify.error(error.response?.data?.message || "Failed to resend OTP");
     } finally {
       dispatch(setLoading(false));
-      toast.dismiss(toastId);
+      notify.dismiss(toastId);
     }
   };
 }
@@ -84,7 +83,7 @@ export function signup(
   navigate,
 ) {
   return async (dispatch) => {
-    const toastId = customToast.loading("Creating account...");
+    const toastId = notify.loading("Creating account...");
     dispatch(setLoading(true));
 
     try {
@@ -110,14 +109,14 @@ export function signup(
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
 
-      customToast.success("Registration successful!");
+      notify.success("Registration successful!");
       navigate("/dashboard");
     } catch (error) {
       console.error("Signup Error:", error);
-      customToast.error(error.response?.data?.message || "Registration failed");
+      notify.error(error.response?.data?.message || "Registration failed");
     } finally {
       dispatch(setLoading(false));
-      toast.dismiss(toastId);
+      notify.dismiss(toastId);
     }
   };
 }
@@ -135,7 +134,7 @@ export function login(email, password, navigate) {
       // return;
     }
 
-    const toastId = customToast.loading("Verifying credentials...");
+    const toastId = notify.loading("Verifying credentials...");
     dispatch(setLoading(true));
 
     try {
@@ -157,7 +156,7 @@ export function login(email, password, navigate) {
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
 
-      customToast.success("Welcome back, " + user.name.split(" ")[0] + "!");
+      notify.success("Welcome back, " + user.name.split(" ")[0] + "!");
       navigate("/dashboard");
     } catch (error) {
       console.error("Login Error:", error);
@@ -174,10 +173,10 @@ export function login(email, password, navigate) {
         errorMessage = error.response.data.message;
       }
 
-      customToast.error(errorMessage);
+      notify.error(errorMessage);
     } finally {
       dispatch(setLoading(false));
-      toast.dismiss(toastId);
+      notify.dismiss(toastId);
     }
   };
 }
@@ -185,7 +184,7 @@ export function login(email, password, navigate) {
 // Logout
 export function logout(navigate) {
   return (dispatch) => {
-    const toastId = customToast.loading("Logging out...");
+    const toastId = notify.loading("Logging out...");
     try {
       dispatch(setToken(null));
       dispatch(setAuthUser(null));
@@ -193,12 +192,12 @@ export function logout(navigate) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       navigate("/");
+      notify.success("Logged out successfully");
     } catch (error) {
       console.error("Login Error:", error);
-      customToast.error(error.response?.data?.message || "Login failed");
+      notify.error(error.response?.data?.message || "Login failed");
     } finally {
-      customToast.success("Logged out successfully");
-      customToast.dismiss(toastId);
+      notify.dismiss(toastId);
     }
   };
 }

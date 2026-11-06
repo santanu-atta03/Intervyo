@@ -8,7 +8,7 @@ import { BrowserRouter } from "react-router-dom";
 import { configureStore } from "@reduxjs/toolkit";
 import { Provider } from "react-redux";
 import rootReducer from "./reducer/index.js";
-import { Toaster } from "react-hot-toast";
+import { Toaster } from "sileo";
 import { ThemeProvider } from "../src/components/shared/ThemeContext";
 import { NotificationProvider } from "./components/shared/NotificationContext.jsx";
 import { HelmetProvider } from "react-helmet-async";

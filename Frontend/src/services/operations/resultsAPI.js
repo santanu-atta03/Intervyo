@@ -3,7 +3,7 @@
 import { apiConnector } from "../apiConnector";
 import { interviewEndpoints } from "../apis";
 import { setResults, setLoading, setError } from "../../slices/resultsSlice";
-import toast from "react-hot-toast";
+import { notify } from "../../utils/sileoNotifications";
 
 const { GET_RESULTS_API } = interviewEndpoints;
 
@@ -42,7 +42,7 @@ export function fetchInterviewResults(interviewId) {
         "Failed to fetch results";
       console.error("FETCH_RESULTS ERROR:", message);
       dispatch(setError(message));
-      toast.error(message);
+      notify.error(message);
       return { success: false, message };
     } finally {
       dispatch(setLoading(false));

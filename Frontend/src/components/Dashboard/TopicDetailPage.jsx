@@ -779,7 +779,7 @@ import {
   Brain,
 } from "lucide-react";
 import { useSelector } from "react-redux";
-import { customToast } from "../../utils/toast";
+import { notify } from "../../utils/sileoNotifications";
 
 const API_BASE_URL = "https://intervyo.onrender.com/api";
 
@@ -854,8 +854,8 @@ export function TopicDetailPage({ topicId, onBack, onModuleSelect }) {
 
       if (response.ok) {
         const data = await response.json();
-        customToast.success(data.message);
-        customToast.success(`You earned ${data.data.xpAwarded} XP!`);
+        notify.success(data.message);
+        notify.success(`You earned ${data.data.xpAwarded} XP!`);
 
         // Wait 2 seconds then refresh to show generated modules
         setTimeout(() => {
@@ -863,11 +863,11 @@ export function TopicDetailPage({ topicId, onBack, onModuleSelect }) {
         }, 2000);
       } else {
         const error = await response.json();
-        customToast.error(error.message || "Failed to enroll");
+        notify.error(error.message || "Failed to enroll");
       }
     } catch (err) {
       console.error("Error enrolling:", err);
-      customToast.error("Failed to enroll. Please try again.");
+      notify.error("Failed to enroll. Please try again.");
     } finally {
       setEnrolling(false);
     }
@@ -884,23 +884,23 @@ export function TopicDetailPage({ topicId, onBack, onModuleSelect }) {
       // Check if Web Share API is supported
       if (navigator.share) {
         await navigator.share(shareData);
-        customToast.success("Course shared successfully!");
+        notify.success("Course shared successfully!");
       } else {
         // Fallback: Copy to clipboard
         await navigator.clipboard.writeText(shareData.url);
-        customToast.success("Course link copied to clipboard!");
+        notify.success("Course link copied to clipboard!");
       }
     } catch (error) {
       if (error.name !== "AbortError") {
         console.error("Error sharing:", error);
-        customToast.error("Failed to share course");
+        notify.error("Failed to share course");
       }
     }
   };
 
   const handleDownloadResources = async (topic, modules, token) => {
     try {
-      customToast.info("Preparing resources for download...");
+      notify.info("Preparing resources for download...");
 
       // Create markdown content with all modules
       let markdownContent = `# ${topic.title}\n\n`;
@@ -972,10 +972,10 @@ export function TopicDetailPage({ topicId, onBack, onModuleSelect }) {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
-      customToast.success("Resources downloaded successfully!");
+      notify.success("Resources downloaded successfully!");
     } catch (error) {
       console.error("Error downloading resources:", error);
-      customToast.error("Failed to download resources");
+      notify.error("Failed to download resources");
     }
   };
 
@@ -1005,10 +1005,10 @@ export function TopicDetailPage({ topicId, onBack, onModuleSelect }) {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
-      customToast.success("Module downloaded successfully!");
+      notify.success("Module downloaded successfully!");
     } catch (error) {
       console.error("Error downloading module:", error);
-      customToast.error("Failed to download module");
+      notify.error("Failed to download module");
     }
   };
 
@@ -1022,15 +1022,15 @@ export function TopicDetailPage({ topicId, onBack, onModuleSelect }) {
     try {
       if (navigator.share) {
         await navigator.share(shareData);
-        customToast.success("Module shared successfully!");
+        notify.success("Module shared successfully!");
       } else {
         await navigator.clipboard.writeText(shareData.url);
-        customToast.success("Module link copied to clipboard!");
+        notify.success("Module link copied to clipboard!");
       }
     } catch (error) {
       if (error.name !== "AbortError") {
         console.error("Error sharing:", error);
-        customToast.error("Failed to share module");
+        notify.error("Failed to share module");
       }
     }
   };

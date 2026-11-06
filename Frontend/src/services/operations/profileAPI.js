@@ -1,5 +1,5 @@
 // services/operations/profileAPI.js
-import toast from "react-hot-toast";
+import { notify } from "../../utils/sileoNotifications";
 
 import { profileEndpoints } from "../apis";
 import { setUser, setLoading } from "../../slices/profileSlice";
@@ -34,7 +34,7 @@ export function getUserProfile(token) {
       return { success: true };
     } catch (error) {
       console.error("GET_PROFILE_API ERROR:", error);
-      toast.error(error?.response?.data?.message || "Could not load profile");
+      notify.error(error?.response?.data?.message || "Could not load profile");
       return { success: false };
     } finally {
       dispatch(setLoading(false));
@@ -45,7 +45,7 @@ export function getUserProfile(token) {
 // Update personal information only (Profile Tab)
 export function updatePersonalInfo(token, personalData) {
   return async (dispatch) => {
-    const toastId = toast.loading("Updating personal information...");
+    const toastId = notify.loading("Updating personal information...");
     dispatch(setLoading(true));
 
     try {
@@ -64,17 +64,17 @@ export function updatePersonalInfo(token, personalData) {
       }
 
       dispatch(setUser(response.data.user));
-      toast.success("Personal information updated successfully");
+      notify.success("Personal information updated successfully");
       return { success: true };
     } catch (error) {
       console.error("UPDATE_PERSONAL_INFO_API ERROR:", error);
       const errorMessage =
         error?.response?.data?.message ||
         "Could not update personal information";
-      toast.error(errorMessage);
+      notify.error(errorMessage);
       return { success: false, message: errorMessage };
     } finally {
-      toast.dismiss(toastId);
+      notify.dismiss(toastId);
       dispatch(setLoading(false));
     }
   };
@@ -83,7 +83,7 @@ export function updatePersonalInfo(token, personalData) {
 // Update professional information only (Professional Tab)
 export function updateProfessionalInfo(token, professionalData) {
   return async (dispatch) => {
-    const toastId = toast.loading("Updating professional information...");
+    const toastId = notify.loading("Updating professional information...");
     dispatch(setLoading(true));
 
     try {
@@ -102,17 +102,17 @@ export function updateProfessionalInfo(token, professionalData) {
       }
 
       dispatch(setUser(response.data.user));
-      toast.success("Professional information updated successfully");
+      notify.success("Professional information updated successfully");
       return { success: true };
     } catch (error) {
       console.error("UPDATE_PROFESSIONAL_INFO_API ERROR:", error);
       const errorMessage =
         error?.response?.data?.message ||
         "Could not update professional information";
-      toast.error(errorMessage);
+      notify.error(errorMessage);
       return { success: false, message: errorMessage };
     } finally {
-      toast.dismiss(toastId);
+      notify.dismiss(toastId);
       dispatch(setLoading(false));
     }
   };
@@ -121,7 +121,7 @@ export function updateProfessionalInfo(token, professionalData) {
 // Update education only (Education Tab)
 export function updateEducation(token, education) {
   return async (dispatch) => {
-    const toastId = toast.loading("Updating education...");
+    const toastId = notify.loading("Updating education...");
     dispatch(setLoading(true));
 
     try {
@@ -140,16 +140,16 @@ export function updateEducation(token, education) {
       }
 
       dispatch(setUser(response.data.user));
-      toast.success("Education updated successfully");
+      notify.success("Education updated successfully");
       return { success: true };
     } catch (error) {
       console.error("UPDATE_EDUCATION_API ERROR:", error);
       const errorMessage =
         error?.response?.data?.message || "Could not update education";
-      toast.error(errorMessage);
+      notify.error(errorMessage);
       return { success: false, message: errorMessage };
     } finally {
-      toast.dismiss(toastId);
+      notify.dismiss(toastId);
       dispatch(setLoading(false));
     }
   };
@@ -158,7 +158,7 @@ export function updateEducation(token, education) {
 // Update certificates only (Certificates Tab)
 export function updateCertificates(token, certificates) {
   return async (dispatch) => {
-    const toastId = toast.loading("Updating certificates...");
+    const toastId = notify.loading("Updating certificates...");
     dispatch(setLoading(true));
 
     try {
@@ -177,16 +177,16 @@ export function updateCertificates(token, certificates) {
       }
 
       dispatch(setUser(response.data.user));
-      toast.success("Certificates updated successfully");
+      notify.success("Certificates updated successfully");
       return { success: true };
     } catch (error) {
       console.error("UPDATE_CERTIFICATES_API ERROR:", error);
       const errorMessage =
         error?.response?.data?.message || "Could not update certificates";
-      toast.error(errorMessage);
+      notify.error(errorMessage);
       return { success: false, message: errorMessage };
     } finally {
-      toast.dismiss(toastId);
+      notify.dismiss(toastId);
       dispatch(setLoading(false));
     }
   };
@@ -195,7 +195,7 @@ export function updateCertificates(token, certificates) {
 // Update achievements only (Achievements Tab)
 export function updateAchievements(token, achievements) {
   return async (dispatch) => {
-    const toastId = toast.loading("Updating achievements...");
+    const toastId = notify.loading("Updating achievements...");
     dispatch(setLoading(true));
 
     try {
@@ -214,16 +214,16 @@ export function updateAchievements(token, achievements) {
       }
 
       dispatch(setUser(response.data.user));
-      toast.success("Achievements updated successfully");
+      notify.success("Achievements updated successfully");
       return { success: true };
     } catch (error) {
       console.error("UPDATE_ACHIEVEMENTS_API ERROR:", error);
       const errorMessage =
         error?.response?.data?.message || "Could not update achievements";
-      toast.error(errorMessage);
+      notify.error(errorMessage);
       return { success: false, message: errorMessage };
     } finally {
-      toast.dismiss(toastId);
+      notify.dismiss(toastId);
       dispatch(setLoading(false));
     }
   };
@@ -232,7 +232,7 @@ export function updateAchievements(token, achievements) {
 // Update entire profile (for backward compatibility)
 export function updateProfile(token, profileData) {
   return async (dispatch) => {
-    const toastId = toast.loading("Updating profile...");
+    const toastId = notify.loading("Updating profile...");
     dispatch(setLoading(true));
 
     try {
@@ -251,16 +251,16 @@ export function updateProfile(token, profileData) {
       }
 
       dispatch(setUser(response.data.user));
-      toast.success("Profile updated successfully");
+      notify.success("Profile updated successfully");
       return { success: true };
     } catch (error) {
       console.error("UPDATE_PROFILE_API ERROR:", error);
       const errorMessage =
         error?.response?.data?.message || "Could not update profile";
-      toast.error(errorMessage);
+      notify.error(errorMessage);
       return { success: false, message: errorMessage };
     } finally {
-      toast.dismiss(toastId);
+      notify.dismiss(toastId);
       dispatch(setLoading(false));
     }
   };
@@ -269,7 +269,7 @@ export function updateProfile(token, profileData) {
 // Upload profile picture
 export function uploadProfilePicture(token, file) {
   return async (dispatch) => {
-    const toastId = toast.loading("Uploading profile picture...");
+    const toastId = notify.loading("Uploading profile picture...");
 
     try {
       const formData = new FormData();
@@ -290,16 +290,16 @@ export function uploadProfilePicture(token, file) {
       }
 
       dispatch(setUser(response.data.user));
-      toast.success("Profile picture uploaded successfully");
+      notify.success("Profile picture uploaded successfully");
       return { success: true, profilePicture: response.data.profilePicture };
     } catch (error) {
       console.error("UPLOAD_PROFILE_PICTURE_API ERROR:", error);
-      toast.error(
+      notify.error(
         error?.response?.data?.message || "Could not upload profile picture",
       );
       return { success: false };
     } finally {
-      toast.dismiss(toastId);
+      notify.dismiss(toastId);
     }
   };
 }
@@ -307,7 +307,7 @@ export function uploadProfilePicture(token, file) {
 // Delete profile picture
 export function deleteProfilePicture(token) {
   return async (dispatch) => {
-    const toastId = toast.loading("Deleting profile picture...");
+    const toastId = notify.loading("Deleting profile picture...");
     try {
       const response = await apiConnector(
         "DELETE",
@@ -323,16 +323,16 @@ export function deleteProfilePicture(token) {
       }
 
       dispatch(setUser(response.data.user));
-      toast.success("Profile picture deleted successfully");
+      notify.success("Profile picture deleted successfully");
       return { success: true };
     } catch (error) {
       console.error("DELETE_PROFILE_PICTURE_API ERROR:", error);
-      toast.error(
+      notify.error(
         error?.response?.data?.message || "Could not delete profile picture",
       );
       return { success: false };
     } finally {
-      toast.dismiss(toastId);
+      notify.dismiss(toastId);
     }
   };
 }

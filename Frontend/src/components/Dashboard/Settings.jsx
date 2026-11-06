@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useContext } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import { logout } from "../../services/operations/authAPI";
-import toast from "react-hot-toast";
+import { notify } from "../../utils/sileoNotifications";
 import {
   uploadProfilePicture,
   updatePersonalInfo,
@@ -329,11 +329,11 @@ export default function Settings() {
     const file = e.target.files[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) {
-      toast.error("Please upload an image file");
+      notify.error("Please upload an image file");
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      toast.error("File size should be less than 5MB");
+      notify.error("File size should be less than 5MB");
       return;
     }
 
@@ -372,7 +372,7 @@ export default function Settings() {
       setEducation([...education, { ...newEducation, _id: `temp_${Date.now()}` }]);
       setNewEducation({ degree: "", institution: "", field: "", startYear: "", endYear: "", grade: "" });
     } else {
-      toast.error("Please fill required education fields");
+      notify.error("Please fill required education fields");
     }
   };
 
@@ -381,7 +381,7 @@ export default function Settings() {
       setCertificates([...certificates, { ...newCertificate, _id: `temp_${Date.now()}` }]);
       setNewCertificate({ name: "", issuer: "", issueDate: "", credentialId: "", url: "" });
     } else {
-      toast.error("Please fill required certificate fields");
+      notify.error("Please fill required certificate fields");
     }
   };
 
@@ -390,13 +390,13 @@ export default function Settings() {
       setAchievements([...achievements, { ...newAchievement, _id: `temp_${Date.now()}` }]);
       setNewAchievement({ title: "", description: "", date: "" });
     } else {
-      toast.error("Please fill achievement title");
+      notify.error("Please fill achievement title");
     }
   };
 
   const handleSaveProfile = async () => {
     if (!token) {
-      toast.error("Please login to update profile");
+      notify.error("Please login to update profile");
       navigate("/login");
       return;
     }
@@ -448,11 +448,11 @@ export default function Settings() {
           break;
       }
       if (result?.success) {
-        toast.success("Profile updated successfully!");
+        notify.success("Profile updated successfully!");
       }
     } catch (error) {
       console.error("Save error:", error);
-      toast.error("Failed to save profile");
+      notify.error("Failed to save profile");
     } finally {
       setSaving(false);
     }

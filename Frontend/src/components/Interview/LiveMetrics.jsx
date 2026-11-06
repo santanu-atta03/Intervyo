@@ -6,7 +6,7 @@ import Webcam from "react-webcam";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
-import { toast } from 'react-hot-toast';
+import { notify } from "../../utils/sileoNotifications";
 import { motion } from "framer-motion";
 
 import {
@@ -123,7 +123,7 @@ const LiveMetrics = () => {
   // Check browser support
   useEffect(() => {
     if (!browserSupportsSpeechRecognition) {
-      toast.error(
+      notify.error(
         "Browser does not support speech recognition. Please use Chrome.",
       );
     }

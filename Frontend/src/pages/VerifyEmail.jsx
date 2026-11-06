@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { setSignupData } from "../slices/authSlice";
 import { resendOtp } from "../services/operations/authAPI";
-import { toast } from "react-hot-toast";
+import { notify } from "../utils/sileoNotifications";
 
 export default function VerifyEmail() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -34,18 +34,18 @@ export default function VerifyEmail() {
   const handleVerify = () => {
     const otpValue = otp.join('');
     if (otpValue.length !== 6) {
-      toast.error("Please enter complete OTP");
+      notify.error("Please enter complete OTP");
       return;
     }
 
     if (!signupData) {
-      toast.error("Please complete registration form first");
+      notify.error("Please complete registration form first");
       navigate("/register");
       return;
     }
 
     dispatch(setSignupData({ ...signupData, otp: otpValue }));
-    toast.success('Email verified! Choose your domain');
+    notify.success('Email verified! Choose your domain');
     navigate('/domain-selection');
   };
 

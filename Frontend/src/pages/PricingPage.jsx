@@ -5,7 +5,7 @@ import { Check, ChevronDown } from "lucide-react";
 import Lenis from "@studio-freight/lenis";
 import Navbar from "../components/Navbar";
 import { useDispatch, useSelector } from "react-redux";
-import { toast } from "react-hot-toast";
+import { notify } from "../utils/sileoNotifications";
 import { setAuthUser } from "../slices/authSlice";
 import { setUser } from "../slices/profileSlice";
 import { apiConnector } from "../services/apiConnector";
@@ -114,7 +114,7 @@ export default function PricingPage() {
 
   const handleProPurchase = async () => {
     if (!token) {
-      toast.error("Please sign in before purchasing Pro.");
+      notify.error("Please sign in before purchasing Pro.");
       navigate("/login");
       return;
     }
@@ -201,12 +201,12 @@ export default function PricingPage() {
         checkout.open();
       }).then((purchased) => {
         if (purchased) {
-          toast.success("Pro access is active.");
+          notify.success("Pro access is active.");
           refreshNotifications();
         }
       });
     } catch (error) {
-      toast.error(
+      notify.error(
         error.response?.data?.message ||
           error.message ||
           "Payment could not be completed. Please try again.",

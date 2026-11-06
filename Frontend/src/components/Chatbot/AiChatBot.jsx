@@ -19,7 +19,7 @@ import {
   deleteConversation,
   clearMessages,
 } from "../../services/operations/chatbotAPI";
-import toast from "react-hot-toast";
+import { notify } from "../../utils/sileoNotifications";
 import "./AIChatbot.css";
 
 const AIChatbot = ({ defaultContext = "general" }) => {
@@ -86,7 +86,7 @@ const AIChatbot = ({ defaultContext = "general" }) => {
       setConversations(response.data);
     } catch (error) {
       console.error("Failed to load conversations:", error);
-      toast.error("Failed to load conversation history");
+      notify.error("Failed to load conversation history");
     }
   };
 
@@ -103,7 +103,7 @@ const AIChatbot = ({ defaultContext = "general" }) => {
       requestAnimationFrame(() => scrollToBottom("auto"));
     } catch (error) {
       console.error("Failed to load conversation:", error);
-      toast.error("Failed to load conversation");
+      notify.error("Failed to load conversation");
     } finally {
       setIsLoading(false);
     }
@@ -118,10 +118,10 @@ const AIChatbot = ({ defaultContext = "general" }) => {
       setCurrentConversation(response.data);
       setMessages([]);
       setConversations([response.data, ...conversations]);
-      toast.success("New conversation started");
+      notify.success("New conversation started");
     } catch (error) {
       console.error("Failed to create conversation:", error);
-      toast.error("Failed to start new conversation");
+      notify.error("Failed to start new conversation");
     }
   };
 
@@ -168,7 +168,7 @@ const AIChatbot = ({ defaultContext = "general" }) => {
       loadConversations();
     } catch (error) {
       console.error("Failed to send message:", error);
-      toast.error("Failed to send message. Please try again.");
+      notify.error("Failed to send message. Please try again.");
       // Remove the temporary user message on error
       setMessages((prev) => prev.slice(0, -1));
     } finally {
@@ -186,10 +186,10 @@ const AIChatbot = ({ defaultContext = "general" }) => {
         setCurrentConversation(null);
         setMessages([]);
       }
-      toast.success("Conversation deleted");
+      notify.success("Conversation deleted");
     } catch (error) {
       console.error("Failed to delete conversation:", error);
-      toast.error("Failed to delete conversation");
+      notify.error("Failed to delete conversation");
     }
   };
 
@@ -199,10 +199,10 @@ const AIChatbot = ({ defaultContext = "general" }) => {
     try {
       await clearMessages(currentConversation.sessionId);
       setMessages([]);
-      toast.success("Messages cleared");
+      notify.success("Messages cleared");
     } catch (error) {
       console.error("Failed to clear messages:", error);
-      toast.error("Failed to clear messages");
+      notify.error("Failed to clear messages");
     }
   };
 

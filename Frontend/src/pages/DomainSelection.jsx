@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { signup } from "../services/operations/authAPI";
-import { toast } from "react-hot-toast";
+import { notify } from "../utils/sileoNotifications";
 
 export default function DomainSelection() {
   const [formData, setFormData] = useState({
@@ -27,12 +27,12 @@ export default function DomainSelection() {
   const handleSubmit = () => {
     if (!formData.domain) {
       setErrors({ domain: "Please select a domain" });
-      toast.error("Please select a domain");
+      notify.error("Please select a domain");
       return;
     }
 
     if (!signupData) {
-      toast.error("Session expired. Please register again.");
+      notify.error("Session expired. Please register again.");
       navigate("/register");
       return;
     }

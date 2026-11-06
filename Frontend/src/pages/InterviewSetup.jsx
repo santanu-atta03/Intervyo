@@ -1,7 +1,7 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
+import { notify } from "../utils/sileoNotifications";
 import React from "react";
 import {
   ArrowLeft,
@@ -1326,12 +1326,12 @@ function InterviewSetup() {
     if (!file) return;
 
     if (file.type !== "application/pdf") {
-      toast.error("Please upload a PDF file.");
+      notify.error("Please upload a PDF file.");
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      toast.error("Resume must be smaller than 5MB.");
+      notify.error("Resume must be smaller than 5MB.");
       return;
     }
 
@@ -1361,7 +1361,7 @@ function InterviewSetup() {
     });
 
     setCustomQuestion("");
-    toast.success("Custom question added.");
+    notify.success("Custom question added.");
   };
 
   const removeQuestion = (index) => {
@@ -1371,7 +1371,7 @@ function InterviewSetup() {
       ),
     });
 
-    toast.success("Question removed.");
+    notify.success("Question removed.");
   };
 
   const isStepComplete = () => {
@@ -1394,7 +1394,7 @@ function InterviewSetup() {
     if (isSubmittingRef.current) return;
 
     if (!token) {
-      toast.error("Please log in to continue.");
+      notify.error("Please log in to continue.");
       navigate("/login");
       return;
     }
@@ -1409,7 +1409,7 @@ function InterviewSetup() {
     ];
 
     if (requiredFields.some((field) => !field)) {
-      toast.error("Please complete all required fields.");
+      notify.error("Please complete all required fields.");
       return;
     }
 
@@ -1500,7 +1500,7 @@ function InterviewSetup() {
 
       if (createdInterview) {
         const interviewId = createdInterview.id || createdInterview._id || createdInterview.interviewId;
-        toast.success("Interview created successfully!");
+        notify.success("Interview created successfully!");
         // Navigate to interview room with the real ID from the backend
         navigate(`/interview-room/${interviewId}`);
       } else {
@@ -1508,7 +1508,7 @@ function InterviewSetup() {
       }
     } catch (error) {
       console.error("CREATE_INTERVIEW_API ERROR:", error);
-      toast.error(
+      notify.error(
         error.response?.data?.message || error.message || "Failed to create interview"
       );
       // Reset so the user can retry from the setup form

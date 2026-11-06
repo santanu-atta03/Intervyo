@@ -1,6 +1,5 @@
-import { toast } from "react-hot-toast";
 import { apiConnector } from "../apiConnector";
-import { setUser, setLoading } from "../../slices/profileSlice";
+import { setLoading } from "../../slices/profileSlice";
 import { BASE_URL } from "../apis";
 
 const LearningHubEndpoints = {
@@ -8,7 +7,7 @@ const LearningHubEndpoints = {
 };
 
 export const getLearningProgress = async (token) => {
-  //   const toastId = toast.loading('Scheduling interview...');
+  //   const toastId = notify.loading('Scheduling interview...');
   setLoading(true);
 
   try {
@@ -23,13 +22,13 @@ export const getLearningProgress = async (token) => {
     );
 
     if (response.data.success) {
-      //   toast.success('Interview scheduled successfully!', { id: toastId });
+      //   notify.success('Interview scheduled successfully!', { id: toastId });
       console.log("Response : ", response);
       return response.data.data;
     }
   } catch (error) {
     console.error("Fetch learning progress error:", error);
-    // toast.error(error.response?.data?.message || 'Failed to schedule interview', {
+    // notify.error(error.response?.data?.message || 'Failed to schedule interview', {
     //   id: toastId,
     // });
     throw error;
