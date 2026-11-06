@@ -1,0 +1,306 @@
+.cookie-consent {
+  position: fixed;
+  z-index: 100;
+  right: 20px;
+  bottom: 20px;
+  width: min(480px, calc(100vw - 40px));
+  max-height: min(760px, calc(100dvh - 40px));
+  overflow-y: auto;
+  padding: 18px;
+  border: 1px solid rgba(101, 84, 217, 0.14);
+  border-radius: 12px;
+  background:  #FFFFFF;
+  box-shadow:
+    0 24px 70px rgba(24, 34, 31, 0.2),
+    0 4px 14px rgba(24, 34, 31, 0.08);
+  color: #17211f;
+  font-family: Geist, Inter, ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.cookie-consent *,
+.cookie-consent *::before,
+.cookie-consent *::after {
+  box-sizing: border-box;
+}
+
+.cookie-consent__close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 0;
+  border-radius: 10px;
+  background: rgba(23, 33, 31, 0.05);
+  color: #64716d;
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.cookie-consent__close:hover {
+  background: rgba(23, 33, 31, 0.1);
+  color: #17211f;
+}
+
+.cookie-consent__intro {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  padding-right: 22px;
+}
+
+.cookie-consent__illustration {
+  display: block;
+  width: 76px;
+  height: 76px;
+  
+  object-fit: contain;
+  background: #fae7c7;
+}
+
+.cookie-consent__eyebrow {
+  margin: 0 0 4px;
+  color: #c554d9;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+}
+
+.cookie-consent__copy h2 {
+  margin: 0;
+  color: #17211f;
+  font-size: 21px;
+  font-weight: 740;
+  letter-spacing: -0.045em;
+  line-height: 1.15;
+}
+
+.cookie-consent__copy > p:last-child {
+  margin: 7px 0 0;
+  color: #080909;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.cookie-consent__actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 9px;
+  margin-top: 16px;
+}
+
+.cookie-consent__accept,
+.cookie-consent__reject,
+.cookie-consent__save {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 650;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.cookie-consent__accept {
+  border-color: #e4e2ed;
+  background: #c1d954;
+  box-shadow: 0 7px 15px rgba(101, 84, 217, 0.17);
+  color: #141313;
+}
+
+.cookie-consent__accept:hover,
+.cookie-consent__save:hover {
+  transform: translateY(-1px);
+  border-color: #d1d2cb;
+  background: #7c901a;
+  box-shadow: 0 9px 18px rgba(101, 84, 217, 0.22);
+}
+
+.cookie-consent__reject {
+  border-color: #e2e5e2;
+  background: rgba(255,255,255,0.68);
+  color: #35413d;
+}
+
+.cookie-consent__reject:hover {
+  transform: translateY(-1px);
+  border-color: #c9cce0;
+  background: #fff;
+}
+
+.cookie-consent__customize {
+  display: block;
+  margin: 11px auto 0;
+  padding: 4px 6px;
+  border: 0;
+  background: transparent;
+  color: #c6127b;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  text-decoration: underline;
+  text-decoration-color: rgba(101, 84, 217, 0.3);
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.cookie-consent__customize:hover {
+  color: #892d58;
+  text-decoration-color: currentColor;
+}
+
+.cookie-consent__preferences {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 14px;
+  border: 1px solid #e8e9e7;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.72);
+}
+
+.cookie-consent__preferences h3 {
+  margin: 0 0 2px;
+  color: #17211f;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.cookie-consent__preference {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cookie-consent__preference-copy > span {
+  color: #27332f;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.cookie-consent__preference-copy p {
+  margin: 2px 0 0;
+  color: #74807b;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.cookie-consent__switch {
+  position: relative;
+  flex: 0 0 auto;
+  width: 36px;
+  height: 21px;
+  padding: 2px;
+  border: 0;
+  border-radius: 999px;
+  background: #d7dbd8;
+  cursor: pointer;
+  transition: background-color 160ms ease;
+}
+
+.cookie-consent__switch[aria-checked="true"] {
+  background: #c97917;
+}
+
+.cookie-consent__switch:disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.cookie-consent__switch span {
+  display: block;
+  width: 17px;
+  height: 17px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(23, 33, 31, 0.2);
+  transition: transform 160ms ease;
+}
+
+.cookie-consent__switch[aria-checked="true"] span {
+  transform: translateX(15px);
+}
+
+.cookie-consent__save {
+  min-height: 38px;
+  margin-top: 3px;
+  border-color: #cccad5;
+  background: #c1d954;
+  color: #0a0a0a;
+}
+
+.cookie-consent__error {
+  margin: 12px 0 0;
+  color: #a62b2b;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.cookie-consent :focus-visible {
+  outline: 3px solid rgba(101, 84, 217, 0.48);
+  outline-offset: 3px;
+}
+
+@media (max-width: 520px) {
+  .cookie-consent {
+    right: 12px;
+    bottom: 12px;
+    width: calc(100vw - 24px);
+    max-height: calc(100dvh - 24px);
+    padding: 15px;
+    border-radius: 18px;
+  }
+
+  .cookie-consent__intro {
+    grid-template-columns: 62px minmax(0, 1fr);
+    gap: 11px;
+  }
+
+  .cookie-consent__illustration {
+    width: 62px;
+    height: 62px;
+    border-radius: 15px;
+  }
+
+  .cookie-consent__copy h2 {
+    font-size: 19px;
+  }
+
+  .cookie-consent__copy > p:last-child {
+    font-size: 11px;
+  }
+
+  .cookie-consent__actions {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .cookie-consent__accept,
+  .cookie-consent__reject {
+    min-height: 40px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cookie-consent *,
+  .cookie-consent *::before,
+  .cookie-consent *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -37,7 +37,7 @@ export default function Footer() {
       </div>
 
       {/* Floating Card Container */}
-      <div className="max-w-6xl mx-auto relative z-10">
+      <div className="max-w-[1440px] mx-auto relative z-10">
         <div className="bg-white dark:bg-[#121622] rounded-[28px] sm:rounded-[36px] border border-black/[0.08] dark:border-white/10 shadow-[0_12px_45px_rgba(0,0,0,0.04)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-8 sm:p-12 lg:p-14">
           
           {/* Top Row: Brand & Info (Left) + 3 Columns (Right) */}
@@ -67,7 +67,7 @@ export default function Footer() {
               {/* Social Media Links */}
               <div className="flex items-center gap-4 mt-8">
                 <a
-                  href="https://x.com"
+                  href="https://x.com/attasantanu747"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="X (formerly Twitter)"
@@ -75,16 +75,16 @@ export default function Footer() {
                 >
                   <XIcon className="size-4" />
                 </a>
-                <a
-                  href="https://instagram.com"
+                <Link
+                  href="https://instagram.com/santanu.stoic"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Instagram"
                   className="text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white transition-colors"
                 >
                   <InstagramIcon className="size-4" />
-                </a>
-                <a
+                </Link>
+                <Link
                   href="https://www.linkedin.com/in/santanu-atta-139820363"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -92,8 +92,8 @@ export default function Footer() {
                   className="text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white transition-colors"
                 >
                   <Linkedin className="size-4" />
-                </a>
-                <a
+                </Link>
+                <Link
                   href="https://github.com/santanu-atta03"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -101,7 +101,7 @@ export default function Footer() {
                   className="text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white transition-colors"
                 >
                   <Github className="size-4" />
-                </a>
+                </Link>
               </div>
             </div>
 
@@ -144,7 +144,7 @@ export default function Footer() {
                 </h4>
                 <ul className="space-y-3 text-sm text-neutral-600 dark:text-neutral-400">
                   <li>
-                    <Link to="/faq" className="hover:text-neutral-900 dark:hover:text-white transition-colors">
+                    <Link to="/docs" className="hover:text-neutral-900 dark:hover:text-white transition-colors">
                       Documentation
                     </Link>
                   </li>

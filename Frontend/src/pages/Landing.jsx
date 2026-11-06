@@ -537,7 +537,7 @@ export default function LandingPage() {
           <div className="flex items-center gap-7 rounded-full bg-white px-5 py-2.5 shadow-sm">
 
             {/* Intervyo Brand */}
-            <Link to="/" className="flex items-center gap-2 group shrink-0">
+            <Link to="/" className="flex items-center gap-2  shrink-0">
               <span className="font-heading font-extrabold text-[35px] tracking-normal text-[#171717] leading-none">
                 Intervyo
               </span>
@@ -592,12 +592,18 @@ export default function LandingPage() {
             {/* Login */}
             <Link
               to="/login"
-              className="hidden sm:flex items-center justify-center 
-              bg-white text-[#171717] text-[15px] font-bold px-7 py-3 rounded-full 
-              hover:bg-zinc-100 transition-all duration-200 shadow-sm group"
+              className="char-btn flex items-center justify-center gap-1.5 bg-[#dcd7d7] text-black text-[15px] font-semibold px-7 py-3 rounded-full hover:bg-[#9b9494] transition-all duration-200 active:scale-[0.97] shadow-sm"
             >
-              <span className="flex flex-col transition-transform duration-300 ease-in-out group-hover:-translate-y-full">
-                <span>Log in</span>
+              <span className="inline-flex">
+                {"Log in".split("").map((c, i) => (
+                  <span
+                    key={i}
+                    className="c-char inline-block transition-transform duration-200"
+                    style={{ transitionDelay: `${i * 20}ms` }}
+                  >
+                    {c === " " ? "\u00A0" : c}
+                  </span>
+                ))}
               </span>
             </Link>
 

@@ -7,6 +7,7 @@ import Footer from "./components/shared/Footer";
 import ScrollToTopOnRouteChange from "./components/shared/ScrollToTopOnRouteChange";
 import Navbar from "./components/Navbar";
 import VoiceflowChatbot from "./components/Chatbot/VoiceflowChatbot";
+import CookieConsent from "./components/shared/CookieConsent";
 
 const Landing = lazy(() => import("./pages/Landing"));
 const Login = lazy(() => import("./pages/Login"));
@@ -21,6 +22,7 @@ const ContactUs = lazy(() => import("./pages/ContactUs"));
 const Career = lazy(() => import("./pages/Career"));
 const PricingPage = lazy(() => import("./pages/PricingPage"));
 const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
+const Documentation = lazy(() => import("./pages/Documentation"));
 const DomainSelection = lazy(() => import("./pages/DomainSelection"));
 const Leaderboard = lazy(() => import("./pages/Leaderboard"));
 const BlogPlatform = lazy(() => import("./components/Blogs/BlogPlatform"));
@@ -50,7 +52,7 @@ function App() {
   const hideFooterRoutes = ["/", "/login", "/register"];
   const hideFooter = hideFooterRoutes.includes(location.pathname);
 
-  const hideNavbarRoutes = ["/", "/login", "/register", "/dashboard", "/settings", "/pricing", "/career", "/terms", "/privacy", "/cookie-policy", "/interview-setup", "/auth/callback", "/blog", "/history", "/analytics", "/resources"];
+  const hideNavbarRoutes = ["/", "/login", "/register","/privacy", "/dashboard", "/settings", "/pricing", "/career", "/terms", "/cookie-policy", "/docs", "/interview-setup", "/auth/callback", "/blog", "/history", "/analytics", "/resources"];
   const hideNavbar =
     hideNavbarRoutes.includes(location.pathname) ||
     location.pathname.startsWith("/interview-room") ||
@@ -83,6 +85,7 @@ function App() {
           <Route path="/career" element={<Career />} />
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/cookie-policy" element={<CookiePolicy />} />
+          <Route path="/docs" element={<Documentation />} />
           <Route path="/domain-selection" element={<DomainSelection />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/blog" element={<BlogPlatform />} />
@@ -202,6 +205,7 @@ function App() {
       </Suspense>
 
       {!location.pathname.startsWith("/interview-room") && <VoiceflowChatbot />}
+      <CookieConsent />
       {!hideFooter && <Footer />}
     </>
   );

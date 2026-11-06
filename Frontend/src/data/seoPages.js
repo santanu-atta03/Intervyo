@@ -24,6 +24,12 @@ export const INDEXABLE_PAGES = [
       "Find answers about AI mock interviews, interview preparation, practice sessions, and feedback on Intervyo.",
   },
   {
+    path: "/docs",
+    title: "Intervyo Documentation",
+    description:
+      "Learn how to get started with Intervyo, practice interviews, understand AI feedback, and make progress with focused guides.",
+  },
+  {
     path: "/pricing",
     title: "AI Interview Practice Pricing",
     description:
