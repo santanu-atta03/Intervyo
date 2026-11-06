@@ -18,9 +18,13 @@ export const submitContactForm = async (data, setLoading) => {
     );
     await notify.promise(submission, {
       loading: { title: "Sending message..." },
-      success: { title: "Message sent successfully!" },
+      success: {
+        title: "Success",
+        description: "Message sent successfully!",
+      },
       error: (error) => ({
-        title:
+        title: "Something Went Wrong",
+        description:
           error.response?.data?.message ||
           error.message ||
           "Failed to send message",

@@ -159,7 +159,13 @@ export const clearReadNotifications = async (token) => {
 
   return notify.promise(clearOperation(), {
     loading: { title: "Clearing notifications..." },
-    success: { title: "Read notifications cleared" },
-    error: { title: "Failed to clear notifications" },
+    success: {
+      title: "Success",
+      description: "Read notifications cleared",
+    },
+    error: {
+      title: "Something Went Wrong",
+      description: "Failed to clear notifications",
+    },
   });
 };

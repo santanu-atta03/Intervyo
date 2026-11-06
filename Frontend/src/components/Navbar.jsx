@@ -9,13 +9,13 @@ const NAV_TONES = {
   landing: {
     nav: "fixed top-6 left-1/2 -translate-x-1/2 w-[95%] max-w-7xl bg-black/10 backdrop-blur-xl rounded-full border border-white/20 z-50 text-skin-primary",
     link: "text-gray-200 hover:text-emerald-400",
-    mobileMenu: "bg-white backdrop-blur-md rounded-2xl shadow-xl border border-gray-200",
-    mobileLink: "text-gray-600 hover:text-gray-900",
-    menuButton: "text-gray-900 hover:bg-gray-100",
+    mobileMenu: "bg-[#141824] backdrop-blur-md rounded-2xl shadow-xl border border-white/15",
+    mobileLink: "text-zinc-300 hover:text-white",
+    menuButton: "text-white hover:bg-white/10",
     logoPrimary: "text-white",
     logoSecondary: "text-emerald-500",
     activeLink: "text-emerald-400",
-    activeMobile: "text-emerald-500 bg-emerald-50",
+    activeMobile: "text-[#FFFA64] bg-white/10",
   },
   skin: {
     nav: "fixed top-6 left-1/2 transform -translate-x-1/2 w-[95%] max-w-7xl bg-skin-primary/95 backdrop-blur-md rounded-full shadow-lg z-50 border border-skin-primary",

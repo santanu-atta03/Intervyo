@@ -33,6 +33,10 @@ html.lenis {
   height: 0px;
 }
 
+:root [data-sileo-viewport] {
+  z-index: 10000;
+}
+
 /* Toast Animations */
 @keyframes slide-in-right {
   0% {

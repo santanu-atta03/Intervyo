@@ -20,7 +20,13 @@ createRoot(document.getElementById("root")).render(
   <HelmetProvider>
     <Provider store={store}>
       <BrowserRouter>
-        <Toaster position="top-right" />
+        <Toaster
+          position="top-right"
+          options={{
+            duration: 8000,
+            autopilot: { expand: 2600, collapse: 5800 },
+          }}
+        />
         <NotificationProvider>
           <ThemeProvider>
             <App />

@@ -68,7 +68,6 @@ function App() {
     <>
       <ScrollToTop />
       <ScrollToTopOnRouteChange />
-      {!hideNavbar && <Navbar />}
 
       <Suspense fallback={routeFallback}>
         <Routes>
