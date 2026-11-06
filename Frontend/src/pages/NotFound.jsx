@@ -1,318 +1,209 @@
-// src/pages/NotFound.jsx
-import React, { useState, useEffect } from "react";
+import React from "react";
+import { ArrowLeft, ArrowRight, Home, Search } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { Helmet } from "react-helmet-async";
+import SEO from "../components/shared/SEO";
 
-const NotFound = () => {
-  const [animate, setAnimate] = useState(false);
-  const { token } = useSelector((state) => state.auth);
-
-  useEffect(() => {
-    // Trigger animation on mount
-    setTimeout(() => setAnimate(true), 100);
-  }, []);
-
-  const styles = {
-    container: {
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      minHeight: "100vh",
-      background: "#0f172a",
-      padding: "20px",
-      fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-      position: "relative",
-      overflow: "hidden",
-    },
-    gradientBg: {
-      position: "absolute",
-      top: 0,
-      left: 0,
-      right: 0,
-      height: "400px",
-      background:
-        "linear-gradient(to bottom, rgba(15, 23, 42, 0.8), transparent)",
-      zIndex: 0,
-    },
-    content: {
-      textAlign: "center",
-      background: "rgba(30, 41, 59, 0.8)",
-      padding: "3rem 2rem",
-      borderRadius: "16px",
-      boxShadow: "0 20px 40px rgba(0, 0, 0, 0.4)",
-      maxWidth: "500px",
-      width: "100%",
-      border: "1px solid rgba(255, 255, 255, 0.1)",
-      backdropFilter: "blur(10px)",
-      zIndex: 1,
-      position: "relative",
-      opacity: animate ? 1 : 0,
-      transform: animate ? "translateY(0)" : "translateY(20px)",
-      transition: "opacity 0.6s ease, transform 0.6s ease",
-    },
-    errorCode: {
-      fontSize: "6rem",
-      fontWeight: "800",
-      background: "linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%)",
-      backgroundClip: "text",
-      WebkitBackgroundClip: "text",
-      color: "transparent",
-      margin: "0",
-      lineHeight: "1",
-      marginBottom: "1rem",
-    },
-    errorTitle: {
-      fontSize: "2rem",
-      color: "#f8fafc",
-      margin: "0.5rem 0",
-      fontWeight: "600",
-    },
-    errorMessage: {
-      color: "#cbd5e1",
-      marginBottom: "2rem",
-      lineHeight: "1.6",
-      fontSize: "1.1rem",
-      opacity: 0.9,
-    },
-    actions: {
-      display: "flex",
-      gap: "1rem",
-      justifyContent: "center",
-      flexWrap: "wrap",
-    },
-    homeButton: {
-      padding: "12px 28px",
-      borderRadius: "12px",
-      fontWeight: "600",
-      textDecoration: "none",
-      transition: "all 0.3s ease",
-      border: "none",
-      cursor: "pointer",
-      fontSize: "1rem",
-      background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
-      color: "white",
-      display: "inline-block",
-      minWidth: "160px",
-    },
-    dashboardButton: {
-      padding: "12px 28px",
-      borderRadius: "12px",
-      fontWeight: "600",
-      textDecoration: "none",
-      transition: "all 0.3s ease",
-      border: "1px solid rgba(255, 255, 255, 0.2)",
-      cursor: "pointer",
-      fontSize: "1rem",
-      background: "rgba(255, 255, 255, 0.1)",
-      color: "white",
-      display: "inline-block",
-      minWidth: "160px",
-    },
-    backButton: {
-      padding: "12px 28px",
-      borderRadius: "12px",
-      fontWeight: "600",
-      textDecoration: "none",
-      transition: "all 0.3s ease",
-      border: "1px solid rgba(255, 255, 255, 0.1)",
-      cursor: "pointer",
-      fontSize: "1rem",
-      background: "rgba(255, 255, 255, 0.05)",
-      color: "#cbd5e1",
-      display: "inline-block",
-      minWidth: "160px",
-    },
-  };
-
-  const handleButtonHover = (e, isPrimary = true) => {
-    e.target.style.transform = "translateY(-2px)";
-    if (isPrimary) {
-      e.target.style.boxShadow = "0 10px 25px rgba(99, 102, 241, 0.3)";
-    } else {
-      e.target.style.boxShadow = "0 10px 25px rgba(255, 255, 255, 0.1)";
-    }
-  };
-
-  const handleButtonLeave = (e) => {
-    e.target.style.transform = "translateY(0)";
-    e.target.style.boxShadow = "none";
-  };
-
+export default function NotFound() {
   return (
-    <>
-      <Helmet>
-        <title>Page not found | Intervyo</title>
-        <meta name="robots" content="noindex, follow" />
-      </Helmet>
-    <div style={styles.container}>
-      {/* Subtle gradient background */}
-      <div style={styles.gradientBg}></div>
+    <main className="relative min-h-screen overflow-hidden bg-[#0A0D12] text-white">
+      <SEO
+        title="Page Not Found | Intervyo"
+        description="The page you're looking for could not be found."
+        canonical="/404"
+      />
 
-      {/* Glow effects */}
-      <div
-        style={{
-          position: "absolute",
-          top: "20%",
-          left: "10%",
-          width: "300px",
-          height: "300px",
-          borderRadius: "50%",
-          background:
-            "radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%)",
-          filter: "blur(40px)",
-        }}
-      ></div>
+      <style>{`
+        @font-face {
+          font-family: "FK Screamer";
+          src: url("https://cdn.ploy.ai/d21bf4ad-2458-43ee-9561-54c28ab0e85f/user/4b73ec13-fkscreamer.woff2") format("woff2");
+          font-weight: 100 900;
+          font-style: normal;
+          font-display: swap;
+        }
 
-      <div
-        style={{
-          position: "absolute",
-          bottom: "20%",
-          right: "10%",
-          width: "300px",
-          height: "300px",
-          borderRadius: "50%",
-          background:
-            "radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%)",
-          filter: "blur(40px)",
-        }}
-      ></div>
+        .not-found-heading {
+          font-family: "FK Screamer", Impact, sans-serif;
+          letter-spacing: -0.035em;
+        }
 
-      <div style={styles.content}>
-        <h1 style={styles.errorCode}>404</h1>
-        <h2 style={styles.errorTitle}>Page Not Found</h2>
-        <p style={styles.errorMessage}>
-          The page you're looking for doesn't exist or has been moved.
-        </p>
+        .not-found-grid {
+          background-image:
+            linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+          background-size: 4rem 4rem;
+          mask-image: radial-gradient(ellipse at center, black 0%, transparent 78%);
+          -webkit-mask-image: radial-gradient(ellipse at center, black 0%, transparent 78%);
+        }
 
-        <div style={styles.actions}>
-          <Link
-            to="/"
-            style={styles.homeButton}
-            onMouseEnter={(e) => handleButtonHover(e, true)}
-            onMouseLeave={handleButtonLeave}
-          >
-            Go to Home
-          </Link>
+        @keyframes floatOrb {
+          0%, 100% {
+            transform: translate3d(0, 0, 0);
+          }
+          50% {
+            transform: translate3d(0, -16px, 0);
+          }
+        }
 
-          {token ? (
-            <Link
-              to="/dashboard"
-              style={styles.dashboardButton}
-              onMouseEnter={(e) => handleButtonHover(e, false)}
-              onMouseLeave={handleButtonLeave}
-            >
-              Go to Dashboard
-            </Link>
-          ) : (
-            <Link
-              to="/register"
-              style={styles.dashboardButton}
-              onMouseEnter={(e) => handleButtonHover(e, false)}
-              onMouseLeave={handleButtonLeave}
-            >
-              Get Started
-            </Link>
-          )}
+        @keyframes pulseRing {
+          0%, 100% {
+            opacity: .35;
+            transform: scale(.96);
+          }
+          50% {
+            opacity: .75;
+            transform: scale(1.04);
+          }
+        }
 
-          <button
-            style={styles.backButton}
-            onClick={() => window.history.back()}
-            onMouseEnter={(e) => handleButtonHover(e, false)}
-            onMouseLeave={handleButtonLeave}
-          >
-            Go Back
-          </button>
-        </div>
+        @keyframes scanLine {
+          0% {
+            transform: translateY(-120%);
+          }
+          100% {
+            transform: translateY(120%);
+          }
+        }
 
-        {/* Quick links */}
-        <div
-          style={{
-            marginTop: "2rem",
-            paddingTop: "1.5rem",
-            borderTop: "1px solid rgba(255, 255, 255, 0.1)",
-            opacity: animate ? 1 : 0,
-            transition: "opacity 0.6s ease 0.3s",
-          }}
+        .not-found-orb {
+          animation: floatOrb 7s ease-in-out infinite;
+        }
+
+        .not-found-ring {
+          animation: pulseRing 5s ease-in-out infinite;
+        }
+
+        .not-found-scan {
+          animation: scanLine 4s ease-in-out infinite;
+        }
+      `}</style>
+
+      {/* Background */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_8%,rgba(195,219,255,0.14),transparent_30%),radial-gradient(circle_at_86%_82%,rgba(209,244,140,0.07),transparent_28%),linear-gradient(180deg,#0E121A_0%,#0A0D12_100%)]" />
+
+      <div className="not-found-grid pointer-events-none absolute inset-0" />
+
+      <div className="not-found-orb pointer-events-none absolute -right-32 top-20 h-80 w-80 rounded-full bg-[#C3DBFF]/10 blur-[100px]" />
+      <div className="not-found-orb pointer-events-none absolute -left-32 bottom-10 h-72 w-72 rounded-full bg-[#FFB8FC]/[0.07] blur-[100px]" />
+
+      {/* Navigation */}
+      <nav className="relative z-20 flex items-center justify-between px-5 py-5 sm:px-8 lg:px-12">
+        <Link
+          to="/"
+          className="rounded-full bg-white px-5 py-2.5 text-[#171717] shadow-lg shadow-black/25 transition hover:bg-[#D1F48C]"
         >
-          <p
-            style={{
-              color: "#94a3b8",
-              fontSize: "0.9rem",
-              marginBottom: "0.5rem",
-            }}
-          >
-            Try these pages instead:
-          </p>
-          <div
-            style={{
-              display: "flex",
-              gap: "1rem",
-              justifyContent: "center",
-              flexWrap: "wrap",
-            }}
-          >
-            <Link
-              to="/interview-setup"
-              style={{
-                color: "#cbd5e1",
-                textDecoration: "none",
-                fontSize: "0.9rem",
-                transition: "color 0.3s ease",
-              }}
-              onMouseEnter={(e) => (e.target.style.color = "#6366f1")}
-              onMouseLeave={(e) => (e.target.style.color = "#cbd5e1")}
-            >
-              Practice Interview
-            </Link>
-            <Link
-              to="/leaderboard"
-              style={{
-                color: "#cbd5e1",
-                textDecoration: "none",
-                fontSize: "0.9rem",
-                transition: "color 0.3s ease",
-              }}
-              onMouseEnter={(e) => (e.target.style.color = "#6366f1")}
-              onMouseLeave={(e) => (e.target.style.color = "#cbd5e1")}
-            >
-              Leaderboard
-            </Link>
-            <Link
-              to="/blog"
-              style={{
-                color: "#cbd5e1",
-                textDecoration: "none",
-                fontSize: "0.9rem",
-                transition: "color 0.3s ease",
-              }}
-              onMouseEnter={(e) => (e.target.style.color = "#6366f1")}
-              onMouseLeave={(e) => (e.target.style.color = "#cbd5e1")}
-            >
-              Blog
-            </Link>
+          <span className="not-found-heading text-[30px] font-extrabold leading-none">
+            Intervyo
+          </span>
+        </Link>
+
+        <Link
+          to="/"
+          className="group flex items-center gap-2 text-sm text-zinc-400 transition hover:text-white"
+        >
+          <ArrowLeft className="h-4 w-4 transition group-hover:-translate-x-1" />
+          Back to home
+        </Link>
+      </nav>
+
+      {/* Main */}
+      <section className="relative z-10 mx-auto flex min-h-[calc(100vh-88px)] w-full max-w-[1440px] items-center px-5 pb-12 sm:px-8 lg:px-12">
+        <div className="grid w-full items-center gap-14 lg:grid-cols-[0.85fr_1.15fr] lg:gap-20">
+          {/* Text */}
+          <div className="order-2 lg:order-1">
+            <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.05] px-4 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-300 backdrop-blur-md">
+              <span className="h-2 w-2 rounded-full bg-[#D1F48C] shadow-[0_0_14px_#D1F48C]" />
+              Navigation error
+            </div>
+
+            <h1 className="not-found-heading text-[105px] font-bold uppercase leading-[0.76] text-white sm:text-[145px] lg:text-[175px]">
+              Oops.
+            </h1>
+
+            <p className="mt-8 max-w-md text-lg leading-relaxed text-zinc-400">
+              This page took a wrong turn. Let&apos;s get you back to your
+              interview preparation workspace.
+            </p>
+
+            <div className="mt-9 flex flex-wrap gap-3">
+              <Link
+                to="/"
+                className="group flex h-12 items-center gap-2 rounded-full bg-white px-6 text-sm font-bold text-[#0A0D12] transition hover:bg-[#D1F48C] hover:shadow-[0_12px_30px_rgba(209,244,140,0.16)]"
+              >
+                <Home className="h-4 w-4" />
+                Go to homepage
+                <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+              </Link>
+
+              <Link
+                to="/interview-setup"
+                className="flex h-12 items-center gap-2 rounded-full border border-white/15 bg-white/[0.05] px-6 text-sm font-semibold text-white transition hover:border-white/30 hover:bg-white/[0.1]"
+              >
+                Start practicing
+              </Link>
+            </div>
+
+            <div className="mt-10 flex items-center gap-3 text-xs text-zinc-600">
+              <span className="not-found-heading text-3xl text-[#C3DBFF]">
+                404
+              </span>
+              <span className="h-px w-12 bg-white/15" />
+              <span>Page not found</span>
+            </div>
+          </div>
+
+          {/* CSS-built visual */}
+          <div className="order-1 flex justify-center lg:order-2">
+            <div className="relative aspect-square w-full max-w-[620px]">
+              {/* Outer rings */}
+              <div className="not-found-ring absolute inset-[4%] rounded-full border border-[#C3DBFF]/20" />
+              <div className="not-found-ring absolute inset-[12%] rounded-full border border-[#D1F48C]/20 [animation-delay:1s]" />
+              <div className="absolute inset-[21%] rounded-full border border-white/10" />
+
+              {/* Orbital marks */}
+              <span className="absolute left-[8%] top-[39%] h-3 w-3 rounded-full bg-[#D1F48C] shadow-[0_0_18px_#D1F48C]" />
+              <span className="absolute right-[13%] top-[19%] h-2 w-2 rounded-full bg-[#FFB8FC] shadow-[0_0_15px_#FFB8FC]" />
+              <span className="absolute bottom-[18%] right-[22%] h-2.5 w-2.5 rounded-full bg-[#C3DBFF] shadow-[0_0_16px_#C3DBFF]" />
+
+              {/* Main panel */}
+              <div className="absolute inset-[17%] overflow-hidden rounded-[24px] border border-white/15 bg-[#11161F] shadow-[0_30px_90px_rgba(0,0,0,0.5)]">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(195,219,255,0.16),transparent_35%),linear-gradient(145deg,#161E2B,#0C1017)]" />
+
+                {/* Scan effect */}
+                <div className="not-found-scan absolute left-0 right-0 top-0 h-20 bg-gradient-to-b from-transparent via-[#D1F48C]/10 to-transparent" />
+
+                <div className="relative flex h-full flex-col items-center justify-center px-6 text-center">
+                  <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-[16px] border border-[#C3DBFF]/25 bg-[#C3DBFF]/10 text-[#C3DBFF]">
+                    <Search className="h-7 w-7" />
+                  </div>
+
+                  <div className="not-found-heading text-[94px] font-bold leading-[0.78] text-white sm:text-[120px]">
+                    404
+                  </div>
+
+                  <div className="mt-5 h-px w-24 bg-gradient-to-r from-transparent via-[#D1F48C] to-transparent" />
+
+                  <p className="mt-5 max-w-[210px] text-sm leading-relaxed text-zinc-400">
+                    The route you&apos;re looking for doesn&apos;t exist.
+                  </p>
+
+                  <div className="mt-6 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[#D1F48C]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#D1F48C] shadow-[0_0_10px_#D1F48C]" />
+                    System ready
+                  </div>
+                </div>
+              </div>
+
+              {/* Corner label */}
+              <div className="absolute bottom-[5%] left-[12%] rounded-[10px] border border-white/10 bg-[#11161F]/90 px-4 py-3 shadow-xl backdrop-blur-xl">
+                <div className="flex items-center gap-2 text-xs font-semibold text-zinc-300">
+                  <span className="h-2 w-2 rounded-full bg-[#FFB8FC]" />
+                  The path continues
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* Copyright */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: "20px",
-          left: 0,
-          right: 0,
-          textAlign: "center",
-          color: "#64748b",
-          fontSize: "0.8rem",
-          opacity: 0.7,
-        }}
-      >
-        © {new Date().getFullYear()} Intervyo. All rights reserved.
-      </div>
-    </div>
-    </>
+      </section>
+    </main>
   );
-};
-
-export default NotFound;
+}
