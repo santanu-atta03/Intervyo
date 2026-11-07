@@ -34,11 +34,19 @@ export function sendOtp(email, navigate) {
         throw new Error(response.data.message);
       }
 
-      notify.success("OTP sent to your email");
+      notify.success("OTP sent to your email", {
+        title: "Verification Code Sent",
+        description: `Check ${email} for your one-time verification code.`,
+      });
       navigate("/verify-email");
     } catch (error) {
       console.error("Send OTP Error:", error);
-      notify.error(error.response?.data?.message || "Failed to send OTP");
+      const message =
+        error.response?.data?.message || "Failed to send OTP";
+      notify.error(message, {
+        title: "Couldn’t Send Verification Code",
+        description: message,
+      });
     } finally {
       dispatch(setLoading(false));
       notify.dismiss(toastId);
@@ -61,10 +69,18 @@ export function resendOtp(email) {
         throw new Error(response.data.message);
       }
 
-      notify.success("OTP resent to your email");
+      notify.success("OTP resent to your email", {
+        title: "New Code Sent",
+        description: `A new verification code was sent to ${email}.`,
+      });
     } catch (error) {
       console.error("Resend OTP Error:", error);
-      notify.error(error.response?.data?.message || "Failed to resend OTP");
+      const message =
+        error.response?.data?.message || "Failed to resend OTP";
+      notify.error(message, {
+        title: "Couldn’t Resend Code",
+        description: message,
+      });
     } finally {
       dispatch(setLoading(false));
       notify.dismiss(toastId);
@@ -109,11 +125,19 @@ export function signup(
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
 
-      notify.success("Registration successful!");
+      notify.success("Registration successful!", {
+        title: "Account Created",
+        description: "Your account is ready. Taking you to your dashboard.",
+      });
       navigate("/dashboard");
     } catch (error) {
       console.error("Signup Error:", error);
-      notify.error(error.response?.data?.message || "Registration failed");
+      const message =
+        error.response?.data?.message || "Registration failed";
+      notify.error(message, {
+        title: "Registration Failed",
+        description: message,
+      });
     } finally {
       dispatch(setLoading(false));
       notify.dismiss(toastId);
@@ -156,7 +180,11 @@ export function login(email, password, navigate) {
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
 
-      notify.success("Welcome back, " + user.name.split(" ")[0] + "!");
+      const firstName = user.name.split(" ")[0];
+      notify.success(`Welcome back, ${firstName}!`, {
+        title: "Welcome Back",
+        description: `You’re signed in as ${firstName}. Your interview prep is ready.`,
+      });
       navigate("/dashboard");
     } catch (error) {
       console.error("Login Error:", error);
@@ -173,7 +201,10 @@ export function login(email, password, navigate) {
         errorMessage = error.response.data.message;
       }
 
-      notify.error(errorMessage);
+      notify.error(errorMessage, {
+        title: "Sign-in Failed",
+        description: errorMessage,
+      });
     } finally {
       dispatch(setLoading(false));
       notify.dismiss(toastId);
@@ -192,10 +223,18 @@ export function logout(navigate) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       navigate("/");
-      notify.success("Logged out successfully");
+      notify.success("Logged out successfully", {
+        title: "Signed Out",
+        description: "You have been securely logged out of your account.",
+      });
     } catch (error) {
-      console.error("Login Error:", error);
-      notify.error(error.response?.data?.message || "Login failed");
+      console.error("Logout Error:", error);
+      const message =
+        error.response?.data?.message || "Could not log out successfully.";
+      notify.error(message, {
+        title: "Sign-out Failed",
+        description: message,
+      });
     } finally {
       notify.dismiss(toastId);
     }

@@ -34,18 +34,27 @@ export default function VerifyEmail() {
   const handleVerify = () => {
     const otpValue = otp.join('');
     if (otpValue.length !== 6) {
-      notify.error("Please enter complete OTP");
+      notify.error("Please enter complete OTP", {
+        title: "Code Incomplete",
+        description: "Enter all six digits from the verification email.",
+      });
       return;
     }
 
     if (!signupData) {
-      notify.error("Please complete registration form first");
+      notify.error("Please complete registration form first", {
+        title: "Registration Details Missing",
+        description: "Return to registration and submit your details first.",
+      });
       navigate("/register");
       return;
     }
 
     dispatch(setSignupData({ ...signupData, otp: otpValue }));
-    notify.success('Email verified! Choose your domain');
+    notify.success('Email verified! Choose your domain', {
+      title: "Email Verified",
+      description: "Your email is confirmed. Choose your career domain next.",
+    });
     navigate('/domain-selection');
   };
 

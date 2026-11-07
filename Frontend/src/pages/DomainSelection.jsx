@@ -27,12 +27,18 @@ export default function DomainSelection() {
   const handleSubmit = () => {
     if (!formData.domain) {
       setErrors({ domain: "Please select a domain" });
-      notify.error("Please select a domain");
+      notify.error("Please select a domain", {
+        title: "Choose a Career Domain",
+        description: "Select the domain you want to focus your interview prep on.",
+      });
       return;
     }
 
     if (!signupData) {
-      notify.error("Session expired. Please register again.");
+      notify.error("Session expired. Please register again.", {
+        title: "Registration Session Expired",
+        description: "Start registration again to finish creating your account.",
+      });
       navigate("/register");
       return;
     }
