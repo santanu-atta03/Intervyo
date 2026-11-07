@@ -1,4 +1,20 @@
 User-agent: *
 Allow: /
+Disallow: /dashboard
+Disallow: /analytics
+Disallow: /advanced-features
+Disallow: /practice-lab
+Disallow: /history
+Disallow: /resources
+Disallow: /settings
+Disallow: /achievements
+Disallow: /interview/
+Disallow: /interview-room/
+Disallow: /results/
+Disallow: /api/
+Disallow: /login
+Disallow: /register
+Disallow: /verify-email
+Disallow: /auth/
 
 Sitemap: https://intervyo.xyz/sitemap.xml

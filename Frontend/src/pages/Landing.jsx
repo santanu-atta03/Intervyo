@@ -270,6 +270,9 @@ export default function LandingPage() {
 
   // Initialize Lenis Smooth Scroll
   useEffect(() => {
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) return undefined;
+
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -287,7 +290,8 @@ export default function LandingPage() {
 
   // Scroll-Triggered Text Fill Scrub for Headline
   useEffect(() => {
-    if (!scrollFillRef.current) return;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!scrollFillRef.current || prefersReducedMotion) return undefined;
     const lines = scrollFillRef.current.querySelectorAll(".scroll-fill-line");
 
     const ctx = gsap.context(() => {
@@ -655,6 +659,12 @@ export default function LandingPage() {
             src={ASSETS.heroPoster}
             alt="Intervyo Autonomous Stage"
             className="absolute inset-0 h-full w-full object-cover opacity-50 scale-105"
+            width={1600}
+            height={900}
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+            sizes="100vw"
           />
           <div className="absolute inset-0 bg-[#0A0D12]/70 backdrop-blur-[2px]" />
 
@@ -665,8 +675,12 @@ export default function LandingPage() {
           >
             <img
               src={ASSETS.announcementThumb}
-              alt="Intervyo 2.0"
+              alt="Intervyo 2.0 announcement"
               className="size-[54px] shrink-0 rounded-[8px] object-cover"
+              width={54}
+              height={54}
+              loading="lazy"
+              decoding="async"
             />
             <div className="flex flex-col min-w-0">
               <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">

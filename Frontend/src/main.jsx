@@ -23,6 +23,7 @@ createRoot(document.getElementById("root")).render(
         <Toaster
           position="top-right"
           options={{
+            fill: "#191919",
             duration: 8000,
             autopilot: { expand: 2600, collapse: 5800 },
           }}
