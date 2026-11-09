@@ -7,6 +7,7 @@ import {
   ChevronDown,
   ChevronRight,
   X,
+  Menu,
   Search,
   ExternalLink,
   Mic,
@@ -196,6 +197,7 @@ const INTEGRATIONS_LIST = [
 export default function LandingPage() {
   const navigate = useNavigate();
   const [videoModalOpen, setVideoModalOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [urlInput, setUrlInput] = useState("");
   const [activePunchcard, setActivePunchcard] = useState(0);
   const heroRef = useRef(null);
@@ -534,15 +536,15 @@ export default function LandingPage() {
       `}</style>
 
       {/* ── 1. FIXED FLOATING CAPSULE NAVIGATION (DARK MODE) ── */}
-      <nav className="fixed top-10 z-50 w-[99%] px-6 md:px-[10px]">
-        <div className="flex  items-center justify-around gap-3">
+      <nav className="fixed left-1/2 top-3 z-50 w-[calc(100vw-24px)] max-w-[1400px] -translate-x-1/2 px-2 sm:top-10 sm:w-[99%] sm:px-6 md:px-[10px]">
+        <div className="flex items-center justify-between gap-2">
 
           {/* LEFT: Brand + Navigation Pill */}
-          <div className="flex items-center gap-7 rounded-full bg-white px-5 py-2.5 shadow-sm">
+          <div className="flex min-w-0 items-center gap-3 rounded-full bg-white px-3 py-2.5 shadow-sm sm:gap-7 sm:px-5">
 
             {/* Intervyo Brand */}
             <Link to="/" className="flex items-center gap-2  shrink-0">
-              <span className="font-heading font-extrabold text-[35px] tracking-normal text-[#171717] leading-none">
+              <span className="font-heading font-extrabold text-[24px] leading-none tracking-normal text-[#171717] sm:text-[35px]">
                 Intervyo
               </span>
 
@@ -591,12 +593,12 @@ export default function LandingPage() {
 
 
           {/* RIGHT: Action Buttons */}
-          <div className="flex items-center gap-2.5 shrink-0">
+          <div className="flex shrink-0 items-center gap-2 sm:gap-2.5">
 
             {/* Login */}
             <Link
               to="/login"
-              className="char-btn flex items-center justify-center gap-1.5 bg-[#dcd7d7] text-black text-[15px] font-semibold px-7 py-3 rounded-full hover:bg-[#9b9494] transition-all duration-200 active:scale-[0.97] shadow-sm"
+              className="char-btn hidden items-center justify-center gap-1.5 rounded-full bg-[#dcd7d7] px-7 py-3 text-[15px] font-semibold text-black shadow-sm transition-all duration-200 hover:bg-[#9b9494] active:scale-[0.97] sm:flex"
             >
               <span className="inline-flex">
                 {"Log in".split("").map((c, i) => (
@@ -624,7 +626,7 @@ export default function LandingPage() {
             {/* Start Free */}
             <Link
               to="/interview-setup"
-              className="char-btn flex items-center justify-center gap-1.5 bg-[#171717] text-white text-[15px] font-semibold px-7 py-3 rounded-full hover:bg-[#333333] transition-all duration-200 active:scale-[0.97] shadow-sm"
+              className="char-btn flex items-center justify-center gap-1.5 rounded-full bg-[#171717] px-3 py-2.5 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:bg-[#333333] active:scale-[0.97] sm:px-7 sm:py-3 sm:text-[15px]"
             >
 
               <span className="inline-flex">
@@ -643,9 +645,55 @@ export default function LandingPage() {
 
             </Link>
 
+            <button
+              type="button"
+              className="flex size-10 items-center justify-center rounded-full bg-white text-[#171717] shadow-sm transition-colors hover:bg-zinc-100 lg:hidden"
+              onClick={() => setMobileMenuOpen((open) => !open)}
+              aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+              aria-expanded={mobileMenuOpen}
+              aria-controls="landing-mobile-navigation"
+            >
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+
           </div>
 
         </div>
+
+        {mobileMenuOpen && (
+          <div
+            id="landing-mobile-navigation"
+            className="mt-2 rounded-2xl border border-black/10 bg-white p-3 text-sm font-medium text-zinc-700 shadow-xl lg:hidden"
+          >
+            {[
+              ["Platform", "#platform"],
+              ["Engines", "#engines"],
+              ["Playbooks", "#playbooks"],
+              ["Candidate Stories", "#migrations"],
+              ["Pricing", "/pricing"],
+            ].map(([label, href]) =>
+              href.startsWith("/") ? (
+                <Link
+                  key={label}
+                  to={href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block rounded-xl px-3 py-3 transition-colors hover:bg-zinc-100"
+                >
+                  {label}
+                </Link>
+              ) : (
+                <a
+                  key={label}
+                  href={href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block rounded-xl px-3 py-3 transition-colors hover:bg-zinc-100"
+                >
+                  {label}
+                </a>
+              ),
+            )}
+          </div>
+        )}
       </nav>
 
       {/* ── 2. HERO SECTION WITH EMBEDDED STAGE (DARK MODE) ── */}
@@ -703,16 +751,16 @@ export default function LandingPage() {
               Intervyo is the autonomous platform that turns your interview preparation into your unfair career advantage.
             </p>
 
-            <div className="mt-10 flex items-center gap-3.5">
+            <div className="mt-8 flex w-full flex-wrap items-center justify-center gap-3.5 sm:mt-10 sm:flex-nowrap">
               <Link
                 to="/interview-setup"
-                className="px-8 py-4 rounded-full bg-white text-[#0A0D12] font-semibold text-sm hover:bg-zinc-200 transition-all shadow-xl active:scale-[0.98]"
+                className="rounded-full bg-white px-5 py-3.5 text-sm font-semibold text-[#0A0D12] shadow-xl transition-all hover:bg-zinc-200 active:scale-[0.98] sm:px-8 sm:py-4"
               >
                 Start Free
               </Link>
               <Link
                 to="/interview-setup"
-                className="px-8 py-4 rounded-full bg-white/10 hover:bg-white/15 border border-white/20 text-white font-semibold text-sm transition-all"
+                className="rounded-full border border-white/20 bg-white/10 px-5 py-3.5 text-sm font-semibold text-white transition-all hover:bg-white/15 sm:px-8 sm:py-4"
               >
                 Get Demo
               </Link>
@@ -755,7 +803,7 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_40%,black_40%,transparent_100%)] pointer-events-none z-0" />
 
         {/* 3D Floating MacBook with 'intervyo' typed on screen */}
-        <div className="absolute -top-[8px] sm:-top-[130px] left-[300px] -translate-x-1/2 w-[440px] sm:w-[540px] lg:w-[780px] max-w-[98vw] 
+        <div className="absolute -top-[8px] left-1/2 -translate-x-1/2 w-[440px] max-w-[98vw] sm:-top-[130px] sm:left-[300px] sm:w-[540px] lg:w-[780px]
         aspect-square z-0 pointer-events-none opacity-55 select-none 
         drop-shadow-[0_25px_70px_rgba(0,0,0,0.9)] 
         [mask-image:radial-gradient(ellipse_100%_75%_at_35%_45%,black_15%,rgba(0,0,0,0.9)_40%,rgba(0,0,0,0.6)_60%,rgba(0,0,0,0.25)_80%,transparent_100%)]
@@ -1071,7 +1119,7 @@ export default function LandingPage() {
 
               {/* Card 2: AI Analysis */}
 
-              <div className="p-5 bg-white rounded-[12px] border border-black/[0.06] shadow-[0_12px_35px_rgba(0,0,0,0.12)] flex flex-col justify-around h-[400px] min-h-[300px] transition-all">
+              <div className="relative overflow-hidden p-5 bg-white rounded-[12px] border border-black/[0.06] shadow-[0_12px_35px_rgba(0,0,0,0.12)] flex flex-col justify-around h-[400px] min-h-[300px] transition-all">
                 <div>
                   {/* Brand Pill + Sparkline Row */}
                   <div className="flex items-center justify-between gap-2">
@@ -1087,7 +1135,7 @@ export default function LandingPage() {
                     {/* Soft Green Sparkline Chart SVG */}
                     {/* Dynamic Emerald Green Sparkline */}
                     <svg
-                      className="absolute translate-x-[180px] translate-y-[50px] w-[150px] h-[70px] shrink-0 overflow-visible"
+                      className="absolute right-0 top-[50px] w-28 sm:w-[150px] h-[70px] shrink-0 overflow-visible"
                       viewBox="0 0 100 40"
                       preserveAspectRatio="none"
                       fill="none"
@@ -1180,7 +1228,7 @@ export default function LandingPage() {
 
               {/* Card 3: Career Progress */}
 
-              <div className="p-5 bg-white rounded-[12px] border border-black/[0.06] shadow-[0_12px_35px_rgba(0,0,0,0.12)] flex flex-col justify-around h-[400px] min-h-[300px]  transition-all">
+              <div className="relative overflow-hidden p-5 bg-white rounded-[12px] border border-black/[0.06] shadow-[0_12px_35px_rgba(0,0,0,0.12)] flex flex-col justify-around h-[400px] min-h-[300px] transition-all">
                 <div>
                   {/* Brand Pill + Sparkline Row */}
                   <div className="flex items-center justify-between gap-2">
@@ -1196,7 +1244,7 @@ export default function LandingPage() {
                     {/* Cyan Sparkline Chart SVG */}
                     {/* Dynamic Cyan Career Progress Sparkline */}
                     <svg
-                      className="absolute translate-x-[170px] translate-y-[50px] w-[160px] h-[70px] shrink-0 overflow-visible"
+                      className="absolute right-0 top-[50px] w-28 sm:w-[160px] h-[70px] shrink-0 overflow-visible"
                       viewBox="0 0 100 40"
                       preserveAspectRatio="none"
                       fill="none"
@@ -1890,18 +1938,18 @@ export default function LandingPage() {
 
           <form
             onSubmit={handleStartDrill}
-            className="mt-10 max-w-xl mx-auto p-2 bg-[#131722] rounded-full border border-white/15 shadow-xl flex items-center gap-3"
+            className="mt-10 max-w-xl mx-auto p-2 bg-[#131722] rounded-2xl sm:rounded-full border border-white/15 shadow-xl flex flex-col items-stretch sm:flex-row sm:items-center gap-2 sm:gap-3"
           >
             <input
               type="text"
               value={urlInput}
               onChange={(e) => setUrlInput(e.target.value)}
               placeholder="e.g. Senior Backend Engineer at Stripe..."
-              className="flex-1 px-5 py-2 text-sm bg-transparent outline-none text-white placeholder-zinc-500 font-medium"
+              className="w-full min-w-0 px-4 py-2 text-sm bg-transparent outline-none text-white placeholder-zinc-500 font-medium sm:flex-1 sm:px-5"
             />
             <button
               type="submit"
-              className="px-8 py-3.5 rounded-full bg-white hover:bg-zinc-200 text-[#0A0D12] font-semibold text-sm transition-all shadow-md flex items-center gap-2 shrink-0"
+              className="w-full justify-center px-4 py-3.5 rounded-full bg-white hover:bg-zinc-200 text-[#0A0D12] font-semibold text-sm transition-all shadow-md flex items-center gap-2 sm:w-auto sm:px-8 sm:shrink-0"
             >
               <span>Start Free</span>
               <ArrowRight className="w-4 h-4" />

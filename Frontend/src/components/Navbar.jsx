@@ -194,7 +194,9 @@ export default function Navbar({
         <button
           onClick={() => setMobileMenuOpen((open) => !open)}
           className={`lg:hidden p-2 rounded-lg transition-colors ${styles.menuButton}`}
-          aria-label="Toggle menu"
+          aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+          aria-expanded={mobileMenuOpen}
+          aria-controls="site-mobile-navigation"
         >
           {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -202,7 +204,8 @@ export default function Navbar({
 
       {mobileMenuOpen && (
         <div
-          className={`lg:hidden absolute top-full left-0 right-0 mt-2 mx-2 overflow-hidden ${styles.mobileMenu}`}
+          id="site-mobile-navigation"
+          className={`lg:hidden absolute top-full left-0 right-0 mt-2 mx-2 max-h-[calc(100dvh-7rem)] overflow-y-auto ${styles.mobileMenu}`}
         >
           <div className="p-6 space-y-4">
             {links.map((link) => {

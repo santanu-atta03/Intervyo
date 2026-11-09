@@ -455,8 +455,9 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .chatbot-container {
-    width: calc(100vw - 32px);
-    height: calc(100vh - 100px);
+    width: min(420px, calc(100vw - 32px));
+    height: min(600px, calc(100dvh - 32px));
+    max-height: calc(100dvh - 32px);
     bottom: 16px;
     right: 16px;
   }

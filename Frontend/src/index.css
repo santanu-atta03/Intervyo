@@ -10,6 +10,24 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+img,
+video {
+  max-width: 100%;
+}
+
 html {
   scroll-behavior: smooth;
 }

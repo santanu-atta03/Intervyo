@@ -106,7 +106,7 @@ export default function Footer() {
             </div>
 
             {/* Right Column: Product, Resources, Company */}
-            <div className="lg:col-span-7 grid grid-cols-3 gap-6 sm:gap-10">
+            <div className="lg:col-span-7 grid grid-cols-2 gap-6 sm:grid-cols-3 sm:gap-10">
               
               {/* Product */}
               <div>
