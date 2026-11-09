@@ -121,7 +121,7 @@ export default function Login() {
   const strength = getStrength(password);
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#0A0D12] text-white">
+    <main className="min-h-screen overflow-x-hidden bg-[#0A0D12] text-white">
       <SEO
         title="Login – Intervyo"
         description="Login to Intervyo and continue practicing AI-powered mock interviews."
@@ -283,7 +283,7 @@ export default function Login() {
                     onChange={(event) => setEmail(event.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder="m@example.com"
-                    className="h-[33px] w-full rounded-[5px] border ring-0 border-[#4e91db] bg-[#292929] px-3 text-[12px] text-white outline-none transition placeholder:text-[#858585] focus:border-[#72b2ff] focus:ring-1 focus:ring-[#72b2ff]/30"
+                    className="h-[44px] w-full rounded-[5px] border ring-0 border-[#4e91db] bg-[#292929] px-3 text-[14px] text-white outline-none transition placeholder:text-[#858585] focus:border-[#72b2ff] focus:ring-1 focus:ring-[#72b2ff]/30 sm:h-[40px] sm:text-[12px]"
                   />
                 </motion.div>
 
@@ -310,7 +310,7 @@ export default function Login() {
                       value={password}
                       onChange={(event) => setPassword(event.target.value)}
                       placeholder=""
-                      className="h-[33px] w-full rounded-[5px] border border-[#414141] bg-[#292929] px-3 pr-9 text-[12px] text-white outline-none transition placeholder:text-[#858585] focus:border-[#72b2ff] focus:ring-1 focus:ring-[#72b2ff]/30"
+                      className="h-[44px] w-full rounded-[5px] border border-[#414141] bg-[#292929] px-3 pr-9 text-[14px] text-white outline-none transition placeholder:text-[#858585] focus:border-[#72b2ff] focus:ring-1 focus:ring-[#72b2ff]/30 sm:h-[40px] sm:text-[12px]"
                     />
 
                     <button
@@ -366,7 +366,7 @@ export default function Login() {
                   disabled={loading || !email || !password}
                   whileHover={{ scale: loading ? 1 : 1.01 }}
                   whileTap={{ scale: loading ? 1 : 0.98 }}
-                  className="mt-1 flex h-[36px] w-full items-center justify-center rounded-full bg-[#e6e6e6] px-4 text-[14px] font-medium text-[#111111] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
+                  className="mt-1 flex h-[48px] w-full items-center justify-center rounded-full bg-[#e6e6e6] px-4 text-[14px] font-medium text-[#111111] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-50 sm:h-[40px]"
                 >
                   {loading ? "Signing in..." : "Log in"}
                 </motion.button>

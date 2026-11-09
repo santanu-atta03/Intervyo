@@ -1227,6 +1227,18 @@ const ROOM_CSS = `
     grid-template-rows: minmax(200px, 42%) minmax(0, 1fr);
   }
 
+  .ir-room.is-ready {
+    display: block;
+  }
+
+  .ir-room.is-ready .ir-stage {
+    height: 100%;
+  }
+
+  .ir-room.is-ready .ir-sidebar {
+    display: none;
+  }
+
   .ir-header {
     min-height: auto;
   }
@@ -1309,6 +1321,13 @@ const ROOM_CSS = `
 
   .ir-ready-card {
     padding: 28px 20px;
+  }
+
+  .ir-overlay {
+    align-items: start;
+    overflow-y: auto;
+    padding: 16px;
+    -webkit-overflow-scrolling: touch;
   }
 
   .ir-ready-grid {
@@ -2874,7 +2893,11 @@ const InterviewRoom = ({ initialStream = null }) => {
           </div>
         </header>
 
-        <main className="ir-room">
+        <main
+          className={`ir-room ${
+            sessionStatus === "ready" && !interviewStarted ? "is-ready" : ""
+          }`}
+        >
           <section className="ir-stage">
             <div className="ir-video-preview" aria-label="Your camera preview">
               <video

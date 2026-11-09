@@ -1024,8 +1024,8 @@
 
   .landing-hero-description {
     margin-top: 18px;
-    font-size: 14px;
-    line-height: 1.7;
+    font-size: 16px;
+    line-height: 1.65;
   }
 
   .landing-hero-actions {
@@ -1048,7 +1048,7 @@
   .landing-promise {
     align-items: flex-start;
     margin-top: 20px;
-    font-size: 10px;
+    font-size: 12px;
     line-height: 1.6;
   }
 
@@ -1072,11 +1072,11 @@
   }
 
   .landing-feedback-card strong {
-    font-size: 9px;
+    font-size: 11px;
   }
 
   .landing-feedback-card span {
-    font-size: 8px;
+    font-size: 10px;
   }
 
   .landing-feedback-icon {
@@ -1088,17 +1088,17 @@
     right: 18px;
     bottom: 18px;
     left: 18px;
-    font-size: 10px;
+    font-size: 12px;
   }
 
   .landing-visual-note {
-    font-size: 7px;
+    font-size: 9px;
   }
 
   .landing-hero-bottom {
     width: min(100% - 36px, 520px);
     margin-top: 46px;
-    font-size: 8px;
+    font-size: 10px;
   }
 
   .landing-intro-inner {
@@ -1117,7 +1117,7 @@
 
   .landing-intro-inner>div span {
     gap: 6px;
-    font-size: 10px;
+    font-size: 12px;
   }
 
   .landing-section,
@@ -1134,7 +1134,7 @@
   .landing-section-heading h2,
   .landing-how-intro h2,
   .landing-faq-heading h2 {
-    font-size: 36px;
+    font-size: clamp(32px, 9vw, 36px);
     letter-spacing: -1.7px;
   }
 
@@ -1142,7 +1142,7 @@
   .landing-how-intro>p,
   .landing-faq-heading>p {
     margin: 13px 0 0;
-    font-size: 12px;
+    font-size: 14px;
     line-height: 1.75;
   }
 
@@ -1152,39 +1152,38 @@
   }
 
   .landing-feature-card {
-    display: grid;
-    grid-template-columns: 0.82fr 1fr;
+    display: block;
     border-radius: 17px;
   }
 
   .landing-feature-image {
-    height: 100%;
-    min-height: 210px;
+    height: 190px;
+    min-height: 0;
   }
 
   .landing-feature-copy {
-    padding: 18px 15px;
+    padding: 20px 18px;
   }
 
   .landing-feature-copy h3 {
-    margin: 8px 0;
-    font-size: 15px;
+    margin: 9px 0;
+    font-size: 19px;
   }
 
   .landing-feature-category {
-    font-size: 8px;
+    font-size: 10px;
     letter-spacing: 0.5px;
   }
 
   .landing-feature-copy p {
     min-height: unset;
-    font-size: 10px;
-    line-height: 1.65;
+    font-size: 14px;
+    line-height: 1.7;
   }
 
   .landing-card-link {
-    margin-top: 12px;
-    font-size: 9px;
+    margin-top: 16px;
+    font-size: 12px;
   }
 
   .landing-feature-icon {
@@ -1219,7 +1218,7 @@
   }
 
   .landing-step p {
-    font-size: 10px;
+    font-size: 13px;
   }
 
   .landing-faq-heading>p {
@@ -1228,11 +1227,11 @@
 
   .landing-faq-question {
     min-height: 60px;
-    font-size: 12px;
+    font-size: 14px;
   }
 
   .landing-faq-answer p {
-    font-size: 11px;
+    font-size: 13px;
   }
 
   .landing-cta {
@@ -1245,7 +1244,7 @@
   }
 
   .landing-cta p {
-    font-size: 12px;
+    font-size: 14px;
   }
 
   .landing-cta-actions {
@@ -1271,14 +1270,14 @@
   .landing-footer-links>div {
     min-width: 0;
     gap: 11px;
-    font-size: 9px;
+    font-size: 11px;
   }
 
   .landing-footer-bottom {
     flex-direction: column;
     gap: 8px;
     padding: 16px 0;
-    font-size: 8px;
+    font-size: 10px;
   }
 }
 
@@ -1293,12 +1292,8 @@
     min-height: 38px;
   }
 
-  .landing-feature-card {
-    grid-template-columns: 0.72fr 1fr;
-  }
-
   .landing-feature-copy {
-    padding: 15px 12px;
+    padding: 18px 15px;
   }
 }
 

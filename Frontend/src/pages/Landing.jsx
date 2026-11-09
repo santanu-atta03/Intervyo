@@ -19,6 +19,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import SEO from "../components/shared/SEO";
 import Footer from "../components/shared/Footer";
+import { warmUpAuthService } from "../services/operations/authAPI";
 import "../pages/Landing.css";
 gsap.registerPlugin(ScrollTrigger);
 
@@ -203,6 +204,10 @@ export default function LandingPage() {
   const heroRef = useRef(null);
   const scrollFillRef = useRef(null);
   const playbooksScrollRef = useRef(null);
+
+  useEffect(() => {
+    warmUpAuthService();
+  }, []);
 
   const scrollPlaybooks = (direction) => {
     if (playbooksScrollRef.current) {
