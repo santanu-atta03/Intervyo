@@ -11,6 +11,7 @@ import {
   ChevronLeft,
 } from "lucide-react";
 import { useSelector } from "react-redux";
+import { IntervyoLoader } from "../components/Loader/Loader";
 
 export default function Leaderboard() {
   const navigate = useNavigate();
@@ -67,16 +68,7 @@ export default function Leaderboard() {
   ];
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-20 h-20 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <div className="text-white text-xl font-semibold">
-            Loading leaderboard...
-          </div>
-        </div>
-      </div>
-    );
+    return <IntervyoLoader label="Loading leaderboard" />;
   }
 
   return (

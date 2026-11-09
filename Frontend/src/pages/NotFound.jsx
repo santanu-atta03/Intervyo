@@ -2,6 +2,7 @@ import React from "react";
 import { ArrowLeft, ArrowRight, Home, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import SEO from "../components/shared/SEO";
+import BrandLogo from "../components/shared/BrandLogo";
 
 export default function NotFound() {
   return (
@@ -89,11 +90,9 @@ export default function NotFound() {
       <nav className="relative z-20 flex items-center justify-between px-5 py-5 sm:px-8 lg:px-12">
         <Link
           to="/"
-          className="rounded-full bg-white px-5 py-2.5 text-[#171717] shadow-lg shadow-black/25 transition hover:bg-[#D1F48C]"
+          className="inline-flex"
         >
-          <span className="not-found-heading text-[30px] font-extrabold leading-none">
-            Intervyo
-          </span>
+          <BrandLogo className="text-[30px]" />
         </Link>
 
         <Link

@@ -1,0 +1,35 @@
+.intervyo-loader {
+  display: grid;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  place-items: center;
+  overflow: hidden;
+  background: transparent;
+  color: #fff;
+}
+
+.intervyo-loading-mark {
+  display: block;
+  flex: 0 0 auto;
+  color: currentColor;
+  overflow: visible;
+}
+
+.intervyo-loading-mark--hero {
+  width: min(94vw, 400px);
+  height: auto;
+}
+
+.intervyo-loading-mark animate {
+  display: inline;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intervyo-loading-mark animate {
+    display: none;
+  }
+}

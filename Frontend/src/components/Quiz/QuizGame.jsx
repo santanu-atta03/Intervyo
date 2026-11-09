@@ -5,6 +5,7 @@ import QuestionCard from './QuestionCard';
 import QuizTimer from './QuizTimer';
 import QuizResults from './QuizResults';
 import { quizCategories } from '../../data/quizQuestions';
+import { IntervyoLoader } from "../Loader/Loader";
 
 const QUESTION_TIMER_SECONDS = 30;
 
@@ -53,7 +54,7 @@ const QuizGame = ({ categoryId, onBack }) => {
         }
     };
 
-    if (!category) return <div>Loading...</div>;
+    if (!category) return <IntervyoLoader label="Loading quiz" />;
 
     if (showResults) {
         return (

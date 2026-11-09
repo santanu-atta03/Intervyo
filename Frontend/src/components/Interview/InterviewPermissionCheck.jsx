@@ -14,7 +14,9 @@ import {
 } from "lucide-react";
 
 import { ThemeContext } from "../shared/ThemeContext";
+import BrandLogo from "../shared/BrandLogo";
 import ThemeToggle from "../ThemeToggle";
+import { LoadingMark } from "../Loader/Loader";
 
 const PERMISSION_CSS = `
 .permission-root {
@@ -116,19 +118,6 @@ const PERMISSION_CSS = `
   display: flex;
   align-items: center;
   gap: 11px;
-}
-
-.permission-brand-mark {
-  width: 37px;
-  height: 37px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: var(--pc-ink);
-  color: var(--pc-on-ink);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: .04em;
 }
 
 .permission-brand-name {
@@ -486,34 +475,6 @@ const PERMISSION_CSS = `
   text-align: center;
 }
 
-.permission-loader {
-  position: relative;
-  width: 62px;
-  height: 62px;
-  border: 1px solid var(--pc-hairline);
-  border-radius: 50%;
-}
-
-.permission-loader::before {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  border: 3px solid transparent;
-  border-top-color: var(--pc-ink);
-  border-right-color: var(--pc-ink);
-  border-radius: 50%;
-  animation: permission-spin 1s linear infinite;
-}
-
-.permission-loader::after {
-  content: "";
-  position: absolute;
-  inset: 19px;
-  border-radius: 50%;
-  background: var(--pc-ink);
-  animation: permission-pulse 1.6s ease-in-out infinite;
-}
-
 .permission-loading strong {
   color: var(--pc-ink);
   font-size: 15px;
@@ -582,25 +543,6 @@ const PERMISSION_CSS = `
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@keyframes permission-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes permission-pulse {
-  0%,
-  100% {
-    transform: scale(.86);
-    opacity: .7;
-  }
-
-  50% {
-    transform: scale(1);
-    opacity: 1;
   }
 }
 
@@ -830,7 +772,7 @@ export default function InterviewPermissionCheck({
       <header className="permission-header">
         <div className="permission-header-inner">
           <div className="permission-brand">
-            <div className="permission-brand-mark">IR</div>
+            <BrandLogo className="text-sm" />
 
             <div>
               <div className="permission-brand-name">
@@ -893,10 +835,7 @@ export default function InterviewPermissionCheck({
 
             {loading ? (
               <div className="permission-loading">
-                <div
-                  className="permission-loader"
-                  aria-hidden="true"
-                />
+                <LoadingMark size={31} />
 
                 <div>
                   <strong>Checking your permissions</strong>
@@ -956,14 +895,7 @@ export default function InterviewPermissionCheck({
                 >
                   {startingInterview ? (
                     <>
-                      <span
-                        className="permission-loader"
-                        style={{
-                          width: 20,
-                          height: 20,
-                          borderWidth: 1,
-                        }}
-                      />
+                      <LoadingMark size={10} />
                       Opening interview room
                     </>
                   ) : (

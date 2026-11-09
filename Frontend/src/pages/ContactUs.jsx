@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import SEO from "../components/shared/SEO";
 import { submitContactForm } from "../services/operations/contactAPI";
 import Lenis from "@studio-freight/lenis";
+import { LoadingMark } from "../components/Loader/Loader";
 
 function Arrow({ className = "" }) {
   return (
@@ -352,25 +353,7 @@ export default function ContactUs() {
                 >
                   {loading ? (
                     <>
-                      <svg
-                        className="h-4 w-4 animate-spin text-emerald-400"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        />
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8v8H4z"
-                        />
-                      </svg>
+                      <LoadingMark size={8} className="text-emerald-400" />
                       <span>Sending message...</span>
                     </>
                   ) : (

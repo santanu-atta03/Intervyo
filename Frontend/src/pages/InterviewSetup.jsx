@@ -11,7 +11,6 @@ import {
   Clock3,
   FileText,
   Lightbulb,
-  LoaderCircle,
   Plus,
   Rocket,
   Sparkles,
@@ -37,10 +36,12 @@ import { FaAmazon, FaGoogle, FaMicrosoft, FaApple, FaSalesforce, FaPencilAlt } f
 import { BiLogoAdobe } from "react-icons/bi";
 import { GrOracle } from "react-icons/gr";
 import { setInterviewConfig } from "../slices/interviewSlice";
+import BrandLogo from "../components/shared/BrandLogo";
 import { ThemeContext } from "../components/shared/ThemeContext";
 import ThemeToggle from "../components/ThemeToggle";
 import { apiConnector } from "../services/apiConnector";
 import { interviewEndpoints } from "../services/apis";
+import { IntervyoLoader } from "../components/Loader/Loader";
 
 const INTERVIEW_SETUP_CSS = `
 .nk-setup {
@@ -787,65 +788,6 @@ const INTERVIEW_SETUP_CSS = `
   background: var(--nk-ink);
 }
 
-.nk-setup .setup-preparing {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: 32px;
-}
-
-.nk-setup .setup-preparing-card {
-  width: min(100%, 520px);
-  padding: 44px;
-  background: var(--nk-canvas);
-  border: 1px solid var(--nk-hairline-soft);
-  box-shadow: 0 24px 80px rgba(17, 17, 17, .12);
-  animation: nk-setup-rise .6s var(--nk-ease) both;
-}
-
-.nk-setup .setup-loader {
-  width: 68px;
-  height: 68px;
-  margin: 0 auto 24px;
-  border: 3px solid var(--nk-hairline-soft);
-  border-top-color: var(--nk-ink);
-  border-radius: 50%;
-  animation: nk-setup-spin 1s linear infinite;
-}
-
-.nk-setup .setup-preparation-bar {
-  height: 8px;
-  margin-top: 26px;
-  overflow: hidden;
-  background: var(--nk-hairline-soft);
-}
-
-.nk-setup .setup-preparation-fill {
-  height: 100%;
-  background: var(--nk-ink);
-  transition: width .6s var(--nk-ease);
-}
-
-.nk-setup .setup-status-list {
-  display: grid;
-  gap: 8px;
-  margin-top: 24px;
-}
-
-.nk-setup .setup-status-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px;
-  background: var(--nk-cloud);
-  color: var(--nk-mute);
-  font-size: 13px;
-}
-
-.nk-setup .setup-status-item.is-complete {
-  color: var(--nk-ink);
-}
-
 .nk-setup .setup-fade-up {
   animation: nk-setup-rise .55s var(--nk-ease) both;
 }
@@ -871,12 +813,6 @@ const INTERVIEW_SETUP_CSS = `
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@keyframes nk-setup-spin {
-  to {
-    transform: rotate(360deg);
   }
 }
 
@@ -960,9 +896,6 @@ const INTERVIEW_SETUP_CSS = `
     width: 100%;
   }
 
-  .nk-setup .setup-preparing-card {
-    padding: 28px 20px;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1237,7 +1170,6 @@ function InterviewSetup() {
   const [showCustomCompany, setShowCustomCompany] = useState(false);
   const [customCompany, setCustomCompany] = useState("");
   const [isPreparingInterview, setIsPreparingInterview] = useState(false);
-  const [preparationProgress, setPreparationProgress] = useState(0);
   // Prevent duplicate submissions when the button is clicked multiple times
   const isSubmittingRef = React.useRef(false);
   const uploadIntervalRef = React.useRef(null);
@@ -1415,7 +1347,6 @@ function InterviewSetup() {
 
     isSubmittingRef.current = true;
     setIsPreparingInterview(true);
-    setPreparationProgress(0);
 
     // Build the payload first (synchronously) so we know what to send
     let interviewData = { ...config };
@@ -1437,24 +1368,8 @@ function InterviewSetup() {
       interviewData = formData;
     }
 
-    // Run the visual progress animation and the real API call in parallel.
-    // The animation takes ~3.5 s; the API call usually takes 2–5 s.
-    // Neither blocks the other – we wait for both before navigating.
-    const animateProgress = async () => {
-      const steps = [20, 40, 60, 80, 100];
-
-      for (const progress of steps) {
-        await new Promise((resolve) => window.setTimeout(resolve, 700));
-        if (!isSubmittingRef.current) return;
-        setPreparationProgress(progress);
-      }
-    };
-
     try {
-      // Fire both concurrently; apiResult resolves with the created interview id
-      const [, createdInterview] = await Promise.all([
-        animateProgress(),
-        new Promise((resolve, reject) => {
+      const createdInterview = await new Promise((resolve, reject) => {
           // Forward both API failures and unsuccessful responses to the setup state.
           Promise.resolve().then(() => {
             let headers = { Authorization: `Bearer ${token}` };
@@ -1495,8 +1410,7 @@ function InterviewSetup() {
               })
               .catch(reject);
           }).catch(reject);
-        }),
-      ]);
+      });
 
       if (createdInterview) {
         const interviewId = createdInterview.id || createdInterview._id || createdInterview.interviewId;
@@ -1513,83 +1427,13 @@ function InterviewSetup() {
       );
       // Reset so the user can retry from the setup form
       setIsPreparingInterview(false);
-      setPreparationProgress(0);
     } finally {
       isSubmittingRef.current = false;
     }
   };
 
   const renderPreparingScreen = () => (
-    <div className="nk-setup" data-nk-theme={nkTheme}>
-      <style>{INTERVIEW_SETUP_CSS}</style>
-
-      <div className="setup-preparing">
-        <div className="setup-preparing-card">
-          <div className="setup-loader" aria-hidden="true" />
-
-          <div style={{ textAlign: "center" }}>
-            <span className="setup-kicker">
-              <WandSparkles size={13} />
-              Preparing session
-            </span>
-
-            <h1 className="setup-title" style={{ fontSize: 36 }}>
-              Your interview is almost ready
-            </h1>
-
-            <p className="setup-description" style={{ fontSize: 15 }}>
-              We are configuring the experience around your selected goals.
-            </p>
-          </div>
-
-          <div className="setup-preparation-bar">
-            <div
-              className="setup-preparation-fill"
-              style={{ width: `${preparationProgress}%` }}
-            />
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginTop: 10,
-            }}
-          >
-            <span className="setup-progress-label">
-              <span>Preparing interview</span>
-            </span>
-            <strong>{preparationProgress}%</strong>
-          </div>
-
-          <div className="setup-status-list">
-            {[
-              ["Resume analysis", 20],
-              ["Question generation", 40],
-              ["Environment setup", 60],
-              ["AI configuration", 80],
-            ].map(([label, requiredProgress]) => {
-              const complete = preparationProgress >= requiredProgress;
-
-              return (
-                <div
-                  key={label}
-                  className={`setup-status-item ${complete ? "is-complete" : ""
-                    }`}
-                >
-                  {complete ? (
-                    <Check size={16} />
-                  ) : (
-                    <LoaderCircle size={16} />
-                  )}
-                  <span>{label}</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-    </div>
+    <IntervyoLoader label="Preparing interview" />
   );
 
   if (isPreparingInterview) {
@@ -1612,7 +1456,7 @@ function InterviewSetup() {
           </button>
 
           <div className="setup-brand">
-
+            <BrandLogo className="text-sm" />
             <div className="hidden sm:block">
               <div style={{ fontWeight: 500 }}>Interview setup</div>
               <div style={{ color: "var(--nk-mute)", fontSize: 12 }}>

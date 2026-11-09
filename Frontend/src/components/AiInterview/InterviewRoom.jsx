@@ -36,6 +36,7 @@ import {
   X,
   Zap,
 } from "lucide-react";
+import { IntervyoLoader } from "../Loader/Loader";
 
 import {
   getInterviewById,
@@ -1113,7 +1114,6 @@ const ROOM_CSS = `
   margin: 0 auto 20px;
   border: 1px solid var(--ir-hairline);
   border-radius: 50%;
-  animation: ir-spin 1s linear infinite;
 }
 
 .ir-loading h1 {
@@ -1126,10 +1126,6 @@ const ROOM_CSS = `
   margin: 8px 0 0;
   color: var(--ir-mute);
   font-size: 14px;
-}
-
-@keyframes ir-spin {
-  to { transform: rotate(360deg); }
 }
 
 @keyframes ir-pulse {
@@ -1430,6 +1426,9 @@ function getTimerClass(timeRemaining, interview) {
   return "";
 }
 
+const THINKING_TIME_SECONDS = 10;
+const ANSWER_END_SILENCE_MS = 2500;
+
 function MetricRow({ label, value, progress, valueClass = "" }) {
   return (
     <div>
@@ -1518,6 +1517,7 @@ const InterviewRoom = ({ initialStream = null }) => {
   const autoListenIntervalRef = useRef(null);
   const questionCountdownRef = useRef(null);
   const answerSilenceTimeoutRef = useRef(null);
+  const submitAnswerRef = useRef(null);
 
   const [showCodeEditor, setShowCodeEditor] = useState(false);
   const [code, setCode] = useState("");
@@ -1557,8 +1557,8 @@ const InterviewRoom = ({ initialStream = null }) => {
 
   const scheduleAutoListen = useCallback(() => {
     window.clearInterval(autoListenIntervalRef.current);
-    questionCountdownRef.current = 5;
-    setQuestionCountdown(5);
+    questionCountdownRef.current = THINKING_TIME_SECONDS;
+    setQuestionCountdown(THINKING_TIME_SECONDS);
     autoListenIntervalRef.current = window.setInterval(() => {
       const remaining = (questionCountdownRef.current || 1) - 1;
       questionCountdownRef.current = remaining;
@@ -2176,7 +2176,10 @@ const InterviewRoom = ({ initialStream = null }) => {
         window.clearTimeout(answerSilenceTimeoutRef.current);
         answerSilenceTimeoutRef.current = window.setTimeout(() => {
           stopListening();
-        }, 2500);
+          if (userTranscriptRef.current.trim().length >= 5) {
+            submitAnswerRef.current?.();
+          }
+        }, ANSWER_END_SILENCE_MS);
       }
     };
 
@@ -2591,6 +2594,7 @@ const InterviewRoom = ({ initialStream = null }) => {
 
     const answer =
       transcriptAccumulatorRef.current.trim() ||
+      userTranscriptRef.current.trim() ||
       userTranscript.trim();
 
     if (answer.length < 5) {
@@ -2650,6 +2654,10 @@ const InterviewRoom = ({ initialStream = null }) => {
     stopListening,
     userTranscript,
   ]);
+
+  useEffect(() => {
+    submitAnswerRef.current = handleSubmitAnswer;
+  }, [handleSubmitAnswer]);
 
   const handleRunCode = useCallback(() => {
     setCodeOutput(
@@ -2730,21 +2738,7 @@ const InterviewRoom = ({ initialStream = null }) => {
       : 0;
 
   if (loading) {
-    return (
-      <div className="ir-root" data-ir-theme={themeValue}>
-        <style>{ROOM_CSS}</style>
-
-        <div className="ir-loading">
-          <div className="ir-loading-inner">
-            <div className="ir-loading-mark">
-              <Activity size={24} />
-            </div>
-            <h1>Loading interview</h1>
-            <p>Preparing your interview room</p>
-          </div>
-        </div>
-      </div>
-    );
+    return <IntervyoLoader label="Loading interview room" />;
   }
 
   if (loadError) {
@@ -3331,7 +3325,11 @@ const InterviewRoom = ({ initialStream = null }) => {
                       <div
                         className="ir-countdown-fill"
                         style={{
-                          width: `${((5 - questionCountdown) / 5) * 100}%`,
+                          width: `${
+                            ((THINKING_TIME_SECONDS - questionCountdown) /
+                              THINKING_TIME_SECONDS) *
+                            100
+                          }%`,
                         }}
                       />
                     </div>

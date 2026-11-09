@@ -47,6 +47,7 @@ import { logout } from "../services/operations/authAPI";
 import ThemeToggle from "../components/ThemeToggle";
 import { ThemeContext } from "../components/shared/ThemeContext";
 import BrandLogo from "../components/shared/BrandLogo";
+import { IntervyoLoader } from "../components/Loader/Loader";
 
 /* ─── Nike Design System ─────────────────────────────────────────── */
 const NIKE_CSS = `
@@ -149,7 +150,6 @@ const NIKE_CSS = `
 @keyframes nk-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes nk-menu-in { from { opacity: 0; transform: translateY(-8px) scale(.97); } to { opacity: 1; transform: none; } }
 @keyframes nk-drawer-in { from { transform: translateX(-100%); } to { transform: none; } }
-@keyframes nk-spin { to { transform: rotate(360deg); } }
 
 @media (max-width: 960px) { .nk-nav-links { display: none; } }
 @media (min-width: 961px) { .nk-hamburger { display: none; } }
@@ -249,15 +249,7 @@ export default function Analytics() {
   );
 
   if (loading) {
-    return (
-      <div className="nk-root flex items-center justify-center" data-nk-theme={nkTheme} style={{ minHeight: "100vh" }}>
-        <style>{NIKE_CSS}</style>
-        <div style={{ textAlign: "center" }}>
-          <div style={{ width: 40, height: 40, border: "3px solid var(--nk-hairline)", borderTopColor: "var(--nk-ink)", borderRadius: "50%", animation: "nk-spin .8s linear infinite", margin: "0 auto 16px" }} />
-          <p className="nk-caption nk-mute">Loading analytics…</p>
-        </div>
-      </div>
-    );
+    return <IntervyoLoader label="Loading analytics" />;
   }
 
   return (
@@ -283,8 +275,7 @@ export default function Analytics() {
             </button>
             <Link to="/" aria-label="Intervyo home" className="flex items-center">
               <BrandLogo
-                className="hidden sm:inline text-base"
-                primaryClassName="text-inherit"
+                className="text-sm sm:text-base"
               />
             </Link>
           </div>
@@ -343,7 +334,6 @@ export default function Analytics() {
             <div className="flex items-center justify-between">
               <BrandLogo
                 className="text-base"
-                primaryClassName="text-inherit"
               />
               <button className="nk-icon-btn" onClick={() => setIsMobileMenuOpen(false)} aria-label="Close menu"><X size={22} /></button>
             </div>

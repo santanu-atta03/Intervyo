@@ -4,13 +4,13 @@ import {
   MessageCircle,
   X,
   Send,
-  Loader2,
   Trash2,
   Plus,
   Menu,
   Settings,
   Minimize2,
 } from "lucide-react";
+import { LoadingMark } from "../Loader/Loader";
 import {
   createConversation,
   getUserConversations,
@@ -366,7 +366,7 @@ const AIChatbot = ({ defaultContext = "general" }) => {
                 <div className="message-avatar">🤖</div>
                 <div className="message-content">
                   <div className="message-loading">
-                    <Loader2 className="spinner" size={20} />
+                    <LoadingMark size={10} />
                     <span>Thinking...</span>
                   </div>
                 </div>
@@ -393,7 +393,7 @@ const AIChatbot = ({ defaultContext = "general" }) => {
               aria-label="Send message"
             >
               {isLoading ? (
-                <Loader2 className="spinner" size={20} />
+                <LoadingMark size={10} />
               ) : (
                 <Send size={20} />
               )}

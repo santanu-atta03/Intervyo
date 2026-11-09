@@ -12,8 +12,6 @@ const NAV_TONES = {
     mobileMenu: "bg-[#141824] backdrop-blur-md rounded-2xl shadow-xl border border-white/15",
     mobileLink: "text-zinc-300 hover:text-white",
     menuButton: "text-white hover:bg-white/10",
-    logoPrimary: "text-white",
-    logoSecondary: "text-emerald-500",
     activeLink: "text-emerald-400",
     activeMobile: "text-[#FFFA64] bg-white/10",
   },
@@ -23,8 +21,6 @@ const NAV_TONES = {
     mobileMenu: "bg-skin-primary backdrop-blur-md rounded-2xl shadow-xl border border-skin-primary",
     mobileLink: "text-skin-secondary hover:text-skin-primary",
     menuButton: "text-skin-primary hover:bg-skin-tertiary",
-    logoPrimary: "text-skin-primary",
-    logoSecondary: "text-emerald-500",
     activeLink: "text-emerald-500",
     activeMobile: "text-emerald-500 bg-emerald-500/10",
   },
@@ -34,8 +30,6 @@ const NAV_TONES = {
     mobileMenu: "bg-white backdrop-blur-md rounded-2xl shadow-xl border border-gray-200",
     mobileLink: "text-gray-600 hover:text-gray-900",
     menuButton: "text-gray-900 hover:bg-gray-100",
-    logoPrimary: "text-gray-900",
-    logoSecondary: "text-emerald-500",
     activeLink: "text-emerald-500",
     activeMobile: "text-emerald-500 bg-emerald-50",
   },
@@ -104,7 +98,6 @@ export default function Navbar({
               <div>
                 <BrandLogo
                   className="text-2xl sm:text-2xl"
-                  primaryClassName="text-skin-primary"
                 />
                 <div className="text-xs text-gray-500 font-medium hidden sm:block">
                   AI-Powered Practice
@@ -123,8 +116,6 @@ export default function Navbar({
         <Link to="/" aria-label="Intervyo home">
           <BrandLogo
             className="text-xl md:text-2xl"
-            primaryClassName={styles.logoPrimary}
-            secondaryClassName={styles.logoSecondary}
           />
         </Link>
 

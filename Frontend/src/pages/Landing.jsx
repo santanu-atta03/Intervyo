@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
@@ -19,6 +19,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import SEO from "../components/shared/SEO";
 import Footer from "../components/shared/Footer";
+import BrandLogo from "../components/shared/BrandLogo";
 import { warmUpAuthService } from "../services/operations/authAPI";
 import "../pages/Landing.css";
 gsap.registerPlugin(ScrollTrigger);
@@ -194,6 +195,127 @@ const INTEGRATIONS_LIST = [
   "Java", "C++", "Rust", "Claude", "ChatGPT", "Cursor", "Notion", "Linear", "Slack",
   "Stripe", "Supabase", "Datadog", "AWS", "Google Cloud", "Azure", "GraphQL"
 ];
+
+const NUMBER_ROLL_BASE = 40;
+const NUMBER_ROLL_DURATION = 700;
+const NUMBER_ROLL_STAGGER = 80;
+
+function RollingDigit({
+  digit,
+  previousDigit,
+  direction,
+  shouldAnimate,
+  isDigitPresent,
+  positionFromRight,
+}) {
+  const [position, setPosition] = useState(
+    NUMBER_ROLL_BASE + (shouldAnimate ? previousDigit : digit),
+  );
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [isVisible, setIsVisible] = useState(isDigitPresent);
+  const animationFrameRef = useRef(null);
+  const animationTimeoutRef = useRef(null);
+
+  useLayoutEffect(() => {
+    if (!shouldAnimate) return undefined;
+
+    const digitDelta =
+      direction > 0
+        ? (digit - previousDigit + 10) % 10
+        : -((previousDigit - digit + 10) % 10);
+    if (digitDelta === 0) return undefined;
+
+    setIsAnimating(true);
+    setIsVisible(true);
+    animationFrameRef.current = window.requestAnimationFrame(() => {
+      setPosition(
+        (currentPosition) => currentPosition + direction * 20 + digitDelta,
+      );
+      animationTimeoutRef.current = window.setTimeout(() => {
+        setPosition(NUMBER_ROLL_BASE + digit);
+        setIsAnimating(false);
+        setIsVisible(isDigitPresent);
+      }, NUMBER_ROLL_DURATION + positionFromRight * NUMBER_ROLL_STAGGER + 40);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(animationFrameRef.current);
+      window.clearTimeout(animationTimeoutRef.current);
+    };
+  }, [
+    digit,
+    direction,
+    isDigitPresent,
+    positionFromRight,
+    previousDigit,
+    shouldAnimate,
+  ]);
+
+  return (
+    <span
+      className={`number-roll-digit${isVisible ? "" : " is-hidden"}`}
+      aria-hidden="true"
+    >
+      <span
+        className={`number-roll-track${isAnimating ? " is-animating" : ""}`}
+        style={{
+          transform: `translateY(-${position}em)`,
+          transitionDelay: `${positionFromRight * NUMBER_ROLL_STAGGER}ms`,
+        }}
+      >
+        {Array.from({ length: 80 }, (_, index) => (
+          <span className="number-roll-glyph" key={index}>
+            {index % 10}
+          </span>
+        ))}
+      </span>
+    </span>
+  );
+}
+
+function RollingNumber({ value, prefix = "", suffix = "", minDigits = 1 }) {
+  const previousValueRef = useRef(value);
+  const previousDigits = String(Math.abs(previousValueRef.current))
+    .split("")
+    .reverse();
+  const digits = String(Math.abs(value)).split("").reverse();
+  const direction = value >= previousValueRef.current ? 1 : -1;
+  const numberChanged = value !== previousValueRef.current;
+  const digitCount = Math.max(digits.length, minDigits);
+
+  useLayoutEffect(() => {
+    previousValueRef.current = value;
+  }, [value]);
+
+  return (
+    <span className="number-roll" aria-label={`${prefix}${value}${suffix}`}>
+      {prefix}
+      <span className="number-roll-digits">
+        {Array.from({ length: digitCount }, (_, positionFromRight) => {
+          const digit = Number(digits[positionFromRight] ?? 0);
+          const previousDigit = previousDigits[positionFromRight];
+          const isNewDigit = previousDigit === undefined;
+
+          return (
+            <RollingDigit
+              key={positionFromRight}
+              digit={digit}
+              previousDigit={previousDigit ?? 0}
+              direction={direction}
+              shouldAnimate={
+                numberChanged &&
+                (isNewDigit || previousDigit !== digit)
+              }
+              isDigitPresent={positionFromRight < digits.length}
+              positionFromRight={positionFromRight}
+            />
+          );
+        }).reverse()}
+      </span>
+      {suffix}
+    </span>
+  );
+}
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -548,11 +670,8 @@ export default function LandingPage() {
           <div className="flex min-w-0 items-center gap-3 rounded-full bg-white px-3 py-2.5 shadow-sm sm:gap-7 sm:px-5">
 
             {/* Intervyo Brand */}
-            <Link to="/" className="flex items-center gap-2  shrink-0">
-              <span className="font-heading font-extrabold text-[24px] leading-none tracking-normal text-[#171717] sm:text-[35px]">
-                Intervyo
-              </span>
-
+            <Link to="/" className="flex shrink-0 items-center">
+              <BrandLogo className="!rounded-none !bg-transparent !px-0 !py-0 !shadow-none text-[24px] sm:text-[35px]" />
             </Link>
 
             {/* Navigation Links */}
@@ -631,7 +750,7 @@ export default function LandingPage() {
             {/* Start Free */}
             <Link
               to="/interview-setup"
-              className="char-btn flex items-center justify-center gap-1.5 rounded-full bg-[#171717] px-3 py-2.5 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:bg-[#333333] active:scale-[0.97] sm:px-7 sm:py-3 sm:text-[15px]"
+              className="char-btn flex flex-row items-center gap-1.5  rounded-full bg-[#171717] px-3 py-2.5 text-[15px] font-semibold text-white shadow-sm transition-all duration-200 hover:bg-[#333333] active:scale-[0.97] sm:px-7 sm:py-3 sm:text-[15px]"
             >
 
               <span className="inline-flex">
@@ -646,7 +765,7 @@ export default function LandingPage() {
                 ))}
               </span>
 
-              <ArrowRight className="w-3.5 h-3.5" />
+              <ArrowRight className="w-4 h-4" />
 
             </Link>
 
@@ -722,7 +841,7 @@ export default function LandingPage() {
           <div className="absolute inset-0 bg-[#0A0D12]/70 backdrop-blur-[2px]" />
 
           {/* Floating Announcement Badge (Bottom-Left) */}
-          <Link
+          {/* <Link
             to="/interview-setup"
             className="group absolute left-6 sm:left-12 bottom-6 z-20 flex w-[min(380px,calc(100%-48px))] items-center gap-3.5 rounded-[12px] bg-[#141824]/95 border border-white/15 p-3 text-white shadow-2xl backdrop-blur-md hover:border-white/30 transition-all text-left"
           >
@@ -744,7 +863,7 @@ export default function LandingPage() {
               </span>
             </div>
             <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:text-white group-hover:translate-x-1 transition-all shrink-0 ml-auto" />
-          </Link>
+          </Link> */}
 
           {/* Hero Content Center */}
           <div className="relative z-10 max-w-[1100px] px-4 flex flex-col items-center">
@@ -769,14 +888,14 @@ export default function LandingPage() {
               >
                 Get Demo
               </Link>
-              <button
+              {/* <button
                 type="button"
                 onClick={() => setVideoModalOpen(true)}
                 aria-label="Watch Product Tour"
                 className="size-[52px] rounded-full bg-white/15 hover:bg-white/25 border border-white/30 text-white flex items-center justify-center transition-all group"
               >
                 <Play className="w-4 h-4 fill-white ml-0.5 group-hover:scale-110 transition-transform" />
-              </button>
+              </button> */}
             </div>
           </div>
         </div>
@@ -789,10 +908,10 @@ export default function LandingPage() {
             Trusted by high-horsepower engineers landing offers at
           </p>
           <div className="relative w-full overflow-hidden" style={{ maskImage: "linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)" }}>
-            <div className="animate-marquee flex items-center gap-16 text-zinc-300 hover:text-white transition-all">
+            <div className="animate-marquee flex items-center gap-16 text-zinc-300 font-[Geist] hover:text-white transition-all">
               {[...ASSETS.logos, ...ASSETS.logos, ...ASSETS.logos].map((logo, idx) => (
                 <div key={idx} className="flex items-center gap-2.5 shrink-0">
-                  <span className="font-heading font-bold text-2xl tracking-wider text-zinc-300 hover:text-white transition-colors cursor-default">
+                  <span className=" font-bold text-xl  text-zinc-300 hover:text-white transition-colors cursor-default">
                     {logo.name}
                   </span>
                 </div>
@@ -953,13 +1072,13 @@ export default function LandingPage() {
       </section>
 
       {/* ── 5. REDESIGNED INTERVYO SECTIONS (FOLLOWING IMAGE 1 LAYOUT DNA IN INTERVYO DARK THEME) ── */}
-      <section className=" px-4 sm:px-6 max-w-[10/12] mx-auto">
+      <section className=" px-4 sm:px-6 max-w-[10/12] mx-auto py-4">
         {/* ── SECTION 1: HERO / MAIN HEADING (PRIMARY SECTION BACKGROUND #11121A) ── */}
         <div className="relative rounded-[10px] bg-gradient-to-b from-[#FFB8FC] to-[#E270DB]  p-8 sm:p-14 lg:p-10 pb-10 sm:pb-16 text-white shadow-2xl overflow-visible mb-6 sm:mb-8">
           {/* Subtle Electric Violet Ambient Radial Lighting */}
           <div className="absolute top-0 right-1/4 w-[500px] h-[300px] bg-purple-600/10 blur-3xl pointer-events-none rounded-t-[36px]" />
 
-          <div className="flex flex-col lg:flex-row items-start justify-between gap-8 mb-14 relative z-10">
+          <div className="flex flex-col lg:flex-row items-start justify-between md:gap-8 md:mb-14 relative z-10">
             <div>
               <h2 className="font-heading font-bold uppercase leading-[0.88] text-6xl sm:text-8xl lg:text-[100px] text-black">
                 <span>YOU SLEPT 8 HOURS.</span>
@@ -985,7 +1104,7 @@ export default function LandingPage() {
 
           {/* ── SECTION 2: THREE FLOATING STATISTIC CARDS (OVERLAPPING SECTION BOUNDARIES) ── */}
           <div className="relative z-30 translate-y-10 sm:translate-y-26 -mb-15 sm:-mb-36 ">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-x-3 max-w-[1150px] mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-y-3 gap-x-3 max-w-[1150px] mx-auto">
               {/* Card 1: Interview Performance */}
               <div className="relative p-5 bg-white rounded-[12px] border border-black/[0.06] shadow-[0_12px_35px_rgba(0,0,0,0.12)] flex flex-col justify-around h-[400px]  min-h-[200px] overflow-hidden transition-all">
 
@@ -1058,7 +1177,7 @@ export default function LandingPage() {
 
                   {/* Main Interview Count */}
                   <div className="font-heading text-6xl sm:text-7xl font-bold text-[#212121] mt-4 tracking-tight leading-none transition-all duration-300">
-                    {liveMetrics.interviews}
+                    <RollingNumber value={liveMetrics.interviews} minDigits={3} />
                   </div>
 
                   <div className="text-xs sm:text-sm text-[#A1A1AA] font-medium mt-1">
@@ -1085,7 +1204,7 @@ export default function LandingPage() {
                       </span>
 
                       <span className="font-heading font-bold text-base sm:text-2xl text-[#222222] mt-0.5">
-                        {liveMetrics.avgScore}%
+                        <RollingNumber value={liveMetrics.avgScore} suffix="%" minDigits={2} />
                       </span>
                     </div>
 
@@ -1095,7 +1214,7 @@ export default function LandingPage() {
                       </span>
 
                       <span className="font-heading font-bold text-2xl text-[#222222] mt-0.5">
-                        {liveMetrics.questions}
+                        <RollingNumber value={liveMetrics.questions} minDigits={4} />
                       </span>
                     </div>
 
@@ -1105,7 +1224,7 @@ export default function LandingPage() {
                       </span>
 
                       <span className="font-heading font-bold text-base sm:text-2xl text-violet-400 mt-0.5">
-                        +{liveMetrics.trend}%
+                        <RollingNumber value={liveMetrics.trend} prefix="+" suffix="%" minDigits={2} />
                       </span>
                     </div>
 
@@ -1178,7 +1297,7 @@ export default function LandingPage() {
 
                   {/* Big Numerical Metric */}
                   <div className="font-heading text-6xl sm:text-7xl font-bold text-[#212121] mt-4 tracking-tight leading-none transition-all duration-300">
-                    {liveMetrics.analysisScore}%
+                    <RollingNumber value={liveMetrics.analysisScore} suffix="%" minDigits={3} />
                   </div>
 
                   <div className="text-xs sm:text-sm text-[#A1A1AA] font-medium mt-1">
@@ -1199,7 +1318,7 @@ export default function LandingPage() {
                         Accuracy
                       </span>
                       <span className="font-heading font-bold text-base sm:text-2xl text-[#222222] mt-0.5">
-                        {liveMetrics.techAccuracy}%
+                        <RollingNumber value={liveMetrics.techAccuracy} suffix="%" minDigits={3} />
                       </span>
                     </div>
 
@@ -1208,7 +1327,7 @@ export default function LandingPage() {
                         Confidence
                       </span>
                       <span className="font-heading font-bold text-base sm:text-2xl text-[#222222] mt-0.5">
-                        {liveMetrics.confidence}%
+                        <RollingNumber value={liveMetrics.confidence} suffix="%" minDigits={3} />
                       </span>
                     </div>
 
@@ -1217,7 +1336,7 @@ export default function LandingPage() {
                         Weaknesses
                       </span>
                       <span className="font-heading font-bold text-base sm:text-2xl text-emerald-500 mt-0.5">
-                        {liveMetrics.weaknesses} flagged
+                        <RollingNumber value={liveMetrics.weaknesses} suffix=" flagged" minDigits={2} />
                       </span>
                     </div>
                   </div>
@@ -1287,7 +1406,7 @@ export default function LandingPage() {
 
                   {/* Big Numerical Metric */}
                   <div className="font-heading text-6xl sm:text-7xl font-bold text-[#212121] mt-4 tracking-tight leading-none transition-all duration-300">
-                    +${liveMetrics.offerBump}K
+                    <RollingNumber value={liveMetrics.offerBump} prefix="+$" suffix="K" minDigits={3} />
                   </div>
 
                   <div className="text-xs sm:text-sm text-[#A1A1AA] font-medium mt-1">
@@ -1308,7 +1427,7 @@ export default function LandingPage() {
                         Skills
                       </span>
                       <span className="font-heading font-bold text-base sm:text-2xl text-[#222222] mt-0.5">
-                        {liveMetrics.skills}
+                        <RollingNumber value={liveMetrics.skills} minDigits={2} />
                       </span>
                     </div>
 
@@ -1317,7 +1436,7 @@ export default function LandingPage() {
                         Streak
                       </span>
                       <span className="font-heading font-bold text-base sm:text-2xl text-[#222222] mt-0.5">
-                        {liveMetrics.streak}d
+                        <RollingNumber value={liveMetrics.streak} suffix="d" minDigits={2} />
                       </span>
                     </div>
 
@@ -1326,7 +1445,7 @@ export default function LandingPage() {
                         Readiness
                       </span>
                       <span className="font-heading font-bold text-base sm:text-2xl text-cyan-500 mt-0.5">
-                        {liveMetrics.readiness}th
+                        <RollingNumber value={liveMetrics.readiness} suffix="th" minDigits={3} />
                       </span>
                     </div>
                   </div>
@@ -1344,9 +1463,9 @@ export default function LandingPage() {
         </div>
 
         {/* ── SECTION 3: ACTIVITY / AI INTELLIGENCE FEED (SECONDARY SECTION BACKGROUND #171824) ── */}
-        <div className="relative rounded-[28px] sm:rounded-[12px] bg-[#FFFA64] border border-white/[0.12] p-8 sm:p-14 lg:p-20 pt-40 sm:pt-48 overflow-hidden text-white shadow-2xl">
+        <div className="relative rounded-[28px] sm:rounded-[12px] bg-[#FFFA64] border border-white/[0.12] p-8 sm:p-14 lg:p-20 pt-30 sm:pt-30 overflow-hidden text-white shadow-2xl">
           {/* Subtle Ambient Radial Lighting */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-purple-600/10 blur-3xl pointer-events-none" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] md:h-[350px] bg-purple-600/10 blur-3xl pointer-events-none" />
 
           {/* Top-Left Editorial Heading */}
           <h2 className="mt-16 font-heading font-bold uppercase text-6xl sm:text-8xl md:text-[108px] text-black leading-none relative z-10">
@@ -1427,7 +1546,7 @@ export default function LandingPage() {
 
       {/* ── 6. INTERVYO BOOKS (EXACT REPLICA: LIGHT BLUE CONTAINER, ASYMMETRIC HEADER, TWO-TONE HORIZONTAL CARDS) ── */}
       <section id="playbooks" className="py-12 sm:py-16 px-4 sm:px-6 max-w-[10/12] mx-auto">
-        <div className="relative  sm:rounded-[12px] bg-[#C3DBFF] p-8 sm:p-12 lg:p-16 shadow-xl overflow-hidden text-black">
+        <div className="relative  rounded-[12px] bg-[#C3DBFF] p-8 sm:p-12 lg:p-16 shadow-xl overflow-hidden text-black">
           {/* Header Row: Left-aligned bold headline, Right-aligned paragraph + black arrow buttons */}
           <div className="flex flex-col lg:flex-row items-start lg:items-end justify-between gap-8 mb-12 relative z-10">
             <div className="max-w-2xl">
@@ -1533,7 +1652,7 @@ export default function LandingPage() {
         </div>
 
         {/* Intervyo Features Card */}
-        <div className="w-[80%] mx-auto bg-white rounded-[5px] border border-black/[0.04] px-5 py-6 md:px-[22px] md:py-[22px]">
+        <div className="md:w-[80%]  mx-auto bg-white rounded-[5px] border border-black/[0.04] px-5 py-6 md:px-[22px] md:py-[22px]">
 
           <div className="grid grid-cols-1 md:grid-cols-3">
 
@@ -1690,7 +1809,7 @@ export default function LandingPage() {
             </div>
 
             <div className="max-w-3xl lg:mr-auto lg:ml-12">
-              <h2 className="font-heading font-bold uppercase leading-[10px] text-5xl sm:text-7xl lg:text-[84px] text-black">
+              <h2 className="font-heading font-bold uppercase sm:leading-[10px] md:leading-[68px] text-5xl sm:text-2xl lg:text-[84px] text-black">
                 Bring any background. Intervyo turns it into your growth engine.
               </h2>
               <p className="mt-6 text-sm sm:text-base text-black/85 leading-relaxed font-medium max-w-2xl">
@@ -1752,15 +1871,7 @@ export default function LandingPage() {
 
           {/* Bottom Divider & Success Story */}
           <div className="mt-16 pt-8 border-t border-black/20 text-xs sm:text-sm text-black/85 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-              Marcus passed 4 consecutive Staff loops at Stripe with an $84,000 compensation increase in 3 weeks.{" "}
-              <Link
-                to="/interview-setup?role=Staff%20Software%20Engineer"
-                className="font-bold underline underline-offset-4 text-black hover:text-black/70 transition-colors cursor-pointer"
-              >
-                Read Marcus's story
-              </Link>
-            </div>
+
           </div>
         </div>
       </section>

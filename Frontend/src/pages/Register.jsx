@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 
 import { setSignupData } from "../slices/authSlice";
+import BrandLogo from "../components/shared/BrandLogo";
 import { sendOtp, warmUpAuthService } from "../services/operations/authAPI";
 
 const HERO_IMAGE = {
@@ -288,11 +289,9 @@ function Register() {
       >
         <Link
           to="/"
-          className="rounded-full bg-white px-5 py-2.5 text-[#171717] shadow-lg shadow-black/20 transition hover:bg-zinc-100"
+          className="inline-flex"
         >
-          <span className="nav-heading text-[30px] font-extrabold leading-none">
-            Intervyo
-          </span>
+          <BrandLogo className="text-[30px]" />
         </Link>
 
         <Link

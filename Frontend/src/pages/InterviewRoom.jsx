@@ -27,7 +27,6 @@ import {
   AlertCircle,
   CheckCircle,
   XCircle,
-  Loader2,
   Play,
   Pause,
   Maximize2,
@@ -35,6 +34,7 @@ import {
   Download,
   Type,
 } from "lucide-react";
+import { IntervyoLoader, LoadingMark } from "../components/Loader/Loader";
 
 const REACT_APP_BASE_URL = import.meta.env.VITE_BASE_URL || "https://intervyo.onrender.com";
 
@@ -588,7 +588,7 @@ export default function InterviewRoom() {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-16 h-16 text-purple-500 animate-spin mx-auto mb-4" />
+          <LoadingMark size={32} className="mx-auto mb-4 text-white" />
           <h2 className="text-2xl font-bold text-white mb-2">Please Login</h2>
           <p className="text-gray-400">Redirecting to login page...</p>
         </div>
@@ -898,7 +898,7 @@ export default function InterviewRoom() {
               {/* AI Thinking Indicator */}
               {isAIThinking && (
                 <div className="absolute top-6 left-1/2 transform -translate-x-1/2 bg-purple-600 backdrop-blur-xl px-6 py-3 rounded-full border border-purple-400 flex items-center gap-3 shadow-2xl">
-                  <Loader2 className="w-5 h-5 text-white animate-spin" />
+                  <LoadingMark size={10} className="text-white" />
                   <span className="text-white font-semibold">
                     AI is analyzing your response...
                   </span>
@@ -1140,30 +1140,8 @@ export default function InterviewRoom() {
 
       {/* Waiting Screen */}
       {interviewStatus === "waiting" && (
-        <div className="absolute inset-0 bg-black/80 backdrop-blur-xl flex items-center justify-center z-50">
-          <div className="text-center">
-            <Loader2 className="w-16 h-16 text-purple-500 animate-spin mx-auto mb-6" />
-            <h2 className="text-3xl font-bold text-white mb-3">
-              Preparing Interview Room
-            </h2>
-            <p className="text-white/60 mb-6">
-              Setting up AI interviewer and environment...
-            </p>
-            <div className="flex items-center gap-2 justify-center">
-              <div
-                className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"
-                style={{ animationDelay: "0s" }}
-              ></div>
-              <div
-                className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"
-                style={{ animationDelay: "0.2s" }}
-              ></div>
-              <div
-                className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"
-                style={{ animationDelay: "0.4s" }}
-              ></div>
-            </div>
-          </div>
+        <div className="fixed inset-0 z-[100]">
+          <IntervyoLoader label="Preparing interview room" />
         </div>
       )}
 

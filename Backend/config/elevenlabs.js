@@ -3,7 +3,7 @@ import fs from "fs";
 
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
 const VOICE_ID = process.env.ELEVENLABS_VOICE_ID || "21m00Tcm4TlvDq8ikWAM"; // Rachel
-const MODEL_ID = "eleven_turbo_v2"; // Using turbo for faster response
+const MODEL_ID = "eleven_multilingual_v2";
 
 // Text to Speech using ElevenLabs
 export const textToSpeech = async (text) => {
@@ -17,7 +17,7 @@ export const textToSpeech = async (text) => {
 
     const response = await axios({
       method: "post",
-      url: `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`,
+      url: `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}?output_format=mp3_44100_128`,
       headers: {
         Accept: "audio/mpeg",
         "Content-Type": "application/json",
@@ -27,9 +27,9 @@ export const textToSpeech = async (text) => {
         text: text,
         model_id: MODEL_ID,
         voice_settings: {
-          stability: 0.6,
-          similarity_boost: 0.8,
-          style: 0.2,
+          stability: 0.7,
+          similarity_boost: 0.85,
+          style: 0,
           use_speaker_boost: true,
         },
       },
@@ -54,7 +54,7 @@ export const textToSpeechStream = async (text, outputPath) => {
   try {
     const response = await axios({
       method: "post",
-      url: `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}/stream`,
+      url: `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}/stream?output_format=mp3_44100_128`,
       headers: {
         Accept: "audio/mpeg",
         "Content-Type": "application/json",
@@ -64,9 +64,9 @@ export const textToSpeechStream = async (text, outputPath) => {
         text: text,
         model_id: MODEL_ID,
         voice_settings: {
-          stability: 0.6,
-          similarity_boost: 0.8,
-          style: 0.2,
+          stability: 0.7,
+          similarity_boost: 0.85,
+          style: 0,
         },
       },
       responseType: "stream",

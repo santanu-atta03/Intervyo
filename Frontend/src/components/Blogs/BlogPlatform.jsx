@@ -13,9 +13,11 @@ import { BLOG_DATA } from '../../data/blogData';
 import { useContext } from "react";
 import { ThemeContext } from "../../components/shared/ThemeContext";
 import ThemeToggle from "../../components/ThemeToggle";
+import BrandLogo from "../shared/BrandLogo";
+import { IntervyoLoader } from "../Loader/Loader";
 const API_URL = 'https://intervyo.onrender.com/api';
 // ============================================
-// SEED CONTENT & SKELETON (Add at top)
+// SEED CONTENT
 // ============================================
 const SEED_ARTICLES = BLOG_DATA;
 
@@ -116,19 +118,6 @@ const BLOG_CSS = `
   display: flex;
   align-items: center;
   gap: 11px;
-}
-
-.blog-brand-mark {
-  width: 38px;
-  height: 38px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: var(--blog-ink);
-  color: var(--blog-on-ink);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: .04em;
 }
 
 .blog-brand-name {
@@ -783,38 +772,6 @@ const BLOG_CSS = `
   text-align: center;
 }
 
-.blog-spinner {
-  width: 42px;
-  height: 42px;
-  border: 2px solid var(--blog-hairline);
-  border-top-color: var(--blog-ink);
-  border-radius: 50%;
-  animation: blog-spin 1s linear infinite;
-}
-
-.blog-skeleton {
-  height: 260px;
-  background: var(--blog-cloud);
-  animation: blog-pulse 1.5s ease-in-out infinite;
-}
-
-@keyframes blog-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes blog-pulse {
-  0%,
-  100% {
-    opacity: .55;
-  }
-
-  50% {
-    opacity: 1;
-  }
-}
-
 @media (max-width: 1000px) {
   .blog-container {
     padding-left: 32px;
@@ -889,20 +846,6 @@ const ReadingProgressBar = () => {
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
   return <motion.div className="fixed top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-orange-500 via-purple-500 to-cyan-500 z-[100] origin-left" style={{ scaleX }} />;
 };
-const BlogSkeleton = () => (
-  <div className="bg-[#1a1f2e] rounded-2xl border border-gray-800 p-6 animate-pulse">
-    <div className="h-48 bg-gray-700/20 rounded-xl mb-4" />
-    <div className="flex gap-3 mb-4">
-      <div className="w-10 h-10 bg-gray-700/40 rounded-full" />
-      <div className="flex-1 space-y-2">
-        <div className="h-3 bg-gray-700/40 rounded w-1/2" />
-        <div className="h-2 bg-gray-700/40 rounded w-1/4" />
-      </div>
-    </div>
-    <div className="h-6 bg-gray-700/40 rounded w-3/4 mb-3" />
-    <div className="h-10 bg-gray-700/40 rounded-xl w-full" />
-  </div>
-);
 // ============================================
 // MAIN BLOG PAGE
 // ============================================
@@ -971,7 +914,7 @@ const blogTheme = theme === "dark" ? "dark" : "light";
       console.error('API Error:', error);
       setBlogs(SEED_ARTICLES); // Fallback if API is blocked (CORS)
     } finally {
-      // Add a slight delay for a smooth "Wow" transition from skeleton to content
+      // Avoid flashing the loading screen for very fast responses.
       setTimeout(() => setLoading(false), 800);
     }
   };
@@ -1064,6 +1007,10 @@ const blogTheme = theme === "dark" ? "dark" : "light";
     }
   };
 
+  if (loading) {
+    return <IntervyoLoader label="Loading articles" />;
+  }
+
   return (
   <div className="blog-root" data-blog-theme={blogTheme}>
     <style>{BLOG_CSS}</style>
@@ -1093,7 +1040,6 @@ const blogTheme = theme === "dark" ? "dark" : "light";
         setSelectedTag={setSelectedTag}
         sortBy={sortBy}
         setSortBy={setSortBy}
-        loading={loading}
         currentPage={currentPageNum}
         totalPages={totalPages}
         setCurrentPage={setCurrentPageNum}
@@ -1178,10 +1124,10 @@ function BlogHeader({ onCreateBlog, onBack }) {
             textAlign: "left",
           }}
         >
-          <span className="blog-brand-mark">IH</span>
+          <BrandLogo className="text-lg" />
 
           <span>
-            <span className="blog-brand-name">Intervyo Knowledge Hub</span>
+            <span className="blog-brand-name">Knowledge Hub</span>
             <span className="blog-brand-subtitle">
               Learn, share, and grow together
             </span>
@@ -1218,7 +1164,6 @@ function BlogList({
   setSelectedTag,
   sortBy,
   setSortBy,
-  loading,
   currentPage,
   totalPages,
   setCurrentPage,
@@ -1393,13 +1338,7 @@ function BlogList({
           </aside>
 
           <section>
-            {loading ? (
-              <div className="blog-grid">
-                {Array.from({ length: 6 }).map((_, index) => (
-                  <div className="blog-skeleton" key={index} />
-                ))}
-              </div>
-            ) : blogs.length === 0 ? (
+            {blogs.length === 0 ? (
               <div className="blog-empty">
                 <BookOpen size={28} />
                 <strong>No articles found</strong>

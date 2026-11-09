@@ -504,7 +504,6 @@ export default function DashboardApple() {
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <BrandLogo
               className="text-sm"
-              primaryClassName="text-white"
             />
           </div>
 

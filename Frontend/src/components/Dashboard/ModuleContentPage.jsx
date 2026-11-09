@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { notify } from "../../utils/sileoNotifications";
+import { IntervyoLoader } from "../Loader/Loader";
 
 const API_BASE_URL = "https://intervyo.onrender.com/api";
 
@@ -736,14 +737,7 @@ function ModuleContentPage({ moduleId, onBack, onNextModule, onPrevModule }) {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-400">🤖 Loading module content...</p>
-        </div>
-      </div>
-    );
+    return <IntervyoLoader label="Loading module content" />;
   }
 
   if (error || !module) {

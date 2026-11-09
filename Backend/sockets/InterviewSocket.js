@@ -1097,7 +1097,7 @@ const questionTimers = new Map(); // sessionId -> timer
 const performanceCache = new Map(); // sessionId -> performance stats
 const socketToSession = new Map(); // socket.id -> sessionId
 const pausedSessions = new Set();
-const SPEECH_TIMEOUT_MS = 2500;
+const SPEECH_TIMEOUT_MS = 8000;
 const QUESTION_GENERATION_TIMEOUT_MS = 10000;
 
 function withTimeout(promise, timeoutMs, message) {

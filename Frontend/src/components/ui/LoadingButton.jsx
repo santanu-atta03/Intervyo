@@ -1,3 +1,5 @@
+import { LoadingMark } from "../Loader/Loader";
+
 export default function LoadingButton({ loading, children, ...props }) {
   return (
     <button
@@ -8,7 +10,14 @@ export default function LoadingButton({ loading, children, ...props }) {
         cursor: loading ? "not-allowed" : "pointer",
       }}
     >
-      {loading ? "Please wait..." : children}
+      {loading ? (
+        <span className="inline-flex items-center gap-2">
+          <LoadingMark size={10} />
+          Please wait...
+        </span>
+      ) : (
+        children
+      )}
     </button>
   );
 }

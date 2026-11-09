@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { IntervyoLoader } from "../components/Loader/Loader";
 import { getCompanyRecommendations } from "../services/operations/recommendationAPI";
 import { getUserCalendars } from "../services/operations/calendarAPI";
 import { getTrendingQuestions } from "../services/operations/questionAPI";
@@ -66,11 +67,7 @@ export default function AdvancedFeaturesDashboard() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading advanced features...</div>
-      </div>
-    );
+    return <IntervyoLoader label="Loading advanced features" />;
   }
 
   return (

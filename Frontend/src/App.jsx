@@ -8,6 +8,7 @@ import ScrollToTopOnRouteChange from "./components/shared/ScrollToTopOnRouteChan
 import Navbar from "./components/Navbar";
 import VoiceflowChatbot from "./components/Chatbot/VoiceflowChatbot";
 import CookieConsent from "./components/shared/CookieConsent";
+import { IntervyoLoader } from "./components/Loader/Loader";
 
 const Landing = lazy(() => import("./pages/Landing"));
 const Login = lazy(() => import("./pages/Login"));
@@ -40,11 +41,7 @@ const Results = lazy(() => import("./pages/Results"));
 const QuizPage = lazy(() => import("./pages/QuizPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-const routeFallback = (
-  <div className="flex min-h-screen items-center justify-center bg-[#09090b] text-sm text-zinc-300">
-    Loading...
-  </div>
-);
+const routeFallback = <IntervyoLoader label="Loading page" />;
 
 function App() {
   const location = useLocation();

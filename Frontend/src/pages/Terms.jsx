@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ArrowLeft, Scale } from "lucide-react";
 import { Link } from "react-router-dom";
+import BrandLogo from "../components/shared/BrandLogo";
 
 const sections = [
   {
@@ -623,11 +624,9 @@ export default function TermsAndConditions() {
       >
         <Link
           to="/"
-          className="rounded-full bg-white px-5 py-2.5 text-[#171717] shadow-lg shadow-black/20 transition hover:bg-zinc-100"
+          className="inline-flex"
         >
-          <span className="terms-nav-heading font-[Fk Screamer] font-heading text-[30px] font-extrabold leading-none">
-            Intervyo
-          </span>
+          <BrandLogo className="text-[30px]" />
         </Link>
 
         <Link

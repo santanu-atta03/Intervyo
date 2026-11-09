@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Linkedin, Github } from "lucide-react";
+import BrandLogo from "./BrandLogo";
 
 // Clean minimal X (Twitter) icon
 const XIcon = ({ className = "size-4" }) => (
@@ -31,8 +32,8 @@ export default function Footer() {
     <footer className="relative bg-[#F8F9FA] dark:bg-[#08090D] py-16 sm:py-24 px-4 sm:px-6 lg:px-8 overflow-hidden transition-colors duration-300">
       {/* Giant Watermark in background */}
       <div className="absolute -bottom-8 sm:-bottom-12 lg:-bottom-16 left-1/2 -translate-x-1/2 w-full text-center pointer-events-none select-none overflow-hidden z-0">
-        <span className="font-heading font-extrabold text-[120px] sm:text-[190px] md:text-[240px] lg:text-[290px] tracking-tight leading-none text-neutral-900/[0.04] dark:text-white/[0.03] whitespace-nowrap block uppercase">
-          INTERVYO
+        <span className="brand-wordmark-font font-extrabold text-[120px] sm:text-[190px] md:text-[240px] lg:text-[290px] tracking-tight leading-none text-neutral-900/[0.04] dark:text-white/[0.03] whitespace-nowrap block">
+          Intervyo
         </span>
       </div>
 
@@ -46,17 +47,8 @@ export default function Footer() {
             {/* Left Column: Logo, Description & Social Icons */}
             <div className="lg:col-span-5 flex flex-col justify-between">
               <div>
-                <Link to="/" className="inline-flex items-center gap-3 group">
-                  <div className="size-9 rounded-xl bg-black dark:bg-white flex items-center justify-center p-1.5 shadow-sm group-hover:scale-105 transition-transform">
-                    <img
-                      src="/intervyo_logo.png"
-                      alt="Intervyo Logo"
-                      className="w-full h-full object-contain rounded-lg"
-                    />
-                  </div>
-                  <span className="font-heading font-bold text-2xl tracking-tight text-neutral-900 dark:text-white">
-                    Intervyo
-                  </span>
+                <Link to="/" className="inline-flex items-center">
+                  <BrandLogo className="text-2xl" />
                 </Link>
 
                 <p className="mt-5 text-sm text-neutral-600 dark:text-neutral-400 max-w-sm leading-relaxed font-sans">

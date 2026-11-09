@@ -858,8 +858,7 @@ function Dashboard() {
             </button>
             <Link to="/" aria-label="Intervyo home" className="flex items-center">
               <BrandLogo
-                className="hidden sm:inline text-2xl"
-                primaryClassName="text-inherit"
+                className="text-base sm:text-2xl"
               />
             </Link>
           </div>
@@ -978,7 +977,6 @@ function Dashboard() {
             <div className="flex items-center justify-between">
               <BrandLogo
                 className="text-base"
-                primaryClassName="text-inherit"
               />
               <button className="nk-icon-btn" onClick={() => setIsMobileMenuOpen(false)} aria-label="Close menu">
                 <X size={22} />

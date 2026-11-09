@@ -10,7 +10,7 @@ import {
   XCircle,
 } from "lucide-react";
 
-import "../../styles/resultsComponents.css";
+import { LoadingMark } from "../Loader/Loader";
 
 const SCORE_FILTERS = [
   { id: "all", label: "All" },
@@ -138,7 +138,7 @@ const QuestionAnalysis = ({
   }, [normalizedQuestions]);
 
   if (isLoading) {
-    return <QuestionAnalysisSkeleton />;
+    return <QuestionAnalysisLoader />;
   }
 
   if (!normalizedQuestions.length) {
@@ -448,28 +448,15 @@ function QuestionStat({ label, value, icon: Icon }) {
   );
 }
 
-function QuestionAnalysisSkeleton() {
+function QuestionAnalysisLoader() {
   return (
-    <section className="results-component question-analysis">
-      <div className="question-skeleton-header">
-        <span />
-        <div>
-          <span />
-          <span />
-        </div>
-      </div>
-
-      <div className="question-stats-grid">
-        {Array.from({ length: 6 }).map((_, index) => (
-          <div className="question-skeleton-stat" key={index} />
-        ))}
-      </div>
-
-      <div className="question-skeleton-list">
-        {Array.from({ length: 4 }).map((_, index) => (
-          <div className="question-skeleton-row" key={index} />
-        ))}
-      </div>
+    <section
+      className="results-component question-analysis question-analysis-loading"
+      role="status"
+      aria-label="Loading question analysis"
+      style={{ display: "grid", minHeight: 260, placeItems: "center" }}
+    >
+      <LoadingMark size={60} />
     </section>
   );
 }

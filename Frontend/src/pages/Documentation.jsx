@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import SEO from "../components/shared/SEO";
+import BrandLogo from "../components/shared/BrandLogo";
 import "./Documentation.css";
 
 const GUIDE_IMAGES = {
@@ -286,11 +287,9 @@ export default function Documentation() {
       <nav className="documentation-nav">
         <Link
           to="/"
-          className="rounded-full px-5 py-2.5 text-[#171717] shadow-lg shadow-black/20 transition "
+          className="inline-flex"
         >
-          <span className="nav-heading font-[Fk Screamer] font-heading text-[30px] font-extrabold leading-none">
-            Intervyo
-          </span>
+          <BrandLogo className="text-[30px]" />
         </Link>
 
         <div className="documentation-nav__actions">

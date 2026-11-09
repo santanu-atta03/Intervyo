@@ -22,6 +22,8 @@ import {
 } from "lucide-react";
 
 import { completeInterview } from "../services/operations/aiInterviewApi";
+import BrandLogo from "../components/shared/BrandLogo";
+import { IntervyoLoader } from "../components/Loader/Loader";
 import { ThemeContext } from "../components/shared/ThemeContext";
 import ThemeToggle from "../components/ThemeToggle";
 
@@ -123,18 +125,6 @@ const RESULTS_CSS = `
   display: flex;
   align-items: center;
   gap: 12px;
-}
-
-.results-brand-mark {
-  width: 38px;
-  height: 38px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: var(--rs-ink);
-  color: var(--rs-on-ink);
-  font-size: 12px;
-  font-weight: 500;
 }
 
 .results-header-title {
@@ -404,7 +394,6 @@ const RESULTS_CSS = `
   margin-top: 32px;
 }
 
-.results-loading,
 .results-error {
   min-height: 100vh;
   display: grid;
@@ -445,16 +434,6 @@ const RESULTS_CSS = `
   line-height: 1.55;
 }
 
-.results-spinner {
-  width: 54px;
-  height: 54px;
-  margin: 0 auto 20px;
-  border: 3px solid var(--rs-hairline-soft);
-  border-top-color: var(--rs-ink);
-  border-radius: 50%;
-  animation: results-spin 1s linear infinite;
-}
-
 .results-confetti {
   position: fixed;
   inset: 0;
@@ -489,12 +468,6 @@ const RESULTS_CSS = `
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@keyframes results-spin {
-  to {
-    transform: rotate(360deg);
   }
 }
 
@@ -979,22 +952,7 @@ const Results = () => {
   );
 
   if (loading) {
-    return (
-      <div className="results-root" data-rs-theme={rsTheme}>
-        <style>{RESULTS_CSS}</style>
-
-        <div className="results-loading">
-          <div className="results-state-card">
-            <div className="results-spinner" />
-            <h1>Analyzing your performance</h1>
-            <p>
-              We are preparing your interview report and personalized
-              feedback.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
+    return <IntervyoLoader label="Analyzing interview results" />;
   }
 
   if (error) {
@@ -1185,7 +1143,7 @@ const Results = () => {
               </span>
             </button>
 
-            <div className="results-brand-mark">IR</div>
+            <BrandLogo className="text-sm" />
 
             <div className="hidden sm:block">
               <div className="results-header-title">

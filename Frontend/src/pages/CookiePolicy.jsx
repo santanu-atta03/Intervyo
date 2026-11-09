@@ -3,6 +3,7 @@ import { ArrowLeft, Cookie, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion as Motion } from "framer-motion";
 import cookieIllustration from "../assets/cookie_img.png";
+import BrandLogo from "../components/shared/BrandLogo";
 
 const sections = [
   {
@@ -640,11 +641,9 @@ export default function CookiePolicy() {
       >
         <Link
           to="/"
-          className="rounded-full bg-white px-5 py-2.5 text-[#171717] shadow-lg shadow-black/20 transition hover:bg-zinc-100"
+          className="inline-flex"
         >
-          <span className="cookie-policy-nav-heading font-[Fk Screamer] font-heading text-[30px] font-extrabold leading-none">
-            Intervyo
-          </span>
+          <BrandLogo className="text-[30px]" />
         </Link>
         <Link
           to="/"

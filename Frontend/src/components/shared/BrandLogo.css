@@ -1,0 +1,15 @@
+@font-face {
+  font-family: "FK Screamer";
+  src: url("https://cdn.ploy.ai/d21bf4ad-2458-43ee-9561-54c28ab0e85f/user/4b73ec13-fkscreamer.woff2")
+    format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+.brand-wordmark-font,
+.brand-logo {
+  font-family: "FK Screamer", Impact, sans-serif;
+  font-weight: 800;
+  letter-spacing: 0;
+}
