@@ -112,12 +112,12 @@
   overflow-y: auto;
 }
 
-.chatbot-sidebar-header {
-  padding: 12px;
-  border-bottom: 1px solid #2a2a2a;
-}
+  /* existing styles (truncated in snippet) */
 
-.chatbot-new-btn {
+/* Ensure textarea text is visible on white background */
+textarea {
+  color: #000000;
+}
   width: 100%;
   padding: 10px;
   background: #10b981;
