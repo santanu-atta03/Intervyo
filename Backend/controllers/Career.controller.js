@@ -105,3 +105,7 @@ export const getFeaturedContent = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+    req.user.loading = false;
+    req.user.loading = false;
+    req.user.loading = false;
+    req.user.loading = false;
