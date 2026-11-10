@@ -14,7 +14,6 @@ import {
   Activity,
   AlertCircle,
   ArrowLeft,
-  BarChart3,
   Check,
   CheckCircle,
   ChevronDown,
@@ -25,16 +24,13 @@ import {
   MessageSquare,
   Mic,
   Minimize2,
-  Pause,
   Phone,
   Play,
   Send,
   Settings2,
   Target,
-  TrendingUp,
   UserRound,
   X,
-  Zap,
 } from "lucide-react";
 import { IntervyoLoader } from "../Loader/Loader";
 
@@ -602,7 +598,7 @@ const ROOM_CSS = `
   color: #ffffff;
 }
 
-.ir-action-pause {
+.ir-action-finish {
   background: #b98916;
   color: #ffffff;
 }
@@ -745,31 +741,6 @@ const ROOM_CSS = `
   height: 100%;
   background: var(--ir-ink);
   transition: width .45s var(--ir-ease);
-}
-
-.ir-stats-panel {
-  position: absolute;
-  top: 20px;
-  left: 24px;
-  z-index: 30;
-  width: 280px;
-  padding: 20px;
-  border: 1px solid rgba(255, 255, 255, .22);
-  background: rgba(17, 17, 17, .9);
-  color: #ffffff;
-  backdrop-filter: blur(18px);
-}
-
-.ir-stats-panel .ir-metric {
-  border-color: rgba(255, 255, 255, .14);
-}
-
-.ir-stats-panel .ir-metric-label {
-  color: rgba(255, 255, 255, .58);
-}
-
-.ir-stats-panel .ir-metric-value {
-  color: #ffffff;
 }
 
 .ir-overlay {
@@ -1474,13 +1445,7 @@ const InterviewRoom = ({ initialStream = null }) => {
   );
 
   const [performanceMetrics, setPerformanceMetrics] = useState({
-    averageScore: 0,
-    technicalScore: 0,
-    communicationScore: 0,
-    problemSolvingScore: 0,
-    currentStreak: 0,
     questionsAnswered: 0,
-    perfectAnswers: 0,
     totalQuestions: 0,
   });
 
@@ -1488,11 +1453,9 @@ const InterviewRoom = ({ initialStream = null }) => {
   // Keep a ref in sync with state so the timer interval closure always reads the
   // latest value without needing timeRemaining in its own dependency array.
   const timeRemainingRef = useRef(0);
-  const [isPaused, setIsPaused] = useState(false);
   const [isEnding, setIsEnding] = useState(false);
   const [showEndConfirmation, setShowEndConfirmation] = useState(false);
   const endingRef = useRef(false);
-  const isPausedRef = useRef(false);
   const currentQuestionRef = useRef(null);
   const timerRef = useRef(null);
 
@@ -1530,7 +1493,6 @@ const InterviewRoom = ({ initialStream = null }) => {
   const [isCodeFullscreen, setIsCodeFullscreen] = useState(false);
 
   const [notifications, setNotifications] = useState([]);
-  const [showStats, setShowStats] = useState(false);
 
   const currentAudioRef = useRef(null);
   const currentAudioUrlRef = useRef(null);
@@ -1570,7 +1532,6 @@ const InterviewRoom = ({ initialStream = null }) => {
         setQuestionCountdown(null);
 
         if (
-          !isPausedRef.current &&
           currentQuestionRef.current &&
           !currentQuestionRef.current.requiresCode &&
           !userTranscriptRef.current.trim()
@@ -1667,66 +1628,6 @@ const InterviewRoom = ({ initialStream = null }) => {
     disconnectSocket();
   }, [disconnectSocket, stopAllMedia]);
 
-  const updateMetricsFromEvaluations = useCallback(
-    (evaluations) => {
-      if (!evaluations?.length) return;
-
-      const totalScore = evaluations.reduce(
-        (sum, evaluation) => sum + (evaluation.score || 0),
-        0,
-      );
-
-      const averageScore = totalScore / evaluations.length;
-
-      const technicalEvaluations = evaluations.filter(
-        (evaluation) => evaluation.category === "technical",
-      );
-
-      const behavioralEvaluations = evaluations.filter(
-        (evaluation) => evaluation.category === "behavioral",
-      );
-
-      const codingEvaluations = evaluations.filter(
-        (evaluation) => evaluation.category === "coding",
-      );
-
-      const average = (items) => {
-        if (!items.length) return 0;
-
-        const total = items.reduce(
-          (sum, item) => sum + (item.score || 0),
-          0,
-        );
-
-        return Math.round((total / items.length) * 10) / 10;
-      };
-
-      let currentStreak = 0;
-
-      for (let index = evaluations.length - 1; index >= 0; index -= 1) {
-        if ((evaluations[index].score || 0) >= 7) {
-          currentStreak += 1;
-        } else {
-          break;
-        }
-      }
-
-      setPerformanceMetrics((previous) => ({
-        averageScore: Math.round(averageScore * 10) / 10,
-        technicalScore: average(technicalEvaluations),
-        communicationScore: average(behavioralEvaluations),
-        problemSolvingScore: average(codingEvaluations),
-        currentStreak,
-        questionsAnswered: evaluations.length,
-        perfectAnswers: evaluations.filter(
-          (evaluation) => evaluation.score === 10,
-        ).length,
-        totalQuestions: previous.totalQuestions,
-      }));
-    },
-    [],
-  );
-
   const finishInterview = useCallback(
     async () => {
       if (endingRef.current || !session) return;
@@ -1741,7 +1642,6 @@ const InterviewRoom = ({ initialStream = null }) => {
           await completeInterview(interviewId, token);
           setSessionStatus("completed");
           window.localStorage.removeItem(`interview-room:${interviewId}:time`);
-          window.localStorage.removeItem(`interview-room:${interviewId}:paused`);
           cleanup();
           navigate(`/results/${interviewId}`);
         } catch (error) {
@@ -1824,18 +1724,11 @@ const InterviewRoom = ({ initialStream = null }) => {
         const savedTime = Number(
           window.localStorage.getItem(`interview-room:${interviewId}:time`),
         );
-        setIsPaused(
-          window.localStorage.getItem(
-            `interview-room:${interviewId}:paused`,
-          ) === "true",
-        );
         if (Number.isFinite(savedTime) && savedTime > 0) {
           remainingSeconds = Math.min(savedTime, durationSeconds);
         }
       } else {
         window.localStorage.removeItem(`interview-room:${interviewId}:time`);
-        window.localStorage.removeItem(`interview-room:${interviewId}:paused`);
-        setIsPaused(false);
       }
       setTimeRemaining(remainingSeconds);
       timeRemainingRef.current = remainingSeconds;
@@ -1886,9 +1779,10 @@ const InterviewRoom = ({ initialStream = null }) => {
           );
         }
 
-        if (sessionData.questionEvaluations?.length) {
-          updateMetricsFromEvaluations(sessionData.questionEvaluations);
-        }
+        setPerformanceMetrics((previous) => ({
+          ...previous,
+          questionsAnswered: sessionData.questionEvaluations?.length || 0,
+        }));
       } else {
         setCurrentMessage(
           "Ready to start? Begin when you are prepared.",
@@ -1916,7 +1810,6 @@ const InterviewRoom = ({ initialStream = null }) => {
     interviewId,
     navigate,
     token,
-    updateMetricsFromEvaluations,
   ]);
 
   useEffect(() => {
@@ -2009,10 +1902,6 @@ const InterviewRoom = ({ initialStream = null }) => {
   }, [addNotification, loading, stream]);
 
   useEffect(() => {
-    isPausedRef.current = isPaused;
-  }, [isPaused]);
-
-  useEffect(() => {
     currentQuestionRef.current = currentQuestion;
   }, [currentQuestion]);
 
@@ -2023,55 +1912,7 @@ const InterviewRoom = ({ initialStream = null }) => {
       `interview-room:${interviewId}:time`,
       String(timeRemaining),
     );
-    window.localStorage.setItem(
-      `interview-room:${interviewId}:paused`,
-      String(isPaused),
-    );
-  }, [interviewId, isPaused, sessionStatus, timeRemaining]);
-
-  const togglePause = useCallback(() => {
-    const nextPaused = !isPaused;
-    isPausedRef.current = nextPaused;
-    setIsPaused(nextPaused);
-    if (nextPaused) {
-      window.clearInterval(autoListenIntervalRef.current);
-      autoListenIntervalRef.current = null;
-      questionCountdownRef.current = null;
-      setQuestionCountdown(null);
-      stopListening();
-      currentAudioRef.current?.pause();
-      window.speechSynthesis?.pause();
-      socket?.emit("pause-interview", { sessionId: session?._id });
-      return;
-    }
-
-    if (currentAudioRef.current) {
-      currentAudioRef.current.play().catch((error) => {
-        console.error("Failed to resume interviewer audio:", error);
-        addNotification("Could not resume interviewer audio.", "error");
-      });
-    } else {
-      window.speechSynthesis?.resume();
-      if (
-        audioQueueRef.current.length === 0 &&
-        !audioQueueRunningRef.current &&
-        currentQuestionRef.current &&
-        !currentQuestionRef.current.requiresCode &&
-        !userTranscriptRef.current.trim()
-      ) {
-        scheduleAutoListen();
-      }
-    }
-    processAudioQueueRef.current?.();
-    socket?.emit("resume-interview", { sessionId: session?._id });
-  }, [
-    addNotification,
-    isPaused,
-    session,
-    scheduleAutoListen,
-    socket,
-    stopListening,
-  ]);
+  }, [interviewId, sessionStatus, timeRemaining]);
 
   // Keep the ref in sync on every render so the interval closure always reads
   // the current value without timeRemaining being a dep of this effect.
@@ -2088,7 +1929,6 @@ const InterviewRoom = ({ initialStream = null }) => {
 
     if (
       sessionStatus !== "active" ||
-      isPaused ||
       isSubmittingAnswer ||
       !hasQuestionStarted ||
       timeRemainingRef.current <= 0
@@ -2122,7 +1962,6 @@ const InterviewRoom = ({ initialStream = null }) => {
   }, [
     hasQuestionStarted,
     handleTimeUp,
-    isPaused,
     isSubmittingAnswer,
     sessionStatus,
   ]);
@@ -2297,12 +2136,12 @@ const InterviewRoom = ({ initialStream = null }) => {
   }, [releaseCurrentAudio]);
 
   const processAudioQueue = useCallback(() => {
-    if (audioQueueRunningRef.current || isPausedRef.current) return;
+    if (audioQueueRunningRef.current) return;
 
     audioQueueRunningRef.current = true;
     void (async () => {
       try {
-        while (audioQueueRef.current.length && !isPausedRef.current) {
+        while (audioQueueRef.current.length) {
           const data = audioQueueRef.current.shift();
           if (!data) continue;
 
@@ -2324,7 +2163,7 @@ const InterviewRoom = ({ initialStream = null }) => {
         }
       } finally {
         audioQueueRunningRef.current = false;
-        if (audioQueueRef.current.length && !isPausedRef.current) {
+        if (audioQueueRef.current.length) {
           processAudioQueueRef.current?.();
         } else if (!currentAudioRef.current) {
           setAiSpeaking(false);
@@ -2412,7 +2251,6 @@ const InterviewRoom = ({ initialStream = null }) => {
         newSocket.emit("candidate-ready", {
           sessionId: session._id,
           interviewId,
-          paused: isPausedRef.current,
         });
       }, 800);
     });
@@ -2438,7 +2276,7 @@ const InterviewRoom = ({ initialStream = null }) => {
     newSocket.on("performance-update", (data) => {
       setPerformanceMetrics((previous) => ({
         ...previous,
-        ...data,
+        questionsAnswered: data.questionsAnswered ?? previous.questionsAnswered,
       }));
     });
 
@@ -2459,7 +2297,6 @@ const InterviewRoom = ({ initialStream = null }) => {
       setIsEnding(true);
       setSessionStatus("completed");
       window.localStorage.removeItem(`interview-room:${interviewId}:time`);
-      window.localStorage.removeItem(`interview-room:${interviewId}:paused`);
       cleanup();
 
       addNotification(
@@ -2541,7 +2378,6 @@ const InterviewRoom = ({ initialStream = null }) => {
       setTimeRemaining(initialTime);
       timeRemainingRef.current = initialTime;
       window.localStorage.removeItem(`interview-room:${interviewId}:time`);
-      window.localStorage.removeItem(`interview-room:${interviewId}:paused`);
       // Ensure loading is cleared after a successful start
       setLoading(false);
 
@@ -2561,8 +2397,7 @@ const InterviewRoom = ({ initialStream = null }) => {
       !currentQuestion ||
       isListening ||
       aiSpeaking ||
-      !isAudioOn ||
-      isPausedRef.current
+      !isAudioOn
     ) {
       return;
     }
@@ -2624,7 +2459,7 @@ const InterviewRoom = ({ initialStream = null }) => {
     setIsSubmittingAnswer(true);
     setCurrentMessage("Processing your answer...");
 
-    socket.timeout(20000).emit(
+    socket.timeout(60000).emit(
       "candidate-answer",
       {
         sessionId: session._id,
@@ -2691,7 +2526,7 @@ const InterviewRoom = ({ initialStream = null }) => {
 
     answerSubmissionRef.current = true;
     setIsSubmittingAnswer(true);
-    socket.timeout(20000).emit(
+    socket.timeout(60000).emit(
       "submit-code",
       {
         sessionId: session._id,
@@ -2738,13 +2573,6 @@ const InterviewRoom = ({ initialStream = null }) => {
     () => getTimerClass(timeRemaining, interview),
     [interview, timeRemaining],
   );
-
-  const answeredPercentage =
-    performanceMetrics.totalQuestions > 0
-      ? (performanceMetrics.questionsAnswered /
-          performanceMetrics.totalQuestions) *
-        100
-      : 0;
 
   if (loading) {
     return <IntervyoLoader label="Loading interview room" />;
@@ -2842,25 +2670,6 @@ const InterviewRoom = ({ initialStream = null }) => {
                     <Clock3 size={18} />
                     {formatSeconds(timeRemaining)}
                   </div>
-
-                  <button
-                    type="button"
-                    className="ir-btn ir-btn-secondary"
-                    onClick={togglePause}
-                    aria-pressed={isPaused}
-                  >
-                    {isPaused ? (
-                      <>
-                        <Play size={15} />
-                        Resume
-                      </>
-                    ) : (
-                      <>
-                        <Pause size={15} />
-                        Pause
-                      </>
-                    )}
-                  </button>
                   {!socketConnected && (
                     <button
                       type="button"
@@ -2872,15 +2681,6 @@ const InterviewRoom = ({ initialStream = null }) => {
                   )}
                 </>
               )}
-
-              <button
-                type="button"
-                className="ir-btn ir-btn-secondary"
-                onClick={() => setShowStats((previous) => !previous)}
-              >
-                <BarChart3 size={16} />
-                Stats
-              </button>
 
               {sessionStatus === "active" && (
                 <button
@@ -2939,11 +2739,7 @@ const InterviewRoom = ({ initialStream = null }) => {
                   }`}
                 />
                 <span>
-                  {isPaused
-                    ? "Paused"
-                    : sessionStatus === "active"
-                      ? "Live session"
-                      : "Waiting"}
+                  {sessionStatus === "active" ? "Live session" : "Waiting"}
                 </span>
               </div>
 
@@ -2991,48 +2787,6 @@ const InterviewRoom = ({ initialStream = null }) => {
                 </div>
               )}
             </div>
-
-            {showStats && sessionStatus === "active" && (
-              <div className="ir-stats-panel">
-                <div className="ir-sidebar-title">
-                  <TrendingUp size={17} />
-                  Performance
-                </div>
-
-                <div style={{ marginTop: 14 }}>
-                  <MetricRow
-                    label="Average score"
-                    value={`${performanceMetrics.averageScore}/10`}
-                  />
-
-                  <MetricRow
-                    label="Current streak"
-                    value={performanceMetrics.currentStreak}
-                    valueClass="ir-pill-success"
-                  />
-
-                  <MetricRow
-                    label="Perfect answers"
-                    value={performanceMetrics.perfectAnswers}
-                  />
-
-                  <MetricRow
-                    label="Technical"
-                    value={`${performanceMetrics.technicalScore}/10`}
-                  />
-
-                  <MetricRow
-                    label="Communication"
-                    value={`${performanceMetrics.communicationScore}/10`}
-                  />
-
-                  <MetricRow
-                    label="Problem solving"
-                    value={`${performanceMetrics.problemSolvingScore}/10`}
-                  />
-                </div>
-              </div>
-            )}
 
             {isListening && userTranscript && !showCodeEditor && (
               <div className="ir-transcript">
@@ -3305,7 +3059,7 @@ const InterviewRoom = ({ initialStream = null }) => {
                       type="button"
                       className="ir-btn ir-btn-primary"
                       onClick={handleSubmitCode}
-                      disabled={!code.trim() || isSubmittingAnswer || isPaused}
+                      disabled={!code.trim() || isSubmittingAnswer}
                     >
                       <Send size={15} />
                       Submit solution
@@ -3355,11 +3109,11 @@ const InterviewRoom = ({ initialStream = null }) => {
                 {isListening && (
                   <button
                     type="button"
-                    className="ir-action ir-action-pause"
+                    className="ir-action ir-action-finish"
                     onClick={stopListening}
-                    disabled={isSubmittingAnswer || isPaused}
+                    disabled={isSubmittingAnswer}
                   >
-                    <Pause size={16} />
+                    <Check size={16} />
                     Finish answer
                   </button>
                 )}
@@ -3371,7 +3125,7 @@ const InterviewRoom = ({ initialStream = null }) => {
                       type="button"
                       className="ir-action ir-action-submit"
                       onClick={handleSubmitAnswer}
-                      disabled={isSubmittingAnswer || isPaused}
+                      disabled={isSubmittingAnswer}
                     >
                       <Send size={16} />
                       {isSubmittingAnswer ? "Saving..." : "Submit answer"}
@@ -3455,32 +3209,6 @@ const InterviewRoom = ({ initialStream = null }) => {
                     </div>
                   )}
                 </div>
-              </section>
-
-              <section className="ir-sidebar-section">
-                <div className="ir-sidebar-label">Progress</div>
-
-                <MetricRow
-                  label="Questions answered"
-                  value={`${performanceMetrics.questionsAnswered}/${performanceMetrics.totalQuestions}`}
-                  progress={answeredPercentage}
-                />
-
-                <MetricRow
-                  label="Average score"
-                  value={`${performanceMetrics.averageScore}/10`}
-                  progress={performanceMetrics.averageScore * 10}
-                />
-
-                <MetricRow
-                  label="Current streak"
-                  value={
-                    <span className="ir-inline">
-                      <Zap size={14} />
-                      {performanceMetrics.currentStreak}
-                    </span>
-                  }
-                />
               </section>
 
               <section className="ir-sidebar-section ir-confidence-section">

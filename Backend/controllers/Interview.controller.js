@@ -669,6 +669,7 @@
 import Interview from "../models/Interview.model.js";
 import InterviewSession from "../models/InterviewSession.js";
 import RealQuestion from "../models/RealQuestion.model.js";
+import questionGenerator from "../services/questionGenerator.js";
 import answerEvaluator from "../services/answerEvaluator.js";
 import emotionAnalyzer from "../services/emotionAnalyzer.js";
 import resultsGenerator from "../services/resultsGenerator.js";
@@ -700,17 +701,6 @@ function calculatePercentile(score) {
 
 function escapeRegex(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function getQuestionBankLevels(difficulty) {
-  const levels = {
-    easy: ["entry"],
-    medium: ["mid"],
-    hard: ["senior"],
-    expert: ["staff", "principal"],
-  };
-
-  return levels[difficulty] || levels.medium;
 }
 
 function shuffle(items) {
@@ -976,11 +966,15 @@ class InterviewController {
 
       // Generate questions - handle "mixed" type
       console.log("Selecting approved questions for:", interview.config);
-      const actualInterviewType = interview.config.interviewType;
+      let actualInterviewType = interview.config.interviewType;
+      if (actualInterviewType === "mixed") {
+        const types = ["behavioral", "technical", "system-design", "coding"];
+        actualInterviewType = types[Math.floor(Math.random() * types.length)];
+      }
 
       let questions;
       if (interview.customQuestionsList?.length) {
-        questions = interview.customQuestionsList.map((question, index) => ({
+        questions = shuffle(interview.customQuestionsList).map((question, index) => ({
           questionId: `custom_${interviewId}_${index}`,
           question,
           type: actualInterviewType,
@@ -992,23 +986,13 @@ class InterviewController {
           metadata: { timeLimit: 180, maxHints: 0, skippable: index > 0 },
         }));
       } else {
-        const rolePatterns = [
-          interview.config.subDomain,
-          interview.config.domain,
-        ]
+        const rolePatterns = [interview.config.subDomain, interview.config.domain]
           .filter(Boolean)
           .map((value) => new RegExp(escapeRegex(value.trim()), "i"));
-        const questionTypes =
-          actualInterviewType === "mixed"
-            ? ["behavioral", "technical", "system-design", "coding", "other"]
-            : [actualInterviewType];
         const questionFilter = {
           status: "active",
-          verified: true,
           difficulty: interview.config.difficulty,
-          level: { $in: getQuestionBankLevels(interview.config.difficulty) },
-          questionType: { $in: questionTypes },
-          sampleAnswer: { $type: "string", $ne: "" },
+          questionType: { $in: [actualInterviewType, "other"] },
           $or: [
             { role: { $in: rolePatterns } },
             { tags: { $in: [interview.config.subDomain, interview.config.domain] } },
@@ -1021,15 +1005,33 @@ class InterviewController {
             : interview.config.difficulty === "hard"
               ? 3.5
               : 3;
-        const requestedQuestionCount = Math.max(
-          1,
-          Math.floor(interview.config.duration / averageMinutesPerQuestion),
+        const requestedQuestionCount = Math.min(
+          12,
+          Math.max(
+            1,
+            Math.floor(interview.config.duration / averageMinutesPerQuestion),
+          ),
         );
-        questions = shuffle(questionBank)
-          .slice(0, requestedQuestionCount)
-          .map((question, index) =>
-            toInterviewQuestion(question, index, interview.config),
+        if (questionBank.length) {
+          questions = shuffle(questionBank)
+            .slice(0, requestedQuestionCount)
+            .map((question, index) =>
+              toInterviewQuestion(question, index, interview.config),
+            );
+        } else {
+          console.warn(
+            "No uploaded questions matched; generating questions for the selected specialization.",
           );
+          const generatedQuestions = await questionGenerator.generateQuestions({
+            ...interview.config,
+            interviewType: actualInterviewType,
+            questionCount: requestedQuestionCount,
+          });
+          questions = shuffle(generatedQuestions || []).slice(
+            0,
+            requestedQuestionCount,
+          );
+        }
       }
 
       if (!questions || questions.length === 0) {
@@ -1043,7 +1045,7 @@ class InterviewController {
         return res.status(422).json({
           success: false,
           message:
-            "No approved questions with reference answers match this specialization and difficulty. Please try another level or contact an administrator.",
+            "We could not find or generate interview questions for this specialization. Please try again.",
         });
       }
 

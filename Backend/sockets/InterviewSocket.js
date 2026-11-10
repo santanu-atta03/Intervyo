@@ -1096,7 +1096,6 @@ const activeSessions = new Map(); // sessionId -> question plan and progress
 const questionTimers = new Map(); // sessionId -> timer
 const performanceCache = new Map(); // sessionId -> performance stats
 const socketToSession = new Map(); // socket.id -> sessionId
-const pausedSessions = new Set();
 const SPEECH_TIMEOUT_MS = 8000;
 
 function withTimeout(promise, timeoutMs, message) {
@@ -1268,8 +1267,6 @@ async function sendAIMessage(target, data, io) {
 
 async function askNextQuestion(socket, session, interview, io) {
   try {
-    if (pausedSessions.has(session._id.toString())) return;
-
     const sessionData = activeSessions.get(session._id.toString());
     if (!sessionData) {
       console.error("Session data not found");
@@ -1371,7 +1368,6 @@ async function completeInterview(socket, session, interview, io) {
     // Cleanup
     activeSessions.delete(session._id.toString());
     performanceCache.delete(session._id.toString());
-    pausedSessions.delete(session._id.toString());
     clearQuestionTimers(session._id.toString());
     
     // Remove socket-to-session mapping
@@ -1465,11 +1461,9 @@ export default (io) => {
     // =====================================
     // START INTERVIEW - CANDIDATE READY
     // =====================================
-    socket.on("candidate-ready", async ({ sessionId, interviewId, paused }) => {
+    socket.on("candidate-ready", async ({ sessionId, interviewId }) => {
       try {
         console.log("🎬 Starting interview:", { sessionId, interviewId });
-        if (paused) pausedSessions.add(sessionId);
-        else pausedSessions.delete(sessionId);
 
         const interview = await Interview.findById(interviewId);
         const session =
@@ -1568,65 +1562,6 @@ export default (io) => {
       }
     });
 
-    socket.on("pause-interview", ({ sessionId }) => {
-      if (sessionId && socketToSession.get(socket.id) === sessionId) {
-        pausedSessions.add(sessionId);
-      }
-    });
-
-    socket.on("resume-interview", async ({ sessionId }) => {
-      try {
-        if (!sessionId || socketToSession.get(socket.id) !== sessionId) return;
-
-        pausedSessions.delete(sessionId);
-        const session =
-          await InterviewSession.findById(sessionId).populate("interviewId");
-        const sessionData = activeSessions.get(sessionId);
-        if (!session || !sessionData) {
-          socket.emit("error", { message: "Interview session could not be resumed." });
-          return;
-        }
-
-        const questionMessages = (session.conversation || []).filter(
-          (message) => message.type === "question",
-        );
-        const pendingQuestion =
-          questionMessages.length > (session.questionEvaluations || []).length
-            ? questionMessages[questionMessages.length - 1]
-            : null;
-
-        if (pendingQuestion) {
-          const questionCategory =
-            pendingQuestion.questionCategory ||
-            determineNextCategory(sessionData);
-          const questionIndex =
-            pendingQuestion.questionIndex ??
-            (session.questionEvaluations || []).length;
-          socket.emit("ai-message", {
-            type: "question",
-            message: pendingQuestion.content,
-            questionType: questionCategory,
-            questionIndex,
-            requiresCode: false,
-          });
-          questionTimers.set(`${sessionId}-${questionIndex}`, Date.now());
-          return;
-        }
-
-        if (
-          (session.questionEvaluations || []).length <
-          sessionData.plan.totalQuestions
-        ) {
-          await askNextQuestion(socket, session, session.interviewId, io);
-        } else {
-          await completeInterview(socket, session, session.interviewId, io);
-        }
-      } catch (error) {
-        console.error("❌ Interview resume error:", error);
-        socket.emit("error", { message: "Failed to resume interview" });
-      }
-    });
-
     // =====================================
     // ANSWER SUBMISSION
     // =====================================
@@ -1634,14 +1569,6 @@ export default (io) => {
       "candidate-answer",
       async ({ sessionId, answer, questionIndex }, acknowledge) => {
         try {
-          if (pausedSessions.has(sessionId)) {
-            acknowledge?.({
-              success: false,
-              message: "Resume the interview before submitting your answer.",
-            });
-            return;
-          }
-
           console.log("💬 Processing answer for question", questionIndex);
 
           const session =
@@ -1898,14 +1825,6 @@ export default (io) => {
       "submit-code",
       async ({ sessionId, question, code, language }, acknowledge) => {
         try {
-          if (pausedSessions.has(sessionId)) {
-            acknowledge?.({
-              success: false,
-              message: "Resume the interview before submitting your solution.",
-            });
-            return;
-          }
-
           console.log("💻 Code submission received");
 
           const session =

@@ -339,8 +339,11 @@ class QuestionGenerator {
       config.interviewType = "technical";
     }
 
-    const questionCount =
+    const configuredQuestionCount =
       aiConfig.questionCounts?.[difficulty]?.[interviewType] || 5;
+    const questionCount = Number.isInteger(config.questionCount)
+      ? Math.max(1, Math.min(12, config.questionCount))
+      : configuredQuestionCount;
 
     const systemPrompt = this._buildSystemPrompt(
       interviewType,
@@ -369,9 +372,22 @@ class QuestionGenerator {
       return this._getFallbackQuestions(
         interviewType,
         difficulty,
-        questionCount,
+        Math.min(
+          questionCount,
+          this._getFallbackQuestionCount(interviewType),
+        ),
       );
     }
+  }
+
+  _getFallbackQuestionCount(interviewType) {
+    const fallbackCounts = {
+      behavioral: 4,
+      technical: 4,
+      coding: 3,
+      "system-design": 3,
+    };
+    return fallbackCounts[interviewType] || fallbackCounts.technical;
   }
 
   _buildSystemPrompt(interviewType, domain, subDomain) {

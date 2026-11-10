@@ -5,13 +5,21 @@ import aiConfig from "../config/ai.config.js";
 class AnswerEvaluator {
   async evaluateAnswer(question, answer, context) {
     const systemPrompt = this._buildEvaluationPrompt(question.type);
+    const expectedAnswer =
+      typeof question.expectedAnswer === "string"
+        ? question.expectedAnswer.trim()
+        : "";
+    const referenceGuidance = expectedAnswer
+      ? `Reference answer / scoring guide: ${expectedAnswer}`
+      : "No sample answer was provided. Derive the expected key points from the question itself and evaluate correctness, relevance, and completeness.";
     const userPrompt = `Evaluate this interview answer thoroughly.
 
 Question: ${question.question}
-Expected Answer Outline: ${question.expectedAnswer}
+${referenceGuidance}
 Candidate's Answer: ${answer}
 Difficulty Level: ${question.difficulty}
-Evaluation Criteria: ${question.evaluationCriteria.join(", ")}
+Interview Context: ${JSON.stringify(context || {})}
+Evaluation Criteria: ${(question.evaluationCriteria || []).join(", ")}
 
 Provide a comprehensive evaluation with scores and feedback.
 
