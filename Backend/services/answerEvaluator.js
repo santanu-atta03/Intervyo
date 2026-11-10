@@ -120,7 +120,12 @@ Focus on architectural thinking and problem-solving approach.`,
     };
 
     // Calculate weighted score based on difficulty
-    const difficultyWeights = { easy: 0.8, medium: 1.0, hard: 1.2 };
+    const difficultyWeights = {
+      easy: 0.8,
+      medium: 1.0,
+      hard: 1.2,
+      expert: 1.3,
+    };
     enhanced.weightedScore = Math.min(
       100,
       Math.round(

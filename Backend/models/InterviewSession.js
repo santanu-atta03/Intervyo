@@ -128,12 +128,19 @@ const questionEvaluationSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    enum: ["technical", "behavioral", "coding", "general", "problem-solving"],
+    enum: [
+      "technical",
+      "behavioral",
+      "coding",
+      "system-design",
+      "general",
+      "problem-solving",
+    ],
     required: true,
   },
   difficulty: {
     type: String,
-    enum: ["easy", "medium", "hard"],
+    enum: ["easy", "medium", "hard", "expert"],
   },
   timestamp: {
     type: Date,

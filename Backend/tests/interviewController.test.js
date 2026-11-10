@@ -53,9 +53,9 @@ const sessionCreateMock = jest.fn();
 const sessionFindOneMock = jest.fn();
 const sessionFindByIdAndUpdateMock = jest.fn();
 const sessionDeleteOneMock = jest.fn();
+const realQuestionFindMock = jest.fn();
 const consumeCreditForInterviewMock = jest.fn();
 const releaseInterviewCreditMock = jest.fn();
-const generateQuestionsMock = jest.fn();
 
 class MockInterviewQuotaExceededError extends Error {}
 class MockInterviewStartConflictError extends Error {}
@@ -80,9 +80,9 @@ jest.unstable_mockModule("../models/InterviewSession.js", () => ({
   },
 }));
 
-jest.unstable_mockModule("../services/questionGenerator.js", () => ({
+jest.unstable_mockModule("../models/RealQuestion.model.js", () => ({
   default: {
-    generateQuestions: (...args) => generateQuestionsMock(...args),
+    find: (...args) => realQuestionFindMock(...args),
   },
 }));
 
@@ -120,9 +120,16 @@ describe("InterviewController routes", () => {
       periodStart: new Date("2026-10-01T00:00:00.000Z"),
     });
     releaseInterviewCreditMock.mockResolvedValue(undefined);
-    generateQuestionsMock.mockResolvedValue([
-      { questionId: "question-1", question: "Sample question" },
-    ]);
+    realQuestionFindMock.mockReturnValue({
+      lean: jest.fn().mockResolvedValue([
+        {
+          _id: "question-1",
+          question: "Sample question",
+          questionType: "technical",
+          sampleAnswer: "The reference answer.",
+        },
+      ]),
+    });
   });
 
   test("GET /api/interviews/all returns the authenticated user's interviews", async () => {
@@ -272,9 +279,13 @@ describe("InterviewController routes", () => {
       _id: "int2",
       userId: "user1",
       config: {
+        domain: "software",
+        subDomain: "Node.js",
         interviewType: "technical",
+        difficulty: "medium",
         duration: 30,
       },
+      customQuestionsList: [],
       status: "pending",
     };
     const updatedInterview = {
@@ -299,6 +310,19 @@ describe("InterviewController routes", () => {
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty("success", true);
     expect(res.body.data.quota.remaining).toBe(2);
+    expect(res.body.data.currentQuestion).toMatchObject({
+      questionId: "question-1",
+      question: "Sample question",
+    });
+    expect(res.body.data.currentQuestion).not.toHaveProperty("expectedAnswer");
+    expect(realQuestionFindMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: "active",
+        verified: true,
+        difficulty: "medium",
+        level: { $in: ["mid"] },
+      }),
+    );
     expect(consumeCreditForInterviewMock).toHaveBeenCalledWith(
       expect.any(Object),
       "int2",
@@ -310,6 +334,93 @@ describe("InterviewController routes", () => {
       status: "pending",
       quotaConsumed: true,
     });
+  });
+
+  test("does not start an interview when the approved question bank has no match", async () => {
+    realQuestionFindMock.mockReturnValue({
+      lean: jest.fn().mockResolvedValue([]),
+    });
+    interviewFindOneMock.mockResolvedValue({
+      _id: "int-bank-empty",
+      userId: "user1",
+      config: {
+        domain: "software",
+        subDomain: "Node.js",
+        interviewType: "technical",
+        difficulty: "medium",
+        duration: 30,
+      },
+      customQuestionsList: [],
+      status: "pending",
+    });
+
+    const res = await request(app).post("/api/interviews/int-bank-empty/start");
+
+    expect(res.statusCode).toBe(422);
+    expect(res.body.message).toMatch(/no approved questions with reference answers/i);
+    expect(releaseInterviewCreditMock).toHaveBeenCalled();
+    expect(interviewFindOneAndUpdateMock).not.toHaveBeenCalled();
+  });
+
+  test("shuffles the matching question bank before storing the interview set", async () => {
+    const randomSpy = jest.spyOn(Math, "random").mockReturnValue(0);
+    realQuestionFindMock.mockReturnValue({
+      lean: jest.fn().mockResolvedValue([
+        {
+          _id: "question-1",
+          question: "First question",
+          questionType: "technical",
+          sampleAnswer: "First reference answer.",
+        },
+        {
+          _id: "question-2",
+          question: "Second question",
+          questionType: "technical",
+          sampleAnswer: "Second reference answer.",
+        },
+      ]),
+    });
+    const interviewDoc = {
+      _id: "int-shuffle",
+      userId: "user1",
+      config: {
+        domain: "software",
+        subDomain: "Node.js",
+        interviewType: "technical",
+        difficulty: "medium",
+        duration: 30,
+      },
+      customQuestionsList: [],
+      status: "pending",
+    };
+    interviewFindOneMock.mockResolvedValue(interviewDoc);
+    interviewFindOneAndUpdateMock.mockResolvedValue({
+      ...interviewDoc,
+      status: "in-progress",
+      rounds: [{ questions: [] }],
+      performance: {},
+    });
+    sessionFindOneMock.mockResolvedValue({
+      _id: "sess-shuffle",
+      interviewId: "int-shuffle",
+      userId: "user1",
+      conversation: [],
+    });
+
+    try {
+      const res = await request(app).post("/api/interviews/int-shuffle/start");
+      const selectedQuestions =
+        interviewFindOneAndUpdateMock.mock.calls[0][1].$set.rounds[0]
+          .questions;
+
+      expect(res.statusCode).toBe(200);
+      expect(selectedQuestions.map(({ questionId }) => questionId)).toEqual([
+        "question-2",
+        "question-1",
+      ]);
+    } finally {
+      randomSpy.mockRestore();
+    }
   });
 
   test("POST /api/interviews/:id/start blocks users with no monthly quota", async () => {

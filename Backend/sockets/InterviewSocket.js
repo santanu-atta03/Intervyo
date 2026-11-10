@@ -1077,10 +1077,10 @@
 
 import InterviewSession from "../models/InterviewSession.js";
 import Interview from "../models/Interview.model.js";
-import { evaluateAnswer, generateNextQuestion } from "../config/openai.js";
+import { evaluateAnswer } from "../config/openai.js";
 import { textToSpeech } from "../config/elevenlabs.js";
+import answerEvaluator from "../services/answerEvaluator.js";
 import {
-  calculateInterviewPlan,
   getInterviewDetails,
 } from "../utils/interviewConfig.js";
 import {
@@ -1098,7 +1098,6 @@ const performanceCache = new Map(); // sessionId -> performance stats
 const socketToSession = new Map(); // socket.id -> sessionId
 const pausedSessions = new Set();
 const SPEECH_TIMEOUT_MS = 8000;
-const QUESTION_GENERATION_TIMEOUT_MS = 10000;
 
 function withTimeout(promise, timeoutMs, message) {
   let timeoutId;
@@ -1116,6 +1115,20 @@ function clearQuestionTimers(sessionId) {
   for (const key of questionTimers.keys()) {
     if (key.startsWith(prefix)) questionTimers.delete(key);
   }
+}
+
+function getInterviewQuestions(interview) {
+  return (interview.rounds || []).flatMap((round) => round.questions || []);
+}
+
+function getQuestionPlan(interview) {
+  const questions = getInterviewQuestions(interview);
+  return {
+    totalQuestions: questions.length,
+    technical: questions.filter((question) => question.type === "technical").length,
+    behavioral: questions.filter((question) => question.type === "behavioral").length,
+    coding: questions.filter((question) => question.type === "coding").length,
+  };
 }
 
 // ============================================
@@ -1145,7 +1158,10 @@ function updatePerformanceMetrics(sessionId, evaluation) {
 
   metrics.scores.push(evaluation.score);
 
-  if (evaluation.category === "technical") {
+  if (
+    evaluation.category === "technical" ||
+    evaluation.category === "system-design"
+  ) {
     metrics.technicalScores.push(evaluation.score);
   } else if (evaluation.category === "behavioral") {
     metrics.behavioralScores.push(evaluation.score);
@@ -1260,63 +1276,23 @@ async function askNextQuestion(socket, session, interview, io) {
       return;
     }
 
-    console.log(`❓ Generating question #${sessionData.questionsAsked + 1}...`);
-
-    const { role, difficulty, interviewType } = getInterviewDetails(interview);
-    const nextCategory = determineNextCategory(sessionData);
-
-    let nextQuestion;
-    const customQuestions = interview.customQuestionsList || [];
-    if (sessionData.questionsAsked < customQuestions.length) {
-      nextQuestion = {
-        question: customQuestions[sessionData.questionsAsked],
-        type: nextCategory,
-        requiresCode: nextCategory === "coding",
-      };
-    } else {
-      try {
-        const questionRole =
-          interviewType === "system-design"
-            ? `${role} system design`
-            : interviewType === "behavioral"
-              ? `${role} behavioral interview`
-              : interviewType === "coding"
-                ? `${role} coding interview`
-                : role;
-        nextQuestion = await withTimeout(
-          generateNextQuestion(
-            session.questionEvaluations,
-            questionRole,
-            difficulty,
-          ),
-          QUESTION_GENERATION_TIMEOUT_MS,
-          "Question generation timed out",
-        );
-
-        if (!nextQuestion?.question) {
-          throw new Error("Question generation returned no question");
-        }
-
-        if (nextQuestion.type !== nextCategory) {
-          nextQuestion.type = nextCategory;
-        }
-      } catch (error) {
-        console.log("⚠️ Using fallback question");
-        nextQuestion = getFallbackQuestion(
-          sessionData.questionsAsked,
-          difficulty,
-          role,
-          nextCategory,
-        );
-      }
+    const questions = getInterviewQuestions(interview);
+    const questionIndex = sessionData.questionsAsked;
+    const nextQuestion = questions[questionIndex];
+    if (!nextQuestion) {
+      await completeInterview(socket, session, interview, io);
+      return;
     }
 
-    sessionData.categoryCounts[nextCategory]++;
+    console.log(`❓ Asking question #${questionIndex + 1}...`);
+    const nextCategory = nextQuestion.type || "technical";
+    sessionData.categoryCounts[nextCategory] =
+      (sessionData.categoryCounts[nextCategory] || 0) + 1;
     sessionData.questionsAsked++;
     activeSessions.set(session._id.toString(), sessionData);
 
     const questionMsg = nextQuestion.question;
-    const requiresCode = nextQuestion.requiresCode || nextCategory === "coding";
+    const requiresCode = false;
 
     await sendAIMessage(
       socket,
@@ -1324,7 +1300,7 @@ async function askNextQuestion(socket, session, interview, io) {
         type: "question",
         message: questionMsg,
         questionType: nextCategory,
-        questionIndex: sessionData.questionsAsked - 1,
+        questionIndex,
         requiresCode,
         timestamp: new Date(),
       },
@@ -1336,14 +1312,14 @@ async function askNextQuestion(socket, session, interview, io) {
       content: questionMsg,
       type: "question",
       questionCategory: nextCategory,
-      questionIndex: sessionData.questionsAsked - 1,
+      questionIndex,
       requiresCode,
       timestamp: new Date(),
     });
     await session.save();
 
     questionTimers.set(
-      `${session._id}-${sessionData.questionsAsked - 1}`,
+      `${session._id}-${questionIndex}`,
       Date.now(),
     );
 
@@ -1374,31 +1350,8 @@ async function completeInterview(socket, session, interview, io) {
       return true;
     }
 
-    const closingMsg =
-      "Thank you for completing the interview!.";
-
-    await sendAIMessage(
-      socket,
-      {
-        type: "closing",
-        message: closingMsg,
-        timestamp: new Date(),
-      },
-      io,
-    );
-
-    session.conversation.push({
-      role: "assistant",
-      content: closingMsg,
-      type: "closing",
-      timestamp: new Date(),
-    });
     session.sessionStatus = "completed";
     await session.save();
-
-    interview.status = "completed";
-    interview.completedAt = new Date();
-    await interview.save();
 
     // Calculate gamification rewards
     try {
@@ -1484,39 +1437,6 @@ function getFallbackCodeEvaluation(code, language) {
   };
 }
 
-function getFallbackQuestion(index, difficulty, role, category) {
-  const questions = {
-    technical: [
-      `Tell me about your experience with ${role} technologies and best practices.`,
-      "How do you approach performance optimization in your applications?",
-      "Explain your understanding of design patterns and when to use them.",
-      "What's your experience with testing and quality assurance?",
-      "How do you handle state management in complex applications?",
-    ],
-    behavioral: [
-      "Describe a challenging project you worked on and how you overcame obstacles.",
-      "Tell me about a time you had to learn a new technology quickly.",
-      "How do you handle code reviews and feedback from peers?",
-      "Describe your experience working in a team environment.",
-      "Tell me about a time you had to debug a complex issue.",
-    ],
-    coding: [
-      "Write a function to implement debounce in JavaScript.",
-      "Implement a function to flatten a nested array.",
-      "Write a function to check if a string is a palindrome.",
-      "Create a function to find the intersection of two arrays.",
-      "Implement a basic cache with expiration functionality.",
-    ],
-  };
-
-  const categoryQuestions = questions[category] || questions.technical;
-  return {
-    question: categoryQuestions[index % categoryQuestions.length],
-    type: category,
-    requiresCode: category === "coding",
-  };
-}
-
 // ============================================
 // MAIN SOCKET HANDLER
 // ============================================
@@ -1560,8 +1480,14 @@ export default (io) => {
           return;
         }
 
-        const plan = calculateInterviewPlan(interview);
+        const plan = getQuestionPlan(interview);
         const evaluations = session.questionEvaluations || [];
+        if (plan.totalQuestions === 0) {
+          socket.emit("error", {
+            message: "This interview has no selected questions. Please restart it.",
+          });
+          return;
+        }
         const questionMessages = (session.conversation || []).filter(
           (message) => message.type === "question",
         );
@@ -1569,6 +1495,9 @@ export default (io) => {
           technical: evaluations.filter((item) => item.category === "technical").length,
           behavioral: evaluations.filter((item) => item.category === "behavioral").length,
           coding: evaluations.filter((item) => item.category === "coding").length,
+          "system-design": evaluations.filter(
+            (item) => item.category === "system-design",
+          ).length,
         };
         const scores = evaluations.map((item) => item.score || 0);
         performanceCache.set(sessionId, {
@@ -1626,39 +1555,13 @@ export default (io) => {
             message: pendingQuestion.content,
             questionType: questionCategory,
             questionIndex,
-            requiresCode: pendingQuestion.requiresCode || questionCategory === "coding",
+            requiresCode: false,
           });
           questionTimers.set(`${sessionId}-${questionIndex}`, Date.now());
           return;
         }
 
-        if (!session.conversation?.length) {
-          const { role, difficulty, duration, targetCompany } =
-            getInterviewDetails(interview);
-          const greetingMsg = `Hello! Welcome to your ${role} interview${targetCompany ? ` for ${targetCompany}` : ""}. I'm your AI interviewer. This is a ${difficulty} level interview that will last approximately ${duration} minutes with around ${plan.totalQuestions} questions. Let's have a great conversation! Are you ready to begin?`;
-
-          await sendAIMessage(
-            socket,
-            {
-              type: "greeting",
-              message: greetingMsg,
-              timestamp: new Date(),
-            },
-            io,
-          );
-
-          session.conversation.push({
-            role: "assistant",
-            content: greetingMsg,
-            type: "greeting",
-            timestamp: new Date(),
-          });
-          await session.save();
-        }
-
-        setTimeout(async () => {
-          await askNextQuestion(socket, session, interview, io);
-        }, session.conversation?.length ? 0 : 3000);
+        await askNextQuestion(socket, session, interview, io);
       } catch (error) {
         console.error("❌ Candidate ready error:", error);
         socket.emit("error", { message: "Failed to start interview" });
@@ -1704,8 +1607,7 @@ export default (io) => {
             message: pendingQuestion.content,
             questionType: questionCategory,
             questionIndex,
-            requiresCode:
-              pendingQuestion.requiresCode || questionCategory === "coding",
+            requiresCode: false,
           });
           questionTimers.set(`${sessionId}-${questionIndex}`, Date.now());
           return;
@@ -1730,7 +1632,7 @@ export default (io) => {
     // =====================================
     socket.on(
       "candidate-answer",
-      async ({ sessionId, question, answer, questionIndex, category }, acknowledge) => {
+      async ({ sessionId, answer, questionIndex }, acknowledge) => {
         try {
           if (pausedSessions.has(sessionId)) {
             acknowledge?.({
@@ -1750,6 +1652,11 @@ export default (io) => {
             return;
           }
 
+          if (typeof answer !== "string" || !answer.trim()) {
+            acknowledge?.({ success: false, message: "Answer cannot be empty." });
+            return;
+          }
+
           const evaluations = session.questionEvaluations || [];
           if (
             evaluations.some(
@@ -1757,6 +1664,23 @@ export default (io) => {
             )
           ) {
             acknowledge?.({ success: true, duplicate: true });
+            return;
+          }
+
+          const questions = getInterviewQuestions(session.interviewId);
+          const sourceQuestion = questions[questionIndex];
+          const askedQuestions = (session.conversation || []).filter(
+            (message) => message.type === "question",
+          );
+          if (
+            !Number.isInteger(questionIndex) ||
+            !sourceQuestion ||
+            questionIndex !== askedQuestions.length - 1
+          ) {
+            acknowledge?.({
+              success: false,
+              message: "The submitted answer does not match an interview question.",
+            });
             return;
           }
 
@@ -1773,57 +1697,143 @@ export default (io) => {
             ? Math.floor((Date.now() - questionTimer) / 1000)
             : 0;
 
-          session.conversation.push({
-            role: "user",
-            content: answer,
-            type: "answer",
-            timestamp: new Date(),
-          });
-          await session.save();
-          acknowledge?.({ success: true });
-
-          let evaluation;
-          try {
-            const details = getInterviewDetails(session.interviewId);
-            const context = `Role: ${details.role}, Difficulty: ${details.difficulty}`;
-            evaluation = await evaluateAnswer(question, answer, context);
-            console.log("✅ Evaluation done:", evaluation.score);
-          } catch (error) {
-            console.error("⚠️ Evaluation failed, using fallback");
-            evaluation = getFallbackEvaluation(answer);
-          }
+          const details = getInterviewDetails(session.interviewId);
+          const evaluation = await answerEvaluator.evaluateAnswer(
+            sourceQuestion,
+            answer.trim(),
+            {
+              role: details.role,
+              difficulty: details.difficulty,
+              domain: session.interviewId.config?.domain,
+              specialization: session.interviewId.config?.subDomain,
+            },
+          );
+          const scoreOutOfTen = Math.max(
+            0,
+            Math.min(10, Math.round((evaluation.overallScore || 0) / 10)),
+          );
+          const questionCategory = sourceQuestion.type || "technical";
 
           const questionEval = {
             questionNumber: questionIndex + 1,
-            question: question,
-            userAnswer: answer,
-            score: evaluation.score,
-            feedback: evaluation.review,
-            category: category || "technical",
-            difficulty: getInterviewDetails(session.interviewId).difficulty,
-            strengths: evaluation.strength ? [evaluation.strength] : [],
-            improvements: evaluation.improvement
-              ? [evaluation.improvement]
-              : [],
+            question: sourceQuestion.question,
+            userAnswer: answer.trim(),
+            score: scoreOutOfTen,
+            feedback: evaluation.feedback,
+            category: questionCategory,
+            difficulty: details.difficulty,
+            strengths: evaluation.strengths || [],
+            improvements: evaluation.improvements || [],
             timeSpent: timeTaken,
             timestamp: new Date(),
           };
 
+          session.conversation.push({
+            role: "user",
+            content: answer.trim(),
+            type: "answer",
+            timestamp: new Date(),
+          });
           session.questionEvaluations.push(questionEval);
-          await session.save();
+          if (!session.stats) session.stats = {};
+          session.stats.questionsAnswered = session.questionEvaluations.length;
+          session.stats.totalTimeSpent =
+            (session.stats.totalTimeSpent || 0) + timeTaken;
+          session.stats.averageResponseTime = Math.round(
+            session.stats.totalTimeSpent / session.stats.questionsAnswered,
+          );
 
           updatePerformanceMetrics(sessionId, {
-            score: evaluation.score,
-            category: category || "technical",
+            score: scoreOutOfTen,
+            category: questionCategory,
           });
 
+          const sourceRound = (session.interviewId.rounds || []).find((round) =>
+            round.questions?.some(
+              (candidateQuestion) =>
+                candidateQuestion.questionId === sourceQuestion.questionId,
+            ),
+          );
+          const alreadySaved = sourceRound?.answers?.some(
+            (savedAnswer) => savedAnswer.questionId === sourceQuestion.questionId,
+          );
+          if (sourceRound && !alreadySaved) {
+            if (!session.interviewId.performance) {
+              session.interviewId.performance = {};
+            }
+            if (!session.interviewId.performance.categoryScores) {
+              session.interviewId.performance.categoryScores = {};
+            }
+            sourceRound.answers.push({
+              questionId: sourceQuestion.questionId,
+              answer: answer.trim(),
+              timeTaken,
+              hintsUsed: 0,
+              skipped: false,
+              evaluation: {
+                score: evaluation.overallScore || 0,
+                feedback: evaluation.feedback || "",
+                strengths: evaluation.strengths || [],
+                improvements: evaluation.improvements || [],
+                technicalAccuracy:
+                  evaluation.categoryScores?.accuracy || 0,
+                clarity: evaluation.categoryScores?.clarity || 0,
+                completeness:
+                  evaluation.categoryScores?.completeness || 0,
+                categoryScores: evaluation.categoryScores || {},
+                isComplete: evaluation.isComplete !== false,
+                missingPoints: evaluation.missingPoints || [],
+                needsFollowUp: evaluation.needsFollowUp || false,
+                weightedScore: evaluation.weightedScore || 0,
+                metadata: evaluation.metadata || {},
+              },
+              timestamp: new Date(),
+            });
+            const savedAnswers = sourceRound.answers.filter(
+              (savedAnswer) => !savedAnswer.skipped && savedAnswer.evaluation,
+            );
+            const averageScore =
+              savedAnswers.reduce(
+                (sum, savedAnswer) =>
+                  sum + (savedAnswer.evaluation.score || 0),
+                0,
+              ) / savedAnswers.length;
+            session.interviewId.performance.overallScore =
+              Math.round(averageScore);
+            session.interviewId.performance.questionsAnswered =
+              savedAnswers.length;
+            session.interviewId.performance.categoryScores.technical =
+              Math.round(averageScore);
+            session.interviewId.performance.categoryScores.communication =
+              Math.round(
+                savedAnswers.reduce(
+                  (sum, savedAnswer) =>
+                    sum +
+                    (savedAnswer.evaluation.categoryScores?.clarity || 0),
+                  0,
+                ) / savedAnswers.length,
+              );
+            session.interviewId.performance.categoryScores.problemSolving =
+              Math.round(
+                savedAnswers.reduce(
+                  (sum, savedAnswer) =>
+                    sum +
+                    (savedAnswer.evaluation.categoryScores?.completeness || 0),
+                  0,
+                ) / savedAnswers.length,
+              );
+            await session.interviewId.save();
+          }
+
+          await session.save();
+          acknowledge?.({ success: true });
           socket.emit("performance-update", getPerformanceStats(sessionId));
 
           const sessionKey = session._id.toString();
           let sessionData =
             activeSessions.get(sessionKey) || activeSessions.get(sessionId);
           if (!sessionData) {
-            const plan = calculateInterviewPlan(session.interviewId);
+            const plan = getQuestionPlan(session.interviewId);
             const askedQuestions = (session.conversation || []).filter(
               (message) => message.type === "question",
             );
@@ -1840,11 +1850,14 @@ export default (io) => {
                 coding: evaluations.filter(
                   (item) => item.category === "coding",
                 ).length,
+                "system-design": evaluations.filter(
+                  (item) => item.category === "system-design",
+                ).length,
               },
             };
           }
 
-          const plan = calculateInterviewPlan(session.interviewId);
+          const plan = getQuestionPlan(session.interviewId);
           sessionData.plan = plan;
           sessionData.questionsAsked = Math.max(
             sessionData.questionsAsked,

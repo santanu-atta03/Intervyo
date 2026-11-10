@@ -20,7 +20,7 @@ import { login, warmUpAuthService } from "../services/operations/authAPI";
 import { authEndpoints } from "../services/apis";
 
 const HERO_IMAGE = {
-  login_img: "/upscalemedia-transformed.png"
+  login_img: "https://res.cloudinary.com/do6qh4gup/image/upload/v1794277079/login-img_wkqipd.jpg"
 }
 
 const PASSWORD_REQUIREMENTS = [

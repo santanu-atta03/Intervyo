@@ -9,6 +9,35 @@ const interview = {
     interviewType: "technical",
   },
   customQuestionsList: [],
+  rounds: [
+    {
+      questions: [
+        {
+          questionId: "question-1",
+          question: "Explain closures.",
+          type: "technical",
+          difficulty: "easy",
+          expectedAnswer: "Closures retain access to lexical scope.",
+          evaluationCriteria: ["Accuracy", "Clarity"],
+        },
+        {
+          questionId: "question-2",
+          question: "Describe a project challenge.",
+          type: "behavioral",
+          difficulty: "easy",
+          expectedAnswer: "Use the STAR method.",
+          evaluationCriteria: ["Relevance", "Structure"],
+        },
+      ],
+      answers: [],
+    },
+  ],
+  performance: {
+    overallScore: 0,
+    questionsAnswered: 0,
+    categoryScores: { technical: 0, communication: 0 },
+  },
+  save: jest.fn(async () => {}),
 };
 const session = {
   _id: "session-1",
@@ -20,6 +49,7 @@ const session = {
 const interviewFindById = jest.fn();
 const sessionFindById = jest.fn();
 const evaluateAnswer = jest.fn();
+const evaluateReferenceAnswer = jest.fn();
 
 jest.unstable_mockModule("../models/Interview.model.js", () => ({
   default: { findById: interviewFindById },
@@ -34,6 +64,12 @@ jest.unstable_mockModule("../config/openai.js", () => ({
   generateNextQuestion: jest.fn(async () => {
     throw new Error("AI service unavailable");
   }),
+}));
+
+jest.unstable_mockModule("../services/answerEvaluator.js", () => ({
+  default: {
+    evaluateAnswer: (...args) => evaluateReferenceAnswer(...args),
+  },
 }));
 
 jest.unstable_mockModule("../config/elevenlabs.js", () => ({
@@ -56,6 +92,12 @@ describe("interview socket startup", () => {
     jest.clearAllMocks();
     session.conversation = [];
     session.questionEvaluations = [];
+    interview.rounds[0].answers = [];
+    interview.performance = {
+      overallScore: 0,
+      questionsAnswered: 0,
+      categoryScores: { technical: 0, communication: 0 },
+    };
     interviewFindById.mockResolvedValue(interview);
     sessionFindById.mockReturnValue({
       populate: jest.fn().mockResolvedValue(session),
@@ -66,7 +108,7 @@ describe("interview socket startup", () => {
     jest.useRealTimers();
   });
 
-  test("sends the first question when the candidate is ready", async () => {
+  test("speaks only the first question selected for the interview", async () => {
     const socketHandlers = new Map();
     const emittedMessages = [];
     const socket = {
@@ -92,23 +134,23 @@ describe("interview socket startup", () => {
     });
     await jest.advanceTimersByTimeAsync(3000);
 
-    expect(emittedMessages.map(({ type }) => type)).toEqual([
-      "greeting",
-      "question",
-    ]);
-    expect(emittedMessages[1]).toMatchObject({
+    expect(emittedMessages.map(({ type }) => type)).toEqual(["question"]);
+    expect(emittedMessages[0]).toMatchObject({
+      message: "Explain closures.",
       questionType: "technical",
       questionIndex: 0,
+      requiresCode: false,
     });
     expect(session.save).toHaveBeenCalled();
   });
 
-  test("sends the next question after an answer is submitted and evaluated", async () => {
-    evaluateAnswer.mockResolvedValue({
-      score: 8,
-      review: "Clear answer",
-      strength: "Communication",
-      improvement: "Add examples",
+  test("evaluates the transcript against the stored reference answer", async () => {
+    evaluateReferenceAnswer.mockResolvedValue({
+      overallScore: 80,
+      feedback: "Clear answer",
+      strengths: ["Communication"],
+      improvements: ["Add examples"],
+      categoryScores: { accuracy: 80, clarity: 80, completeness: 80, depth: 80 },
     });
 
     const socketHandlers = new Map();
@@ -144,18 +186,22 @@ describe("interview socket startup", () => {
     await socketHandlers.get("candidate-answer")(
       {
         sessionId: session._id,
-        question: firstQuestion.message,
         answer: "I solved this by measuring the issue and improving the system.",
         questionIndex: firstQuestion.questionIndex,
-        category: firstQuestion.questionType,
       },
       jest.fn(),
     );
-    await jest.advanceTimersByTimeAsync(800);
 
     const questions = emittedMessages.filter(({ type }) => type === "question");
     expect(questions).toHaveLength(2);
     expect(questions[1].questionIndex).toBe(1);
-    expect(evaluateAnswer).toHaveBeenCalledTimes(1);
+    expect(questions[1].message).toBe("Describe a project challenge.");
+    expect(evaluateReferenceAnswer).toHaveBeenCalledTimes(1);
+    expect(evaluateReferenceAnswer.mock.calls[0][0].expectedAnswer).toBe(
+      "Closures retain access to lexical scope.",
+    );
+    expect(interview.rounds[0].answers[0].answer).toBe(
+      "I solved this by measuring the issue and improving the system.",
+    );
   });
 });

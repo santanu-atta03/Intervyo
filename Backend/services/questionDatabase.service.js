@@ -28,6 +28,7 @@ export const submitQuestion = async (userId, questionData) => {
       expectedDuration,
       followUpQuestions,
       hints,
+      sampleAnswer,
       notes,
     } = questionData;
 
@@ -46,6 +47,8 @@ export const submitQuestion = async (userId, questionData) => {
       expectedDuration,
       followUpQuestions: followUpQuestions || [],
       hints: hints || [],
+      sampleAnswer:
+        typeof sampleAnswer === "string" ? sampleAnswer.trim() : "",
       notes,
       status: "pending", // Requires verification
     });

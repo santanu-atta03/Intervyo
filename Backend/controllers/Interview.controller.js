@@ -668,7 +668,7 @@
 // controllers/interviewController.js
 import Interview from "../models/Interview.model.js";
 import InterviewSession from "../models/InterviewSession.js";
-import questionGenerator from "../services/questionGenerator.js";
+import RealQuestion from "../models/RealQuestion.model.js";
 import answerEvaluator from "../services/answerEvaluator.js";
 import emotionAnalyzer from "../services/emotionAnalyzer.js";
 import resultsGenerator from "../services/resultsGenerator.js";
@@ -696,6 +696,58 @@ function calculatePercentile(score) {
   if (score >= 60) return 55;
   if (score >= 50) return 40;
   return 25;
+}
+
+function escapeRegex(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function getQuestionBankLevels(difficulty) {
+  const levels = {
+    easy: ["entry"],
+    medium: ["mid"],
+    hard: ["senior"],
+    expert: ["staff", "principal"],
+  };
+
+  return levels[difficulty] || levels.medium;
+}
+
+function shuffle(items) {
+  const shuffled = [...items];
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[swapIndex]] = [
+      shuffled[swapIndex],
+      shuffled[index],
+    ];
+  }
+  return shuffled;
+}
+
+function toInterviewQuestion(question, index, config) {
+  const questionType =
+    question.questionType === "other" ? "technical" : question.questionType;
+
+  return {
+    questionId: question._id.toString(),
+    question: question.question,
+    type: questionType,
+    difficulty: config.difficulty,
+    expectedAnswer: question.sampleAnswer,
+    hints: question.hints || [],
+    tags: question.tags || [],
+    evaluationCriteria: [
+      "Accuracy against the reference answer",
+      "Completeness",
+      "Clarity",
+    ],
+    metadata: {
+      timeLimit: 180,
+      maxHints: question.hints?.length || 0,
+      skippable: index > 0,
+    },
+  };
 }
 
 class InterviewController {
@@ -923,22 +975,62 @@ class InterviewController {
       );
 
       // Generate questions - handle "mixed" type
-      console.log("Generating questions for:", interview.config);
-      let actualInterviewType = interview.config.interviewType;
+      console.log("Selecting approved questions for:", interview.config);
+      const actualInterviewType = interview.config.interviewType;
 
-      // If mixed, randomly choose a type for question generation
-      if (actualInterviewType === "mixed") {
-        const types = ["behavioral", "technical", "system-design", "coding"];
-        actualInterviewType = types[Math.floor(Math.random() * types.length)];
+      let questions;
+      if (interview.customQuestionsList?.length) {
+        questions = interview.customQuestionsList.map((question, index) => ({
+          questionId: `custom_${interviewId}_${index}`,
+          question,
+          type: actualInterviewType,
+          difficulty: interview.config.difficulty,
+          expectedAnswer: "",
+          hints: [],
+          tags: [],
+          evaluationCriteria: ["Relevance", "Accuracy", "Clarity"],
+          metadata: { timeLimit: 180, maxHints: 0, skippable: index > 0 },
+        }));
+      } else {
+        const rolePatterns = [
+          interview.config.subDomain,
+          interview.config.domain,
+        ]
+          .filter(Boolean)
+          .map((value) => new RegExp(escapeRegex(value.trim()), "i"));
+        const questionTypes =
+          actualInterviewType === "mixed"
+            ? ["behavioral", "technical", "system-design", "coding", "other"]
+            : [actualInterviewType];
+        const questionFilter = {
+          status: "active",
+          verified: true,
+          difficulty: interview.config.difficulty,
+          level: { $in: getQuestionBankLevels(interview.config.difficulty) },
+          questionType: { $in: questionTypes },
+          sampleAnswer: { $type: "string", $ne: "" },
+          $or: [
+            { role: { $in: rolePatterns } },
+            { tags: { $in: [interview.config.subDomain, interview.config.domain] } },
+          ],
+        };
+        const questionBank = await RealQuestion.find(questionFilter).lean();
+        const averageMinutesPerQuestion =
+          interview.config.difficulty === "easy"
+            ? 2.5
+            : interview.config.difficulty === "hard"
+              ? 3.5
+              : 3;
+        const requestedQuestionCount = Math.max(
+          1,
+          Math.floor(interview.config.duration / averageMinutesPerQuestion),
+        );
+        questions = shuffle(questionBank)
+          .slice(0, requestedQuestionCount)
+          .map((question, index) =>
+            toInterviewQuestion(question, index, interview.config),
+          );
       }
-
-      const configForGeneration = {
-        ...interview.config,
-        interviewType: actualInterviewType,
-      };
-
-      const questions =
-        await questionGenerator.generateQuestions(configForGeneration);
 
       if (!questions || questions.length === 0) {
         await releaseInterviewCredit(
@@ -948,9 +1040,10 @@ class InterviewController {
           reservedQuota,
         );
         reservedQuota = null;
-        return res.status(500).json({
+        return res.status(422).json({
           success: false,
-          message: "Failed to generate questions",
+          message:
+            "No approved questions with reference answers match this specialization and difficulty. Please try another level or contact an administrator.",
         });
       }
 
@@ -1031,14 +1124,18 @@ class InterviewController {
           interviewId: updatedInterview._id,
           session,
           config: updatedInterview.config,
-          rounds: updatedInterview.rounds,
           quota: {
             plan: reservedQuota.plan,
             limit: reservedQuota.limit,
             remaining: reservedQuota.remaining,
             resetAt: reservedQuota.periodStart,
           },
-          currentQuestion: questions[0],
+          currentQuestion: {
+            questionId: questions[0].questionId,
+            question: questions[0].question,
+            type: questions[0].type,
+            difficulty: questions[0].difficulty,
+          },
           totalQuestions: questions.length,
           timeRemaining,
           status: updatedInterview.status,
@@ -2160,9 +2257,28 @@ Be encouraging but honest. Provide specific, actionable feedback.`,
         });
       }
 
+      const interviewData = interview.toObject
+        ? interview.toObject()
+        : { ...interview };
+      interviewData.rounds = (interviewData.rounds || []).map((round) => ({
+        ...round,
+        questions: (round.questions || []).map(
+          ({ questionId, question, type, difficulty, hints, tags, metadata }) => ({
+            questionId,
+            question,
+            type,
+            difficulty,
+            hints,
+            tags,
+            metadata,
+          }),
+        ),
+        answers: [],
+      }));
+
       res.json({
         success: true,
-        data: interview,
+        data: interviewData,
       });
     } catch (error) {
       console.error("Get interview by ID error:", error);

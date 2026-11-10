@@ -1846,10 +1846,15 @@ const InterviewRoom = ({ initialStream = null }) => {
           : normalizedInterview.difficulty === "hard"
             ? 3.5
             : 3;
-      const totalQuestions = Math.max(
+      const estimatedQuestionCount = Math.max(
         1,
         Math.floor(normalizedInterview.duration / averageMinutesPerQuestion),
       );
+      const totalQuestions =
+        interviewData.rounds?.reduce(
+          (count, round) => count + (round.questions?.length || 0),
+          0,
+        ) || estimatedQuestionCount;
 
       setPerformanceMetrics((previous) => ({
         ...previous,
@@ -2527,6 +2532,10 @@ const InterviewRoom = ({ initialStream = null }) => {
       setInterviewStarted(true);
       setHasQuestionStarted(false);
       setSessionStatus("active");
+      setPerformanceMetrics((previous) => ({
+        ...previous,
+        totalQuestions: result.totalQuestions || previous.totalQuestions,
+      }));
       const initialTime =
         Number(result.timeRemaining) || (interview?.duration || 30) * 60;
       setTimeRemaining(initialTime);
