@@ -6,6 +6,7 @@ import {
   ChevronRight, Sparkles, X, ArrowLeft, Send, MoreVertical, Star,
   BookOpen
 } from 'lucide-react';
+import { AnimatePresence, motion } from "framer-motion";
 import { useScroll, useSpring, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { BLOG_DATA } from '../../data/blogData';
@@ -16,9 +17,7 @@ import ThemeToggle from "../../components/ThemeToggle";
 import BrandLogo from "../shared/BrandLogo";
 import { IntervyoLoader } from "../Loader/Loader";
 const API_URL = 'https://intervyo.onrender.com/api';
-// ============================================
-// SEED CONTENT
-// ============================================
+
 const SEED_ARTICLES = BLOG_DATA;
 
 const BLOG_CSS = `

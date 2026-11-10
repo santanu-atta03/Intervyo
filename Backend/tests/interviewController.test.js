@@ -54,7 +54,6 @@ const sessionFindOneMock = jest.fn();
 const sessionFindByIdAndUpdateMock = jest.fn();
 const sessionDeleteOneMock = jest.fn();
 const realQuestionFindMock = jest.fn();
-const generateQuestionsMock = jest.fn();
 const consumeCreditForInterviewMock = jest.fn();
 const releaseInterviewCreditMock = jest.fn();
 
@@ -84,12 +83,6 @@ jest.unstable_mockModule("../models/InterviewSession.js", () => ({
 jest.unstable_mockModule("../models/RealQuestion.model.js", () => ({
   default: {
     find: (...args) => realQuestionFindMock(...args),
-  },
-}));
-
-jest.unstable_mockModule("../services/questionGenerator.js", () => ({
-  default: {
-    generateQuestions: (...args) => generateQuestionsMock(...args),
   },
 }));
 
@@ -127,16 +120,6 @@ describe("InterviewController routes", () => {
       periodStart: new Date("2026-10-01T00:00:00.000Z"),
     });
     releaseInterviewCreditMock.mockResolvedValue(undefined);
-    generateQuestionsMock.mockResolvedValue([
-      {
-        questionId: "generated-question",
-        question: "Generated interview question",
-        type: "technical",
-        difficulty: "medium",
-        expectedAnswer: "Generated reference answer",
-        evaluationCriteria: ["Accuracy"],
-      },
-    ]);
     realQuestionFindMock.mockReturnValue({
       lean: jest.fn().mockResolvedValue([
         {
@@ -355,7 +338,7 @@ describe("InterviewController routes", () => {
     });
   });
 
-  test("generates specialization-specific questions when the uploaded bank has no match", async () => {
+  test("does not start an interview when the bank has no prewritten match", async () => {
     realQuestionFindMock.mockReturnValue({
       lean: jest.fn().mockResolvedValue([]),
     });
@@ -373,48 +356,18 @@ describe("InterviewController routes", () => {
       status: "pending",
     });
 
-    const interviewDoc = {
-      _id: "int-bank-empty",
-      userId: "user1",
-      config: {
-        domain: "software",
-        subDomain: "Node.js",
-        interviewType: "technical",
-        difficulty: "medium",
-        duration: 30,
-      },
-      customQuestionsList: [],
-      status: "pending",
-    };
-    interviewFindOneMock.mockResolvedValue(interviewDoc);
-    interviewFindOneAndUpdateMock.mockResolvedValue({
-      ...interviewDoc,
-      status: "in-progress",
-      rounds: [{ questions: [] }],
-      performance: {},
-    });
-    sessionFindOneMock.mockResolvedValue({
-      _id: "sess-bank-empty",
-      interviewId: "int-bank-empty",
-      userId: "user1",
-      conversation: [],
-    });
-
     const res = await request(app).post("/api/interviews/int-bank-empty/start");
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body.data.currentQuestion.question).toBe(
-      "Generated interview question",
+    expect(res.statusCode).toBe(422);
+    expect(res.body.message).toMatch(/no prewritten questions match/i);
+    expect(interviewFindOneAndUpdateMock).not.toHaveBeenCalled();
+    expect(sessionFindOneMock).not.toHaveBeenCalled();
+    expect(releaseInterviewCreditMock).toHaveBeenCalledWith(
+      expect.any(Object),
+      "int-bank-empty",
+      "user1",
+      expect.objectContaining({ plan: "free" }),
     );
-    expect(generateQuestionsMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        domain: "software",
-        subDomain: "Node.js",
-        interviewType: "technical",
-        questionCount: 10,
-      }),
-    );
-    expect(releaseInterviewCreditMock).not.toHaveBeenCalled();
   });
 
   test("shuffles the matching question bank before storing the interview set", async () => {

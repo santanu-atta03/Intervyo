@@ -669,7 +669,6 @@
 import Interview from "../models/Interview.model.js";
 import InterviewSession from "../models/InterviewSession.js";
 import RealQuestion from "../models/RealQuestion.model.js";
-import questionGenerator from "../services/questionGenerator.js";
 import answerEvaluator from "../services/answerEvaluator.js";
 import emotionAnalyzer from "../services/emotionAnalyzer.js";
 import resultsGenerator from "../services/resultsGenerator.js";
@@ -964,7 +963,7 @@ class InterviewController {
         userId,
       );
 
-      // Generate questions - handle "mixed" type
+      // Select prewritten questions - handle "mixed" type
       console.log("Selecting approved questions for:", interview.config);
       let actualInterviewType = interview.config.interviewType;
       if (actualInterviewType === "mixed") {
@@ -1018,19 +1017,6 @@ class InterviewController {
             .map((question, index) =>
               toInterviewQuestion(question, index, interview.config),
             );
-        } else {
-          console.warn(
-            "No uploaded questions matched; generating questions for the selected specialization.",
-          );
-          const generatedQuestions = await questionGenerator.generateQuestions({
-            ...interview.config,
-            interviewType: actualInterviewType,
-            questionCount: requestedQuestionCount,
-          });
-          questions = shuffle(generatedQuestions || []).slice(
-            0,
-            requestedQuestionCount,
-          );
         }
       }
 
@@ -1045,7 +1031,7 @@ class InterviewController {
         return res.status(422).json({
           success: false,
           message:
-            "We could not find or generate interview questions for this specialization. Please try again.",
+            "No prewritten questions match this specialization, difficulty, and interview type. Add approved questions to the question bank or choose another interview configuration.",
         });
       }
 
