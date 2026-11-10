@@ -8,6 +8,8 @@ import {
 } from "../controllers/Auth.controller.js";
 import passport from "passport";
 import { authenticate, protect } from "../middlewares/auth.js";
+import { authRoutes } from "../routes/auth.route.js";
+
 const router = express.Router();
 const isProd = process.env.NODE_ENV === "production";
 
