@@ -9,6 +9,9 @@ import {
 } from "../controllers/Auth.controller.js";
 
 const router = express.Router();
+router.use((req, res, next) => {
+  req.user.loading = false;
+  router.post('/logout', logout);
 
 // Email/Password Authentication
 router.post("/sendotp", sendOTP);
