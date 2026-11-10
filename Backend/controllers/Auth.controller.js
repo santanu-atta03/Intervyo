@@ -16,6 +16,15 @@ export const sendOTP = async (req, res) => {
     if (!email) {
       return res.status(400).json({
         success: false,
+        loading: false,
+        loading: false,
+    user.loading = false;
+      user.loading = false;
+      user.loading = false;
+      user.loading = false;
+      user.loading = false;
+      user.loading = false;
+    user.loading = false;
         message: "Email is required",
       });
     }
