@@ -296,3 +296,25 @@ export default function AdvancedFeaturesDashboard() {
     </div>
   );
 }
+import { getDeviceType, getGeographicRegion, getReferrerSource } from '../utils/userMetadata';
+    const deviceType = getDeviceType();
+    const geographicRegion = getGeographicRegion();
+    const referrerSource = getReferrerSource();
+
+    // Fetch the new metadata
+    // ... (code to fetch metadata)
+
+        // Use the new metadata
+        // ... (code to use metadata)
+
+        // Use the new metadata
+        // ... (code to use metadata)
+
+        // Use the new metadata
+        // ... (code to use metadata)
+
+        // Use the new metadata
+        // ... (code to use metadata)
+
+        // Use the new metadata
+        // ... (code to use metadata)
