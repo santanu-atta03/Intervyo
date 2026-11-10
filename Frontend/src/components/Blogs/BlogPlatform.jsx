@@ -7,7 +7,7 @@ import {
   BookOpen
 } from 'lucide-react';
 import { AnimatePresence, motion } from "framer-motion";
-import { useScroll, useSpring, AnimatePresence } from 'framer-motion';
+import { useScroll, useSpring } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { BLOG_DATA } from '../../data/blogData';
 
