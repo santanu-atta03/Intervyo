@@ -11,6 +11,7 @@ import {
 } from "../controllers/ProfileController.js";
 import { upload } from "../config/cloudinary.js";
 import { protect } from "../middlewares/auth.js";
+import { authRoutes } from "../routes/auth.route.js";
 
 const router = express.Router();
 
