@@ -33,7 +33,7 @@ const replaceRequired = (html, pattern, replacement, tagName) => {
   return html.replace(pattern, replacement);
 };
 
-const createPageHtml = ({ route, title, description, noindex = false, article }) => {
+const createPageHtml = ({ route, title, description, noindex = false }) => {
   const canonical = pageUrl(route);
   const escapedTitle = escapeHtml(`${title} | Intervyo`);
   const escapedDescription = escapeHtml(description);
@@ -87,13 +87,22 @@ const createPageHtml = ({ route, title, description, noindex = false, article })
     `<meta name="twitter:image" content="${siteUrl}/intervyologo.png" />`
   );
 
-  const fallbackContent = article
-    ? `<main><article><h1>${escapeHtml(article.title)}</h1><p>${escapeHtml(
-        article.excerpt
-      )}</p></article></main>`
-    : `<main><h1>${escapeHtml(title)}</h1><p>${escapedDescription}</p></main>`;
-  html = html.replace('<div id="root"></div>', `<div id="root">${fallbackContent}</div>`);
-  return html.replace("</head>", `${routeIndexingGuard}\n  </head>`);
+  const initialLoader =
+    '<div class="app-initial-loader" role="status" aria-label="Loading page"><span class="app-initial-loader__spinner"></span></div>';
+  html = html.replace(
+    '<div id="root"></div>',
+    `<div id="root">${initialLoader}</div>`,
+  );
+  const initialLoaderStyles = `<style>
+    .app-initial-loader{display:grid;min-height:100vh;min-height:100dvh;place-items:center;background:#0a0d12}
+    .app-initial-loader__spinner{width:42px;height:42px;border:3px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:app-initial-spin .8s linear infinite}
+    @keyframes app-initial-spin{to{transform:rotate(360deg)}}
+    @media(prefers-reduced-motion:reduce){.app-initial-loader__spinner{animation-duration:2s}}
+  </style>`;
+  return html.replace(
+    "</head>",
+    `${initialLoaderStyles}\n${routeIndexingGuard}\n  </head>`,
+  );
 };
 
 const articles = BLOG_DATA.map((article) => ({
@@ -130,7 +139,7 @@ const routeIndexingGuard = `<script>(function(){var path=window.location.pathnam
 for (const page of [...indexablePages.map(({ path: route, ...metadata }) => ({ route, ...metadata })), ...noindexPages]) {
   await writeFile(
     outputPath(page.route),
-    createPageHtml({ ...page, article: articles.find((item) => item.route === page.route)?.article })
+    createPageHtml(page)
   );
 }
 

@@ -66,12 +66,12 @@ const io = new Server(server, {
 
 app.use(cookieParser());
 app.use(helmet());
-// ========================================
-// MIDDLEWARE
-// ========================================
+
 const allowedOrigins = [
   "https://intervyo.xyz",
+  "https://intervyo.tech",
   "https://www.intervyo.xyz",
+  "https://www.intervyo.tech",
   "https://intervyo-sage.vercel.app",
   "http://localhost:5173",
   "http://localhost:5174",
@@ -112,9 +112,6 @@ app.use(
 // Initialize Passport
 app.use(passport.initialize());
 
-// ========================================
-// DATABASE CONNECTION
-// ========================================
 interviewSocket(io);
 dbConnect();
 
@@ -176,10 +173,6 @@ app.get("/api/health", async (req, res) => {
   }
 });
 
-// ========================================
-// ERROR HANDLER
-// ========================================
-
 app.use((err, req, res, next) => {
   logger.error("Server Error:", err);
   res.status(err.status || 500).json({
@@ -189,9 +182,7 @@ app.use((err, req, res, next) => {
 });
 
 app.use(errorHandler);
-// ========================================
-// START SERVER
-// ========================================
+
 const PORT = process.env.PORT || 5000;
 if (process.env.NODE_ENV !== "test") {
   server.listen(PORT, () => {
@@ -199,9 +190,6 @@ if (process.env.NODE_ENV !== "test") {
   });
 }
 
-// ========================================
-// GRACEFUL SHUTDOWN
-// ========================================
 const gracefulShutdown = async (signal) => {
   logger.warn(`${signal} received. Starting graceful shutdown...`);
 

@@ -24,7 +24,7 @@ import BrandLogo from "../components/shared/BrandLogo";
 import { sendOtp, warmUpAuthService } from "../services/operations/authAPI";
 
 const HERO_IMAGE = {
-  register_img: "/upscalemedia-transformed.png",
+  register_img: "https://res.cloudinary.com/do6qh4gup/image/upload/v1794378800/upscalemedia-transformed_1_fejyc8.png",
 };
 
 const PASSWORD_REQUIREMENTS = [

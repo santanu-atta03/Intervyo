@@ -1,5 +1,6 @@
 import { defineConfig, createLogger } from 'vite'
 import react from '@vitejs/plugin-react'
+import path from 'path'
 
 // Suppress noisy face-api.js sourcemap warnings (the npm package omits original .ts source files)
 const logger = createLogger()
@@ -30,6 +31,7 @@ export default defineConfig({
     alias: {
       fs: false,
       path: false,
+      '@': path.resolve(__dirname, './src')
     }
   },
   optimizeDeps: {
