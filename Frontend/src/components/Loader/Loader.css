@@ -8,8 +8,9 @@
   height: 100dvh;
   place-items: center;
   overflow: hidden;
-  background: transparent;
+  background-color: transparent;
   color: #fff;
+  pointer-events: none;
 }
 
 .intervyo-loading-mark {
@@ -20,7 +21,7 @@
 }
 
 .intervyo-loading-mark--hero {
-  width: min(94vw, 400px);
+  width: min(50vw, 160px);
   height: auto;
 }
 

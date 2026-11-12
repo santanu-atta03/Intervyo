@@ -39,7 +39,7 @@ export default function Footer() {
 
       {/* Floating Card Container */}
       <div className="max-w-[1440px] mx-auto relative z-10">
-        <div className="bg-white dark:bg-[#121622] rounded-[28px] sm:rounded-[36px] border border-black/[0.08] dark:border-white/10 shadow-[0_12px_45px_rgba(0,0,0,0.04)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-8 sm:p-12 lg:p-14">
+        <div className="bg-white dark:bg-[#121622] rounded-[12px] sm:rounded-[12px] border border-black/[0.08] dark:border-white/10 shadow-[0_12px_45px_rgba(0,0,0,0.04)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-8 sm:p-12 lg:p-14">
           
           {/* Top Row: Brand & Info (Left) + 3 Columns (Right) */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 pb-12">

@@ -20,7 +20,9 @@ jest.unstable_mockModule("../middlewares/auth.js", () => ({
 }));
 
 // Mock Cloudinary upload helper used by createInterview
-const uploadMock = jest.fn(() => Promise.resolve({ secure_url: "https://cdn.example.com/resume.pdf" }));
+const uploadMock = jest.fn(() =>
+  Promise.resolve({ secure_url: "https://cdn.example.com/resume.pdf" }),
+);
 const deleteMock = jest.fn(async () => {});
 jest.unstable_mockModule("../config/cloudinary.js", () => ({
   uploadToCloudinary: uploadMock,
@@ -54,6 +56,7 @@ const sessionFindOneMock = jest.fn();
 const sessionFindByIdAndUpdateMock = jest.fn();
 const sessionDeleteOneMock = jest.fn();
 const realQuestionFindMock = jest.fn();
+const generateQuestionsMock = jest.fn();
 const consumeCreditForInterviewMock = jest.fn();
 const releaseInterviewCreditMock = jest.fn();
 
@@ -86,6 +89,12 @@ jest.unstable_mockModule("../models/RealQuestion.model.js", () => ({
   },
 }));
 
+jest.unstable_mockModule("../services/questionGenerator.js", () => ({
+  default: {
+    generateQuestions: (...args) => generateQuestionsMock(...args),
+  },
+}));
+
 jest.unstable_mockModule("../utils/interviewQuota.js", () => ({
   consumeCreditForInterview: (...args) =>
     consumeCreditForInterviewMock(...args),
@@ -113,6 +122,7 @@ describe("InterviewController routes", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    generateQuestionsMock.mockReset();
     consumeCreditForInterviewMock.mockResolvedValue({
       plan: "free",
       limit: 3,
@@ -212,7 +222,9 @@ describe("InterviewController routes", () => {
     expect(res.body.data.feedback.overallScore).toBe(0);
     expect(res.body.data.feedback.technicalScore).toBe(0);
     expect(res.body.data.feedback.communicationScore).toBe(0);
-    expect(res.body.data.feedback.summary).toMatch(/no answers were submitted/i);
+    expect(res.body.data.feedback.summary).toMatch(
+      /no answers were submitted/i,
+    );
     expect(
       sessionFindByIdAndUpdateMock.mock.calls[0][1].$set[
         "stats.totalQuestions"
@@ -235,8 +247,18 @@ describe("InterviewController routes", () => {
         },
       },
       questionEvaluations: [
-        { userAnswer: "I identified the bottleneck and optimized it.", score: 8, category: "technical", question: "How do you optimize a system?" },
-        { userAnswer: "  ", score: 10, category: "behavioral", question: "Tell me about a challenge." },
+        {
+          userAnswer: "I identified the bottleneck and optimized it.",
+          score: 8,
+          category: "technical",
+          question: "How do you optimize a system?",
+        },
+        {
+          userAnswer: "  ",
+          score: 10,
+          category: "behavioral",
+          question: "Tell me about a challenge.",
+        },
       ],
       conversation: [],
       sessionStatus: "active",
@@ -260,17 +282,16 @@ describe("InterviewController routes", () => {
     expect(res.body.data.feedback.communicationScore).toBe(0);
   });
 
-  test("POST /api/interviews/create should return 400 when resume missing", async () => {
+  test("POST /api/interviews/create should return 400 when interview configuration is missing", async () => {
     const res = await request(app)
       .post("/api/interviews/create")
       .field("role", "Software Engineer")
       .field("difficulty", "medium")
-      .field("duration", "30")
-      .field("scheduledAt", "2026-01-13T00:00:00Z");
+      .field("duration", "30");
 
     expect(res.statusCode).toBe(400);
     expect(res.body).toHaveProperty("success", false);
-    expect(res.body.message).toMatch(/resume file is required/i);
+    expect(res.body.message).toMatch(/domain, subDomain, interviewType/i);
   });
 
   test("POST /api/interviews/:id/start consumes one quota and starts a pending interview", async () => {
@@ -338,11 +359,11 @@ describe("InterviewController routes", () => {
     });
   });
 
-  test("does not start an interview when the bank has no prewritten match", async () => {
+  test("generates questions and starts when the bank has no prewritten match", async () => {
     realQuestionFindMock.mockReturnValue({
       lean: jest.fn().mockResolvedValue([]),
     });
-    interviewFindOneMock.mockResolvedValue({
+    const interviewDoc = {
       _id: "int-bank-empty",
       userId: "user1",
       config: {
@@ -354,20 +375,47 @@ describe("InterviewController routes", () => {
       },
       customQuestionsList: [],
       status: "pending",
+    };
+    const generatedQuestions = [
+      {
+        questionId: "generated-question-1",
+        question: "Explain how React rendering works.",
+        type: "technical",
+        difficulty: "easy",
+        expectedAnswer: "A reference answer.",
+      },
+    ];
+    interviewFindOneMock.mockResolvedValue(interviewDoc);
+    interviewFindOneAndUpdateMock.mockResolvedValue({
+      ...interviewDoc,
+      status: "in-progress",
+      performance: {},
     });
+    sessionFindOneMock.mockResolvedValue({
+      _id: "session-bank-empty",
+      interviewId: "int-bank-empty",
+      userId: "user1",
+      conversation: [],
+    });
+    generateQuestionsMock.mockResolvedValue(generatedQuestions);
 
     const res = await request(app).post("/api/interviews/int-bank-empty/start");
 
-    expect(res.statusCode).toBe(422);
-    expect(res.body.message).toMatch(/no prewritten questions match/i);
-    expect(interviewFindOneAndUpdateMock).not.toHaveBeenCalled();
-    expect(sessionFindOneMock).not.toHaveBeenCalled();
-    expect(releaseInterviewCreditMock).toHaveBeenCalledWith(
-      expect.any(Object),
-      "int-bank-empty",
-      "user1",
-      expect.objectContaining({ plan: "free" }),
+    expect(res.statusCode).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data.currentQuestion).toMatchObject({
+      questionId: "generated-question-1",
+      question: "Explain how React rendering works.",
+    });
+    expect(generateQuestionsMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        subDomain: "Node.js",
+        interviewType: "technical",
+        difficulty: "medium",
+        questionCount: 10,
+      }),
     );
+    expect(releaseInterviewCreditMock).not.toHaveBeenCalled();
   });
 
   test("shuffles the matching question bank before storing the interview set", async () => {
@@ -418,8 +466,7 @@ describe("InterviewController routes", () => {
     try {
       const res = await request(app).post("/api/interviews/int-shuffle/start");
       const selectedQuestions =
-        interviewFindOneAndUpdateMock.mock.calls[0][1].$set.rounds[0]
-          .questions;
+        interviewFindOneAndUpdateMock.mock.calls[0][1].$set.rounds[0].questions;
 
       expect(res.statusCode).toBe(200);
       expect(selectedQuestions.map(({ questionId }) => questionId)).toEqual([
@@ -465,39 +512,27 @@ describe("InterviewController routes", () => {
       expect(res.body.message).toMatch(/not yet completed/i);
     });
 
-    test("should return session and feedback when interview completed", async () => {
+    test("should return stored results when interview completed", async () => {
+      const results = {
+        summary: { overallScore: 85, grade: "B", passed: true },
+      };
       interviewFindOneMock.mockResolvedValue({
         _id: "int4",
         userId: "user1",
         status: "completed",
-        overallScore: 85,
-        feedback: { summary: "Good", strengths: ["X"], improvements: ["Y"] },
-        technicalScore: 80,
-        communicationScore: 90,
-        problemSolvingScore: 85,
-      });
-
-      sessionFindOneMock.mockResolvedValue({
-        _id: "sess4",
-        interviewId: "int4",
-        userId: "user1",
-        conversation: [],
-        questionEvaluations: [],
-        sessionStatus: "completed",
-        overallScore: 85,
-        technicalScore: 80,
-        communicationScore: 90,
-        problemSolvingScore: 85,
-        feedback: { summary: "Good", strengths: ["X"], improvements: ["Y"] },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        results,
+        config: { domain: "software", subDomain: "Node.js" },
+        performance: { overallScore: 85 },
+        rounds: [],
+        totalDuration: 120,
+        endTime: new Date("2026-11-12T12:00:00.000Z"),
       });
 
       const res = await request(app).get("/api/ai/int4/results");
       expect(res.statusCode).toBe(200);
       expect(res.body).toHaveProperty("success", true);
-      expect(res.body.data.session.interviewId).toBe("int4");
-      expect(res.body.data.feedback.overallScore).toBe(85);
+      expect(res.body.data.results).toEqual(results);
+      expect(res.body.data.duration).toBe(120);
     });
   });
 });

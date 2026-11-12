@@ -6,19 +6,29 @@ import React from "react";
 import {
   ArrowLeft,
   ArrowRight,
+  AlarmClock,
   Check,
   ChevronRight,
+  Code2,
   Clock3,
+  Crown,
+  Flame,
   FileText,
+  Gauge,
   Lightbulb,
+  MessageSquare,
+  Network,
   Plus,
   Rocket,
+  Sprout,
   Sparkles,
   Target,
+  Timer,
   Trash2,
   Upload,
   User,
   WandSparkles,
+  Zap,
 } from "lucide-react";
 import {
   PanelsTopLeft,
@@ -27,12 +37,15 @@ import {
   Smartphone,
   BrainCircuit,
 } from "lucide-react";
+import { SiMeta, SiNetflix, SiTesla } from "react-icons/si";
 import {
-  SiMeta,
-  SiNetflix,
-  SiTesla
-} from "react-icons/si";
-import { FaAmazon, FaGoogle, FaMicrosoft, FaApple, FaSalesforce, FaPencilAlt } from "react-icons/fa";
+  FaAmazon,
+  FaGoogle,
+  FaMicrosoft,
+  FaApple,
+  FaSalesforce,
+  FaPencilAlt,
+} from "react-icons/fa";
 import { BiLogoAdobe } from "react-icons/bi";
 import { GrOracle } from "react-icons/gr";
 import { setInterviewConfig } from "../slices/interviewSlice";
@@ -997,28 +1010,28 @@ const INTERVIEW_TYPES = [
   {
     value: "technical",
     label: "Technical",
-    icon: "💡",
+    icon: Code2,
     description: "Coding, algorithms and data structures",
     features: ["Live coding", "Problem solving", "Code review"],
   },
   {
     value: "behavioral",
     label: "Behavioral",
-    icon: "💬",
+    icon: MessageSquare,
     description: "Communication and soft skills",
     features: ["STAR method", "Team scenarios", "Leadership"],
   },
   {
     value: "system-design",
     label: "System Design",
-    icon: "🏗️",
+    icon: Network,
     description: "Architecture and scalability",
     features: ["Microservices", "Database design", "Load balancing"],
   },
   {
     value: "mixed",
     label: "Mixed Interview",
-    icon: "🎯",
+    icon: Sparkles,
     description: "A complete interview assessment",
     features: ["All-in-one", "Realistic", "Complete evaluation"],
   },
@@ -1028,14 +1041,14 @@ const DIFFICULTIES = [
   {
     value: "easy",
     label: "Easy",
-    icon: "🟢",
+    icon: Sprout,
     description: "Perfect for beginners",
     experience: "0–2 years",
   },
   {
     value: "medium",
     label: "Medium",
-    icon: "🟡",
+    icon: Gauge,
     description: "Intermediate challenges",
     experience: "2–4 years",
     recommended: true,
@@ -1043,31 +1056,36 @@ const DIFFICULTIES = [
   {
     value: "hard",
     label: "Hard",
-    icon: "🔴",
+    icon: Flame,
     description: "Advanced concepts",
     experience: "4–7 years",
   },
   {
     value: "expert",
     label: "Expert",
-    icon: "⚫",
+    icon: Crown,
     description: "Senior-level mastery",
     experience: "7+ years",
   },
 ];
 
 const DURATIONS = [
-  { value: 15, label: "15 min", icon: "⚡", description: "Quick practice" },
+  { value: 15, label: "15 min", icon: Zap, description: "Quick practice" },
   {
     value: 30,
     label: "30 min",
-    icon: "🎯",
+    icon: Target,
     description: "Standard session",
     recommended: true,
   },
-  { value: 45, label: "45 min", icon: "⏱️", description: "Extended practice" },
-  { value: 60, label: "1 hour", icon: "🕐", description: "Deep dive" },
-  { value: 90, label: "1.5 hours", icon: "⏰", description: "Full interview" },
+  { value: 45, label: "45 min", icon: Timer, description: "Extended practice" },
+  { value: 60, label: "1 hour", icon: Clock3, description: "Deep dive" },
+  {
+    value: 90,
+    label: "1.5 hours",
+    icon: AlarmClock,
+    description: "Full interview",
+  },
 ];
 
 const COMPANIES = [
@@ -1370,13 +1388,18 @@ function InterviewSetup() {
 
     try {
       const createdInterview = await new Promise((resolve, reject) => {
-          // Forward both API failures and unsuccessful responses to the setup state.
-          Promise.resolve().then(() => {
+        // Forward both API failures and unsuccessful responses to the setup state.
+        Promise.resolve()
+          .then(() => {
             let headers = { Authorization: `Bearer ${token}` };
             let dataToSend = interviewData;
 
             if (!(interviewData instanceof FormData)) {
-              if (!interviewData.domain || !interviewData.subDomain || !interviewData.interviewType) {
+              if (
+                !interviewData.domain ||
+                !interviewData.subDomain ||
+                !interviewData.interviewType
+              ) {
                 reject(new Error("Please complete all required fields"));
                 return;
               }
@@ -1409,11 +1432,15 @@ function InterviewSetup() {
                 }
               })
               .catch(reject);
-          }).catch(reject);
+          })
+          .catch(reject);
       });
 
       if (createdInterview) {
-        const interviewId = createdInterview.id || createdInterview._id || createdInterview.interviewId;
+        const interviewId =
+          createdInterview.id ||
+          createdInterview._id ||
+          createdInterview.interviewId;
         notify.success("Interview created successfully!");
         // Navigate to interview room with the real ID from the backend
         navigate(`/interview-room/${interviewId}`);
@@ -1423,7 +1450,9 @@ function InterviewSetup() {
     } catch (error) {
       console.error("CREATE_INTERVIEW_API ERROR:", error);
       notify.error(
-        error.response?.data?.message || error.message || "Failed to create interview"
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to create interview",
       );
       // Reset so the user can retry from the setup form
       setIsPreparingInterview(false);
@@ -1491,8 +1520,9 @@ function InterviewSetup() {
               return (
                 <div
                   key={setupStep.number}
-                  className={`setup-progress-item ${completed ? "is-complete" : ""
-                    } ${active ? "is-active" : ""}`}
+                  className={`setup-progress-item ${
+                    completed ? "is-complete" : ""
+                  } ${active ? "is-active" : ""}`}
                 >
                   <div className="setup-progress-number">
                     {completed ? <Check size={16} /> : setupStep.number}
@@ -1548,20 +1578,22 @@ function InterviewSetup() {
                           <button
                             key={subDomain}
                             type="button"
-                            className={`setup-chip ${config.subDomain === subDomain
-                              ? "is-selected"
-                              : ""
-                              }`}
-                            onClick={() =>
-                              updateConfig({ subDomain })
-                            }
+                            className={`setup-chip ${
+                              config.subDomain === subDomain
+                                ? "is-selected"
+                                : ""
+                            }`}
+                            onClick={() => updateConfig({ subDomain })}
                             aria-pressed={config.subDomain === subDomain}
                           >
                             {subDomain}
                             {config.subDomain === subDomain && (
                               <Check
                                 size={14}
-                                style={{ marginLeft: 6, verticalAlign: "middle" }}
+                                style={{
+                                  marginLeft: 6,
+                                  verticalAlign: "middle",
+                                }}
                               />
                             )}
                           </button>
@@ -1773,9 +1805,7 @@ function InterviewSetup() {
                       <FileText size={28} />
                     </div>
 
-                    <h2 className="setup-upload-title">
-                      Upload your resume
-                    </h2>
+                    <h2 className="setup-upload-title">Upload your resume</h2>
 
                     <p className="setup-upload-description">
                       The AI interviewer can use your experience to generate
@@ -1916,7 +1946,10 @@ function InterviewSetup() {
                         </div>
 
                         {config.questions.map((question, index) => (
-                          <div className="setup-question" key={`${question}-${index}`}>
+                          <div
+                            className="setup-question"
+                            key={`${question}-${index}`}
+                          >
                             <span className="setup-question-number">
                               {index + 1}
                             </span>
@@ -1960,7 +1993,10 @@ function InterviewSetup() {
                   </section>
 
                   <section className="setup-summary">
-                    <h2 className="setup-section-title" style={{ marginBottom: 0 }}>
+                    <h2
+                      className="setup-section-title"
+                      style={{ marginBottom: 0 }}
+                    >
                       <Rocket size={20} />
                       Interview summary
                     </h2>
@@ -1977,7 +2013,9 @@ function InterviewSetup() {
                       </div>
 
                       <div className="setup-summary-item">
-                        <div className="setup-summary-label">Interview type</div>
+                        <div className="setup-summary-label">
+                          Interview type
+                        </div>
                         <div className="setup-summary-value">
                           {config.interviewType || "—"}
                         </div>
@@ -2061,8 +2099,7 @@ function InterviewSetup() {
               {[1, 2, 3, 4].map((item) => (
                 <span
                   key={item}
-                  className={`setup-dot ${step >= item ? "is-active" : ""
-                    }`}
+                  className={`setup-dot ${step >= item ? "is-active" : ""}`}
                 />
               ))}
             </div>

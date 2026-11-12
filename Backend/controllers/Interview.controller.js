@@ -672,6 +672,7 @@ import RealQuestion from "../models/RealQuestion.model.js";
 import answerEvaluator from "../services/answerEvaluator.js";
 import emotionAnalyzer from "../services/emotionAnalyzer.js";
 import resultsGenerator from "../services/resultsGenerator.js";
+import questionGenerator from "../services/questionGenerator.js";
 import mongoose from "mongoose";
 import groqService from "../services/groqService.js";
 import {
@@ -762,7 +763,8 @@ class InterviewController {
       if (!domain || !subDomain || !interviewType) {
         return res.status(400).json({
           success: false,
-          message: "Please provide all required fields (domain, subDomain, interviewType)",
+          message:
+            "Please provide all required fields (domain, subDomain, interviewType)",
         });
       }
 
@@ -973,19 +975,24 @@ class InterviewController {
 
       let questions;
       if (interview.customQuestionsList?.length) {
-        questions = shuffle(interview.customQuestionsList).map((question, index) => ({
-          questionId: `custom_${interviewId}_${index}`,
-          question,
-          type: actualInterviewType,
-          difficulty: interview.config.difficulty,
-          expectedAnswer: "",
-          hints: [],
-          tags: [],
-          evaluationCriteria: ["Relevance", "Accuracy", "Clarity"],
-          metadata: { timeLimit: 180, maxHints: 0, skippable: index > 0 },
-        }));
+        questions = shuffle(interview.customQuestionsList).map(
+          (question, index) => ({
+            questionId: `custom_${interviewId}_${index}`,
+            question,
+            type: actualInterviewType,
+            difficulty: interview.config.difficulty,
+            expectedAnswer: "",
+            hints: [],
+            tags: [],
+            evaluationCriteria: ["Relevance", "Accuracy", "Clarity"],
+            metadata: { timeLimit: 180, maxHints: 0, skippable: index > 0 },
+          }),
+        );
       } else {
-        const rolePatterns = [interview.config.subDomain, interview.config.domain]
+        const rolePatterns = [
+          interview.config.subDomain,
+          interview.config.domain,
+        ]
           .filter(Boolean)
           .map((value) => new RegExp(escapeRegex(value.trim()), "i"));
         const questionFilter = {
@@ -994,7 +1001,11 @@ class InterviewController {
           questionType: { $in: [actualInterviewType, "other"] },
           $or: [
             { role: { $in: rolePatterns } },
-            { tags: { $in: [interview.config.subDomain, interview.config.domain] } },
+            {
+              tags: {
+                $in: [interview.config.subDomain, interview.config.domain],
+              },
+            },
           ],
         };
         const questionBank = await RealQuestion.find(questionFilter).lean();
@@ -1017,6 +1028,12 @@ class InterviewController {
             .map((question, index) =>
               toInterviewQuestion(question, index, interview.config),
             );
+        } else {
+          questions = await questionGenerator.generateQuestions({
+            ...interview.config,
+            interviewType: actualInterviewType,
+            questionCount: requestedQuestionCount,
+          });
         }
       }
 
@@ -1028,10 +1045,10 @@ class InterviewController {
           reservedQuota,
         );
         reservedQuota = null;
-        return res.status(422).json({
+        return res.status(503).json({
           success: false,
           message:
-            "No prewritten questions match this specialization, difficulty, and interview type. Add approved questions to the question bank or choose another interview configuration.",
+            "Unable to prepare interview questions right now. Please try again.",
         });
       }
 
@@ -1096,8 +1113,8 @@ class InterviewController {
             questionsAnswered: 0,
             questionsSkipped: 0,
             averageResponseTime: 0,
-            totalTimeSpent: 0
-          }
+            totalTimeSpent: 0,
+          },
         });
         await session.save();
       }
@@ -2130,8 +2147,7 @@ Be encouraging but honest. Provide specific, actionable feedback.`,
             "Interview",
           difficulty:
             interview.difficulty || interview.config?.difficulty || "medium",
-          duration:
-            interview.duration || interview.config?.duration || 30,
+          duration: interview.duration || interview.config?.duration || 30,
           overallScore:
             interview.overallScore ?? interview.performance?.overallScore ?? 0,
           completedAt: interview.completedAt || interview.endTime || null,
@@ -2207,7 +2223,6 @@ Be encouraging but honest. Provide specific, actionable feedback.`,
           success: false,
           message: "Interview not yet completed",
         });
-        
       }
 
       res.json({
@@ -2251,7 +2266,15 @@ Be encouraging but honest. Provide specific, actionable feedback.`,
       interviewData.rounds = (interviewData.rounds || []).map((round) => ({
         ...round,
         questions: (round.questions || []).map(
-          ({ questionId, question, type, difficulty, hints, tags, metadata }) => ({
+          ({
+            questionId,
+            question,
+            type,
+            difficulty,
+            hints,
+            tags,
+            metadata,
+          }) => ({
             questionId,
             question,
             type,

@@ -1,8 +1,8 @@
 import "./Loader.css";
 import { MorphingInfinity } from "../morphing-infinity.jsx";
 
-export function LoadingMark({ size = 20, className = "" }) {
-  const dimensions = size ? { width: size * 2, height: size } : undefined;
+export function LoadingMark({ size = 10, className = "" }) {
+  const dimensions = size ? { width: size, height: size } : undefined;
 
   return (
     <MorphingInfinity

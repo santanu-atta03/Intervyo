@@ -91,12 +91,10 @@ describe("monthly interview quotas", () => {
         plan: "free",
         interviewsRemaining: 3,
         interviewsLimit: 3,
-        quotaResetAt: getQuotaResetDate(new Date("2026-10-22T12:00:00.000Z")),
+        quotaResetAt: getQuotaResetDate(),
       },
     };
-    userFindById.mockImplementation(() =>
-      makeQuery(async () => cloneUser()),
-    );
+    userFindById.mockImplementation(() => makeQuery(async () => cloneUser()));
     userFindOneAndUpdate.mockImplementation((filter, update) =>
       makeQuery(async () => {
         if (!matchesFilter(filter)) return null;
@@ -176,13 +174,15 @@ describe("monthly interview quotas", () => {
 
   it("serializes concurrent starts and never overspends the monthly quota", async () => {
     const results = await Promise.allSettled(
-      Array.from({ length: 4 }, () =>
-        consumeInterviewCredit("user-1"),
-      ),
+      Array.from({ length: 4 }, () => consumeInterviewCredit("user-1")),
     );
 
-    expect(results.filter((result) => result.status === "fulfilled")).toHaveLength(3);
-    expect(results.filter((result) => result.status === "rejected")).toHaveLength(1);
+    expect(
+      results.filter((result) => result.status === "fulfilled"),
+    ).toHaveLength(3);
+    expect(
+      results.filter((result) => result.status === "rejected"),
+    ).toHaveLength(1);
     expect(user.subscription.interviewsRemaining).toBe(0);
   });
 

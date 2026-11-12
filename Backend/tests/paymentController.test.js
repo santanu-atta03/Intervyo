@@ -32,9 +32,8 @@ jest.unstable_mockModule("../models/User.model.js", () => ({
 const { default: axios } = await import("axios");
 const { default: Payment } = await import("../models/Payment.model.js");
 const { default: User } = await import("../models/User.model.js");
-const { createPaymentOrder, verifyPayment } = await import(
-  "../controllers/Payment.controller.js"
-);
+const { createPaymentOrder, verifyPayment } =
+  await import("../controllers/Payment.controller.js");
 
 const createResponse = () => ({
   status: jest.fn().mockReturnThis(),
@@ -57,13 +56,14 @@ describe("Payment controller", () => {
   afterAll(() => {
     if (originalEnv.keyId === undefined) delete process.env.RAZORPAY_KEY_ID;
     else process.env.RAZORPAY_KEY_ID = originalEnv.keyId;
-    if (originalEnv.keySecret === undefined) delete process.env.RAZORPAY_KEY_SECRET;
+    if (originalEnv.keySecret === undefined)
+      delete process.env.RAZORPAY_KEY_SECRET;
     else process.env.RAZORPAY_KEY_SECRET = originalEnv.keySecret;
   });
 
   it("creates an order using server-controlled yearly pricing", async () => {
     axios.post.mockResolvedValue({
-      data: { id: "order_yearly", amount: 958800, currency: "INR" },
+      data: { id: "order_yearly", amount: 358800, currency: "INR" },
     });
     User.findById.mockReturnValue({
       select: jest.fn().mockResolvedValue({
@@ -80,14 +80,14 @@ describe("Payment controller", () => {
     );
 
     expect(axios.post.mock.calls[0][1]).toEqual(
-      expect.objectContaining({ amount: 958800, currency: "INR" }),
+      expect.objectContaining({ amount: 358800, currency: "INR" }),
     );
     expect(Payment.create).toHaveBeenCalledWith(
       expect.objectContaining({
         userId: "user-1",
         orderId: "order_yearly",
         billingCycle: "yearly",
-        amount: 958800,
+        amount: 358800,
       }),
     );
     expect(response.status).toHaveBeenCalledWith(201);

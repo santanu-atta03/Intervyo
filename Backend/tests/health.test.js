@@ -34,7 +34,9 @@ jest.unstable_mockModule("../config/email.js", () => ({
 
 // Mock cloudinary upload middleware (used in various routes)
 jest.unstable_mockModule("../config/cloudinary.js", () => ({
-  uploadToCloudinary: jest.fn(async () => ({ secure_url: "https://cdn.example.com/x.png" })),
+  uploadToCloudinary: jest.fn(async () => ({
+    secure_url: "https://cdn.example.com/x.png",
+  })),
   deleteFromCloudinary: jest.fn(async () => {}),
   upload: { single: () => (req, res, next) => next() },
   default: {},
@@ -50,8 +52,12 @@ describe("Health Check Endpoint", () => {
   });
 
   it("should return 200 and success message", async () => {
+    mongoose.connection.readyState = 1;
     const res = await request(app).get("/api/health");
     expect(res.statusCode).toEqual(200);
-    expect(res.body).toHaveProperty("status", "Server is running!");
+    expect(res.body).toMatchObject({
+      status: "ok",
+      services: { database: "connected", server: "ok" },
+    });
   });
 });
