@@ -1120,8 +1120,9 @@ function SetupOption({
   description,
   children,
 }) {
-  const isComponent = typeof icon === "function";
-  const Icon = isComponent ? icon : null;
+  const isComponent =
+    typeof icon === "function" ||
+    (typeof icon === "object" && icon !== null && !React.isValidElement(icon));
 
   return (
     <button
@@ -1131,7 +1132,7 @@ function SetupOption({
       aria-pressed={selected}
     >
       <span className="setup-option-icon" style={{ color: iconColor }}>
-        {typeof icon === "function" ? (
+        {isComponent ? (
           React.createElement(icon, {
             size: 24,
             strokeWidth: 1.8,
