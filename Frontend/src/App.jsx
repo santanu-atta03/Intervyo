@@ -6,7 +6,7 @@ import ScrollToTop from "./components/shared/ScrollToTopButton";
 import Footer from "./components/shared/Footer";
 import ScrollToTopOnRouteChange from "./components/shared/ScrollToTopOnRouteChange";
 import Navbar from "./components/Navbar";
-import VoiceflowChatbot from "./components/Chatbot/VoiceflowChatbot";
+import AIChatbot from "./components/Chatbot/AiChatBot";
 import CookieConsent from "./components/shared/CookieConsent";
 import { IntervyoLoader } from "./components/Loader/Loader";
 
@@ -200,7 +200,8 @@ function App() {
         </Routes>
       </Suspense>
 
-      {!location.pathname.startsWith("/interview-room") && <VoiceflowChatbot />}
+      {!location.pathname.startsWith("/interview-room") &&
+        <AIChatbot />}
       <CookieConsent />
       {!hideFooter && <Footer />}
     </>

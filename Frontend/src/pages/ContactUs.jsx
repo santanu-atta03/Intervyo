@@ -212,7 +212,7 @@ export default function ContactUs() {
                   href="mailto:support@intervyo.com?subject=Inquiry%20-%20Intervyo"
                   className="mt-2 block text-lg font-medium tracking-tight text-[#1D1E20] transition hover:text-[#69665F]"
                 >
-                  support@intervyo.com
+                  intervyo@gmail.com
                 </a>
               </div>
 

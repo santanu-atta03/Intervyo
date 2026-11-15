@@ -8,11 +8,24 @@ import {
 } from "../config/aiconfig.js";
 import { v4 as uuidv4 } from "uuid";
 
+const CHATBOT_CONTEXTS = [
+  "general",
+  "interview-prep",
+  "technical-help",
+  "career-advice",
+];
+
 // Create a new conversation
 export const createConversation = async (req, res) => {
   try {
     const { context = "general", title, metadata } = req.body;
     const userId = req.user.id;
+    if (!CHATBOT_CONTEXTS.includes(context)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid coaching mode",
+      });
+    }
 
     const conversation = new ChatbotConversation({
       userId,
@@ -122,6 +135,12 @@ export const sendMessage = async (req, res) => {
         message: "Message cannot be empty",
       });
     }
+    if (context !== undefined && !CHATBOT_CONTEXTS.includes(context)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid coaching mode",
+      });
+    }
 
     // Find or create conversation
     let conversation = await ChatbotConversation.findOne({
@@ -170,6 +189,11 @@ export const sendMessage = async (req, res) => {
       success: true,
       data: {
         message: aiResponse,
+        usage: {
+          ...req.chatbotUsage,
+          hourlyCount: req.chatbotUsage.hourlyCount + 1,
+          dailyCount: req.chatbotUsage.dailyCount + 1,
+        },
         conversation: {
           sessionId: conversation.sessionId,
           title: conversation.title,
@@ -179,17 +203,19 @@ export const sendMessage = async (req, res) => {
     });
   } catch (error) {
     console.error("Send message error:", error);
-    res.status(500).json({
+    res.status(error.status || 500).json({
       success: false,
-      message: "Failed to send message. Please try again.",
-      error: error.message,
+      message:
+        error.status === 503
+          ? error.message
+          : "Failed to send message. Please try again.",
     });
   }
 };
 
 // Generate AI response using FREE services
 const generateFreeAIResponse = async (messages, context) => {
-  const provider = process.env.FREE_AI_PROVIDER || "groq"; // Default to Groq (fastest free option)
+  const provider = process.env.FREE_AI_PROVIDER || "groq";
 
   try {
     let response;
@@ -225,42 +251,18 @@ const generateFreeAIResponse = async (messages, context) => {
         break;
 
       default:
-        // Fallback to a simple response if no provider configured
-        response = getFallbackResponse(messages, context);
+        throw new Error(`Unsupported AI provider: ${provider}`);
     }
 
     return response;
   } catch (error) {
     console.error("AI generation error:", error);
-
-    // Return a helpful fallback response instead of failing
-    return getFallbackResponse(messages, context);
+    const unavailableError = new Error(
+      "AI assistant is temporarily unavailable. Please try again shortly.",
+    );
+    unavailableError.status = 503;
+    throw unavailableError;
   }
-};
-
-// Fallback response when AI services are unavailable
-const getFallbackResponse = (messages, context) => {
-  const lastMessage = messages[messages.length - 1].content.toLowerCase();
-
-  // Simple pattern matching for common queries
-  if (lastMessage.includes("hello") || lastMessage.includes("hi")) {
-    return "Hello! I'm here to help you with interview preparation, technical questions, and career advice. What would you like to know?";
-  }
-
-  if (lastMessage.includes("interview")) {
-    return "For interview preparation, I recommend: 1) Research the company thoroughly, 2) Practice common questions, 3) Prepare specific examples from your experience, 4) Dress professionally, and 5) Arrive early. Would you like more specific advice?";
-  }
-
-  if (lastMessage.includes("technical") || lastMessage.includes("coding")) {
-    return "For technical interviews, focus on: data structures, algorithms, system design, and coding best practices. Practice on platforms like LeetCode and HackerRank. Would you like specific problem-solving strategies?";
-  }
-
-  if (lastMessage.includes("resume") || lastMessage.includes("cv")) {
-    return "A great resume should: 1) Be concise (1-2 pages), 2) Highlight achievements with metrics, 3) Use action verbs, 4) Be tailored to each job, and 5) Be error-free. Would you like tips on any specific section?";
-  }
-
-  // Generic helpful response
-  return "I'm here to help! I can assist with interview preparation, technical questions, resume advice, and career guidance. What specific area would you like to explore?";
 };
 
 // Delete a conversation
@@ -301,10 +303,20 @@ export const updateConversation = async (req, res) => {
     const { sessionId } = req.params;
     const userId = req.user.id;
     const { title, isActive } = req.body;
+    const { context } = req.body;
 
     const updateData = {};
     if (title !== undefined) updateData.title = title;
     if (isActive !== undefined) updateData.isActive = isActive;
+    if (context !== undefined) {
+      if (!CHATBOT_CONTEXTS.includes(context)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid coaching mode",
+        });
+      }
+      updateData.context = context;
+    }
 
     const conversation = await ChatbotConversation.findOneAndUpdate(
       { sessionId, userId },

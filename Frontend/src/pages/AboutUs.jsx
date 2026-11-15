@@ -141,21 +141,21 @@ export default function AboutUs() {
       description:
         "Practice with realistic, role-specific interview simulations powered by advanced AI.",
       icon: <MessageSquare className="h-6 w-6 text-white" />,
-      className: "bg-gradient-to-br from-emerald-500 to-teal-500",
+      className: "bg-[#7B4C3E]",
     },
     {
       title: "Instant Feedback",
       description:
         "Receive detailed performance analysis and actionable improvement suggestions.",
       icon: <Zap className="h-6 w-6 text-white" />,
-      className: "bg-gradient-to-br from-amber-400 to-yellow-500",
+      className: "bg-[#7B4C3E]",
     },
     {
       title: "Progress Analytics",
       description:
         "Track your improvement over time with comprehensive dashboards and insights.",
       icon: <BarChart className="h-6 w-6 text-white" />,
-      className: "bg-gradient-to-br from-violet-500 to-purple-600",
+      className: "bg-[#7B4C3E]",
     },
   ];
 
@@ -416,7 +416,7 @@ export default function AboutUs() {
             </h2>
           </div>
 
-          <div className="mb-12 rounded-[28px] border border-[#41423F] bg-[#242526] p-6 sm:p-8 lg:p-10">
+          <div className="mb-12 rounded-[12px] border border-[#41423F] bg-[#242526] p-6 sm:p-8 lg:p-10">
             <div className="flex flex-col items-center text-center">
               <div className="relative mb-6">
                 <img
@@ -484,7 +484,7 @@ export default function AboutUs() {
             </div>
           </div>
 
-          <div className="rounded-[28px] border border-[#41423F] bg-[#242526] p-6 sm:p-8 lg:p-10">
+          <div className="rounded-[12px] border border-[#41423F] bg-[#242526] p-6 sm:p-8 lg:p-10">
             <div className="mb-8 flex items-center gap-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#D7D1C5] text-[#1D1E20]">
                 <Github className="h-5 w-5" />

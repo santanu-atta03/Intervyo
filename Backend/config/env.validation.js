@@ -105,21 +105,17 @@ const requiredEnvVars = {
     sensitive: true
   },
 
-  // Optional Email
-  EMAIL_USER: {
+  // Email delivery service
+  OTP_MAIL_SERVICE_URL: {
     required: false,
-    description: 'Email service username',
-    sensitive: false
+    description: 'Deployed otp-mail-service /api/send-otp endpoint',
+    validate: (value) => value.startsWith('http://') || value.startsWith('https://'),
+    errorMessage: 'OTP_MAIL_SERVICE_URL must be an HTTP(S) URL'
   },
-  EMAIL_PASS: {
+  OTP_MAIL_SERVICE_TOKEN: {
     required: false,
-    description: 'Email service password',
+    description: 'Bearer token configured for otp-mail-service',
     sensitive: true
-  },
-  EMAIL_FROM: {
-    required: false,
-    description: 'Email from address',
-    default: 'noreply@intervyo.xyz'
   },
 
   // Optional Cloudinary
@@ -281,7 +277,7 @@ export function printValidationResults(result) {
       AI: ['GROQ_API_KEY', 'OPENAI_API_KEY', 'HUGGINGFACE_API_KEY'],
       OAuth: ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'GITHUB_CLIENT_ID', 'GITHUB_CLIENT_SECRET'],
       Payments: ['RAZORPAY_KEY_ID', 'RAZORPAY_KEY_SECRET', 'RAZORPAY_WEBHOOK_SECRET'],
-      Email: ['EMAIL_USER', 'EMAIL_PASS', 'EMAIL_FROM'],
+      Email: ['OTP_MAIL_SERVICE_URL', 'OTP_MAIL_SERVICE_TOKEN'],
       Storage: ['CLOUDINARY_CLOUD_NAME', 'CLOUDINARY_API_KEY', 'CLOUDINARY_API_SECRET']
     };
 

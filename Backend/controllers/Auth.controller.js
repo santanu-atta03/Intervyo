@@ -6,12 +6,25 @@ import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import { authLogger } from "../utils/logger.js";
+import { mailSender } from "../config/email.js";
+import otpEmailTemplate from "../utils/otpEmailTemplate.js";
 dotenv.config();
+
+const sendVerificationEmail = (email, otp) =>
+  mailSender(
+    email,
+    "Email Verification - Intervyo",
+    otpEmailTemplate(otp),
+    `Your Intervyo verification code is ${otp}. It expires in 5 minutes.`,
+  );
+
+const normalizeEmail = (email) =>
+  typeof email === "string" ? email.trim().toLowerCase() : "";
 
 // Send OTP
 export const sendOTP = async (req, res) => {
   try {
-    const { email } = req.body;
+    const email = normalizeEmail(req.body.email);
 
     if (!email) {
       return res.status(400).json({
@@ -44,7 +57,13 @@ export const sendOTP = async (req, res) => {
       existingOTP = await OTP.findOne({ otp });
     }
 
-    await OTP.create({ email, otp });
+    const savedOtp = await OTP.create({ email, otp });
+    try {
+      await sendVerificationEmail(email, otp);
+    } catch (error) {
+      await OTP.deleteOne({ _id: savedOtp._id });
+      throw error;
+    }
 
     res.status(200).json({
       success: true,
@@ -54,8 +73,7 @@ export const sendOTP = async (req, res) => {
     console.error("Send OTP Error:", error);
     res.status(500).json({
       success: false,
-      message: "Failed to send OTP",
-      error: error.message,
+      message: "Failed to send OTP. Please try again later.",
     });
   }
 };
@@ -63,7 +81,7 @@ export const sendOTP = async (req, res) => {
 // Resend OTP
 export const resendOtp = async (req, res) => {
   try {
-    const { email } = req.body;
+    const email = normalizeEmail(req.body.email);
 
     if (!email) {
       return res.status(400).json({
@@ -101,9 +119,10 @@ export const resendOtp = async (req, res) => {
     }
 
     // Update existing OTP document with new OTP and reset expiry
+    await sendVerificationEmail(email, otp);
     existingOTP.otp = otp;
     existingOTP.createdAt = Date.now();
-    await existingOTP.save(); // Triggers post-save hook to send email
+    await existingOTP.save();
 
     res.status(200).json({
       success: true,
@@ -113,8 +132,7 @@ export const resendOtp = async (req, res) => {
     console.error("Resend OTP Error:", error);
     res.status(500).json({
       success: false,
-      message: "Failed to resend OTP",
-      error: error.message,
+      message: "Failed to resend OTP. Please try again later.",
     });
   }
 };
@@ -215,7 +233,14 @@ export const resendOtp = async (req, res) => {
 // controllers/Auth.controller.js - register function
 export const register = async (req, res) => {
   try {
-    const { name, email, password, otp, profilePicture, profile: profileData } = req.body;
+    const {
+      name,
+      password,
+      otp,
+      profilePicture,
+      profile: profileData,
+    } = req.body;
+    const email = normalizeEmail(req.body.email);
 
     if (!name || !email || !password || !otp) {
       return res.status(400).json({

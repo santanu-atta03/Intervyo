@@ -1,32 +1,47 @@
-import { Resend } from "resend";
-import dotenv from "dotenv";
-dotenv.config();
+export const mailSender = async (email, subject, html, text) => {
+  const serviceUrl = process.env.OTP_MAIL_SERVICE_URL;
+  const serviceToken = process.env.OTP_MAIL_SERVICE_TOKEN;
 
-const apiKey = process.env.RESEND_API_KEY;
-const resend = apiKey ? new Resend(apiKey) : null;
-
-export const mailSender = async (email, title, body) => {
-  try {
-    if (!resend) {
-      console.log("⚠️  Resend disabled (missing API key). Skipping email send.");
-      return { id: null };
-    }
-    const { data, error } = await resend.emails.send({
-      from: "Intervyo <no-reply@intervyo.tech>",
-      to: [email],
-      subject: title,
-      html: body,
-    });
-
-    if (error) {
-      console.error("❌ Resend error:", error);
-      throw new Error(error.message);
-    }
-
-    console.log("✅ Resend email sent, ID:", data.id);
-    return data;
-  } catch (err) {
-    console.error("❌ Mail sender failed:", err);
-    throw err;
+  if (!serviceUrl || !serviceToken) {
+    throw new Error(
+      "Email delivery is not configured. Set OTP_MAIL_SERVICE_URL and OTP_MAIL_SERVICE_TOKEN.",
+    );
   }
+
+  let response;
+  try {
+    response = await fetch(serviceUrl, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${serviceToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        to: email,
+        subject,
+        html,
+        text,
+        fromName: "Intervyo",
+      }),
+      signal: AbortSignal.timeout(15000),
+    });
+  } catch (error) {
+    console.error("Email service request failed:", error.message);
+    throw new Error("Email delivery service could not be reached.");
+  }
+
+  let result;
+  try {
+    result = await response.json();
+  } catch (error) {
+    console.error("Email service returned an invalid response:", error.message);
+    throw new Error("Email delivery service returned an invalid response.");
+  }
+
+  if (!response.ok || result.success !== true) {
+    console.error("Email service rejected delivery:", response.status);
+    throw new Error("Email delivery failed. Please try again later.");
+  }
+
+  return { id: result.messageId || null };
 };

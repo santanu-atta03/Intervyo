@@ -1,6 +1,7 @@
 import express from "express";
 import {
   sendOTP,
+  resendOtp,
   register,
   login,
   getCurrentUser,
@@ -13,6 +14,7 @@ const isProd = process.env.NODE_ENV === "production";
 
 // Email/Password Authentication
 router.post("/send-otp", sendOTP);
+router.post("/send-otp/resend", resendOtp);
 router.post("/register", register);
 router.post("/login", login);
 router.get("/me", protect, getCurrentUser);

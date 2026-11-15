@@ -1,6 +1,8 @@
 import { useContext, useState } from "react";
+import { Sparkles } from "lucide-react";
 import { ThemeContext } from "../shared/ThemeContext";
 import { LoadingMark } from "../Loader/Loader";
+import BrandLogo from "../shared/BrandLogo";
 
 const VOICEFLOW_PROJECT_ID = "695f3fcb847e07b5c98aefe7";
 const VOICEFLOW_SCRIPT_SRC = "https://cdn.voiceflow.com/widget-next/bundle.mjs";
@@ -13,30 +15,33 @@ const CHATBOT_THEME_STYLES = {
       font-family: inherit;
     }
     .vfrc-chat {
-      background-color: #ffffff !important;
-      color: #111827 !important;
+      background-color: #fbfcfa !important;
+      color: #17211f !important;
     }
     .vfrc-header {
       background-color: #ffffff !important;
-      color: #111827 !important;
-      border-bottom: 1px solid #e5e7eb !important;
+      color: #17211f !important;
+      border-bottom: 1px solid #e7e9e7 !important;
     }
     .vfrc-system-response .vfrc-message,
     .vfrc-card {
-      background-color: #f9fafb !important;
-      color: #111827 !important;
-      border: 1px solid #e5e7eb !important;
+      background-color: #f2f4f1 !important;
+      color: #17211f !important;
+      border: 1px solid #e7e9e7 !important;
     }
     .vfrc-user-response .vfrc-message {
-      background-color: #10b981 !important;
+      background-color: #6554d9 !important;
       color: #ffffff !important;
     }
     .vf-footer,
     .vfrc-chat-input,
     .vfrc-input {
       background-color: #ffffff !important;
-      color: #111827 !important;
-      border-color: #e5e7eb !important;
+      color: #17211f !important;
+      border-color: #e7e9e7 !important;
+    }
+    .vfrc-launcher, .vfrc-launcher__button {
+      background-color: #6554d9 !important;
     }
   `,
   dark: `
@@ -44,33 +49,36 @@ const CHATBOT_THEME_STYLES = {
       font-family: inherit;
     }
     .vfrc-chat {
-      background-color: #0f172a !important;
-      color: #f8fafc !important;
+      background-color: #111512 !important;
+      color: #f1f4f1 !important;
     }
     .vfrc-header {
-      background-color: #111827 !important;
-      color: #f8fafc !important;
-      border-bottom: 1px solid #334155 !important;
+      background-color: #171d19 !important;
+      color: #f1f4f1 !important;
+      border-bottom: 1px solid #2b352e !important;
     }
     .vfrc-system-response .vfrc-message,
     .vfrc-card {
-      background-color: #1e293b !important;
-      color: #f8fafc !important;
-      border: 1px solid #334155 !important;
+      background-color: #1d2520 !important;
+      color: #f1f4f1 !important;
+      border: 1px solid #2b352e !important;
     }
     .vfrc-user-response .vfrc-message {
-      background-color: #10b981 !important;
+      background-color: #6554d9 !important;
       color: #ffffff !important;
     }
     .vf-footer,
     .vfrc-chat-input,
     .vfrc-input {
-      background-color: #111827 !important;
-      color: #f8fafc !important;
-      border-color: #334155 !important;
+      background-color: #171d19 !important;
+      color: #f1f4f1 !important;
+      border-color: #2b352e !important;
     }
     .vfrc-input::placeholder {
-      color: #94a3b8 !important;
+      color: #a4b0a9 !important;
+    }
+    .vfrc-launcher, .vfrc-launcher__button {
+      background-color: #6554d9 !important;
     }
   `,
 };
@@ -159,7 +167,7 @@ const VoiceflowChatbot = () => {
           url: VOICEFLOW_RUNTIME_URL,
           versionID: "production",
           assistant: {
-            color: "#10b981",
+            color: "#6554d9",
             stylesheet: getStylesheetDataUrl(theme),
           },
           voice: {
@@ -189,32 +197,20 @@ const VoiceflowChatbot = () => {
       onClick={openChat}
       disabled={loading}
       aria-label={loading ? "Loading chat" : "Open Intervyo chat"}
-      className="fixed bottom-4 right-4 z-50 inline-flex min-h-12 items-center gap-2 rounded-full bg-emerald-600 px-5 py-3 font-semibold text-white shadow-lg transition-colors hover:bg-emerald-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500 disabled:cursor-wait disabled:opacity-80"
+      className="fixed bottom-4 right-4 z-50 inline-flex min-h-12 items-center gap-2.5 rounded-2xl bg-[#6554d9] px-5 py-3 font-semibold text-white shadow-[0_12px_30px_rgba(58,44,153,0.26)] transition hover:-translate-y-0.5 hover:bg-[#4c3dc1] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6554d9] disabled:cursor-wait disabled:opacity-80"
     >
       {loading ? (
         <LoadingMark size={10} className="text-white" />
       ) : (
-        <svg
-          aria-hidden="true"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          className="h-5 w-5"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5Z"
-          />
-        </svg>
+        <Sparkles aria-hidden="true" className="h-5 w-5" />
       )}
+      <BrandLogo className="!px-2 !py-1 !text-xs !shadow-none" />
       <span>
         {loading
           ? "Loading chat..."
           : loadError
             ? "Retry chat"
-            : "Chat with us"}
+            : "Ask AI"}
       </span>
     </button>
   );

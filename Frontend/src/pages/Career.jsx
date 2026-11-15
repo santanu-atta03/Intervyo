@@ -20,52 +20,52 @@ import Navbar from "../components/Navbar";
 import SEO from "../components/shared/SEO";
 import Footer from "../components/shared/Footer";
 
-const MOCK_JOBS = [
-    {
-        _id: "1",
-        title: "Frontend Developer",
-        company: "TechFlow",
-        location: "Remote",
-        type: "Full-time",
-        salaryRange: "$80k - $120k",
-        postedAt: new Date().toISOString()
-    },
-    {
-        _id: "2",
-        title: "Senior Product Designer",
-        company: "Creative Labs",
-        location: "New York, NY",
-        type: "Full-time",
-        salaryRange: "$110k - $150k",
-        postedAt: new Date().toISOString()
-    },
-    {
-        _id: "3",
-        title: "Backend Engineer (Node.js)",
-        company: "CloudScale",
-        location: "Remote",
-        type: "Full-time",
-        salaryRange: "$90k - $140k",
-        postedAt: new Date().toISOString()
-    }
-];
+// const MOCK_JOBS = [
+//     {
+//         _id: "1",
+//         title: "Frontend Developer",
+//         company: "TechFlow",
+//         location: "Remote",
+//         type: "Full-time",
+//         salaryRange: "$80k - $120k",
+//         postedAt: new Date().toISOString()
+//     },
+//     {
+//         _id: "2",
+//         title: "Senior Product Designer",
+//         company: "Creative Labs",
+//         location: "New York, NY",
+//         type: "Full-time",
+//         salaryRange: "$110k - $150k",
+//         postedAt: new Date().toISOString()
+//     },
+//     {
+//         _id: "3",
+//         title: "Backend Engineer (Node.js)",
+//         company: "CloudScale",
+//         location: "Remote",
+//         type: "Full-time",
+//         salaryRange: "$90k - $140k",
+//         postedAt: new Date().toISOString()
+//     }
+// ];
 
-const MOCK_RESOURCES = [
-    {
-        _id: "1",
-        title: "Mastering System Design Interviews",
-        type: "Guide",
-        category: "Interview Prep",
-        description: "A comprehensive guide to acing system design questions."
-    },
-    {
-        _id: "2",
-        title: "Resume Building for Tech Roles",
-        type: "Article",
-        category: "Resume Tips",
-        description: "How to make your resume stand out to FAANG recruiters."
-    }
-];
+// const MOCK_RESOURCES = [
+//     {
+//         _id: "1",
+//         title: "Mastering System Design Interviews",
+//         type: "Guide",
+//         category: "Interview Prep",
+//         description: "A comprehensive guide to acing system design questions."
+//     },
+//     {
+//         _id: "2",
+//         title: "Resume Building for Tech Roles",
+//         type: "Article",
+//         category: "Resume Tips",
+//         description: "How to make your resume stand out to FAANG recruiters."
+//     }
+// ];
 
 export default function Career() {
     const [jobs, setJobs] = useState([]);

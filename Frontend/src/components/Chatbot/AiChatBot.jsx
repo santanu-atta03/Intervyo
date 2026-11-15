@@ -1,21 +1,26 @@
 // frontend/src/components/Chatbot/AIChatbot.jsx
 import React, { useState, useEffect, useRef } from "react";
+import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import {
-  MessageCircle,
   X,
   Send,
   Trash2,
   Plus,
   Menu,
-  Settings,
   Minimize2,
+  Sparkles,
+  Copy,
+  PanelLeftClose,
 } from "lucide-react";
 import { LoadingMark } from "../Loader/Loader";
+import BrandLogo from "../shared/BrandLogo";
 import {
   createConversation,
   getUserConversations,
   getConversation,
   sendMessage,
+  updateConversation,
   deleteConversation,
   clearMessages,
 } from "../../services/operations/chatbotAPI";
@@ -23,6 +28,7 @@ import { notify } from "../../utils/sileoNotifications";
 import "./AIChatbot.css";
 
 const AIChatbot = ({ defaultContext = "general" }) => {
+  const token = useSelector((state) => state.auth.token);
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [conversations, setConversations] = useState([]);
@@ -30,8 +36,12 @@ const AIChatbot = ({ defaultContext = "general" }) => {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [showSidebar, setShowSidebar] = useState(true);
+  const [showSidebar, setShowSidebar] = useState(() =>
+    window.matchMedia("(min-width: 601px)").matches,
+  );
   const [context, setContext] = useState(defaultContext);
+  const [usage, setUsage] = useState(null);
+  const [messageError, setMessageError] = useState("");
 
   // Refs for scrolling behavior
   const messagesEndRef = useRef(null);
@@ -70,12 +80,12 @@ const AIChatbot = ({ defaultContext = "general" }) => {
 
   // Load conversations when chatbot opens
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && token) {
       loadConversations();
       // When chat opens, consider user at bottom so first messages auto-scroll
       setIsAtBottom(true);
     }
-  }, [isOpen]);
+  }, [isOpen, token]);
 
   const loadConversations = async () => {
     try {
@@ -97,6 +107,9 @@ const AIChatbot = ({ defaultContext = "general" }) => {
       setCurrentConversation(response.data);
       setMessages(response.data.messages);
       setContext(response.data.context);
+      if (window.matchMedia("(max-width: 600px)").matches) {
+        setShowSidebar(false);
+      }
       // After loading a conversation, jump directly to the latest message
       setIsAtBottom(true);
       // Use next tick to ensure DOM has rendered before scrolling
@@ -118,10 +131,16 @@ const AIChatbot = ({ defaultContext = "general" }) => {
       setCurrentConversation(response.data);
       setMessages([]);
       setConversations([response.data, ...conversations]);
+      setMessageError("");
+      if (window.matchMedia("(max-width: 600px)").matches) {
+        setShowSidebar(false);
+      }
       notify.success("New conversation started");
     } catch (error) {
       console.error("Failed to create conversation:", error);
-      notify.error("Failed to start new conversation");
+      notify.error(
+        error.response?.data?.message || "Failed to start new conversation",
+      );
     }
   };
 
@@ -131,10 +150,13 @@ const AIChatbot = ({ defaultContext = "general" }) => {
     if (!inputMessage.trim() || isLoading) return;
 
     const userMessage = inputMessage.trim();
+    const localId = `${Date.now()}-${Math.random()}`;
     setInputMessage("");
+    setMessageError("");
 
     // Add user message to UI immediately
     const tempUserMessage = {
+      localId,
       role: "user",
       content: userMessage,
       timestamp: new Date(),
@@ -155,6 +177,7 @@ const AIChatbot = ({ defaultContext = "general" }) => {
 
       // Send message and get AI response
       const response = await sendMessage(sessionId, userMessage, context);
+      setUsage(response.data.usage || null);
 
       // Add AI response to messages
       const aiMessage = {
@@ -168,9 +191,14 @@ const AIChatbot = ({ defaultContext = "general" }) => {
       loadConversations();
     } catch (error) {
       console.error("Failed to send message:", error);
-      notify.error("Failed to send message. Please try again.");
-      // Remove the temporary user message on error
-      setMessages((prev) => prev.slice(0, -1));
+      const errorData = error.response?.data;
+      if (errorData?.usage) setUsage(errorData.usage);
+      setMessageError(
+        errorData?.message || "We couldn't send that. Please try again.",
+      );
+      setMessages((prev) =>
+        prev.filter((message) => message.localId !== localId),
+      );
     } finally {
       setIsLoading(false);
     }
@@ -206,12 +234,51 @@ const AIChatbot = ({ defaultContext = "general" }) => {
     }
   };
 
+  const handleContextChange = async (event) => {
+    const nextContext = event.target.value;
+    const previousContext = context;
+    setContext(nextContext);
+
+    if (!currentConversation || currentConversation.context === nextContext) {
+      return;
+    }
+
+    try {
+      const response = await updateConversation(currentConversation.sessionId, {
+        context: nextContext,
+      });
+      setCurrentConversation(response.data);
+    } catch (error) {
+      console.error("Failed to update coaching mode:", error);
+      setContext(previousContext);
+      notify.error(
+        error.response?.data?.message || "Couldn't update coaching mode",
+      );
+    }
+  };
+
   const contextOptions = [
-    { value: "general", label: "General Help", icon: "💬" },
-    { value: "interview-prep", label: "Interview Prep", icon: "🎯" },
-    { value: "technical-help", label: "Technical Help", icon: "💻" },
-    { value: "career-advice", label: "Career Advice", icon: "📈" },
+    { value: "general", label: "General help" },
+    { value: "interview-prep", label: "Interview practice" },
+    { value: "technical-help", label: "Technical questions" },
+    { value: "career-advice", label: "Career advice" },
   ];
+
+  const starterPrompts = [
+    "Help me prepare for an interview",
+    "Improve my answer to “Tell me about yourself”",
+    "Explain a technical concept",
+  ];
+
+  const handleCopyMessage = async (content) => {
+    try {
+      await navigator.clipboard.writeText(content);
+      notify.success("Response copied");
+    } catch (error) {
+      console.error("Failed to copy chatbot response:", error);
+      notify.error("Couldn't copy the response");
+    }
+  };
 
   if (!isOpen) {
     return (
@@ -220,33 +287,62 @@ const AIChatbot = ({ defaultContext = "general" }) => {
         className="chatbot-toggle-btn"
         aria-label="Open AI Assistant"
       >
-        <MessageCircle size={24} />
+        <Sparkles size={21} />
+        <span>Ask Invyo AI</span>
       </button>
     );
   }
 
   return (
-    <div className={`chatbot-container ${isMinimized ? "minimized" : ""}`}>
-      {/* Header */}
+    <section
+      className={`chatbot-container ${isMinimized ? "minimized" : ""}`}
+      aria-label="Intervyo AI assistant"
+    >
       <div className="chatbot-header">
         <div className="chatbot-header-left">
-          <button
-            onClick={() => setShowSidebar(!showSidebar)}
-            className="chatbot-icon-btn"
-            aria-label="Toggle sidebar"
-          >
-            <Menu size={20} />
-          </button>
-          <div className="chatbot-header-info">
-            <h3>AI Assistant</h3>
-            <span className="chatbot-status">Online</span>
+          {token && (
+            <button
+              onClick={() => setShowSidebar(!showSidebar)}
+              className="chatbot-icon-btn"
+              aria-label={
+                showSidebar ? "Hide chat history" : "Show chat history"
+              }
+              title={showSidebar ? "Hide history" : "Show history"}
+            >
+              {showSidebar ? (
+                <PanelLeftClose size={18} />
+              ) : (
+                <Menu size={18} />
+              )}
+            </button>
+          )}
+          <div className="chatbot-brand">
+            <BrandLogo className="chatbot-brand-logo" />
+            <div className="chatbot-header-info">
+              <h3>AI coach</h3>
+              <span className="chatbot-status">
+                <span className="chatbot-status-dot" />
+                {token ? "Ready when you are" : "Personal interview coaching"}
+              </span>
+            </div>
           </div>
         </div>
         <div className="chatbot-header-right">
+          {currentConversation && messages.length > 0 && (
+            <button
+              onClick={handleClearMessages}
+              className="chatbot-icon-btn"
+              aria-label="Clear this chat"
+              title="Clear this chat"
+            >
+              <Trash2 size={17} />
+            </button>
+          )}
           <button
             onClick={() => setIsMinimized(!isMinimized)}
             className="chatbot-icon-btn"
-            aria-label="Minimize"
+            aria-label={isMinimized ? "Restore chat" : "Minimize chat"}
+            title={isMinimized ? "Restore" : "Minimize"}
           >
             <Minimize2 size={20} />
           </button>
@@ -254,6 +350,7 @@ const AIChatbot = ({ defaultContext = "general" }) => {
             onClick={() => setIsOpen(false)}
             className="chatbot-icon-btn"
             aria-label="Close"
+            title="Close chat"
           >
             <X size={20} />
           </button>
@@ -261,8 +358,7 @@ const AIChatbot = ({ defaultContext = "general" }) => {
       </div>
 
       <div className="chatbot-body">
-        {/* Sidebar */}
-        {showSidebar && (
+        {token && showSidebar && (
           <div className="chatbot-sidebar">
             <div className="chatbot-sidebar-header">
               <button
@@ -274,24 +370,29 @@ const AIChatbot = ({ defaultContext = "general" }) => {
               </button>
             </div>
 
-            {/* Context Selector */}
             <div className="chatbot-context-selector">
-              <label>Mode:</label>
+              <label htmlFor="chatbot-context">YOUR COACHING MODE</label>
               <select
+                id="chatbot-context"
                 value={context}
-                onChange={(e) => setContext(e.target.value)}
+                onChange={handleContextChange}
                 className="chatbot-select"
               >
                 {contextOptions.map((opt) => (
                   <option key={opt.value} value={opt.value}>
-                    {opt.icon} {opt.label}
+                    {opt.label}
                   </option>
                 ))}
               </select>
             </div>
 
-            {/* Conversations List */}
             <div className="chatbot-conversations">
+              <p className="chatbot-section-label">RECENT CHATS</p>
+              {conversations.length === 0 && (
+                <p className="chatbot-history-empty">
+                  Your conversations will show up here.
+                </p>
+              )}
               {conversations.map((conv) => (
                 <div
                   key={conv.sessionId}
@@ -300,14 +401,22 @@ const AIChatbot = ({ defaultContext = "general" }) => {
                       ? "active"
                       : ""
                   }`}
-                  onClick={() => loadConversation(conv.sessionId)}
                 >
-                  <div className="conversation-content">
+                  <button
+                    type="button"
+                    className="conversation-content"
+                    onClick={() => loadConversation(conv.sessionId)}
+                    aria-current={
+                      currentConversation?.sessionId === conv.sessionId
+                        ? "page"
+                        : undefined
+                    }
+                  >
                     <span className="conversation-title">{conv.title}</span>
                     <span className="conversation-time">
                       {new Date(conv.lastActivity).toLocaleDateString()}
                     </span>
-                  </div>
+                  </button>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -315,6 +424,7 @@ const AIChatbot = ({ defaultContext = "general" }) => {
                     }}
                     className="conversation-delete"
                     aria-label="Delete conversation"
+                    title="Delete conversation"
                   >
                     <Trash2 size={14} />
                   </button>
@@ -324,38 +434,92 @@ const AIChatbot = ({ defaultContext = "general" }) => {
           </div>
         )}
 
-        {/* Messages Area */}
         <div className="chatbot-messages-container">
           <div
             className="chatbot-messages"
             ref={messagesContainerRef}
             onScroll={handleMessagesScroll}
-          > 
+            aria-live="polite"
+          >
             {messages.length === 0 ? (
-              <div className="chatbot-welcome">
-                <h2>👋 Welcome to AI Assistant!</h2>
-                <p>I'm here to help you with:</p>
-                <ul>
-                  <li>🎯 Interview preparation and tips</li>
-                  <li>💻 Technical questions and coding help</li>
-                  <li>📈 Career advice and guidance</li>
-                  <li>❓ Any questions about the platform</li>
-                </ul>
-                <p>What would you like to know?</p>
+              <div
+                className={`chatbot-welcome ${
+                  token ? "" : "chatbot-welcome-guest"
+                }`}
+              >
+                <p className="chatbot-eyebrow">
+                  {token ? "YOUR INTERVIEW PARTNER" : "INTERVIEW PREP, REIMAGINED"}
+                </p>
+                <h2>
+                  {token
+                    ? "Let’s get you ready."
+                    : "Your next interview starts here."}
+                </h2>
+                <p className="chatbot-welcome-copy">
+                  {token
+                    ? "Practice answers, work through technical questions, or make your next career move with a little more confidence."
+                    : "Get thoughtful, personalized coaching for interview practice, technical questions, and your next career move."}
+                </p>
+                {token ? (
+                  <div className="chatbot-starter-prompts">
+                    {starterPrompts.map((prompt) => (
+                      <button
+                        type="button"
+                        key={prompt}
+                        onClick={() => setInputMessage(prompt)}
+                        className="chatbot-starter-prompt"
+                      >
+                        {prompt}
+                        <Send size={14} />
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="chatbot-guest-actions">
+                    <Link to="/login" className="chatbot-guest-primary">
+                      Sign in to start chatting
+                      <Send size={15} />
+                    </Link>
+                    <Link to="/register" className="chatbot-guest-secondary">
+                      Create a free account
+                    </Link>
+                    <p>
+                      Your chat history and coaching modes are saved to your
+                      account.
+                    </p>
+                  </div>
+                )}
               </div>
             ) : (
               messages.map((msg, index) => (
-                <div key={index} className={`chatbot-message ${msg.role}`}>
-                  <div className="message-avatar">
-                    {msg.role === "user" ? "👤" : "🤖"}
-                  </div>
+                <div
+                  key={msg._id || msg.localId || `${msg.timestamp}-${index}`}
+                  className={`chatbot-message ${msg.role}`}
+                >
                   <div className="message-content">
+                    <div className="message-author">
+                      {msg.role === "user" ? "You" : "Intervyo AI"}
+                    </div>
                     <div className="message-text">{msg.content}</div>
-                    <div className="message-time">
-                      {new Date(msg.timestamp).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                    <div className="message-meta">
+                      <div className="message-time">
+                        {new Date(msg.timestamp).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </div>
+                      {msg.role === "assistant" && (
+                        <button
+                          type="button"
+                          className="message-copy-btn"
+                          onClick={() => handleCopyMessage(msg.content)}
+                          aria-label="Copy response"
+                          title="Copy response"
+                        >
+                          <Copy size={13} />
+                          <span>Copy</span>
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -363,11 +527,10 @@ const AIChatbot = ({ defaultContext = "general" }) => {
             )}
             {isLoading && (
               <div className="chatbot-message assistant">
-                <div className="message-avatar">🤖</div>
                 <div className="message-content">
                   <div className="message-loading">
                     <LoadingMark size={10} />
-                    <span>Thinking...</span>
+                    <span>Putting together a thoughtful answer…</span>
                   </div>
                 </div>
               </div>
@@ -375,33 +538,66 @@ const AIChatbot = ({ defaultContext = "general" }) => {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input Area */}
-          <form onSubmit={handleSendMessage} className="chatbot-input-form">
-            <input
-              ref={inputRef}
-              type="text"
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              placeholder="Type your message..."
-              className="chatbot-input"
-              disabled={isLoading}
-            />
-            <button
-              type="submit"
-              className="chatbot-send-btn"
-              disabled={!inputMessage.trim() || isLoading}
-              aria-label="Send message"
-            >
-              {isLoading ? (
-                <LoadingMark size={10} />
-              ) : (
-                <Send size={20} />
-              )}
-            </button>
-          </form>
+          {token ? (
+            <form onSubmit={handleSendMessage} className="chatbot-input-form">
+            {usage && (
+              <div className="chatbot-usage" aria-live="polite">
+                <span>
+                  {usage.hourlyCount} / {usage.hourlyLimit} messages this hour
+                </span>
+                <span className="chatbot-usage-divider">·</span>
+                <span>{usage.dailyCount} / {usage.dailyLimit} today</span>
+              </div>
+            )}
+            {messageError && (
+              <p className="chatbot-error" role="alert">
+                {messageError}
+              </p>
+            )}
+            <div className="chatbot-composer">
+              <input
+                ref={inputRef}
+                type="text"
+                value={inputMessage}
+                maxLength={5000}
+                onChange={(e) => setInputMessage(e.target.value)}
+                placeholder="Ask anything about your next interview…"
+                className="chatbot-input"
+                disabled={isLoading}
+                aria-label="Message Intervyo AI"
+              />
+              <button
+                type="submit"
+                className="chatbot-send-btn"
+                disabled={!inputMessage.trim() || isLoading}
+                aria-label="Send message (Enter)"
+                title="Send message"
+              >
+                {isLoading ? (
+                  <LoadingMark size={10} />
+                ) : (
+                  <Send size={18} />
+                )}
+              </button>
+            </div>
+            <p className="chatbot-disclaimer">
+              AI can make mistakes. Don’t share sensitive personal information.
+            </p>
+            </form>
+          ) : (
+            <div className="chatbot-input-form chatbot-guest-footer">
+              <p>
+                Sign in to unlock your personal AI coach, saved conversations,
+                and tailored practice.
+              </p>
+              <Link to="/login" className="chatbot-guest-footer-link">
+                Continue to sign in
+              </Link>
+            </div>
+          )}
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 
