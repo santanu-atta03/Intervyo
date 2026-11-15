@@ -4,6 +4,7 @@ export const BASE_URL = VITE_BASE_URL + "/api";
 
 export const authEndpoints = {
   SEND_OTP_API: `${BASE_URL}/auth/send-otp`,
+  VERIFY_OTP_API: `${BASE_URL}/auth/verify-otp`,
   REGISTER_API: `${BASE_URL}/auth/register`,
   LOGIN_API: `${BASE_URL}/auth/login`,
   LOGOUT_API: `${BASE_URL}/auth/logout`,

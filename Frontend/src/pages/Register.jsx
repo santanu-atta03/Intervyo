@@ -1,16 +1,14 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   AtSign,
   BriefcaseBusiness,
-  Check,
   ChevronLeft,
   ChevronRight,
   Eye,
   EyeOff,
-  Github,
   Mail,
   Monitor,
   Rocket,
@@ -21,7 +19,12 @@ import {
 
 import { setSignupData } from "../slices/authSlice";
 import BrandLogo from "../components/shared/BrandLogo";
-import { sendOtp, warmUpAuthService } from "../services/operations/authAPI";
+import {
+  resendOtp,
+  sendOtp,
+  verifyOtp,
+  warmUpAuthService,
+} from "../services/operations/authAPI";
 
 const HERO_IMAGE = {
   register_img: "https://res.cloudinary.com/do6qh4gup/image/upload/v1794378800/upscalemedia-transformed_1_fejyc8.png",
@@ -102,7 +105,8 @@ const fadeUp = {
 
 function Register() {
   const dispatch = useDispatch();
-  const { loading } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
+  const { loading, signupData } = useSelector((state) => state.auth);
 
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
@@ -112,10 +116,31 @@ function Register() {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [resendCountdown, setResendCountdown] = useState(0);
+  const otpInputRefs = useRef([]);
+  const autoSubmittedOtp = useRef("");
+  const verificationInProgress = useRef(false);
 
   useEffect(() => {
     warmUpAuthService();
   }, []);
+
+  useEffect(() => {
+    if (step === 4) {
+      otpInputRefs.current[0]?.focus();
+    }
+  }, [step]);
+
+  useEffect(() => {
+    if (resendCountdown === 0) return undefined;
+
+    const timer = window.setTimeout(
+      () => setResendCountdown((countdown) => countdown - 1),
+      1000,
+    );
+    return () => window.clearTimeout(timer);
+  }, [resendCountdown]);
 
   const strength = getStrength(password);
   const passwordsMatch =
@@ -151,6 +176,89 @@ function Register() {
 
     setError("");
     return true;
+  };
+
+  const handleVerifyOtp = useCallback(async () => {
+    const otpValue = otp.join("");
+    if (
+      otpValue.length !== 6 ||
+      loading ||
+      verificationInProgress.current
+    ) {
+      return;
+    }
+
+    verificationInProgress.current = true;
+    const isVerified = await dispatch(verifyOtp(email, otpValue));
+    verificationInProgress.current = false;
+
+    if (!isVerified) return;
+
+    dispatch(setSignupData({ ...signupData, otp: otpValue }));
+    navigate("/domain-selection");
+  }, [dispatch, email, loading, navigate, otp, signupData]);
+
+  useEffect(() => {
+    const otpValue = otp.join("");
+    if (
+      otpValue.length === 6 &&
+      otpValue !== autoSubmittedOtp.current
+    ) {
+      autoSubmittedOtp.current = otpValue;
+      handleVerifyOtp();
+    }
+  }, [handleVerifyOtp, otp]);
+
+  const handleOtpChange = (value, index) => {
+    const digits = value.replace(/\D/g, "");
+    if (!digits) {
+      if (value) return;
+
+      setOtp((currentOtp) =>
+        currentOtp.map((digit, digitIndex) =>
+          digitIndex === index ? "" : digit,
+        ),
+      );
+      autoSubmittedOtp.current = "";
+      return;
+    }
+
+    const updatedOtp = [...otp];
+    if (digits.length > 1) {
+      digits.slice(0, 6 - index).split("").forEach((digit, offset) => {
+        updatedOtp[index + offset] = digit;
+      });
+    } else {
+      updatedOtp[index] = digits;
+    }
+
+    setOtp(updatedOtp);
+    autoSubmittedOtp.current = "";
+    const nextIndex = Math.min(index + digits.length, 5);
+    otpInputRefs.current[nextIndex]?.focus();
+  };
+
+  const handleOtpPaste = (event) => {
+    const digits = event.clipboardData.getData("text").replace(/\D/g, "");
+    if (!digits) return;
+
+    event.preventDefault();
+    const pastedOtp = digits.slice(0, 6).split("");
+    setOtp([...pastedOtp, ...Array(6 - pastedOtp.length).fill("")]);
+    autoSubmittedOtp.current = "";
+    otpInputRefs.current[Math.min(pastedOtp.length, 5)]?.focus();
+  };
+
+  const handleResendOtp = async () => {
+    if (resendCountdown > 0 || loading) return;
+
+    const sent = await dispatch(resendOtp(email));
+    if (sent) {
+      setOtp(["", "", "", "", "", ""]);
+      autoSubmittedOtp.current = "";
+      setResendCountdown(30);
+      otpInputRefs.current[0]?.focus();
+    }
   };
 
   const handleContinue = async () => {
@@ -195,11 +303,12 @@ function Register() {
         })
       );
 
-      setStep(4);
-
-      // Passing an empty callback keeps the verification message on this screen.
-      // The verification page can still be opened from your auth flow if needed.
-      dispatch(sendOtp(email, () => { }));
+      const sent = await dispatch(sendOtp(email));
+      if (sent) {
+        setOtp(["", "", "", "", "", ""]);
+        autoSubmittedOtp.current = "";
+        setStep(4);
+      }
 
       return;
     }
@@ -663,44 +772,104 @@ function Register() {
                   className="py-5 text-center"
                 >
                   <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-[#555] bg-white/[0.05]">
-                    <Mail className="h-5 w-5 text-[#d9d9d9]" />
+                    <Mail className="h-5 w-5 text-[#D1F48C]" />
                   </div>
 
                   <h1 className="mt-5 font-heading text-[28px] font-bold leading-none text-white">
-                    Check your inbox
+                    Verify your email
                   </h1>
 
                   <p className="mt-3 text-[12px] leading-relaxed text-[#aaa]">
-                    We sent a verification link to:
+                    Enter the six-digit code we sent to
                   </p>
 
-                  <p className="mt-2 break-all text-[13px] font-semibold text-white">
+                  <p className="mt-1 break-all text-[13px] font-semibold text-white">
                     {email}
                   </p>
 
-                  <p className="mt-5 text-[11px] leading-relaxed text-[#888]">
-                    Open the email and follow the link to finish creating your
-                    Intervyo account.
-                  </p>
-
-                  <div className="mt-6 rounded-[5px] border border-[#414141] bg-white/[0.03] px-4 py-3 text-left text-[11px] text-[#aaa]">
-                    <div className="flex items-center gap-2 text-white">
-                      <Check className="h-4 w-4 text-[#d9d9d9]" />
-                      Account details saved
-                    </div>
-                    <div className="mt-2 flex items-center gap-2 text-white">
-                      <Check className="h-4 w-4 text-[#d9d9d9]" />
-                      Preparation path selected
-                    </div>
+                  <div
+                    className="mt-6 flex justify-center gap-2 sm:gap-3"
+                    aria-label="Six-digit email verification code"
+                  >
+                    {otp.map((digit, index) => (
+                      <motion.input
+                        key={index}
+                        ref={(element) => {
+                          otpInputRefs.current[index] = element;
+                        }}
+                        type="text"
+                        inputMode="numeric"
+                        autoComplete={index === 0 ? "one-time-code" : "off"}
+                        aria-label={`Verification digit ${index + 1}`}
+                        maxLength={index === 0 ? 6 : 1}
+                        value={digit}
+                        disabled={loading}
+                        onChange={(event) =>
+                          handleOtpChange(event.target.value, index)
+                        }
+                        onPaste={handleOtpPaste}
+                        onKeyDown={(event) => {
+                          if (
+                            event.key === "Backspace" &&
+                            !digit &&
+                            index > 0
+                          ) {
+                            otpInputRefs.current[index - 1]?.focus();
+                          } else if (
+                            event.key === "ArrowLeft" &&
+                            index > 0
+                          ) {
+                            otpInputRefs.current[index - 1]?.focus();
+                          } else if (
+                            event.key === "ArrowRight" &&
+                            index < 5
+                          ) {
+                            otpInputRefs.current[index + 1]?.focus();
+                          }
+                        }}
+                        animate={
+                          digit
+                            ? { scale: [0.92, 1.06, 1], y: [3, 0] }
+                            : { scale: 1, y: 0 }
+                        }
+                        transition={{ duration: 0.22, ease: "easeOut" }}
+                        className="h-12 w-10 rounded-[5px] border border-[#414141] bg-[#202020] text-center text-lg font-semibold text-white outline-none transition-colors focus:border-[#D1F48C] focus:ring-2 focus:ring-[#D1F48C]/20 disabled:opacity-60 sm:h-14 sm:w-12 sm:text-xl"
+                      />
+                    ))}
                   </div>
 
                   <button
                     type="button"
-                    onClick={() => setStep(1)}
-                    className="mt-6 text-[12px] font-semibold text-white hover:text-[#D1F48C]"
+                    onClick={handleVerifyOtp}
+                    disabled={loading || otp.join("").length !== 6}
+                    className="mt-6 flex h-[39px] w-full items-center justify-center rounded-full bg-[#e6e6e6] text-[13px] font-medium text-[#111] transition hover:bg-white active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    Use a different email
+                    {loading ? "Verifying..." : "Verify & continue"}
                   </button>
+
+                  <div className="mt-5 flex items-center justify-between text-[11px]">
+                    <button
+                      type="button"
+                      onClick={handleResendOtp}
+                      disabled={loading || resendCountdown > 0}
+                      className="font-medium text-[#aaa] transition hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {resendCountdown > 0
+                        ? `Resend code in ${resendCountdown}s`
+                        : "Resend code"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOtp(["", "", "", "", "", ""]);
+                        autoSubmittedOtp.current = "";
+                        setStep(1);
+                      }}
+                      className="font-semibold text-white transition hover:text-[#D1F48C]"
+                    >
+                      Use a different email
+                    </button>
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>

@@ -30,7 +30,7 @@ export function warmUpAuthService() {
 }
 
 // Send OTP
-export function sendOtp(email, navigate) {
+export function sendOtp(email) {
   return async (dispatch) => {
     const toastId = notify.loading("Sending OTP...");
     dispatch(setLoading(true));
@@ -46,7 +46,7 @@ export function sendOtp(email, navigate) {
         title: "Verification Code Sent",
         description: `Check ${email} for your one-time verification code.`,
       });
-      navigate("/verify-email");
+      return true;
     } catch (error) {
       console.error("Send OTP Error:", error);
       const message =
@@ -55,6 +55,40 @@ export function sendOtp(email, navigate) {
         title: "Couldn’t Send Verification Code",
         description: message,
       });
+      return false;
+    } finally {
+      dispatch(setLoading(false));
+      notify.dismiss(toastId);
+    }
+  };
+}
+
+export function verifyOtp(email, otp) {
+  return async (dispatch) => {
+    const toastId = notify.loading("Verifying your email...");
+    dispatch(setLoading(true));
+
+    try {
+      const response = await apiConnector(
+        "POST",
+        authEndpoints.VERIFY_OTP_API,
+        { email, otp },
+      );
+
+      if (!response.data.success) {
+        throw new Error(response.data.message);
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Verify OTP Error:", error);
+      const message =
+        error.response?.data?.message || "Failed to verify OTP";
+      notify.error(message, {
+        title: "Verification Failed",
+        description: message,
+      });
+      return false;
     } finally {
       dispatch(setLoading(false));
       notify.dismiss(toastId);
@@ -81,6 +115,7 @@ export function resendOtp(email) {
         title: "New Code Sent",
         description: `A new verification code was sent to ${email}.`,
       });
+      return true;
     } catch (error) {
       console.error("Resend OTP Error:", error);
       const message =
@@ -89,6 +124,7 @@ export function resendOtp(email) {
         title: "Couldn’t Resend Code",
         description: message,
       });
+      return false;
     } finally {
       dispatch(setLoading(false));
       notify.dismiss(toastId);

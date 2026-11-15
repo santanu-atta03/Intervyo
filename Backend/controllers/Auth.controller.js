@@ -91,7 +91,7 @@ export const resendOtp = async (req, res) => {
     }
 
     // Find existing OTP for this email
-    const existingOTP = await OTP.findOne({ email });
+    const existingOTP = await OTP.findOne({ email }).sort({ createdAt: -1 });
 
     if (!existingOTP) {
       return res.status(400).json({
@@ -133,6 +133,43 @@ export const resendOtp = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to resend OTP. Please try again later.",
+    });
+  }
+};
+
+export const verifyOTP = async (req, res) => {
+  try {
+    const email = normalizeEmail(req.body?.email);
+    const otp = typeof req.body?.otp === "string" ? req.body.otp : "";
+
+    if (!email || !/^\d{6}$/.test(otp)) {
+      return res.status(400).json({
+        success: false,
+        message: "A valid email and six-digit OTP are required",
+      });
+    }
+
+    const recentOTP = await OTP.findOne({
+      email,
+      createdAt: { $gt: new Date(Date.now() - 5 * 60 * 1000) },
+    }).sort({ createdAt: -1 });
+
+    if (!recentOTP || recentOTP.otp !== otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired OTP",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Email verified successfully",
+    });
+  } catch (error) {
+    console.error("Verify OTP Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to verify OTP. Please try again.",
     });
   }
 };
@@ -258,7 +295,10 @@ export const register = async (req, res) => {
     }
 
     // Verify OTP
-    const recentOTP = await OTP.findOne({ email })
+    const recentOTP = await OTP.findOne({
+      email,
+      createdAt: { $gt: new Date(Date.now() - 5 * 60 * 1000) },
+    })
       .sort({ createdAt: -1 })
       .limit(1);
 

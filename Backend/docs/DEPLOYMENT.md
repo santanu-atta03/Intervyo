@@ -79,9 +79,16 @@ Complete guide for deploying Intervyo to production.
    CLOUDINARY_CLOUD_NAME=your_cloudinary_name
    CLOUDINARY_API_KEY=your_cloudinary_key
    CLOUDINARY_API_SECRET=your_cloudinary_secret
-   EMAIL_USER=your_email
-   EMAIL_PASS=your_email_password
+   OTP_MAIL_SERVICE_URL=https://your-otp-mail-service.onrender.com/api/send-otp
+   OTP_MAIL_SERVICE_TOKEN=the_matching_bearer_token
    ```
+
+   OTP and contact emails are sent through the separate `santanu-atta03/otp-mail-service`.
+   Deploy that service and configure its `MAIL_USERNAME`, `MAIL_PASSWORD` (a Gmail
+   app password), `MAIL_HOST`, and `MAIL_PORT` variables there. Set the backend
+   `OTP_MAIL_SERVICE_URL` to that service's `/api/send-otp` endpoint and
+   `OTP_MAIL_SERVICE_TOKEN` to the same bearer token configured in the mail service.
+   `EMAIL_USER` and `EMAIL_PASS` are not used by this backend.
 
 4. **Deploy**
    - Click "Create Web Service"

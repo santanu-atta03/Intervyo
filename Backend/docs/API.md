@@ -57,7 +57,7 @@ Send OTP to email for registration.
 {
   "success": true,
   "message": "OTP sent successfully",
-  "expiresIn": "10 minutes"
+  "expiresIn": "5 minutes"
 }
 ```
 
@@ -65,18 +65,16 @@ Send OTP to email for registration.
 
 ---
 
-### Verify OTP & Register
+### Verify OTP
 **POST** `/auth/verify-otp`
 
-Verify OTP and complete registration.
+Verify the latest six-digit registration OTP. The code expires after five minutes.
 
 **Request Body:**
 ```json
 {
   "email": "user@example.com",
-  "otp": "123456",
-  "name": "John Doe",
-  "password": "SecurePass123!"
+  "otp": "123456"
 }
 ```
 
@@ -84,18 +82,13 @@ Verify OTP and complete registration.
 ```json
 {
   "success": true,
-  "message": "Registration successful",
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "user": {
-    "id": "user_id",
-    "email": "user@example.com",
-    "name": "John Doe"
-  }
+  "message": "Email verified successfully"
 }
 ```
 
----
+Complete account creation separately with **POST** `/auth/register`, including the verified OTP and signup details.
 
+---
 ### Login
 **POST** `/auth/login`
 
