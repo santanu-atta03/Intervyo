@@ -27,7 +27,7 @@ jest.unstable_mockModule("../config/Passport.js", () => ({
   },
 }));
 
-// Mock email config to bypass Resend
+// Mock the outbound mail service for health-check tests.
 jest.unstable_mockModule("../config/email.js", () => ({
   mailSender: jest.fn(async () => ({ id: "mock-email" })),
 }));

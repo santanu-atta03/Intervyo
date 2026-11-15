@@ -38,7 +38,7 @@ jest.unstable_mockModule("../config/Passport.js", () => ({
   },
 }));
 
-// Mock email config to avoid constructing Resend without API key
+// Mock the outbound mail service for controller tests.
 jest.unstable_mockModule("../config/email.js", () => ({
   mailSender: jest.fn(async () => ({ id: "mock-email" })),
 }));
