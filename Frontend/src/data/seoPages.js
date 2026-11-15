@@ -75,7 +75,6 @@ export const NOINDEX_PAGES = [
   { path: "/settings", title: "Settings" },
   { path: "/achievements", title: "Achievements" },
   { path: "/interview-setup", title: "Interview setup" },
-  { path: "/domain-selection", title: "Choose an interview domain" },
   { path: "/leaderboard", title: "Leaderboard" },
   { path: "/quiz", title: "Interview quiz" },
   { path: "/career", title: "Career resources" },

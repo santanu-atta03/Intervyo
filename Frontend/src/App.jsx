@@ -1,5 +1,5 @@
 import { Suspense, lazy, useEffect } from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import ScrollToTop from "./components/shared/ScrollToTopButton";
@@ -13,7 +13,6 @@ import { IntervyoLoader } from "./components/Loader/Loader";
 const Landing = lazy(() => import("./pages/Landing"));
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
-const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 const FAQ = lazy(() => import("./pages/FAQ"));
 const PrivacyPolicy = lazy(() => import("./pages/Privacy"));
@@ -24,7 +23,6 @@ const Career = lazy(() => import("./pages/Career"));
 const PricingPage = lazy(() => import("./pages/PricingPage"));
 const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
 const Documentation = lazy(() => import("./pages/Documentation"));
-const DomainSelection = lazy(() => import("./pages/DomainSelection"));
 const Leaderboard = lazy(() => import("./pages/Leaderboard"));
 const BlogPlatform = lazy(() => import("./components/Blogs/BlogPlatform"));
 const DashboardPage = lazy(() => import("./pages/Dashboard"));
@@ -71,7 +69,8 @@ function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/verify-email" element={<Navigate to="/register" replace />} />
+          <Route path="/domain-selection" element={<Navigate to="/register" replace />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
@@ -82,7 +81,6 @@ function App() {
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/cookie-policy" element={<CookiePolicy />} />
           <Route path="/docs" element={<Documentation />} />
-          <Route path="/domain-selection" element={<DomainSelection />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/blog" element={<BlogPlatform />} />
           <Route path="/blog/:slug" element={<BlogPlatform />} />

@@ -86,7 +86,7 @@ Verify the latest six-digit registration OTP. The code expires after five minute
 }
 ```
 
-Complete account creation separately with **POST** `/auth/register`, including the verified OTP and signup details.
+Complete account creation separately with **POST** `/auth/register`, including the verified OTP and signup details. The registration request may also include `discoverySource` and `profile` (`domain` and `experience`) to save the user's onboarding choices.
 
 ---
 ### Login

@@ -276,6 +276,7 @@ export const register = async (req, res) => {
       otp,
       profilePicture,
       profile: profileData,
+      discoverySource,
     } = req.body;
     const email = normalizeEmail(req.body.email);
 
@@ -283,6 +284,16 @@ export const register = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "All fields are required",
+      });
+    }
+
+    if (
+      discoverySource !== undefined &&
+      (typeof discoverySource !== "string" || discoverySource.trim().length > 100)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid discovery source",
       });
     }
 
@@ -327,6 +338,7 @@ export const register = async (req, res) => {
       authProvider: "local",
       isVerified: true,
       profilePicture: finalProfilePicture,
+      discoverySource: discoverySource?.trim() || undefined,
     });
 
     // Step 2: Create profile and assign user

@@ -141,6 +141,7 @@ export function signup(
   profilePicture,
   profile,
   navigate,
+  discoverySource,
 ) {
   return async (dispatch) => {
     const toastId = notify.loading("Creating account...");
@@ -154,6 +155,7 @@ export function signup(
         otp,
         profilePicture,
         profile,
+        discoverySource,
       });
 
       if (!response.data.success) {

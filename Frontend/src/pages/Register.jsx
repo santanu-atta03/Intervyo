@@ -22,6 +22,7 @@ import BrandLogo from "../components/shared/BrandLogo";
 import {
   resendOtp,
   sendOtp,
+  signup,
   verifyOtp,
   warmUpAuthService,
 } from "../services/operations/authAPI";
@@ -86,6 +87,15 @@ const PLATFORMS = [
   },
 ];
 
+const DISCOVERY_SOURCES = [
+  "Social media",
+  "Search engine",
+  "Friend or colleague",
+  "YouTube",
+  "College or university",
+  "Other",
+];
+
 const getStrength = (password) =>
   PASSWORD_REQUIREMENTS.filter((requirement) =>
     requirement.test(password)
@@ -113,6 +123,8 @@ function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [platform, setPlatform] = useState("");
+  const [experience, setExperience] = useState("");
+  const [discoverySource, setDiscoverySource] = useState("");
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -195,8 +207,8 @@ function Register() {
     if (!isVerified) return;
 
     dispatch(setSignupData({ ...signupData, otp: otpValue }));
-    navigate("/domain-selection");
-  }, [dispatch, email, loading, navigate, otp, signupData]);
+    setStep(5);
+  }, [dispatch, email, loading, otp, signupData]);
 
   useEffect(() => {
     const otpValue = otp.join("");
@@ -261,7 +273,7 @@ function Register() {
     }
   };
 
-  const handleContinue = async () => {
+  const handleContinue = async (skipPlatform = false) => {
     if (step === 1) {
       if (validateEmail()) {
         setStep(2);
@@ -279,7 +291,7 @@ function Register() {
     }
 
     if (step === 3) {
-      if (!platform) {
+      if (!platform && !skipPlatform) {
         setError("Please choose a platform");
         return;
       }
@@ -296,7 +308,7 @@ function Register() {
           name: derivedName || "Intervyo User",
           email,
           password,
-          platform,
+          platform: skipPlatform ? "" : platform,
           profilePicture: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(
             email
           )}`,
@@ -312,10 +324,45 @@ function Register() {
 
       return;
     }
+
+    if (step === 5) {
+      if (!discoverySource) {
+        setError("Please tell us where you heard about Intervyo");
+        return;
+      }
+
+      if (!signupData) {
+        setError("Your signup details have expired. Please start again.");
+        return;
+      }
+
+      const profile = {
+        domain: signupData.platform || null,
+        experience: Number(experience) || 0,
+      };
+
+      dispatch(
+        signup(
+          signupData.name,
+          signupData.email,
+          signupData.password,
+          signupData.otp,
+          signupData.profilePicture,
+          profile,
+          navigate,
+          discoverySource,
+        ),
+      );
+    }
   };
 
   const handleBack = () => {
     setError("");
+
+    if (step === 5) {
+      setStep(4);
+      return;
+    }
 
     if (step > 1 && step < 4) {
       setStep((currentStep) => currentStep - 1);
@@ -452,7 +499,7 @@ function Register() {
             <span className="absolute bottom-[10px] left-[11px] h-[7px] w-[7px] rounded-full bg-[#3b3b3b]" />
             <span className="absolute bottom-[10px] right-[11px] h-[7px] w-[7px] rounded-full bg-[#3b3b3b]" />
 
-            {step > 1 && step < 4 && (
+            {(step > 1 && step < 4 || step === 5) && (
               <button
                 type="button"
                 onClick={handleBack}
@@ -752,13 +799,98 @@ function Register() {
 
                   <button
                     type="button"
-                    onClick={() => {
-                      setPlatform("skipped");
-                      handleContinue();
-                    }}
+                    onClick={() => handleContinue(true)}
                     className="mx-auto mt-5 block text-[12px] font-medium text-white hover:text-[#D1F48C]"
                   >
                     Skip
+                  </button>
+                </motion.div>
+              )}
+
+              {step === 5 && (
+                <motion.div
+                  key="discovery-source"
+                  variants={fadeUp}
+                  initial="hidden"
+                  animate="visible"
+                  exit={{ opacity: 0, y: -10 }}
+                >
+                  <h1 className="font-heading text-[27px] font-bold leading-none text-white">
+                    Where did you hear about Intervyo?
+                  </h1>
+
+                  <p className="mt-2 text-[12px] leading-relaxed text-[#aaa]">
+                    This helps us understand how people find us.
+                  </p>
+
+                  <div className="mt-6 grid grid-cols-2 gap-2">
+                    {DISCOVERY_SOURCES.map((source) => {
+                      const selected = discoverySource === source;
+
+                      return (
+                        <button
+                          key={source}
+                          type="button"
+                          aria-pressed={selected}
+                          onClick={() => {
+                            setDiscoverySource(source);
+                            setError("");
+                          }}
+                          className={`flex min-h-[39px] items-center justify-between gap-2 rounded-[5px] border px-3 text-left text-[11px] transition ${
+                            selected
+                              ? "border-[#8c8c8c] bg-white/[0.08] text-white"
+                              : "border-[#414141] text-[#ccc] hover:border-[#626262]"
+                          }`}
+                        >
+                          {source}
+                          <span
+                            className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border ${
+                              selected
+                                ? "border-white bg-white"
+                                : "border-[#555]"
+                            }`}
+                          >
+                            {selected && (
+                              <span className="h-1.5 w-1.5 rounded-full bg-[#292929]" />
+                            )}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="mt-5">
+                    <label
+                      htmlFor="signup-experience"
+                      className="mb-2 block text-[12px] font-semibold text-white"
+                    >
+                      Years of experience (optional)
+                    </label>
+                    <select
+                      id="signup-experience"
+                      value={experience}
+                      onChange={(event) => setExperience(event.target.value)}
+                      className="h-[39px] w-full rounded-[5px] border border-[#414141] bg-[#292929] px-3 text-[12px] text-white outline-none transition focus:border-[#72b2ff] focus:ring-1 focus:ring-[#72b2ff]/30"
+                    >
+                      <option value="">Select experience</option>
+                      <option value="0">Fresher</option>
+                      <option value="1">1-2 years</option>
+                      <option value="3">3-5 years</option>
+                      <option value="6">5+ years</option>
+                    </select>
+                  </div>
+
+                  {error && (
+                    <p className="mt-3 text-[11px] text-red-300">{error}</p>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => handleContinue()}
+                    disabled={loading}
+                    className="mt-6 flex h-[39px] w-full items-center justify-center rounded-full bg-[#e6e6e6] text-[13px] font-medium text-[#111] transition hover:bg-white active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {loading ? "Creating account..." : "Complete sign up"}
                   </button>
                 </motion.div>
               )}

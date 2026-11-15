@@ -29,6 +29,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  discoverySource: {
+    type: String,
+    trim: true,
+    maxlength: 100,
+  },
 
   // ========================================
   // OAUTH PROVIDER IDs
