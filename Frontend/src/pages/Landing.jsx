@@ -14,6 +14,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSelector } from "react-redux";
 import Lenis from "@studio-freight/lenis";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -319,6 +320,7 @@ function RollingNumber({ value, prefix = "", suffix = "", minDigits = 1 }) {
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const { token } = useSelector((state) => state.auth);
   const [videoModalOpen, setVideoModalOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [urlInput, setUrlInput] = useState("");
@@ -718,56 +720,58 @@ export default function LandingPage() {
 
           {/* RIGHT: Action Buttons */}
           <div className="flex shrink-0 items-center gap-2 sm:gap-2.5">
-
-            {/* Login */}
-            <Link
-              to="/login"
-              className="char-btn hidden items-center justify-center gap-1.5 rounded-full bg-[#dcd7d7] px-7 py-3 text-[15px] font-semibold text-black shadow-sm transition-all duration-200 hover:bg-[#9b9494] active:scale-[0.97] sm:flex"
-            >
-              <span className="inline-flex">
-                {"Log in".split("").map((c, i) => (
-                  <span
-                    key={i}
-                    className="c-char inline-block transition-transform duration-200"
-                    style={{ transitionDelay: `${i * 20}ms` }}
-                  >
-                    {c === " " ? "\u00A0" : c}
+            {token ? (
+              <Link
+                to="/dashboard"
+                className="rounded-full bg-[#171717] px-5 py-2.5 text-[15px] font-semibold text-white shadow-sm transition-all duration-200 hover:bg-[#333333] sm:px-7 sm:py-3"
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="char-btn hidden items-center justify-center gap-1.5 rounded-full bg-[#dcd7d7] px-7 py-3 text-[15px] font-semibold text-black shadow-sm transition-all duration-200 hover:bg-[#9b9494] active:scale-[0.97] sm:flex"
+                >
+                  <span className="inline-flex">
+                    {"Log in".split("").map((c, i) => (
+                      <span
+                        key={i}
+                        className="c-char inline-block transition-transform duration-200"
+                        style={{ transitionDelay: `${i * 20}ms` }}
+                      >
+                        {c === " " ? "\u00A0" : c}
+                      </span>
+                    ))}
                   </span>
-                ))}
-              </span>
-            </Link>
+                </Link>
 
+                <Link
+                  to="/interview-setup"
+                  className="hidden sm:flex items-center justify-center bg-white text-[#171717] text-[15px] font-semibold px-7 py-3 rounded-full hover:bg-zinc-100 transition-all duration-200 shadow-sm"
+                >
+                  Get Demo
+                </Link>
 
-            {/* Get Demo */}
-            <Link
-              to="/interview-setup"
-              className="hidden sm:flex items-center justify-center bg-white text-[#171717] text-[15px] font-semibold px-7 py-3 rounded-full hover:bg-zinc-100 transition-all duration-200 shadow-sm"
-            >
-              Get Demo
-            </Link>
-
-
-            {/* Start Free */}
-            <Link
-              to="/interview-setup"
-              className="char-btn flex flex-row items-center gap-1.5  rounded-full bg-[#171717] px-3 py-2.5 text-[15px] font-semibold text-white shadow-sm transition-all duration-200 hover:bg-[#333333] active:scale-[0.97] sm:px-7 sm:py-3 sm:text-[15px]"
-            >
-
-              <span className="inline-flex">
-                {"Start Free".split("").map((c, i) => (
-                  <span
-                    key={i}
-                    className="c-char inline-block transition-transform duration-200"
-                    style={{ transitionDelay: `${i * 20}ms` }}
-                  >
-                    {c === " " ? "\u00A0" : c}
+                <Link
+                  to="/interview-setup"
+                  className="char-btn flex flex-row items-center gap-1.5 rounded-full bg-[#171717] px-3 py-2.5 text-[15px] font-semibold text-white shadow-sm transition-all duration-200 hover:bg-[#333333] active:scale-[0.97] sm:px-7 sm:py-3 sm:text-[15px]"
+                >
+                  <span className="inline-flex">
+                    {"Start Free".split("").map((c, i) => (
+                      <span
+                        key={i}
+                        className="c-char inline-block transition-transform duration-200"
+                        style={{ transitionDelay: `${i * 20}ms` }}
+                      >
+                        {c === " " ? "\u00A0" : c}
+                      </span>
+                    ))}
                   </span>
-                ))}
-              </span>
-
-              <ArrowRight className="w-4 h-4" />
-
-            </Link>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </>
+            )}
 
             <button
               type="button"
@@ -815,6 +819,15 @@ export default function LandingPage() {
                   {label}
                 </a>
               ),
+            )}
+            {token && (
+              <Link
+                to="/dashboard"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block rounded-xl px-3 py-3 transition-colors hover:bg-zinc-100"
+              >
+                Dashboard
+              </Link>
             )}
           </div>
         )}

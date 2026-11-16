@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
+import CodeSlots from "@/components/CodeSlots";
 import {
   AtSign,
   BriefcaseBusiness,
@@ -119,6 +120,7 @@ function Register() {
   const { loading, signupData } = useSelector((state) => state.auth);
 
   const [step, setStep] = useState(1);
+  const [status, setStatus] = useState("idle");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -190,25 +192,38 @@ function Register() {
     return true;
   };
 
-  const handleVerifyOtp = useCallback(async () => {
-    const otpValue = otp.join("");
-    if (
-      otpValue.length !== 6 ||
-      loading ||
-      verificationInProgress.current
-    ) {
-      return;
-    }
+  
+const handleVerifyOtp = useCallback(async () => {
+  const otpValue = otp.join("");
 
-    verificationInProgress.current = true;
-    const isVerified = await dispatch(verifyOtp(email, otpValue));
-    verificationInProgress.current = false;
+  if (
+    otpValue.length !== 6 ||
+    loading ||
+    verificationInProgress.current
+  ) {
+    return;
+  }
+
+  verificationInProgress.current = true;
+
+  try {
+    const isVerified = await dispatch(
+      verifyOtp(email, otpValue)
+    );
 
     if (!isVerified) return;
 
-    dispatch(setSignupData({ ...signupData, otp: otpValue }));
+    dispatch(setSignupData({
+      ...signupData,
+      otp: otpValue
+    }));
+
     setStep(5);
-  }, [dispatch, email, loading, otp, signupData]);
+  } finally {
+    verificationInProgress.current = false;
+  }
+}, [dispatch, email, loading, otp, signupData]);
+
 
   useEffect(() => {
     const otpValue = otp.join("");
@@ -221,45 +236,6 @@ function Register() {
     }
   }, [handleVerifyOtp, otp]);
 
-  const handleOtpChange = (value, index) => {
-    const digits = value.replace(/\D/g, "");
-    if (!digits) {
-      if (value) return;
-
-      setOtp((currentOtp) =>
-        currentOtp.map((digit, digitIndex) =>
-          digitIndex === index ? "" : digit,
-        ),
-      );
-      autoSubmittedOtp.current = "";
-      return;
-    }
-
-    const updatedOtp = [...otp];
-    if (digits.length > 1) {
-      digits.slice(0, 6 - index).split("").forEach((digit, offset) => {
-        updatedOtp[index + offset] = digit;
-      });
-    } else {
-      updatedOtp[index] = digits;
-    }
-
-    setOtp(updatedOtp);
-    autoSubmittedOtp.current = "";
-    const nextIndex = Math.min(index + digits.length, 5);
-    otpInputRefs.current[nextIndex]?.focus();
-  };
-
-  const handleOtpPaste = (event) => {
-    const digits = event.clipboardData.getData("text").replace(/\D/g, "");
-    if (!digits) return;
-
-    event.preventDefault();
-    const pastedOtp = digits.slice(0, 6).split("");
-    setOtp([...pastedOtp, ...Array(6 - pastedOtp.length).fill("")]);
-    autoSubmittedOtp.current = "";
-    otpInputRefs.current[Math.min(pastedOtp.length, 5)]?.focus();
-  };
 
   const handleResendOtp = async () => {
     if (resendCountdown > 0 || loading) return;
@@ -540,7 +516,8 @@ function Register() {
                         setError("");
                       }}
                       placeholder="m@example.com"
-                      autoComplete="email"
+                      name="username"
+                      autoComplete="username"
                       autoFocus
                       className={`h-[36px] w-full rounded-[5px] border bg-transparent px-3 text-[14px] text-white outline-none transition placeholder:text-[#858585] focus:border-[#72b2ff] focus:ring-1 focus:ring-[#72b2ff]/30 ${error ? "border-red-400/70" : "border-[#414141]"
                         }`}
@@ -615,6 +592,8 @@ function Register() {
                         id="signup-password"
                         type={showPassword ? "text" : "password"}
                         value={password}
+                        name="password"
+                        autoComplete="new-password"
                         onChange={(event) => {
                           setPassword(event.target.value);
                           setError("");
@@ -652,6 +631,8 @@ function Register() {
                       <input
                         id="confirm-password"
                         type={showConfirmPassword ? "text" : "password"}
+                        name="confirmPassword"
+                        autoComplete="new-password"
                         value={confirmPassword}
                         onChange={(event) => {
                           setConfirmPassword(event.target.value);
@@ -924,49 +905,87 @@ function Register() {
                     aria-label="Six-digit email verification code"
                   >
                     {otp.map((digit, index) => (
-                      <motion.input
-                        key={index}
-                        ref={(element) => {
-                          otpInputRefs.current[index] = element;
-                        }}
-                        type="text"
-                        inputMode="numeric"
-                        autoComplete={index === 0 ? "one-time-code" : "off"}
-                        aria-label={`Verification digit ${index + 1}`}
-                        maxLength={index === 0 ? 6 : 1}
-                        value={digit}
-                        disabled={loading}
-                        onChange={(event) =>
-                          handleOtpChange(event.target.value, index)
-                        }
-                        onPaste={handleOtpPaste}
-                        onKeyDown={(event) => {
-                          if (
-                            event.key === "Backspace" &&
-                            !digit &&
-                            index > 0
-                          ) {
-                            otpInputRefs.current[index - 1]?.focus();
-                          } else if (
-                            event.key === "ArrowLeft" &&
-                            index > 0
-                          ) {
-                            otpInputRefs.current[index - 1]?.focus();
-                          } else if (
-                            event.key === "ArrowRight" &&
-                            index < 5
-                          ) {
-                            otpInputRefs.current[index + 1]?.focus();
-                          }
-                        }}
-                        animate={
-                          digit
-                            ? { scale: [0.92, 1.06, 1], y: [3, 0] }
-                            : { scale: 1, y: 0 }
-                        }
-                        transition={{ duration: 0.22, ease: "easeOut" }}
-                        className="h-12 w-10 rounded-[5px] border border-[#414141] bg-[#202020] text-center text-lg font-semibold text-white outline-none transition-colors focus:border-[#D1F48C] focus:ring-2 focus:ring-[#D1F48C]/20 disabled:opacity-60 sm:h-14 sm:w-12 sm:text-xl"
-                      />
+                      // <motion.input
+                      //   key={index}
+                      //   ref={(element) => {
+                      //     otpInputRefs.current[index] = element;
+                      //   }}
+                      //   type="text"
+                      //   inputMode="numeric"
+                      //   autoComplete={index === 0 ? "one-time-code" : "off"}
+                      //   aria-label={`Verification digit ${index + 1}`}
+                      //   maxLength={index === 0 ? 6 : 1}
+                      //   value={digit}
+                      //   disabled={loading}
+                      //   onChange={(event) =>
+                      //     handleOtpChange(event.target.value, index)
+                      //   }
+                      //   onPaste={handleOtpPaste}
+                      //   onKeyDown={(event) => {
+                      //     if (
+                      //       event.key === "Backspace" &&
+                      //       !digit &&
+                      //       index > 0
+                      //     ) {
+                      //       otpInputRefs.current[index - 1]?.focus();
+                      //     } else if (
+                      //       event.key === "ArrowLeft" &&
+                      //       index > 0
+                      //     ) {
+                      //       otpInputRefs.current[index - 1]?.focus();
+                      //     } else if (
+                      //       event.key === "ArrowRight" &&
+                      //       index < 5
+                      //     ) {
+                      //       otpInputRefs.current[index + 1]?.focus();
+                      //     }
+                      //   }}
+                      //   animate={
+                      //     digit
+                      //       ? { scale: [0.92, 1.06, 1], y: [3, 0] }
+                      //       : { scale: 1, y: 0 }
+                      //   }
+                      //   transition={{ duration: 0.22, ease: "easeOut" }}
+                      //   className="h-12 w-10 rounded-[5px] border border-[#414141] bg-[#202020] text-center text-lg font-semibold text-white outline-none transition-colors focus:border-[#D1F48C] focus:ring-2 focus:ring-[#D1F48C]/20 disabled:opacity-60 sm:h-14 sm:w-12 sm:text-xl"
+                      // />
+
+<CodeSlots
+  length={6}
+  value={otp.join("")}
+  onChange={(value) => {
+    const digits = value.replace(/\D/g, "").slice(0, 6);
+
+    setOtp([
+      ...digits.split(""),
+      ...Array(6 - digits.length).fill("")
+    ]);
+
+    autoSubmittedOtp.current = "";
+  }}
+  onComplete={(code) => {
+    if (code.length === 6) {
+      setOtp(code.split(""));
+    }
+  }}
+  status="idle"
+  accentColor="#D1F48C"
+  inkColor="#ffffff"
+  slotColor="#202020"
+  digitColor="#ffffff"
+  dangerColor="#ff3b30"
+  slotSize={44}
+  gap={8}
+  radius={5}
+  bounce={0.2}
+  settle={0.3}
+  rise={8}
+  cascade={20}
+  mask={false}
+  caret
+  outcome="accept"
+  disabled={loading}
+/>
+
                     ))}
                   </div>
 

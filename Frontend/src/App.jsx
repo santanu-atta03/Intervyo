@@ -1,5 +1,6 @@
 import { Suspense, lazy, useEffect } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import ScrollToTop from "./components/shared/ScrollToTopButton";
@@ -43,6 +44,7 @@ const routeFallback = <IntervyoLoader label="Loading page" />;
 
 function App() {
   const location = useLocation();
+  const { token } = useSelector((state) => state.auth);
 
   const hideFooterRoutes = ["/", "/login", "/register"];
   const hideFooter = hideFooterRoutes.includes(location.pathname);
@@ -66,7 +68,10 @@ function App() {
 
       <Suspense fallback={routeFallback}>
         <Routes>
-          <Route path="/" element={<Landing />} />
+          <Route
+            path="/"
+            element={token ? <Navigate to="/dashboard" replace /> : <Landing />}
+          />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/verify-email" element={<Navigate to="/register" replace />} />
