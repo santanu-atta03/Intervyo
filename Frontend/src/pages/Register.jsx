@@ -120,8 +120,8 @@ function Register() {
   const { loading, signupData } = useSelector((state) => state.auth);
 
   const [step, setStep] = useState(1);
-  const [status, setStatus] = useState({otpStatus});
   const [otpStatus, setOtpStatus] = useState("idle");
+  const [status, setStatus] = useState({otpStatus});
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
