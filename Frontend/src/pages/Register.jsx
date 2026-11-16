@@ -120,7 +120,8 @@ function Register() {
   const { loading, signupData } = useSelector((state) => state.auth);
 
   const [step, setStep] = useState(1);
-  const [status, setStatus] = useState("idle");
+  const [status, setStatus] = useState({otpStatus});
+  const [otpStatus, setOtpStatus] = useState("idle");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -211,19 +212,28 @@ const handleVerifyOtp = useCallback(async () => {
       verifyOtp(email, otpValue)
     );
 
-    if (!isVerified) return;
+    if (!isVerified) {
+      setOtpStatus("error");
+      return;
+    }
+
+    // Trigger built-in CodeSlots tick animation
+    setOtpStatus("success");
 
     dispatch(setSignupData({
       ...signupData,
       otp: otpValue
     }));
 
-    setStep(5);
+    // Allow animation to play before changing page
+    setTimeout(() => {
+      setStep(5);
+    }, 800);
+
   } finally {
     verificationInProgress.current = false;
   }
 }, [dispatch, email, loading, otp, signupData]);
-
 
   useEffect(() => {
     const otpValue = otp.join("");
@@ -968,10 +978,10 @@ const handleVerifyOtp = useCallback(async () => {
     }
   }}
   status="idle"
-  accentColor="#D1F48C"
-  inkColor="#ffffff"
-  slotColor="#202020"
-  digitColor="#ffffff"
+  accentColor="#FFFFFF"
+  inkColor="#000000"
+  slotColor="#FFFFFF"
+  digitColor="#000000"
   dangerColor="#ff3b30"
   slotSize={44}
   gap={8}
