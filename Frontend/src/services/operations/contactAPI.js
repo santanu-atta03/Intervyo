@@ -17,7 +17,7 @@ export const submitContactForm = async (data, setLoading) => {
       title: response.data.emailSent === false ? "Message received" : "Success",
       description: response.data.message,
     });
-    return true;
+    return { emailSent: response.data.emailSent !== false };
   } catch (error) {
     console.error("Contact Form Error:", error);
     const message =

@@ -81,6 +81,7 @@ Complete guide for deploying Intervyo to production.
    CLOUDINARY_API_SECRET=your_cloudinary_secret
    OTP_MAIL_SERVICE_URL=https://your-otp-mail-service.onrender.com/api/send-otp
    OTP_MAIL_SERVICE_TOKEN=the_matching_bearer_token
+   CONTACT_EMAIL_TO=intervyo.team@gmail.com
    ```
 
    OTP and contact emails are sent through the separate `santanu-atta03/otp-mail-service`.
@@ -89,6 +90,8 @@ Complete guide for deploying Intervyo to production.
    `OTP_MAIL_SERVICE_URL` to that service's `/api/send-otp` endpoint and
    `OTP_MAIL_SERVICE_TOKEN` to the same bearer token configured in the mail service.
    `EMAIL_USER` and `EMAIL_PASS` are not used by this backend.
+   Contact form notifications are sent to `CONTACT_EMAIL_TO` (defaults to
+   `intervyo.team@gmail.com`); change it to your preferred Gmail inbox if needed.
 
    If email requests return `401 Invalid project credentials`, confirm that
    `OTP_MAIL_SERVICE_TOKEN` is set on the backend and exactly matches the token

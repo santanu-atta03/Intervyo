@@ -32,6 +32,7 @@ function SectionLabel({ children, light = false }) {
 export default function ContactUs() {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [emailSent, setEmailSent] = useState(true);
   const [submitError, setSubmitError] = useState("");
   const lenisRef = useRef(null);
 
@@ -85,6 +86,7 @@ export default function ContactUs() {
     try {
       const result = await submitContactForm(formData, setLoading);
       if (result) {
+        setEmailSent(result.emailSent);
         setSubmitted(true);
       }
     } catch (err) {
@@ -97,6 +99,7 @@ export default function ContactUs() {
 
   const handleReset = () => {
     setSubmitted(false);
+    setEmailSent(true);
     setSubmitError("");
     setFormData({
       name: "",
@@ -212,7 +215,7 @@ export default function ContactUs() {
                   href="mailto:support@intervyo.com?subject=Inquiry%20-%20Intervyo"
                   className="mt-2 block text-lg font-medium tracking-tight text-[#1D1E20] transition hover:text-[#69665F]"
                 >
-                  intervyo@gmail.com
+                  intervyo.team@gmail.com
                 </a>
               </div>
 
@@ -234,7 +237,7 @@ export default function ContactUs() {
                 <div className="flex items-center gap-2">
                   <span className="inline-block h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
                   <p className="nk-caption-sm uppercase tracking-[0.2em] text-emerald-300 font-semibold">
-                    Message Dispatched
+                    {emailSent ? "Message Dispatched" : "Message Received"}
                   </p>
                 </div>
 
@@ -243,12 +246,32 @@ export default function ContactUs() {
                 </h3>
 
                 <p className="mt-4 max-w-md text-sm leading-7 text-[#E8DFD2]">
-                  Your inquiry regarding{" "}
-                  <span className="font-semibold text-white">
-                    {formData.subject || "Intervyo Practice"}
-                  </span>{" "}
-                  has been sent to our team. We will review your message and reply
-                  to <span className="font-semibold text-white">{formData.email}</span> shortly.
+                  {emailSent ? (
+                    <>
+                      Your inquiry regarding{" "}
+                      <span className="font-semibold text-white">
+                        {formData.subject || "Intervyo Practice"}
+                      </span>{" "}
+                      has been sent to our team. We will review your message and
+                      reply to{" "}
+                      <span className="font-semibold text-white">
+                        {formData.email}
+                      </span>{" "}
+                      shortly.
+                    </>
+                  ) : (
+                    <>
+                      We saved your message, but couldn&apos;t email our team.
+                      Please contact{" "}
+                      <a
+                        href="mailto:intervyo.team@gmail.com"
+                        className="font-semibold text-white underline"
+                      >
+                        intervyo.team@gmail.com
+                      </a>{" "}
+                      directly.
+                    </>
+                  )}
                 </p>
 
                 <div className="mt-8 flex flex-wrap items-center gap-4">
