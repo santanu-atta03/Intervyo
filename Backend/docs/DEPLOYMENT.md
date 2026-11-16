@@ -90,6 +90,11 @@ Complete guide for deploying Intervyo to production.
    `OTP_MAIL_SERVICE_TOKEN` to the same bearer token configured in the mail service.
    `EMAIL_USER` and `EMAIL_PASS` are not used by this backend.
 
+   If email requests return `401 Invalid project credentials`, confirm that
+   `OTP_MAIL_SERVICE_TOKEN` is set on the backend and exactly matches the token
+   configured on the deployed OTP mail service. If the token was rotated, update
+   both deployments and restart them.
+
 4. **Deploy**
    - Click "Create Web Service"
    - Wait for deployment to complete

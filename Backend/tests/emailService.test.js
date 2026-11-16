@@ -9,6 +9,9 @@ const { mailSender } = await import("../config/email.js");
 describe("OTP mail service adapter", () => {
   afterEach(() => {
     jest.restoreAllMocks();
+    process.env.OTP_MAIL_SERVICE_URL =
+      "https://mail.example.test/api/send-otp";
+    process.env.OTP_MAIL_SERVICE_TOKEN = "test-service-token";
   });
 
   afterAll(() => {
@@ -55,6 +58,22 @@ describe("OTP mail service adapter", () => {
     await expect(
       mailSender("user@example.com", "Verify", "<p>Code</p>"),
     ).rejects.toThrow("Email delivery failed");
+  });
+
+  it("trims whitespace around the configured service URL and project token", async () => {
+    process.env.OTP_MAIL_SERVICE_URL =
+      " https://mail.example.test/api/send-otp ";
+    process.env.OTP_MAIL_SERVICE_TOKEN = " test-service-token ";
+    globalThis.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ success: true }),
+    });
+
+    await mailSender("user@example.com", "Verify", "<p>Code</p>");
+
+    const [, requestOptions] = globalThis.fetch.mock.calls[0];
+    expect(requestOptions.headers.Authorization).toMatch(/^Bearer \S+$/);
   });
 
   it("fails explicitly when the mail service is not configured", async () => {

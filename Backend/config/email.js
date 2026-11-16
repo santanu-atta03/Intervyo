@@ -1,11 +1,11 @@
 
 export const mailSender = async (email, subject, html, text) => {
-  const serviceUrl = process.env.OTP_MAIL_SERVICE_URL;
-  const serviceToken = process.env.OTP_MAIL_SERVICE_TOKEN;
+  const serviceUrl = process.env.OTP_MAIL_SERVICE_URL?.trim();
+  const serviceToken = process.env.OTP_MAIL_SERVICE_TOKEN?.trim();
 
   if (!serviceUrl || !serviceToken) {
     throw new Error(
-      "Email service URL or project token is missing."
+      "Email delivery is not configured: service URL or project token is missing."
     );
   }
 
@@ -23,6 +23,7 @@ export const mailSender = async (email, subject, html, text) => {
         subject,
         html,
         text,
+        fromName: "Intervyo",
       }),
       signal: AbortSignal.timeout(15000),
     });
@@ -50,6 +51,11 @@ export const mailSender = async (email, subject, html, text) => {
       response.status,
       result.message
     );
+    if (response.status === 401) {
+      console.error(
+        "Check that OTP_MAIL_SERVICE_TOKEN on the backend matches the project token configured in the deployed OTP mail service."
+      );
+    }
 
     throw new Error(
       "Email delivery failed. Please try again later."
