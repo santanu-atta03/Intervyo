@@ -890,7 +890,7 @@ export default function LandingPage() {
 
             <div className="mt-8 flex w-full flex-wrap items-center justify-center gap-3.5 sm:mt-10 sm:flex-nowrap">
               <Link
-                to="/interview-setup"
+                to="/register"
                 className="rounded-full bg-white px-5 py-3.5 text-sm font-semibold text-[#0A0D12] shadow-xl transition-all hover:bg-zinc-200 active:scale-[0.98] sm:px-8 sm:py-4"
               >
                 Start Free
