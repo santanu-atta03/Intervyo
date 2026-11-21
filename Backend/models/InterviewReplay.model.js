@@ -69,6 +69,12 @@ const replayNoteSchema = new mongoose.Schema(
   {
     _id: true,
   }
+
+InterviewReplaySchema.methods.addNote = async function (noteData) {
+  this.notes.push(noteData);
+  await this.save();
+  return this;
+}
 );
 
 const interviewReplaySchema = new mongoose.Schema(

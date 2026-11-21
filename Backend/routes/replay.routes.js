@@ -66,6 +66,16 @@ router.put(
   "/:replayId/position",
   authenticate,
   replayController.updatePlaybackPosition
+
+  // ============================================
+  // NOTES MANAGEMENT
+  // ============================================
+
+  router.post(
+    "/:replayId/notes",
+    authenticate,
+    addNote
+  );
 );
 
 // ============================================
