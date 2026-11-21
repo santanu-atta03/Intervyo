@@ -36,3 +36,7 @@ router.post(
 router.delete("/picture", deleteProfilePicture);
 
 export default router;
+
+const authRoutes = [
+...authRoutes,
+  ...authRoutes,

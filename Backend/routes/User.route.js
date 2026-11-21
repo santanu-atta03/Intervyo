@@ -73,3 +73,10 @@ router.get(
 );
 
 export default router;
+
+const authRoutes = [
+...authRoutes,
+    session: false,
+  }),
+    session: false,
+  }),

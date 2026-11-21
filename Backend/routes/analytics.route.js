@@ -13,3 +13,5 @@ router.get("/", getUserAnalytics);
 router.get("/skills", getSkillRadar);
 
 export default router;
+  ...authRoutes,
+router.get("/skills", getSkillRadar);
